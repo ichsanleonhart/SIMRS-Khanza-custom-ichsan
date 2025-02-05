@@ -301,6 +301,7 @@ public final class DlgResepObat extends javax.swing.JDialog {
         ppResepObat = new javax.swing.JMenuItem();
         ppResepObat1 = new javax.swing.JMenuItem();
         ppResepObat2 = new javax.swing.JMenuItem();
+        ppResepObatTglExpired = new javax.swing.JMenuItem();
         ppLabelDataObat = new javax.swing.JMenuItem();
         ppLembarObat = new javax.swing.JMenuItem();
         ppLembarObat1 = new javax.swing.JMenuItem();
@@ -429,6 +430,22 @@ public final class DlgResepObat extends javax.swing.JDialog {
             }
         });
         Popup2.add(ppResepObat2);
+
+        ppResepObatTglExpired.setBackground(new java.awt.Color(255, 255, 254));
+        ppResepObatTglExpired.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
+        ppResepObatTglExpired.setForeground(new java.awt.Color(50, 50, 50));
+        ppResepObatTglExpired.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
+        ppResepObatTglExpired.setText("Cetak Aturan Pakai tgl ED");
+        ppResepObatTglExpired.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        ppResepObatTglExpired.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        ppResepObatTglExpired.setName("ppResepObatTglExpired"); // NOI18N
+        ppResepObatTglExpired.setPreferredSize(new java.awt.Dimension(225, 25));
+        ppResepObatTglExpired.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ppResepObatTglExpiredActionPerformed(evt);
+            }
+        });
+        Popup2.add(ppResepObatTglExpired);
 
         ppLabelDataObat.setBackground(new java.awt.Color(255, 255, 254));
         ppLabelDataObat.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
@@ -863,7 +880,7 @@ public final class DlgResepObat extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15-04-2022 20:49:52" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-01-2025 14:53:59" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -877,7 +894,7 @@ public final class DlgResepObat extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15-04-2022 20:49:53" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-01-2025 14:53:59" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -1007,7 +1024,7 @@ public final class DlgResepObat extends javax.swing.JDialog {
         jLabel8.setBounds(0, 42, 95, 23);
 
         DTPBeri.setForeground(new java.awt.Color(50, 70, 50));
-        DTPBeri.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15-04-2022" }));
+        DTPBeri.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-01-2025" }));
         DTPBeri.setDisplayFormat("dd-MM-yyyy");
         DTPBeri.setName("DTPBeri"); // NOI18N
         DTPBeri.setOpaque(false);
@@ -1109,7 +1126,7 @@ public final class DlgResepObat extends javax.swing.JDialog {
         PanelAccor.setPreferredSize(new java.awt.Dimension(445, 43));
         PanelAccor.setLayout(new java.awt.BorderLayout(1, 1));
 
-        ChkAccor.setBackground(new java.awt.Color(255,250,250));
+        ChkAccor.setBackground(new java.awt.Color(255, 250, 250));
         ChkAccor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/kiri.png"))); // NOI18N
         ChkAccor.setSelected(true);
         ChkAccor.setFocusable(false);
@@ -1764,7 +1781,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                     "resep_obat.tgl_perawatan=aturan_pakai.tgl_perawatan and " +
                     "resep_obat.jam=aturan_pakai.jam where resep_obat.no_resep=? and aturan_pakai.aturan<>''",NoResep.getText())>0){
                 Valid.MyReportqry("rptItemResep5.jasper","report","::[ Aturan Pakai Obat ]::",
-                    "select resep_obat.no_resep,resep_obat.tgl_perawatan,resep_obat.jam,pasien.tgl_lahir, "+
+                    "select DATE_FORMAT(databarang.expire, '%d-%m-%Y') as expire, resep_obat.no_resep,resep_obat.tgl_perawatan,resep_obat.jam,pasien.tgl_lahir, "+
                     "resep_obat.no_rawat,pasien.no_rkm_medis,pasien.nm_pasien,databarang.nama_brng,"+
                     "aturan_pakai.aturan,detail_pemberian_obat.jml,kodesatuan.satuan,pasien.jk,reg_periksa.umurdaftar,reg_periksa.sttsumur "+
                     "from resep_obat inner join reg_periksa inner join pasien inner join "+
@@ -2012,7 +2029,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
             param.put("norm",TNoRm.getText());
             param.put("peresep",NmDokter.getText());
             param.put("noresep",NoResep.getText());
-            param.put("poli",Sequel.cariIsi("select poliklinik.nm_poli from poliklinik where poliklinik.kd_poli=?",Sequel.cariIsi("select reg_periksa.kd_poli from reg_periksa where reg_periksa.no_rawat=?",TNoRw.getText())));   
+            param.put("poli",Sequel.cariIsi("select poliklinik.nm_poli from poliklinik where poliklinik.kd_poli=?",Sequel.cariIsi("select kd_poli from reg_periksa where no_rawat=?",TNoRw.getText())));   
             param.put("jam",cmbJam.getSelectedItem()+":"+cmbMnt.getSelectedItem()+":"+cmbDtk.getSelectedItem());
             param.put("logo",Sequel.cariGambar("select setting.logo from setting")); 
             
@@ -2200,7 +2217,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
             if(akses.getkode().equals("Admin Utama")){
                 param.put("diserahkanoleh","Petugas Farmasi");
             }else{
-                param.put("diserahkanoleh",Sequel.cariIsi("select petugas.nama from petugas where petugas.nip=?",akses.getkode()));
+                param.put("diserahkanoleh",Sequel.cariIsi("select petugas.petugas from petugas where petugas.nip=?",akses.getkode()));
             }
                 
             param.put("noresep",NoResep.getText());
@@ -2214,6 +2231,42 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
             this.setCursor(Cursor.getDefaultCursor());
         }
     }//GEN-LAST:event_ppLembarObat2ActionPerformed
+
+    private void ppResepObatTglExpiredActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ppResepObatTglExpiredActionPerformed
+        // TODO add your handling code here:
+        if (tabMode.getRowCount() == 0) {  //start if pertama
+            JOptionPane.showMessageDialog(null, "Maaf, data sudah habis...!!!!");
+            TNoRw.requestFocus();
+        } else if (TPasien.getText().trim().equals("")) {
+            JOptionPane.showMessageDialog(null, "Maaf, Klik No Resep untuk mencetak aturan pakai...!!!!");
+        } else if (!(TPasien.getText().trim().equals(""))) {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            Map<String, Object> param = new HashMap<>();
+            param.put("namars", akses.getnamars());
+            param.put("alamatrs", akses.getalamatrs());
+            param.put("kotars", akses.getkabupatenrs());
+            param.put("propinsirs", akses.getpropinsirs());
+            param.put("kontakrs", akses.getkontakrs());
+            param.put("emailrs", akses.getemailrs());
+            param.put("logo", Sequel.cariGambar("select setting.logo from setting"));            
+            if (Sequel.cariInteger(
+                    "select count(*) from resep_obat inner join aturan_pakai on resep_obat.no_rawat=aturan_pakai.no_rawat and "+
+                    "resep_obat.tgl_perawatan=aturan_pakai.tgl_perawatan and resep_obat.jam=aturan_pakai.jam where resep_obat.no_resep=? and aturan_pakai.aturan<>''", NoResep.getText()) > 0) {  //if kedua
+                Valid.MyReportqry("rptItemResepTglExpired.jasper", "report", "::[ Aturan Pakai Obat ]::",
+                    "select COALESCE(DATE_FORMAT(data_batch.tgl_kadaluarsa, '%d-%m-%Y'), '-') as tgl_kadaluarsa, resep_obat.no_resep, DATE_FORMAT(resep_obat.tgl_perawatan, '%d-%m-%Y') as tgl_perawatan, "+
+                    "resep_obat.jam, DATE_FORMAT(pasien.tgl_lahir, '%d-%m-%Y') as tgl_lahir, resep_obat.no_rawat, pasien.no_rkm_medis, pasien.nm_pasien, databarang.nama_brng, aturan_pakai.aturan, "+
+                    "detail_pemberian_obat.jml, kodesatuan.satuan, pasien.jk, reg_periksa.umurdaftar, reg_periksa.sttsumur from databarang inner join resep_obat inner join reg_periksa "+
+                    "inner join pasien inner join aturan_pakai inner join detail_pemberian_obat inner join kodesatuan on resep_obat.no_rawat = reg_periksa.no_rawat "+
+                    "and reg_periksa.no_rkm_medis = pasien.no_rkm_medis and databarang.kode_brng = aturan_pakai.kode_brng and detail_pemberian_obat.kode_brng = databarang.kode_brng "+
+                    "and resep_obat.no_rawat = aturan_pakai.no_rawat and resep_obat.tgl_perawatan = aturan_pakai.tgl_perawatan and resep_obat.jam = aturan_pakai.jam "+
+                    "and resep_obat.no_rawat = detail_pemberian_obat.no_rawat and resep_obat.tgl_perawatan = detail_pemberian_obat.tgl_perawatan "+
+                    "and resep_obat.jam = detail_pemberian_obat.jam and kodesatuan.kode_sat = databarang.kode_sat "+
+                    "left join data_batch on data_batch.kode_brng = databarang.kode_brng and data_batch.tgl_kadaluarsa = (select min(db.tgl_kadaluarsa) from data_batch db "+
+                    "where db.kode_brng = databarang.kode_brng and db.tgl_kadaluarsa >= resep_obat.tgl_perawatan ) "+
+                    "where resep_obat.no_resep = '" + NoResep.getText() + "' and aturan_pakai.aturan <> ''", param);
+            } //penutup if kedua
+        } //penutup IF pertama
+    }//GEN-LAST:event_ppResepObatTglExpiredActionPerformed
 
     /**
     * @param args the command line arguments
@@ -2307,6 +2360,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private javax.swing.JMenuItem ppResepObat;
     private javax.swing.JMenuItem ppResepObat1;
     private javax.swing.JMenuItem ppResepObat2;
+    private javax.swing.JMenuItem ppResepObatTglExpired;
     private javax.swing.JMenuItem ppUbahAturanPakai;
     private javax.swing.JMenuItem ppUbahAturanPakai1;
     private widget.ScrollPane scrollPane1;
@@ -2321,10 +2375,9 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         try{  
             ps=koneksi.prepareStatement("select resep_obat.no_resep,resep_obat.tgl_perawatan,resep_obat.jam,"+
                     " resep_obat.no_rawat,pasien.no_rkm_medis,pasien.nm_pasien,resep_obat.kd_dokter,dokter.nm_dokter "+
-                    " from resep_obat inner join reg_periksa on resep_obat.no_rawat=reg_periksa.no_rawat "+
-                    " inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis "+
-                    " inner join dokter on resep_obat.kd_dokter=dokter.kd_dokter "+
-                    " where concat(resep_obat.tgl_perawatan,' ',resep_obat.jam) between ? and ? "+
+                    " from resep_obat inner join reg_periksa inner join pasien inner join dokter on resep_obat.no_rawat=reg_periksa.no_rawat  "+
+                    " and reg_periksa.no_rkm_medis=pasien.no_rkm_medis and resep_obat.kd_dokter=dokter.kd_dokter where "+
+                    " concat(resep_obat.tgl_perawatan,' ',resep_obat.jam) between ? and ? "+
                     (TCari.getText().trim().equals("")?"":"and (resep_obat.no_resep like ? or resep_obat.no_rawat like ? or "+
                     "pasien.no_rkm_medis like ? or pasien.nm_pasien like ? or dokter.nm_dokter like ?) ")+
                     " order by resep_obat.tgl_perawatan,resep_obat.jam");
@@ -2368,8 +2421,8 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                             tabMode.addRow(new String[]{
                                 "",rs2.getString("nama_brng"),rs2.getString("jml")+"  x  "+Valid.SetAngka(rs2.getDouble("biaya_obat"))+
                                 " + "+Valid.SetAngka(rs2.getDouble("embalase"))+" + "+Valid.SetAngka(rs2.getDouble("tuslah"))+" = "+Valid.SetAngka(rs2.getDouble("total")),
-                                Sequel.cariIsi("select aturan_pakai.aturan from aturan_pakai where aturan_pakai.tgl_perawatan='"+rs.getString("tgl_perawatan")+"' and "+
-                                "aturan_pakai.jam='"+rs.getString("jam")+"' and aturan_pakai.no_rawat='"+rs.getString("no_rawat")+"' and aturan_pakai.kode_brng='"+rs2.getString("kode_brng")+"'")
+                                Sequel.cariIsi("select aturan from aturan_pakai where tgl_perawatan='"+rs.getString("tgl_perawatan")+"' and "+
+                                "jam='"+rs.getString("jam")+"' and no_rawat='"+rs.getString("no_rawat")+"' and kode_brng='"+rs2.getString("kode_brng")+"'")
                             });
                             total=total+rs2.getDouble("total");
                             jumlahtotal=jumlahtotal+rs2.getDouble("total");
