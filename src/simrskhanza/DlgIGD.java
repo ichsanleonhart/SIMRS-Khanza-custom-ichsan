@@ -48,6 +48,7 @@ import fungsi.koneksiDB;
 import fungsi.sekuel;
 import fungsi.validasi;
 import fungsi.akses;
+import fungsi.WarnaTableRawatInap; //tambahan ichsan
 import inventory.DlgCopyResep;
 import inventory.DlgPeresepanDokter;
 import java.awt.Cursor;
@@ -344,7 +345,17 @@ public final class DlgIGD extends javax.swing.JDialog {
                 column.setPreferredWidth(70);
             }
         }
-        tbPetugas.setDefaultRenderer(Object.class, new WarnaTable());
+        // tbPetugas.setDefaultRenderer(Object.class, new WarnaTable());
+        //tambahan warna table igd oleh ichsan
+        try {
+            if(koneksiDB.AKTIFKANWARNARANAP().equals("yes")){
+                tbPetugas.setDefaultRenderer(Object.class, new WarnaTableRawatInap());
+            }else{
+                tbPetugas.setDefaultRenderer(Object.class, new WarnaTable());
+            }
+        } catch (Exception e) {
+            tbPetugas.setDefaultRenderer(Object.class, new WarnaTable());
+        }
 
         TNoReg.setDocument(new batasInput((byte)8).getKata(TNoReg));
         TNoRw.setDocument(new batasInput((byte)17).getKata(TNoRw));

@@ -37,8 +37,7 @@ import fungsi.koneksiDB;
 import fungsi.sekuel;
 import fungsi.validasi;
 import fungsi.akses;
-//tambahan ichsan
-import fungsi.WarnaTableRawatInap;
+import fungsi.WarnaTableRawatInap;  //tambahan ichsan
 import inventory.DlgInputStokPasien;
 import inventory.DlgPenjualan;
 import inventory.DlgPeresepanDokter;
@@ -286,7 +285,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
             }
         }
         //tbKamIn.setDefaultRenderer(Object.class, new WarnaTable());
-        //tambahan kamar inap oleh ichsan
+        //tambahan warna table kamar inap oleh ichsan
         try {
             if(koneksiDB.AKTIFKANWARNARANAP().equals("yes")){
                 tbKamIn.setDefaultRenderer(Object.class, new WarnaTableRawatInap());
