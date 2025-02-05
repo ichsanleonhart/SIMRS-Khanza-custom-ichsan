@@ -20,4 +20,8 @@ public final class ComboBox extends JComboBox {
         setForeground(new Color(50,50,50));
         setSize(WIDTH,23);
     } 
+
+    public Object getText() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
