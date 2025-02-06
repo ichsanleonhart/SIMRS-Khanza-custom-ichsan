@@ -49,7 +49,7 @@ public class DlgCariTagihanOperasi extends javax.swing.JDialog {
             Suspen_Piutang_Operasi_Ralan="",Operasi_Ralan="",Beban_Jasa_Medik_Dokter_Operasi_Ralan="",Utang_Jasa_Medik_Dokter_Operasi_Ralan="",
             Beban_Jasa_Medik_Paramedis_Operasi_Ralan="",Utang_Jasa_Medik_Paramedis_Operasi_Ralan="",HPP_Obat_Operasi_Ralan="",Persediaan_Obat_Kamar_Operasi_Ralan="",
             status="",tanggal="",mem="",norawat="",sql="",diagnosa_preop="",diagnosa_postop="",jaringan_dieksekusi="",selesaioperasi="",permintaan_pa="",laporan_operasi="",
-            finger="",kodeoperator="";
+            finger="",kodeoperator="", no_rawat_gabung="";  //tambahan no_rawat_gabung oleh ichsan
 
     /** Creates new form DlgProgramStudi
      * @param parent
@@ -3067,7 +3067,16 @@ private void MnHapusObatOperasiActionPerformed(java.awt.event.ActionEvent evt) {
                                 param.put("pemeriksaan",rs.getString("pemeriksaan"));
                                 param.put("penilaian",rs.getString("penilaian"));
                                 param.put("rtl",rs.getString("rtl"));
-                                param.put("ruang",Sequel.cariIsi("select nm_bangsal from bangsal inner join kamar inner join kamar_inap on bangsal.kd_bangsal=kamar.kd_bangsal and kamar_inap.kd_kamar=kamar.kd_kamar where no_rawat=? order by tgl_masuk desc limit 1 ",rs.getString("no_rawat")));
+                                //param.put("ruang",Sequel.cariIsi("select nm_bangsal from bangsal inner join kamar inner join kamar_inap on bangsal.kd_bangsal=kamar.kd_bangsal and kamar_inap.kd_kamar=kamar.kd_kamar where no_rawat=? order by tgl_masuk desc limit 1 ",rs.getString("no_rawat")));
+                                // Check if no_rawat_gabung is null or not || tambahan dari Ichsan. Jika yang dipilih adalah pasien rawat gabung, maka akan mengambil bed paling awal. Jika bukan rawat gabung, maka akan ambil bed paling akhir
+                                String no_rawat_gabung = Sequel.cariIsi("select no_rawat2 from ranap_gabung where no_rawat=?", tbDokter.getValueAt(tbDokter.getSelectedRow(), 1).toString());
+                                                         if (no_rawat_gabung == null) {
+                                                        // If no_rawat_gabung is null, use this query
+                                                        param.put("ruang", Sequel.cariIsi("select nm_bangsal from bangsal inner join kamar inner join kamar_inap on bangsal.kd_bangsal=kamar.kd_bangsal and kamar_inap.kd_kamar=kamar.kd_kamar where no_rawat=? order by tgl_masuk desc limit 1", rs.getString("no_rawat")));
+                                                        } else {
+                                                        // If no_rawat_gabung is not null, use this query
+                                                        param.put("ruang", Sequel.cariIsi("select nm_bangsal from bangsal inner join kamar inner join kamar_inap on bangsal.kd_bangsal=kamar.kd_bangsal and kamar_inap.kd_kamar=kamar.kd_kamar where no_rawat=? order by tgl_masuk asc limit 1", rs.getString("no_rawat")));
+                                                        }
                                 param.put("suhu_tubuh",rs.getString("suhu_tubuh"));
                                 param.put("tensi",rs.getString("tensi"));
                                 param.put("tinggi",rs.getString("tinggi"));
