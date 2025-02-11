@@ -1371,6 +1371,65 @@ public final class DlgReg extends javax.swing.JDialog {
         tbPetugas = new widget.Table();
         Scroll1 = new widget.ScrollPane();
         tbPetugas2 = new widget.Table();
+        
+/////////////////////////////TAMBAHAN CUSTOM TOMBOL CHECKIN
+        Checkin = new widget.TextBox();   //tambahan checkin by ichsan
+        Booking = new widget.TextBox();   //tambahan checkin by ichsan
+        BtnCheckin = new widget.Button(); //tambahan checkin by ichsan
+        
+        
+        
+        jLabel500 = new widget.Label(); //tambahan tulisan checkin
+        jLabel501 = new widget.Label(); //tambahan tulisan booking
+        
+        jLabel500.setName("jLabel500"); //isi tulisan checkin
+        jLabel500.setText("Status Checkin :"); //isi tulisan checkin
+        FormInput.add(jLabel500);  //inisiasi isi tulisan checkin
+        jLabel500.setBounds(890,20,98,23);  //lokasi isi tulisan checkin        
+        
+        jLabel501.setName("jLabel501"); //isi tulisan booking
+        jLabel501.setText("No. booking :"); //isi tulisan booking
+        FormInput.add(jLabel501);  //inisiasi isi tulisan booking
+        jLabel501.setBounds(890,50,98,23);  //lokasi isi tulisan booking
+
+        Checkin.setName("Checkin"); // NOI18N
+        Checkin.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                CheckinKeyPressed(evt);
+            }
+        });
+        
+        FormInput.add(Checkin);
+        Checkin.setBounds(990, 20, 150, 23);  //letak tombol checkink di atas kanan by ichsan
+
+        Booking.setName("Booking"); // NOI18N
+        Booking.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                BookingKeyPressed(evt);
+            }
+        });
+        FormInput.add(Booking);
+        Booking.setBounds(990, 50, 150, 23);
+
+        BtnCheckin.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/2rightarrow.png"))); // NOI18N
+        BtnCheckin.setMnemonic('S');
+        BtnCheckin.setText("Check in");
+        BtnCheckin.setToolTipText("Alt+S");
+        BtnCheckin.setName("BtnCheckin"); // NOI18N
+        BtnCheckin.setPreferredSize(new java.awt.Dimension(100, 30));
+        BtnCheckin.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BtnCheckinActionPerformed(evt);
+            }
+        });
+        BtnCheckin.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                BtnCheckinKeyPressed(evt);
+            }
+        });
+        FormInput.add(BtnCheckin);
+        BtnCheckin.setBounds(890, 70, 120, 30);   //dua angka di kiri adalah koordinat x dan y
+/////////////////////////////TAMBAHAN CUSTOM TOMBOL CHECKIN
 
         jPopupMenu1.setName("jPopupMenu1"); // NOI18N
 
@@ -6527,10 +6586,11 @@ public final class DlgReg extends javax.swing.JDialog {
 
         PanelInput.setName("PanelInput"); // NOI18N
         PanelInput.setOpaque(false);
+        PanelInput.setPreferredSize(new java.awt.Dimension(490, 225));   ////////// TAMBAHAN MODIFIKASI ICHSAN UNTUK MENYETEL KETINGGIAN FORM INPUT
         PanelInput.setLayout(new java.awt.BorderLayout(1, 1));
 
         FormInput.setName("FormInput"); // NOI18N
-        FormInput.setPreferredSize(new java.awt.Dimension(490, 167));
+        FormInput.setPreferredSize(new java.awt.Dimension(490, 225));
         FormInput.setLayout(null);
 
         jLabel3.setText("No. Reg. :");
@@ -6970,6 +7030,34 @@ public final class DlgReg extends javax.swing.JDialog {
         Valid.pindah(evt,TNoReg,DTPReg);
 }//GEN-LAST:event_TNoRwKeyPressed
 
+////////////////////////////////////////////////////////////////////////////// tombol checkin by ichsan
+    private void CheckinKeyPressed(java.awt.event.KeyEvent evt) {                                   
+        // TODO add your handling code here:
+    }                                  
+
+    private void BookingKeyPressed(java.awt.event.KeyEvent evt) {                                   
+        // TODO add your handling code here:
+    }                                  
+
+    private void BtnCheckinActionPerformed(java.awt.event.ActionEvent evt) {                                           
+        if (Sequel.mengedittf("referensi_mobilejkn_bpjs", "no_rawat=?", "status='Checkin',validasi=now()", 1, new String[]{
+            TNoRw.getText()
+        }) == true) {
+            Sequel.meghapus("referensi_mobilejkn_bpjs_batal", "nobooking", Booking.getText());
+            Sequel.queryu("update reg_periksa set jam_reg=current_time() where no_rawat='" + TNoRw.getText() + "'");
+        }
+        getData();
+    }                                          
+
+    private void BtnCheckinKeyPressed(java.awt.event.KeyEvent evt) {                                      
+        if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
+            BtnCheckinActionPerformed(null);
+        } else {
+            Valid.pindah(evt, BtnCari, BtnBatal);
+        }
+    }  
+ /////////////////////////////////////////////////////////////////// checkin by ichsan
+    
     private void DTPRegKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_DTPRegKeyPressed
         Valid.pindah(evt,TNoRw,CmbJam);
 }//GEN-LAST:event_DTPRegKeyPressed
@@ -15805,6 +15893,13 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
     private javax.swing.JMenuItem ppSuratPRI;
     private widget.Table tbPetugas;
     private widget.Table tbPetugas2;
+/////////////////////////////////////////////////
+    private widget.TextBox Checkin;  //tambahan chekin by ichsan
+    private widget.Button BtnCheckin; //tambahan chekin by ichsan
+    private widget.TextBox Booking;  //tambahan booking by ichsan
+    private widget.Label jLabel500;  //tambahan text tulisan checkin
+    private widget.Label jLabel501;  //tambahan text tulisan booking
+/////////////////////////////////////////////////
     // End of variables declaration//GEN-END:variables
     private javax.swing.JMenuItem MnSkorBromagePascaAnestesi,MnPenilaianRisikoJatuhDewasa,MnPenilaianRisikoJatuhAnak,MnPenilaianRisikoJatuhLansia,MnPenilaianRisikoJatuhNeonatus,MnPenilaianRisikoJatuhGeriatri,MnPenilaianRisikoJatuhPsikiatri,MnPenilaianLanjutanSkriningFungsional,
             MnPenilaianPreInduksi,MnHasilPemeriksaanUSGUrologi,MnHasilPemeriksaanUSGGynecologi,MnHasilPemeriksaanEKG,MnSudahTerbitSEP,MnPenatalaksanaanTerapiOkupasi,MnHasilPemeriksaanUSGNeonatus,MnHasilEndoskopiFaringLaring,MnHasilEndoskopiHidung,MnHasilEndoskopiTelinga,
@@ -15993,7 +16088,9 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
             kdpnj.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),22).toString()); 
             Sequel.cariIsi("select rujuk_masuk.perujuk from rujuk_masuk where rujuk_masuk.no_rawat=?", AsalRujukan,tbPetugas.getValueAt(tbPetugas.getSelectedRow(),2).toString());
             TNoRw.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),2).toString());
-            TNoReg.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),1).toString());    
+            TNoReg.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),1).toString());
+            Checkin.setText(Sequel.cariIsi("select referensi_mobilejkn_bpjs.status from referensi_mobilejkn_bpjs where no_rawat=?", TNoRw.getText()));   // tambahan checkin by ichsan
+            Booking.setText(Sequel.cariIsi("select referensi_mobilejkn_bpjs.nobooking from referensi_mobilejkn_bpjs where no_rawat=?", TNoRw.getText()));  // tambahan checkin by ichsan
         }
     }
 
