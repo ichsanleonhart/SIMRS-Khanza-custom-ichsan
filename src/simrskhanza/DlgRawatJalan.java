@@ -11,7 +11,7 @@
  */
 
 package simrskhanza;
-
+import bridging.ICareRiwayatPerawatan;   // import form icare ke rawat jalan oleh Ichsan 
 import surat.SuratKontrol;
 import kepegawaian.DlgCariDokter;
 import kepegawaian.DlgCariPetugas;
@@ -200,7 +200,8 @@ public final class DlgRawatJalan extends javax.swing.JDialog {
             Suspen_Piutang_Tindakan_Ralan="",Tindakan_Ralan="",Beban_Jasa_Medik_Dokter_Tindakan_Ralan="",Utang_Jasa_Medik_Dokter_Tindakan_Ralan="",
             Beban_Jasa_Medik_Paramedis_Tindakan_Ralan="",Utang_Jasa_Medik_Paramedis_Tindakan_Ralan="",Beban_KSO_Tindakan_Ralan="",Utang_KSO_Tindakan_Ralan="",
             Beban_Jasa_Sarana_Tindakan_Ralan="",Utang_Jasa_Sarana_Tindakan_Ralan="",HPP_BHP_Tindakan_Ralan="",Persediaan_BHP_Tindakan_Ralan="",
-            Beban_Jasa_Menejemen_Tindakan_Ralan="",Utang_Jasa_Menejemen_Tindakan_Ralan="";
+            Beban_Jasa_Menejemen_Tindakan_Ralan="",Utang_Jasa_Menejemen_Tindakan_Ralan="",
+            variabel = "";  //tambahan [variabel = ""] untuk tombol icare oleh ichsan
     private boolean[] pilih; 
     private String[] kode,nama,kategori;
     private double[] totaltnd,bagianrs,bhp,jmdokter,jmperawat,kso,menejemen;
@@ -1344,7 +1345,7 @@ public final class DlgRawatJalan extends javax.swing.JDialog {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-
+        
         internalFrame1 = new widget.InternalFrame();
         jPanel3 = new javax.swing.JPanel();
         panelGlass8 = new widget.panelisi();
@@ -1677,6 +1678,48 @@ public final class DlgRawatJalan extends javax.swing.JDialog {
         BtnPenilaianTambahanBunuhDiri = new widget.Button();
         BtnPenilaianTambahanPerilakuKekerasan = new widget.Button();
         BtnPenilaianTambahanMelarikanDiri = new widget.Button();
+        BtnRiwayatFKTP = new widget.Button(); //TOMBOL ICARE oleh ichsan - ini bagian inisiasi komponen
+        Btn5Soap1 = new widget.Button();//TOMBOL shortcut SOAP oleh ichsan - ini bagian inisiasi komponen
+        
+ //////////////////////////////////////////////////////////////// BUTTON ICARE by ichsan - ini bagian lokasi button
+        BtnRiwayatFKTP.setForeground(new java.awt.Color(0, 0, 0));
+        BtnRiwayatFKTP.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/Hospital.png"))); // NOI18N
+        BtnRiwayatFKTP.setMnemonic('4');
+        BtnRiwayatFKTP.setText("Icare");
+        BtnRiwayatFKTP.setToolTipText("");
+        BtnRiwayatFKTP.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
+        BtnRiwayatFKTP.setGlassColor(new java.awt.Color(255, 153, 153));
+        BtnRiwayatFKTP.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        BtnRiwayatFKTP.setName("BtnRiwayatFKTP"); // NOI18N
+        BtnRiwayatFKTP.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BtnRiwayatFKTPActionPerformed(evt);
+            }
+        });
+        panelGlass12.add(BtnRiwayatFKTP);
+        BtnRiwayatFKTP.setBounds(910, 10, 160, 26);
+        
+//////////////////////////////////////////////////////////////// BUTTON ICARE by ichsan
+//////////////////////////////////////////////////////////////////// BUTTON SOAP BY ICHSAN
+        Btn5Soap1.setForeground(new java.awt.Color(0, 0, 0));
+        Btn5Soap1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/1358372639_kmenuedit.png"))); // NOI18N
+        Btn5Soap1.setMnemonic('4');
+        Btn5Soap1.setText("Riwayat SOAP Pasien");
+        Btn5Soap1.setToolTipText("");
+        Btn5Soap1.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
+        Btn5Soap1.setGlassColor(new java.awt.Color(255, 153, 153));
+        Btn5Soap1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        Btn5Soap1.setName("Btn5Soap1"); // NOI18N
+        Btn5Soap1.setPreferredSize(new java.awt.Dimension(196, 30));
+        Btn5Soap1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                Btn5Soap1ActionPerformed(evt);
+            }
+        });
+        panelGlass12.add(Btn5Soap1);
+        Btn5Soap1.setBounds(910, 40, 160, 26);
+        
+//////////////////////////////////////////////////////////////////// BUTTON SOAP BY ICHSAN
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setUndecorated(true);
@@ -5364,7 +5407,41 @@ public final class DlgRawatJalan extends javax.swing.JDialog {
             BtnBatalActionPerformed(null);
         }else{Valid.pindah(evt, BtnSimpan, BtnHapus);}
 }//GEN-LAST:event_BtnBatalKeyPressed
-
+    
+////////////////////////////////////////////////////////////////////////////// modif by ichsan - ini action ketika button icare diklik
+    private void BtnRiwayatFKTPActionPerformed(java.awt.event.ActionEvent evt) {                                               
+        variabel = Sequel.cariIsi("select maping_dokter_dpjpvclaim.kd_dokter_bpjs from maping_dokter_dpjpvclaim where maping_dokter_dpjpvclaim.kd_dokter=?", KdPeg.getText());
+        if (!variabel.equals("")) {
+            akses.setform("DlgRawatJalan");
+            ICareRiwayatPerawatan dlgki = new ICareRiwayatPerawatan(null, false);
+            dlgki.setSize(internalFrame1.getWidth() - 20, internalFrame1.getHeight() - 20);
+            dlgki.setLocationRelativeTo(internalFrame1);
+            dlgki.setPasien(Sequel.cariIsi("select pasien.no_peserta from pasien where pasien.no_rkm_medis=?", TNoRM.getText()), variabel);
+            dlgki.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(null, "Maaf, Dokter tidak terdaftar di mapping dokter BPJS...!!!");
+        }
+    } 
+////////////////////////////////////////////////////////////////////////////////////////////////  end tombol Icare
+//////////////////////////////////////////////////////////////////////////////////////////////// modif by ichsan - ini action ketika button Riwayat SOAP diklik
+    private void Btn5Soap1ActionPerformed(java.awt.event.ActionEvent evt) {                                          
+        if (TPasien.getText().trim().equals("") || TNoRw.getText().trim().equals("")) {
+            JOptionPane.showMessageDialog(null, "Maaf, Silahkan anda pilih dulu dengan menklik data pada table...!!!");
+            TCari.requestFocus();
+        } else if (TPegawai.getText().trim().equals("") || KdPeg.getText().trim().equals("")) {
+            JOptionPane.showMessageDialog(null, "Maaf, Silahkan anda pilih dulu petugas/dokter pemberi asuhan...!!!");
+            TCari.requestFocus();
+        } else {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            soapterakhir.setNoRM(TNoRM.getText(), KdPeg.getText(), "Ralan");
+            soapterakhir.setSize(internalFrame1.getWidth() - 20, internalFrame1.getHeight() - 20);
+            soapterakhir.setLocationRelativeTo(internalFrame1);
+            soapterakhir.setVisible(true);
+            this.setCursor(Cursor.getDefaultCursor());
+        }
+    } 
+//////////////////////////////////////////////////////////////////////////////////////////////// END TAMBAHAN BUTTON RIWAYAT SOAP
+    
     private void BtnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnHapusActionPerformed
         switch (TabRawat.getSelectedIndex()) {
             case 0:
@@ -10123,6 +10200,9 @@ private void BtnEditKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
     private widget.Table tbTindakan2;
     private widget.Table tbTindakan3;
     private widget.TextBox TanggalRegistrasi;
+    private widget.Button BtnRiwayatFKTP; // edit tambahan oleh ichsan -> penambahan button Icare
+    private widget.Button Btn5Soap1; //edit tambahan oleh ichsan -> penambahan button riwayat SOAP
+    
     // End of variables declaration//GEN-END:variables
     private widget.Button BtnSkorBromagePascaAnestesi,BtnPenilaianPreInduksi,BtnHasilPemeriksaanUSGUrologi,BtnHasilPemeriksaanUSGGynecologi,BtnHasilPemeriksaanEKG,BtnPenatalaksanaanTerapiOkupasi,BtnPenilaianPsikolog,
                           BtnHasilPemeriksaanUSGNeonatus,BtnHasilEndoskopiFaringLaring,BtnHasilEndoskopiHidung,BtnHasilEndoskopiTelinga,BtnPenilaianPasienImunitasRendah,BtnCatatanKeseimbanganCairan,BtnCatatanObservasiCHBP,

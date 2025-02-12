@@ -191,4 +191,9 @@
     <entry key="URLAPISERTISIGN">https://api-stag.sertisign.id/v2/poa/signing-qr</entry>
     <entry key="APIKEYSERTISIGN">Qvbk11KTaeMu98WE5RITeYdqppEJrrfzN7HisMpfOheYGYPFOLs1CW4idp8VpXV1</entry>
     <entry key="URLDOKUMENSERTISIGN">https://sertisign.com/webhook</entry>
+	
+	
+	
+	<!--TAMBAHAN ICHSAN-->
+	<entry key="AKTIFKANWARNARANAP">no</entry>
 </properties>
