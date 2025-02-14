@@ -3492,6 +3492,9 @@ private void MnHapusObatOperasiActionPerformed(java.awt.event.ActionEvent evt) {
                            petugas.tampil3(rs2.getString("omloop3")),
                            petugas.tampil3(rs2.getString("omloop4")),
                            petugas.tampil3(rs2.getString("omloop5")),
+                            //tambahan mengosongkan 21 kolom di atas dan 3 kolom di bawah
+                            //"","","","","","","","","","","","","","","","","","","","","","","",
+                            // tambahan
                            "",
                            "",
                            "",
@@ -3501,35 +3504,40 @@ private void MnHapusObatOperasiActionPerformed(java.awt.event.ActionEvent evt) {
                            dokter.tampil3(rs2.getString("dokter_umum")),
                            "","","","","","",""
                     });  
-                    tabMode.addRow(new Object[]{"","","","","",Valid.SetAngka(rs2.getDouble("biayaoperator1")),
-                           Valid.SetAngka(rs2.getDouble("biayaoperator2")),
-                           Valid.SetAngka(rs2.getDouble("biayaoperator3")),
-                           Valid.SetAngka(rs2.getDouble("biayaasisten_operator1")),
-                           Valid.SetAngka(rs2.getDouble("biayaasisten_operator2")),
-                           Valid.SetAngka(rs2.getDouble("biayaasisten_operator3")),
-                           Valid.SetAngka(rs2.getDouble("biayainstrumen")),
-                           Valid.SetAngka(rs2.getDouble("biayadokter_anak")),
-                           Valid.SetAngka(rs2.getDouble("biayaperawaat_resusitas")),
-                           Valid.SetAngka(rs2.getDouble("biayadokter_anestesi")),
-                           Valid.SetAngka(rs2.getDouble("biayaasisten_anestesi")),
-                           Valid.SetAngka(rs2.getDouble("biayaasisten_anestesi2")),
-                           Valid.SetAngka(rs2.getDouble("biayabidan")),
-                           Valid.SetAngka(rs2.getDouble("biayabidan2")),
-                           Valid.SetAngka(rs2.getDouble("biayabidan3")),
-                           Valid.SetAngka(rs2.getDouble("biayaperawat_luar")),
-                           Valid.SetAngka(rs2.getDouble("biaya_omloop")),
-                           Valid.SetAngka(rs2.getDouble("biaya_omloop2")),
-                           Valid.SetAngka(rs2.getDouble("biaya_omloop3")),
-                           Valid.SetAngka(rs2.getDouble("biaya_omloop4")),
-                           Valid.SetAngka(rs2.getDouble("biaya_omloop5")),
-                           Valid.SetAngka(rs2.getDouble("biayasewaok")),
-                           Valid.SetAngka(rs2.getDouble("biayaalat")),
-                           Valid.SetAngka(rs2.getDouble("akomodasi")),
-                           Valid.SetAngka(rs2.getDouble("bagian_rs")),
-                           Valid.SetAngka(rs2.getDouble("biayasarpras")),
-                           Valid.SetAngka(rs2.getDouble("biaya_dokter_pjanak")),
-                           Valid.SetAngka(rs2.getDouble("biaya_dokter_umum")),
-                           Valid.SetAngka(rs2.getDouble("total")),"","","","","",""
+                    tabMode.addRow(new Object[]{"","","","","",
+                           //tambah 29 row kosong
+                            "","","","","","","","","","","","","","","","","","","","","","","","","","","","","",
+                           //tambah 29 row kosong
+                           //Valid.SetAngka(rs2.getDouble("biayaoperator1")),
+                           //Valid.SetAngka(rs2.getDouble("biayaoperator2")),
+                           //Valid.SetAngka(rs2.getDouble("biayaoperator3")),
+                           //Valid.SetAngka(rs2.getDouble("biayaasisten_operator1")),
+                           //Valid.SetAngka(rs2.getDouble("biayaasisten_operator2")),
+                           //Valid.SetAngka(rs2.getDouble("biayaasisten_operator3")),
+                           //Valid.SetAngka(rs2.getDouble("biayainstrumen")),
+                           //Valid.SetAngka(rs2.getDouble("biayadokter_anak")),
+                           //Valid.SetAngka(rs2.getDouble("biayaperawaat_resusitas")),
+                           //Valid.SetAngka(rs2.getDouble("biayadokter_anestesi")),
+                           //Valid.SetAngka(rs2.getDouble("biayaasisten_anestesi")),
+                           //Valid.SetAngka(rs2.getDouble("biayaasisten_anestesi2")),
+                           //Valid.SetAngka(rs2.getDouble("biayabidan")),
+                           //Valid.SetAngka(rs2.getDouble("biayabidan2")),
+                           //Valid.SetAngka(rs2.getDouble("biayabidan3")),
+                           //Valid.SetAngka(rs2.getDouble("biayaperawat_luar")),
+                           //Valid.SetAngka(rs2.getDouble("biaya_omloop")),
+                           //Valid.SetAngka(rs2.getDouble("biaya_omloop2")),
+                           //Valid.SetAngka(rs2.getDouble("biaya_omloop3")),
+                           //Valid.SetAngka(rs2.getDouble("biaya_omloop4")),
+                           //Valid.SetAngka(rs2.getDouble("biaya_omloop5")),
+                           //Valid.SetAngka(rs2.getDouble("biayasewaok")),
+                           //Valid.SetAngka(rs2.getDouble("biayaalat")),
+                           //Valid.SetAngka(rs2.getDouble("akomodasi")),
+                           //Valid.SetAngka(rs2.getDouble("bagian_rs")),
+                           //Valid.SetAngka(rs2.getDouble("biayasarpras")),
+                           //Valid.SetAngka(rs2.getDouble("biaya_dokter_pjanak")),
+                           //Valid.SetAngka(rs2.getDouble("biaya_dokter_umum")),
+                           //Valid.SetAngka(rs2.getDouble("total")),
+                            "","","","","",""
                     }); 
                     total=total+rs2.getDouble("total");
                     no++;
@@ -3537,7 +3545,8 @@ private void MnHapusObatOperasiActionPerformed(java.awt.event.ActionEvent evt) {
                 if(rs2!=null){
                     rs2.close();
                 }
-                tabMode.addRow(new Object[]{"","","","","Obat & BHP", "Satuan", "Harga","Jml","","","","","","","","","","","","","","","","","","","","","","","","","","Biaya Obat","","","","","",""}); 
+                //tabMode.addRow(new Object[]{"","","","","Obat & BHP", "Satuan", "Harga","Jml","","","","","","","","","","","","","","","","","","","","","","","","","","Biaya Obat","","","","","",""});
+                tabMode.addRow(new Object[]{"","","","","Obat & BHP", "Satuan", "Harga","Jml","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""});
                 rs2=koneksi.createStatement().executeQuery(
                         "select beri_obat_operasi.kd_obat,obatbhp_ok.nm_obat,kodesatuan.satuan, beri_obat_operasi.hargasatuan,beri_obat_operasi.jumlah "+
                         "from beri_obat_operasi inner join obatbhp_ok inner join  kodesatuan "+
@@ -3555,7 +3564,8 @@ private void MnHapusObatOperasiActionPerformed(java.awt.event.ActionEvent evt) {
                 if(rs2!=null){
                     rs2.close();
                 }
-                tabMode.addRow(new Object[]{"","","","","Total Biaya :", "", "","","","","","","","","","","","","","","","","","","","",""," ","","","","","",Valid.SetAngka(total),"","","","","",""}); 
+                //tabMode.addRow(new Object[]{"","","","","Total Biaya :", "", "","","","","","","","","","","","","","","","","","","","",""," ","","","","","",Valid.SetAngka(total),"","","","","",""});
+                tabMode.addRow(new Object[]{"","","","","", "", "","","","","","","","","","","","","","","","","","","","",""," ","","","","","","","","","","","",""});
             }      
             rs.last();  
             LTotal.setText(""+rs.getRow());
