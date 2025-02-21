@@ -1665,11 +1665,21 @@ public class koneksiDB {
         return var;
     }
     
-    	     //TAMBAHAN DARI ICHSAN
+//TAMBAHAN DARI ICHSAN
     public static String AKTIFKANWARNARANAP(){
         try{
             prop.loadFromXML(new FileInputStream("setting/database.xml"));
             var=prop.getProperty("AKTIFKANWARNARANAP");
+        }catch(Exception e){
+            var=""; 
+        }
+        return var;
+    }
+    //TAMBAHAN DARI ICHSAN
+    public static String WANOTIFPASIEN(){
+        try{
+            prop.loadFromXML(new FileInputStream("setting/database.xml"));
+            var=prop.getProperty("WANOTIFPASIEN");
         }catch(Exception e){
             var=""; 
         }

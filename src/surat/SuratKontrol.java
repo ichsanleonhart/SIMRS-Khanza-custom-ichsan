@@ -1080,9 +1080,18 @@ public class SuratKontrol extends javax.swing.JDialog {
                 } 
             } 
         }
-        kirimWhatsAppMessage();  //kirim pesan WA by ichsan
-        kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol
-        emptTeks();  //kosongkan isi form setelah tekan simpan
+        //////////////// fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+        try {
+            if(koneksiDB.WANOTIFPASIEN().equals("yes")){   
+                kirimWhatsAppMessage();  //kirim pesan WA by ichsan
+                kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol
+                emptTeks();  //kosongkan isi form setelah tekan simpan
+            }else{
+                emptTeks();  //kosongkan isi form setelah tekan simpan
+            }
+        } catch (Exception e) {
+            emptTeks();  //kosongkan isi form setelah tekan simpan
+        }
 }//GEN-LAST:event_BtnSimpanActionPerformed
 ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA SETELAH SIMPAN SURAT KONTROL BY ICHSAN
     private void kirimWhatsAppMessage() {

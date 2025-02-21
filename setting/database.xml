@@ -197,5 +197,6 @@
 	
 	
 	<!--TAMBAHAN ICHSAN-->
-	<entry key="AKTIFKANWARNARANAP">no</entry>
+	<entry key="AKTIFKANWARNARANAP">yes</entry>
+	<entry key="WANOTIFPASIEN">yes</entry>
 </properties>
