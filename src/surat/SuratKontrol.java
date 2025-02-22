@@ -1085,6 +1085,8 @@ public class SuratKontrol extends javax.swing.JDialog {
             if(koneksiDB.WANOTIFPASIEN().equals("yes")){   
                 kirimWhatsAppMessage();  //kirim pesan WA by ichsan
                 kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol
+                JOptionPane.showMessageDialog(null, "Surat kontrol berhasil dibuat. \n "
+                + "WA reminder akan otomatis terkirim sekarang dan pada H-1 sebelum tanggal kontrol  ;-)");
                 emptTeks();  //kosongkan isi form setelah tekan simpan
             }else{
                 emptTeks();  //kosongkan isi form setelah tekan simpan
@@ -1156,7 +1158,8 @@ public class SuratKontrol extends javax.swing.JDialog {
         "0xF0 0x9F 0x91 0xA8 Dokter : " + NmDokter.getText() + "\n" +
         "0xF0 0x9F 0x8F 0xA5 Spesialis : " + NmPoli.getText() + "\n" +
         "0xF0 0x9F 0x8F 0xA0 Alamat : " + akses.getalamatrs() + "\n\n" +
-        "0xF0 0x9F 0x93 0x84 Jangan lupa untuk membawa surat kontrol yang telah diisi oleh dokter. Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
+        "Apabila Anda menggunakan BPJS, silakan ambil antrian menggunakan aplikasi MJKN, atau hubungi kami di:"+ akses.getkontakrs()+ " atau email ke:" + akses.getemailrs() + "\n" +
+        "0xF0 0x9F 0x93 0x84 Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n\n" +
         "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
 
     // Insert into wa_outbox

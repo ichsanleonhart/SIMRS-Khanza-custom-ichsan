@@ -19,9 +19,13 @@ import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -33,6 +37,10 @@ import kepegawaian.DlgCariDokter2;
 import simrskhanza.DlgCariPoli;
 import simrskhanza.DlgCariPoli2;
 import simrskhanza.DlgPasien;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  *
@@ -51,7 +59,7 @@ public class DlgBookingRegistrasi extends javax.swing.JDialog {
     private DlgCariPoli poli=new DlgCariPoli(null,false);
     private DlgCariPoli2 poli2=new DlgCariPoli2(null,false);
     private DlgPasien pasien=new DlgPasien(null,false);
-    private String aktifjadwal="",URUTNOREG="",status="",no_rawat="",umur="",sttsumur="",nohp="";
+    private String aktifjadwal="",URUTNOREG="",status="",no_rawat="",umur="",sttsumur="",nohp="", tglRegistrasi="";  //tambahan [nohp="", JamBooking="", JamPeriksa=""] oleh ichsan 
     private StringBuilder htmlContent;
     
     
@@ -485,6 +493,8 @@ public class DlgBookingRegistrasi extends javax.swing.JDialog {
         btnPenjab = new widget.Button();
         jLabel20 = new widget.Label();
         Kuota = new widget.TextBox();
+        TombolWA = new javax.swing.JButton();
+        jLabel21 = new widget.Label();
 
         Popup.setName("Popup"); // NOI18N
 
@@ -769,7 +779,7 @@ public class DlgBookingRegistrasi extends javax.swing.JDialog {
         R2.setPreferredSize(new java.awt.Dimension(125, 23));
         panelCari.add(R2);
 
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "31-07-2022" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-02-2025" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -792,7 +802,7 @@ public class DlgBookingRegistrasi extends javax.swing.JDialog {
         jLabel22.setPreferredSize(new java.awt.Dimension(25, 23));
         panelCari.add(jLabel22);
 
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "31-07-2022" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-02-2025" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -814,7 +824,7 @@ public class DlgBookingRegistrasi extends javax.swing.JDialog {
         R3.setPreferredSize(new java.awt.Dimension(135, 23));
         panelCari.add(R3);
 
-        DTPCari3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "31-07-2022" }));
+        DTPCari3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-02-2025" }));
         DTPCari3.setDisplayFormat("dd-MM-yyyy");
         DTPCari3.setName("DTPCari3"); // NOI18N
         DTPCari3.setOpaque(false);
@@ -837,7 +847,7 @@ public class DlgBookingRegistrasi extends javax.swing.JDialog {
         jLabel25.setPreferredSize(new java.awt.Dimension(25, 23));
         panelCari.add(jLabel25);
 
-        DTPCari4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "31-07-2022" }));
+        DTPCari4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-02-2025" }));
         DTPCari4.setDisplayFormat("dd-MM-yyyy");
         DTPCari4.setName("DTPCari4"); // NOI18N
         DTPCari4.setOpaque(false);
@@ -921,7 +931,7 @@ public class DlgBookingRegistrasi extends javax.swing.JDialog {
         TPasien.setBounds(151, 10, 311, 23);
 
         TanggalBooking.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalBooking.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "31-07-2022 01:07:29" }));
+        TanggalBooking.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-02-2025 10:53:31" }));
         TanggalBooking.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         TanggalBooking.setName("TanggalBooking"); // NOI18N
         TanggalBooking.setOpaque(false);
@@ -1001,13 +1011,18 @@ public class DlgBookingRegistrasi extends javax.swing.JDialog {
         jLabel14.setBounds(506, 40, 70, 23);
 
         TanggalPeriksa.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalPeriksa.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "31-07-2022 01:07:29" }));
+        TanggalPeriksa.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-02-2025 10:53:31" }));
         TanggalPeriksa.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         TanggalPeriksa.setName("TanggalPeriksa"); // NOI18N
         TanggalPeriksa.setOpaque(false);
         TanggalPeriksa.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 TanggalPeriksaItemStateChanged(evt);
+            }
+        });
+        TanggalPeriksa.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                TanggalPeriksaActionPerformed(evt);
             }
         });
         TanggalPeriksa.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1020,18 +1035,19 @@ public class DlgBookingRegistrasi extends javax.swing.JDialog {
 
         NoReg.setHighlighter(null);
         NoReg.setName("NoReg"); // NOI18N
-        NoReg.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                NoRegKeyPressed(evt);
+        NoReg.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NoRegActionPerformed(evt);
             }
         });
         FormInput.add(NoReg);
         NoReg.setBounds(630, 70, 90, 23);
 
-        jLabel18.setText("No.Reg :");
+        jLabel18.setText("(Yakinkan no. reg poli-nya sudah benar)");
+        jLabel18.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jLabel18.setName("jLabel18"); // NOI18N
         FormInput.add(jLabel18);
-        jLabel18.setBounds(526, 70, 100, 23);
+        jLabel18.setBounds(720, 70, 200, 23);
 
         BtnPasien.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         BtnPasien.setMnemonic('X');
@@ -1091,7 +1107,7 @@ public class DlgBookingRegistrasi extends javax.swing.JDialog {
         jLabel20.setText("Kuota :");
         jLabel20.setName("jLabel20"); // NOI18N
         FormInput.add(jLabel20);
-        jLabel20.setBounds(526, 100, 100, 23);
+        jLabel20.setBounds(586, 100, 40, 23);
 
         Kuota.setEditable(false);
         Kuota.setHighlighter(null);
@@ -1103,6 +1119,23 @@ public class DlgBookingRegistrasi extends javax.swing.JDialog {
         });
         FormInput.add(Kuota);
         Kuota.setBounds(630, 100, 90, 23);
+
+        TombolWA.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/wa.png"))); // NOI18N
+        TombolWA.setText("Kirim WA");
+        TombolWA.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        TombolWA.setName("TombolWA"); // NOI18N
+        TombolWA.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                TombolWAActionPerformed(evt);
+            }
+        });
+        FormInput.add(TombolWA);
+        TombolWA.setBounds(740, 10, 170, 30);
+
+        jLabel21.setText("No.Reg :");
+        jLabel21.setName("jLabel21"); // NOI18N
+        FormInput.add(jLabel21);
+        jLabel21.setBounds(526, 70, 100, 23);
 
         PanelInput.add(FormInput, java.awt.BorderLayout.CENTER);
 
@@ -1299,7 +1332,21 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
             if(tbObat.getValueAt(i,0).toString().equals("true")&&tbObat.getValueAt(i,23).toString().equals("Belum")){
                 Sequel.mengedit("pasien","no_rkm_medis=?","umur=CONCAT(CONCAT(CONCAT(TIMESTAMPDIFF(YEAR, tgl_lahir, CURDATE()), ' Th '),CONCAT(TIMESTAMPDIFF(MONTH, tgl_lahir, CURDATE()) - ((TIMESTAMPDIFF(MONTH, tgl_lahir, CURDATE()) div 12) * 12), ' Bl ')),CONCAT(TIMESTAMPDIFF(DAY, DATE_ADD(DATE_ADD(tgl_lahir,INTERVAL TIMESTAMPDIFF(YEAR, tgl_lahir, CURDATE()) YEAR), INTERVAL TIMESTAMPDIFF(MONTH, tgl_lahir, CURDATE()) - ((TIMESTAMPDIFF(MONTH, tgl_lahir, CURDATE()) div 12) * 12) MONTH), CURDATE()), ' Hr'))",1,new String[]{tbObat.getValueAt(i,3).toString()});
                 status=Sequel.cariIsi("select if((select count(no_rkm_medis) from reg_periksa where no_rkm_medis='"+tbObat.getValueAt(i,3).toString()+"' and kd_poli='"+tbObat.getValueAt(i,8).toString()+"')>0,'Lama','Baru' )");
-                no_rawat=Valid.autoNomer3("select ifnull(MAX(CONVERT(RIGHT(no_rawat,6),signed)),0) from reg_periksa where tgl_registrasi='"+tbObat.getValueAt(i,5).toString()+"' ",tbObat.getValueAt(i,5).toString().replace("-","/")+"/",6); 
+               //no_rawat=Valid.autoNomer3("select ifnull(MAX(CONVERT(RIGHT(no_rawat,6),signed)),0) from reg_periksa where tgl_registrasi='"+tbObat.getValueAt(i,5).toString()+"' ",tbObat.getValueAt(i,5).toString().replace("-","/")+"/",6); 
+                ////////////////////////
+                // Ambil hanya tanggal (tanpa waktu)
+                    String rawTgl = tbObat.getValueAt(i,5).toString().split(" ")[0]; // Ambil hanya yyyy-MM-dd
+
+                    // Format ke yyyy/MM/dd
+                    String formattedTgl = rawTgl.replace("-", "/"); 
+
+                    // Generate nomor rawat dengan format yang benar
+                    no_rawat = Valid.autoNomer3(
+                        "select ifnull(MAX(CONVERT(RIGHT(no_rawat,6),signed)),0) from reg_periksa where tgl_registrasi='" + rawTgl + "'",
+                        formattedTgl + "/", 6
+                    );
+                ////////////////////////
+               
                 umur="0";
                 sttsumur="Th";
                 if(Double.parseDouble(tbObat.getValueAt(i,19).toString())>0){
@@ -1326,15 +1373,114 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                     Sequel.mengedit3("skdp_bpjs","no_rkm_medis=? and tanggal_datang=?","status='Sudah Periksa'",2,new String[]{
                         tbObat.getValueAt(i,3).toString(),tbObat.getValueAt(i,5).toString()
                     });
-                    Sequel.queryu2("update booking_registrasi set status='Terdaftar' where no_rkm_medis=? and tanggal_periksa=?",2,new String[]{
+                    Sequel.queryu2("update booking_registrasi set status='Terdaftar' where no_rkm_medis=? and waktu_kunjungan=?",2,new String[]{
                         tbObat.getValueAt(i,3).toString(),tbObat.getValueAt(i,5).toString()
                     });
                 }
             }
         }
+        System.out.println("Debug: No Rawat = " + no_rawat);
+        System.out.println("Debug: Panjang No Rawat = " + no_rawat.length());
+        
+        //////////////kirim WA ke Pasien setelah regist dari menu booking
+        kirimWhatsAppMessageRegistBooking();  //kirim pesan WA by ichsan 
+        JOptionPane.showMessageDialog(null, "OK, pasien sudah ter-regist ke pendaftaran. \n "
+                + "Sambil ditunggu WA bukti registrasi-nya otomatis dikirim bot yah~  ;-)");
+        
         tampil();
     }//GEN-LAST:event_BtnEditActionPerformed
+   
+    ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA  BY ICHSAN
+    private void kirimWhatsAppMessageRegistBooking() {
+    LocalDateTime waktuSekarang = LocalDateTime.now().plusSeconds(5); // ambil detik sekarang, lalu tambahkan + 5 detik ke depan
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");  //penyesuaian format waktu untuk dikirim ke table wa_outbox
+    String waktukirim = waktuSekarang.format(formatter);    //isi value untuk dikirim ke jadwal pengiriman di wa gateway
 
+    // Fetch nomor hp pasien, gender, serta tanggal kontrol
+    String nohppasien = "";  //ubah format nomor hp pasien
+    String jk = "";  //ubah format jenis kelamin
+    String formattedTanggal = "";  //ubah format tanggal kontrol
+    
+    try {
+        ///////// start - format tanggal dan jam kontrol        
+        //System.out.println("Raw value of TanggalPeriksa: " + TanggalPeriksa.getSelectedItem());        // aktifkan baris ini untuk Print debug ke kotak hitam
+        String rawDate = TanggalPeriksa.getSelectedItem().toString().trim(); // Step 1, ambil tanggal dan jam        
+        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH); //step 2, sesuaikan format sesuai isi kolom
+        SimpleDateFormat outputFormat = new SimpleDateFormat("dd MMMM yyyy 'jam' HH:mm", new Locale("id", "ID"));   //step 3, penyesuaian menjadi format yang enak dibaca, untuk nanti di-insert ke dalam isi pesan WA           
+        Date date = inputFormat.parse(rawDate);  // Parse string dari tanggal yang diinput menjadi objek tanggal
+        formattedTanggal = outputFormat.format(date); // memformat tanggal menjadi format indonesia 
+        ///////// end - format tanggal dan jam kontrol ke dalam isi pesan WA        
+        
+        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
+        ps.setString(1, TNoRM.getText());
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            nohppasien = rs.getString("no_tlp");
+            jk = rs.getString("jk");
+
+            // Convert phone number from 08xxxxxx to 628xxxxxx
+            if (nohppasien.startsWith("0")) {
+                nohppasien = "62" + nohppasien.substring(1);
+            }
+        }
+
+        rs.close();
+        ps.close();
+    } catch (Exception e) {
+        System.out.println("Error fetching phone number: " + e);
+        System.out.println("Error formatting date: " + e);
+        System.out.println("Error formatting date: " + e);
+        formattedTanggal = TanggalPeriksa.getSelectedItem().toString(); // Fallback to original format
+    }
+
+
+    // Set greeting based on gender
+    String salampembuka;
+    if ("L".equalsIgnoreCase(jk)) {
+        salampembuka = "Yth, Bpk " + TPasien.getText() + "\n";
+    } else if ("P".equalsIgnoreCase(jk)) {
+        salampembuka = "Yth, Ibu " + TPasien.getText() + "\n";
+    } else {
+        salampembuka = "Yth, Bpk / Ibu " + TPasien.getText() + "\n";
+    }
+
+    // Membuat isi pesan ke dalam whatsapp
+    String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
+        "Terima kasih sudah registrasi di loket admisi " + akses.getnamars() + ". \n " +
+        "Berikut adalah informasi antrian Anda:\n\n" +       
+        "0xF0 0x9F 0x94 0xA2 *Nomor Antrian Poli : " + NoReg.getText() + "* \n" +
+        "0xF0 0x9F 0x93 0x85 Tanggal: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
+        "0xF0 0x9F 0x91 0xA8 Dokter : " + NmDokter.getText() + "\n" +
+        "0xF0 0x9F 0x8F 0xA5 Spesialis : " + NmPoli.getText() + "\n" +
+        "Mohon menuju loket perawat / menunggu dipanggil oleh petugas pelayanan untuk dilakukan pemeriksaan tensi.\n";
+
+    // Insert into wa_outbox
+    try {
+        String sql = "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, SUCCESS, RESPONSE, REQUEST, TYPE, FILE) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        PreparedStatement psWa = koneksi.prepareStatement(sql);
+        psWa.setLong(1, 0);
+        psWa.setString(2, nohppasien + "@c.us");
+        psWa.setString(3, pesan);
+        psWa.setString(4, waktukirim);
+        psWa.setString(5, "ANTRIAN");
+        psWa.setString(6, "KHANZA");
+        psWa.setString(7, "NODEJS");
+        psWa.setString(8, "");
+        psWa.setString(9, "");
+        psWa.setString(10, "");
+        psWa.setString(11, "TEXT");
+        psWa.setString(12, "");
+        psWa.executeUpdate();
+
+        System.out.println("Tanggal Periksa: " + formattedTanggal + "dengan nomor HP:" + nohppasien + "Sudah masuk dalam antrian pengiriman WA ke nomor HP pasien." );
+    } catch (Exception e) {
+        System.out.println("Gagal mengirim pesan WA ke Pasien: " + e);
+    }
+}
+    
     private void BtnEditKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnEditKeyPressed
         if(evt.getKeyCode()==KeyEvent.VK_SPACE){
             BtnEditActionPerformed(null);
@@ -1400,10 +1546,6 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
             poli.setVisible(true);
         }
     }//GEN-LAST:event_BtnPoliActionPerformed
-
-    private void NoRegKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_NoRegKeyPressed
-        Valid.pindah(evt,TanggalPeriksa,BtnSimpan);
-    }//GEN-LAST:event_NoRegKeyPressed
 
     private void BtnPasienActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPasienActionPerformed
         pasien.emptTeks();
@@ -1477,7 +1619,8 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private void BtnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnHapusActionPerformed
         for(i=0;i<tbObat.getRowCount();i++){
             if(tbObat.getValueAt(i,0).toString().equals("true")){
-                Sequel.queryu2("delete from booking_registrasi where no_rkm_medis=? and tanggal_periksa=?",2,new String[]{
+                //Sequel.queryu2("delete from booking_registrasi where no_rkm_medis=? and tanggal_periksa=?",2,new String[]{
+                Sequel.queryu2("delete from booking_registrasi where no_rkm_medis=? and waktu_kunjungan=?",2,new String[]{  //modif oleh ichsan
                     tbObat.getValueAt(i,3).toString(),tbObat.getValueAt(i,5).toString()
                 });
             }
@@ -1567,6 +1710,118 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         }
     }//GEN-LAST:event_ppCSVWARocketActionPerformed
 
+    private void TombolWAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TombolWAActionPerformed
+             //////////////// start - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+        try {
+            if(koneksiDB.WANOTIFPASIEN().equals("yes")){   
+                kirimWhatsAppMessage();  //kirim pesan WA by ichsan 
+                JOptionPane.showMessageDialog(null, "OK, ditunggu sampai WA reminder-nya dikirim bot yah~  ;-)");
+            }else{
+            }
+        } catch (Exception e) {
+         //kosong   
+        }
+        ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+    }//GEN-LAST:event_TombolWAActionPerformed
+
+    private void TanggalPeriksaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TanggalPeriksaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_TanggalPeriksaActionPerformed
+
+    private void NoRegActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NoRegActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_NoRegActionPerformed
+
+    ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA  BY ICHSAN
+    private void kirimWhatsAppMessage() {
+    LocalDateTime waktuSekarang = LocalDateTime.now().plusSeconds(5); // ambil detik sekarang, lalu tambahkan + 5 detik ke depan
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");  //penyesuaian format waktu untuk dikirim ke table wa_outbox
+    String waktukirim = waktuSekarang.format(formatter);    //isi value untuk dikirim ke jadwal pengiriman di wa gateway
+
+    // Fetch nomor hp pasien, gender, serta tanggal kontrol
+    String nohppasien = "";  //ubah format nomor hp pasien
+    String jk = "";  //ubah format jenis kelamin
+    String formattedTanggal = "";  //ubah format tanggal kontrol
+    
+    try {
+        ///////// start - format tanggal dan jam kontrol        
+        //System.out.println("Raw value of TanggalPeriksa: " + TanggalPeriksa.getSelectedItem());        // aktifkan baris ini untuk Print debug ke kotak hitam
+        String rawDate = TanggalPeriksa.getSelectedItem().toString().trim(); // Step 1, ambil tanggal dan jam        
+        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH); //step 2, sesuaikan format sesuai isi kolom
+        SimpleDateFormat outputFormat = new SimpleDateFormat("dd MMMM yyyy 'jam' HH:mm", new Locale("id", "ID"));   //step 3, penyesuaian menjadi format yang enak dibaca, untuk nanti di-insert ke dalam isi pesan WA           
+        Date date = inputFormat.parse(rawDate);  // Parse string dari tanggal yang diinput menjadi objek tanggal
+        formattedTanggal = outputFormat.format(date); // memformat tanggal menjadi format indonesia 
+        ///////// end - format tanggal dan jam kontrol ke dalam isi pesan WA        
+        
+        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
+        ps.setString(1, TNoRM.getText());
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            nohppasien = rs.getString("no_tlp");
+            jk = rs.getString("jk");
+
+            // Convert phone number from 08xxxxxx to 628xxxxxx
+            if (nohppasien.startsWith("0")) {
+                nohppasien = "62" + nohppasien.substring(1);
+            }
+        }
+
+        rs.close();
+        ps.close();
+    } catch (Exception e) {
+        System.out.println("Error fetching phone number: " + e);
+        System.out.println("Error formatting date: " + e);
+        System.out.println("Error formatting date: " + e);
+        formattedTanggal = TanggalPeriksa.getSelectedItem().toString(); // Fallback to original format
+    }
+
+    // Set greeting based on gender
+    String salampembuka;
+    if ("L".equalsIgnoreCase(jk)) {
+        salampembuka = "Assalamualaikum, Bpk " + TPasien.getText() + "\n";
+    } else if ("P".equalsIgnoreCase(jk)) {
+        salampembuka = "Assalamualaikum, Ibu " + TPasien.getText() + "\n";
+    } else {
+        salampembuka = "Assalamualaikum, Bpk / Ibu " + TPasien.getText() + "\n";
+    }
+
+    // Membuat isi pesan ke dalam whatsapp
+    String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
+        "Kami dari " + akses.getnamars() + ", izin mengingatkan bahwa Anda memiliki jadwal kontrol/tindak lanjut pada: \n\n" +       
+        "0xF0 0x9F 0x93 0x85 Tanggal: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
+        "0xF0 0x9F 0x91 0xA8 Dokter : " + NmDokter.getText() + "\n" +
+        "0xF0 0x9F 0x8F 0xA5 Spesialis : " + NmPoli.getText() + "\n" +
+        "*Nomor Antrian Poli : " + NoReg.getText() + "*\n" +
+        "0xF0 0x9F 0x8F 0xA0 Alamat : " + akses.getalamatrs() + "\n\n" +
+        "0xF0 0x9F 0x93 0x84 Mohon konfirmasi menuju bagian admisi. Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
+        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
+
+    // Insert into wa_outbox
+    try {
+        String sql = "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, SUCCESS, RESPONSE, REQUEST, TYPE, FILE) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        PreparedStatement psWa = koneksi.prepareStatement(sql);
+        psWa.setLong(1, 0);
+        psWa.setString(2, nohppasien + "@c.us");
+        psWa.setString(3, pesan);
+        psWa.setString(4, waktukirim);
+        psWa.setString(5, "ANTRIAN");
+        psWa.setString(6, "KHANZA");
+        psWa.setString(7, "NODEJS");
+        psWa.setString(8, "");
+        psWa.setString(9, "");
+        psWa.setString(10, "");
+        psWa.setString(11, "TEXT");
+        psWa.setString(12, "");
+        psWa.executeUpdate();
+
+        System.out.println("Tanggal Periksa: " + formattedTanggal + "dengan nomor HP:" + nohppasien + "Sudah masuk dalam antrian pengiriman WA ke nomor HP pasien." );
+    } catch (Exception e) {
+        System.out.println("Gagal mengirim pesan WA ke Pasien: " + e);
+    }
+}
     /**
     * @param args the command line arguments
     */
@@ -1618,6 +1873,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private widget.TextBox TPasien;
     private widget.Tanggal TanggalBooking;
     private widget.Tanggal TanggalPeriksa;
+    private javax.swing.JButton TombolWA;
     private widget.Button btnPenjab;
     private javax.swing.ButtonGroup buttonGroup1;
     private widget.InternalFrame internalFrame1;
@@ -1627,6 +1883,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private widget.Label jLabel18;
     private widget.Label jLabel19;
     private widget.Label jLabel20;
+    private widget.Label jLabel21;
     private widget.Label jLabel22;
     private widget.Label jLabel25;
     private widget.Label jLabel4;
@@ -1649,7 +1906,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         if(R2.isSelected()==true){
             status=" booking_registrasi.tanggal_booking between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' ";
         }else if(R3.isSelected()==true){
-            status=" booking_registrasi.tanggal_periksa between '"+Valid.SetTgl(DTPCari3.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari4.getSelectedItem()+"")+"' ";           
+            status=" booking_registrasi.waktu_kunjungan between '"+Valid.SetTgl(DTPCari3.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari4.getSelectedItem()+"")+"' ";           
         }
         Valid.tabelKosong(tabMode);
         try {
@@ -1661,7 +1918,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                     "pasien.kabupatenpj,pasien.propinsipj,pasien.keluarga,TIMESTAMPDIFF(YEAR, pasien.tgl_lahir, CURDATE()) as tahun, "+
                     "(TIMESTAMPDIFF(MONTH, pasien.tgl_lahir, CURDATE()) - ((TIMESTAMPDIFF(MONTH, pasien.tgl_lahir, CURDATE()) div 12) * 12)) as bulan, "+
                     "TIMESTAMPDIFF(DAY, DATE_ADD(DATE_ADD(pasien.tgl_lahir,INTERVAL TIMESTAMPDIFF(YEAR, pasien.tgl_lahir, CURDATE()) YEAR), INTERVAL TIMESTAMPDIFF(MONTH, pasien.tgl_lahir, CURDATE()) - ((TIMESTAMPDIFF(MONTH, pasien.tgl_lahir, CURDATE()) div 12) * 12) MONTH), CURDATE()) as hari, "+
-                    "booking_registrasi.limit_reg,booking_registrasi.status,booking_registrasi.kd_pj,penjab.png_jawab "+
+                    "booking_registrasi.limit_reg,booking_registrasi.waktu_kunjungan,booking_registrasi.status,booking_registrasi.kd_pj,penjab.png_jawab "+
                     "from booking_registrasi inner join pasien on booking_registrasi.no_rkm_medis=pasien.no_rkm_medis "+
                     "inner join dokter on booking_registrasi.kd_dokter=dokter.kd_dokter "+
                     "inner join poliklinik on booking_registrasi.kd_poli=poliklinik.kd_poli "+
@@ -1677,12 +1934,16 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                 ps.setString(1,"%"+TCari.getText().trim()+"%");
                 ps.setString(2,"%"+TCari.getText().trim()+"%");
                 ps.setString(3,"%"+TCari.getText().trim()+"%");
-                ps.setString(4,"%"+TCari.getText().trim()+"%");
+                ps.setString(4,"%"+TCari.getText().trim()+"%");                
                 rs=ps.executeQuery();
-                while(rs.next()){                    
+                while(rs.next()){ 
+                    Timestamp tsPeriksa = rs.getTimestamp("waktu_kunjungan");  // tambahan by ichsan
+                    String tanggalPeriksa = (tsPeriksa != null) ? tsPeriksa.toString() : "N/A";  // tambahan by ichsan
+                    System.out.println("Debug: waktu_kunjungan = " + tanggalPeriksa);
                     tabMode.addRow(new Object[]{
                         false,rs.getString("tanggal_booking"),rs.getString("jam_booking"),rs.getString("no_rkm_medis"),rs.getString("nm_pasien"),
-                        rs.getString("tanggal_periksa"),rs.getString("kd_dokter"),rs.getString("nm_dokter"),
+                        //rs.getString("tanggal_periksa"),rs.getString("kd_dokter"),rs.getString("nm_dokter"),
+                        tanggalPeriksa,rs.getString("kd_dokter"),rs.getString("nm_dokter"),
                         rs.getString("kd_poli"),rs.getString("nm_poli"),rs.getString("no_reg"),
                         rs.getString("namakeluarga"),rs.getString("alamatpj"),rs.getString("kelurahanpj"),
                         rs.getString("kecamatanpj"),rs.getString("kabupatenpj"),rs.getString("propinsipj"),
@@ -1718,7 +1979,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         isNomer();
     }
     
-    private void isNomer(){
+    /*private void isNomer(){
         switch (URUTNOREG) {
             case "poli":
                 Valid.autoNomer3("select ifnull(MAX(CONVERT(no_reg,signed)),0) from booking_registrasi where kd_poli='"+KdPoli.getText()+"' and tanggal_periksa='"+Valid.SetTgl(TanggalPeriksa.getSelectedItem()+"")+"'","",3,NoReg);
@@ -1733,9 +1994,55 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                 Valid.autoNomer3("select ifnull(MAX(CONVERT(no_reg,signed)),0) from booking_registrasi where kd_dokter='"+KdDokter.getText()+"' and tanggal_periksa='"+Valid.SetTgl(TanggalPeriksa.getSelectedItem()+"")+"'","",3,NoReg);
                 break;
         }
+    }*/
+    
+    private void isNomer() {
+    String query = "";
+    
+    switch (URUTNOREG) {
+        case "poli":
+            query = "SELECT IFNULL(MAX(CONVERT(no_reg, SIGNED)), 0) FROM (" +
+                    "SELECT no_reg FROM booking_registrasi WHERE kd_poli='" + KdPoli.getText() + 
+                    "' AND tanggal_periksa='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "' " +
+                    "UNION ALL " +
+                    "SELECT no_reg FROM reg_periksa WHERE kd_poli='" + KdPoli.getText() + 
+                    "' AND tgl_registrasi='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "') AS merged";
+            break;
+            
+        case "dokter":
+            query = "SELECT IFNULL(MAX(CONVERT(no_reg, SIGNED)), 0) FROM (" +
+                    "SELECT no_reg FROM booking_registrasi WHERE kd_dokter='" + KdDokter.getText() + 
+                    "' AND tanggal_periksa='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "' " +
+                    "UNION ALL " +
+                    "SELECT no_reg FROM reg_periksa WHERE kd_dokter='" + KdDokter.getText() + 
+                    "' AND tgl_registrasi='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "') AS merged";
+            break;
+            
+        case "dokter + poli":             
+            query = "SELECT IFNULL(MAX(CONVERT(no_reg, SIGNED)), 0) FROM (" +
+                    "SELECT no_reg FROM booking_registrasi WHERE kd_dokter='" + KdDokter.getText() + 
+                    "' AND kd_poli='" + KdPoli.getText() + "' AND tanggal_periksa='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "' " +
+                    "UNION ALL " +
+                    "SELECT no_reg FROM reg_periksa WHERE kd_dokter='" + KdDokter.getText() + 
+                    "' AND kd_poli='" + KdPoli.getText() + "' AND tgl_registrasi='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "') AS merged";
+            break;
+            
+        default:
+            query = "SELECT IFNULL(MAX(CONVERT(no_reg, SIGNED)), 0) FROM (" +
+                    "SELECT no_reg FROM booking_registrasi WHERE kd_dokter='" + KdDokter.getText() + 
+                    "' AND tanggal_periksa='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "' " +
+                    "UNION ALL " +
+                    "SELECT no_reg FROM reg_periksa WHERE kd_dokter='" + KdDokter.getText() + 
+                    "' AND tgl_registrasi='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "') AS merged";
+            break;
     }
 
-    private void getData() {
+    // Gunakan query yang sudah dibuat untuk mendapatkan nomor registrasi terbesar
+    Valid.autoNomer3(query, "", 3, NoReg);
+}
+
+
+     /*private void getData() {
         if(tbObat.getSelectedRow()!= -1){            
             Valid.SetTgl(TanggalBooking,tbObat.getValueAt(tbObat.getSelectedRow(),1).toString());
             TNoRM.setText(tbObat.getValueAt(tbObat.getSelectedRow(),3).toString()); 
@@ -1749,7 +2056,54 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
             kdpnj.setText(tbObat.getValueAt(tbObat.getSelectedRow(),24).toString());
             nmpnj.setText(tbObat.getValueAt(tbObat.getSelectedRow(),25).toString());
         }
+    } */
+    
+
+private void getData() {
+    if (tbObat.getSelectedRow() != -1) {            
+        Valid.SetTgl(TanggalBooking, tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString());
+        TNoRM.setText(tbObat.getValueAt(tbObat.getSelectedRow(), 3).toString()); 
+        TPasien.setText(tbObat.getValueAt(tbObat.getSelectedRow(), 4).toString());
+
+        try {
+            // Get the full date-time string from the table
+            String dateTimeString = tbObat.getValueAt(tbObat.getSelectedRow(), 5).toString(); 
+
+            // Parse it into a Date object (original format: yyyy-MM-dd HH:mm:ss)
+            SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date date = originalFormat.parse(dateTimeString);
+
+            // Format for display (dd-MM-yyyy HH:mm:ss)
+            SimpleDateFormat targetFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+            String formattedDateTime = targetFormat.format(date);
+
+            // Set the formatted value to TanggalPeriksa using its model
+            TanggalPeriksa.setModel(new javax.swing.DefaultComboBoxModel(new String[] { formattedDateTime }));
+
+        } catch (ParseException e) {
+            System.out.println("Error parsing date: " + e.getMessage());
+        }
+
+        KdDokter.setText(tbObat.getValueAt(tbObat.getSelectedRow(), 6).toString());
+        NmDokter.setText(tbObat.getValueAt(tbObat.getSelectedRow(), 7).toString());
+        KdPoli.setText(tbObat.getValueAt(tbObat.getSelectedRow(), 8).toString());
+        NmPoli.setText(tbObat.getValueAt(tbObat.getSelectedRow(), 9).toString());
+        NoReg.setText(tbObat.getValueAt(tbObat.getSelectedRow(), 10).toString());
+        kdpnj.setText(tbObat.getValueAt(tbObat.getSelectedRow(), 24).toString());
+        nmpnj.setText(tbObat.getValueAt(tbObat.getSelectedRow(), 25).toString());
     }
+}
+
+
+
+
+
+
+
+
+
+
+
     
     public void setNoRm(String norm,String nama) {
         TNoRM.setText(norm);
@@ -1827,7 +2181,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         return jam+":"+menit+":"+detik;
     }
 
-    private void isBooking() {
+    /* private void isBooking() {
         if(Sequel.menyimpantf("booking_registrasi","?,?,?,?,?,?,?,?,?,?,?","Pasien dan Tanggal",11,new String[]{
              Valid.SetTgl(TanggalBooking.getSelectedItem()+""),TanggalBooking.getSelectedItem().toString().substring(11,19),TNoRM.getText(),
              Valid.SetTgl(TanggalPeriksa.getSelectedItem()+""),KdDokter.getText(),
@@ -1838,5 +2192,29 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
             emptTeks();
             tampil();
         } 
+    } */
+    
+    private void isBooking() {
+    String tanggalBooking = Valid.SetTgl(TanggalBooking.getSelectedItem()+"") + " " + TanggalBooking.getSelectedItem().toString().substring(11,19);
+    String tanggalPeriksa = Valid.SetTgl(TanggalPeriksa.getSelectedItem()+"") + " " + TanggalPeriksa.getSelectedItem().toString().substring(11,19);
+    
+    System.out.println("Debug: Tanggal Booking = " + tanggalBooking);
+    System.out.println("Debug: Tanggal Periksa = " + tanggalPeriksa);
+    
+    if(Sequel.menyimpantf("booking_registrasi","?,?,?,?,?,?,?,?,?,?,?","Pasien dan Tanggal",11,new String[]{
+         tanggalBooking, // Store full datetime (yyyy-MM-dd HH:mm:ss)
+         TanggalBooking.getSelectedItem().toString().substring(11,19), // Extract only time
+         TNoRM.getText(),
+         tanggalPeriksa, // Store full datetime (yyyy-MM-dd HH:mm:ss)
+         KdDokter.getText(),
+         KdPoli.getText(),NoReg.getText(),kdpnj.getText(),"0",
+         tanggalPeriksa, // Store full datetime (yyyy-MM-dd HH:mm:ss)
+         "Belum"
+       })==true){
+        emptTeks();
+        tampil();
+        } 
     }
+
+
 }

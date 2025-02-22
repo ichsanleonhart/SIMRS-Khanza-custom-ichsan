@@ -24,4 +24,8 @@ public final class Tanggal extends JDateTimePicker {
         setSize(WIDTH,23);
     }
 
+    public void setText(String toString) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }
