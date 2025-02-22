@@ -1245,7 +1245,7 @@ public final class validasi {
         return s;
     }
     
-     public void SetTglJam(DefaultTableModel tabMode,JTable table,JDateTimePicker dtp,int i){  //tambahan dari ichsan
+/*     public void SetTglJam(DefaultTableModel tabMode,JTable table,JDateTimePicker dtp,int i){  //tambahan dari ichsan
         j=table.getSelectedRow();
         try {
            Date dtpa = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(tabMode.getValueAt(j,i).toString().replaceAll("'",""));
@@ -1254,7 +1254,7 @@ public final class validasi {
            dtp.setDate(new Date());
         }
     }
-    
+ */   
     public String SetTgl3(String original){
         original=original.replaceAll("'","");
         s = "";

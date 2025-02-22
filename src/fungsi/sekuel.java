@@ -2105,10 +2105,6 @@ public final class sekuel {
         System.out.println(str);
     }
 
-    public String cariIsi(String string, String rawTgl, String kdDokter) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     public class Painter extends Canvas {
 
         Image image;

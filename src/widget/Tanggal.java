@@ -23,9 +23,9 @@ public final class Tanggal extends JDateTimePicker {
         //setBorder(javax.swing.BorderFactory.createLineBorder(new Color(212,212,152)));
         setSize(WIDTH,23);
     }
-
+/*
     public void setText(String toString) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+*/
 }
