@@ -21,8 +21,12 @@ import java.security.cert.X509Certificate;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
@@ -949,9 +953,222 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
                     JOptionPane.showMessageDialog(null,"Koneksi ke server BPJS terputus...!");
                 }
             }
+            
+            
+            ////////////////kirim WA ke pasien
+            //////////////// fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+        try {
+            if(koneksiDB.WANOTIFPASIEN().equals("yes")){   
+                kirimWhatsAppMessage();  //kirim pesan WA by ichsan
+                kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol
+                emptTeks();  //kosongkan isi form setelah tekan simpan
+            }else{
+                emptTeks();  //kosongkan isi form setelah tekan simpan
+            }
+        } catch (Exception e) {
+            emptTeks();  //kosongkan isi form setelah tekan simpan
+        }
+            
+            
         }
 }//GEN-LAST:event_BtnSimpanActionPerformed
 
+    ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA SETELAH SIMPAN SURAT KONTROL BY ICHSAN
+    private void kirimWhatsAppMessage() {
+    // ambil detik sekarang, lalu tambahkan + 5 detik ke depan
+    LocalDateTime waktuSekarang = LocalDateTime.now().plusSeconds(5);
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    String waktukirim = waktuSekarang.format(formatter);    
+
+    // Fetch nomor hp pasien, gender, serta tanggal kontrol
+    String nohppasien = "";  //ubah format nomor hp pasien
+    String jk = "";  //ubah format jenis kelamin
+    String formattedTanggal = "";  //ubah format tanggal kontrol
+    
+    try {
+        /////////format tanggal dan jam kontrol        
+        //System.out.println("Raw value of TanggalPeriksa: " + TanggalPeriksa.getSelectedItem());        // aktifkan baris ini untuk Print debug ke kotak hitam
+        String rawDate = TanggalKontrol.getSelectedItem().toString().trim(); // Convert to string properly      
+        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);
+        SimpleDateFormat outputFormat = new SimpleDateFormat("dd MMMM yyyy 'jam' HH:mm", new Locale("id", "ID"));   //penyesuaian menjadi format yang enak dibaca           
+        Date date = inputFormat.parse(rawDate);  // Parse the input date string into a Date object        
+        formattedTanggal = outputFormat.format(date); // Format the date into the desired Indonesian format                 
+        /////////format tanggal dan jam kontrol        
+        
+        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
+        ps.setString(1, NoRM.getText());
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            nohppasien = rs.getString("no_tlp");
+            jk = rs.getString("jk");
+
+            // Convert phone number from 08xxxxxx to 628xxxxxx
+            if (nohppasien.startsWith("0")) {
+                nohppasien = "62" + nohppasien.substring(1);
+            }
+        }
+
+        rs.close();
+        ps.close();
+    } catch (Exception e) {
+        System.out.println("Error fetching phone number: " + e);
+        System.out.println("Error formatting date: " + e);
+        System.out.println("Error formatting date: " + e);
+        formattedTanggal = TanggalKontrol.getSelectedItem().toString(); // Fallback to original format
+    }
+
+    // Set greeting based on gender
+    String salampembuka;
+    if ("L".equalsIgnoreCase(jk)) {
+        salampembuka = "Assalamualaikum, Bpk " + NoRM.getText() + "\n";
+    } else if ("P".equalsIgnoreCase(jk)) {
+        salampembuka = "Assalamualaikum, Ibu " + NoRM.getText() + "\n";
+    } else {
+        salampembuka = "Assalamualaikum, Bpk / Ibu " + NoRM.getText() + "\n";
+    }
+
+    // Membuat isi pesan ke dalam whatsapp
+    String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
+        "Kami dari " + akses.getnamars() + " ingin mengingatkan bahwa Anda memiliki jadwal kontrol/tindak lanjut pada: \n\n" +       
+        "0xF0 0x9F 0x93 0x85 Tanggal: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
+        "0xF0 0x9F 0x91 0xA8 Dokter : " + NmDokter.getText() + "\n" +
+        "0xF0 0x9F 0x8F 0xA5 Spesialis : " + NmPoli.getText() + "\n" +
+        "0xF0 0x9F 0x8F 0xA0 Alamat : " + akses.getalamatrs() + "\n\n" +
+        "0xF0 0x9F 0x93 0x84 Mohon untuk mengambil antrean pada aplikasi MJKN BPJS. Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
+        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
+
+    // Insert into wa_outbox
+    try {
+        String sql = "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, SUCCESS, RESPONSE, REQUEST, TYPE, FILE) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        PreparedStatement psWa = koneksi.prepareStatement(sql);
+        psWa.setLong(1, 0);
+        psWa.setString(2, nohppasien + "@c.us");
+        psWa.setString(3, pesan);
+        psWa.setString(4, waktukirim);
+        psWa.setString(5, "ANTRIAN");
+        psWa.setString(6, "KHANZA");
+        psWa.setString(7, "NODEJS");
+        psWa.setString(8, "");
+        psWa.setString(9, "");
+        psWa.setString(10, "");
+        psWa.setString(11, "TEXT");
+        psWa.setString(12, "");
+        psWa.executeUpdate();
+
+        System.out.println("Tanggal booking : " + formattedTanggal);
+        System.out.println("Pesan Whatsapp dalam antrian untuk dikirim ke pasien.");
+    } catch (Exception e) {
+        System.out.println("Gagal mengirim pesan WA ke Pasien: " + e);
+    }
+}
+    
+    private void kirimWhatsAppMessageReminderKontrol() {
+
+    // Fetch nomor hp pasien, gender, serta tanggal kontrol
+    String nohppasien = "";  //ubah format nomor hp pasien
+    String jk = "";  //ubah format jenis kelamin
+    String formattedTanggal = "";  //ubah format tanggal kontrol
+    String waktukirim = ""; // format waktu pengiriman WA (delayed message)
+    
+    try {
+        /////////format tanggal dan jam kontrol, agar tanggal terkirim adalah 24 jam sebelum tanggal kontrol                
+        String rawDate = TanggalKontrol.getSelectedItem().toString().trim();   // Convert to string properly      
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);        
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); 
+        
+        // Convert to LocalDateTime
+        LocalDateTime tanggalPeriksa = LocalDateTime.parse(rawDate, inputFormatter);
+        
+        // Subtract 24 hours
+        LocalDateTime waktuKirim = tanggalPeriksa.minusHours(24);
+        
+         // Format the new waktukirim
+        waktukirim = waktuKirim.format(outputFormatter);
+        
+        // Debugging output
+        System.out.println("Raw value of TanggalPeriksa: " + rawDate);
+        System.out.println("Waktu Kirim (24 hours before): " + waktukirim);
+        
+        //fecth data dari table pasien
+        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
+        ps.setString(1, NoRM.getText());
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            nohppasien = rs.getString("no_tlp");
+            jk = rs.getString("jk");
+
+            // Convert phone number from 08xxxxxx to 628xxxxxx
+            if (nohppasien.startsWith("0")) {
+                nohppasien = "62" + nohppasien.substring(1);
+            }
+        }
+
+        rs.close();
+        ps.close();
+    } catch (Exception e) {
+        System.out.println("Error fetching phone number: " + e);
+        System.out.println("Error formatting date: " + e);
+        System.out.println("Error formatting date: " + e);
+        formattedTanggal = TanggalKontrol.getSelectedItem().toString(); // Fallback to original format
+    }
+
+    // Set greeting based on gender
+    String salampembuka;
+    if ("L".equalsIgnoreCase(jk)) {
+        salampembuka = "Assalamualaikum, Bpk " + NoRM.getText() + "\n";
+    } else if ("P".equalsIgnoreCase(jk)) {
+        salampembuka = "Assalamualaikum, Ibu " + NoRM.getText() + "\n";
+    } else {
+        salampembuka = "Assalamualaikum, Bpk / Ibu " + NoRM.getText() + "\n";
+    }
+
+    // Membuat isi pesan ke dalam whatsapp
+    String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
+        "Kami dari " + akses.getnamars() + " izin reminder / mengingatkan bahwa Anda besok memiliki jadwal kontrol/tindak lanjut pada: \n\n" +        
+        "0xF0 0x9F 0x93 0x85 Tanggal: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
+        "0xF0 0x9F 0x91 0xA8 Dokter : " + NmDokter.getText() + "\n" +
+        "0xF0 0x9F 0x8F 0xA5 Spesialis : " + NmPoli.getText() + "\n" +
+        "0xF0 0x9F 0x8F 0xA0 Alamat : " + akses.getalamatrs() + "\n\n" +
+        "0xF0 0x9F 0x8F 0xA0 Lokasi map : https://maps.app.goo.gl/hYx9zEgC4fnN2xE2A \n\n" +            
+        "0xF0 0x9F 0x93 0x84 Mohon untuk mengecek kembali aplikasi MJKN BPJS dan memastikan antrean sudah diambil untuk tanggal " + formattedTanggal + ". /n" +
+        " Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
+        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
+
+    // Insert into wa_outbox
+    try {
+        String sql = "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, SUCCESS, RESPONSE, REQUEST, TYPE, FILE) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        PreparedStatement psWa = koneksi.prepareStatement(sql);
+        psWa.setLong(1, 0);
+        psWa.setString(2, nohppasien + "@c.us");
+        psWa.setString(3, pesan);
+        psWa.setString(4, waktukirim);
+        psWa.setString(5, "ANTRIAN");
+        psWa.setString(6, "KHANZA");
+        psWa.setString(7, "NODEJS");
+        psWa.setString(8, "");
+        psWa.setString(9, "");
+        psWa.setString(10, "");
+        psWa.setString(11, "TEXT");
+        psWa.setString(12, "");
+        psWa.executeUpdate();
+
+        
+        System.out.println("Waktu Kirim (24 hours before): " + waktukirim);
+        System.out.println("Pesan Whatsapp dalam antrian untuk dikirim ke pasien.");
+    } catch (Exception e) {
+        System.out.println("Gagal mengirim pesan WA ke Pasien: " + e);
+    }
+}
+///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA SETELAH SIMPAN SURAT KONTROL BY ICHSAN
+    
+    
+    
     private void BtnSimpanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnSimpanKeyPressed
         if(evt.getKeyCode()==KeyEvent.VK_SPACE){
             BtnSimpanActionPerformed(null);
