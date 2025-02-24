@@ -215,7 +215,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
             hariawal="",pilihancetak="",aktifkan_hapus_data_salah="",terbitsep="",namadokter="";
     private PreparedStatement ps,pssetjam,pscaripiutang,psdiagnosa,psibu,psanak,pstarif,psdpjp,pscariumur;
     private ResultSet rs,rs2,rssetjam;
-    private int i,row=0;
+    private int i,row=0, reply=0;  //tambahan by ichsan untuk layar tampilan yes / no
     private double lama=0,persenbayi=0,hargakamar=0;
     private String tgl,finger="",kodedokter="", gabungkan="",norawatgabung="",kamaryangdigabung="",dokterranap="",bangsal="",diagnosa_akhir="",namakamar="",umur="0",sttsumur="Th",order="order by bangsal.nm_bangsal,kamar_inap.tgl_masuk,kamar_inap.jam_masuk", waktukirim="";
 	//modifikasi ichsan, tambahkan private string [penambahan tgl,finger="", namadokter="" ] di line atas ini (line 219)
@@ -9145,11 +9145,15 @@ public class DlgKamarInap extends javax.swing.JDialog {
                         Valid.MyReport("rptSuratPengantarPulang.jasper",param,"::[ Surat Pengantar Pulang ]::"); 
                         this.setCursor(Cursor.getDefaultCursor());
                 }
-                ///////////////////Selesai cetak surat pengantar pulang, dilanjutkan dengan script untuk mengirim pesan WA ke nomor hp pasien - by ichsan
+                ///////////////////Selesai cetak surat pengantar pulang, dilanjutkan dengan script untuk konfirmasi mau mengirim pesan WA ke nomor hp pasien - by ichsan
                 //////////////// start - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
                         try {
-                             if(koneksiDB.WANOTIFPASIEN().equals("yes")){   
-                                 kirimWhatsAppMessage();  //kirim pesan WA by ichsan 
+                             if(koneksiDB.WANOTIFPASIEN().equals("yes")){
+                                reply = JOptionPane.showConfirmDialog(rootPane,"Mau skalian kirim WA notifikasi ke Pasien?","Konfirmasi",JOptionPane.YES_NO_OPTION);
+                                if (reply == JOptionPane.YES_OPTION) {                                    
+                                     kirimWhatsAppMessage();  //kirim pesan WA by ichsan 
+                                     JOptionPane.showMessageDialog(null, "OK, WA sudah terkirim ke Pasien. \n ");
+                                } 
                              }else{
                              }
                          } catch (Exception e) {                         
