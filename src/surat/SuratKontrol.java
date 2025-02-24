@@ -1096,7 +1096,32 @@ public class SuratKontrol extends javax.swing.JDialog {
         }
 }//GEN-LAST:event_BtnSimpanActionPerformed
 ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA SETELAH SIMPAN SURAT KONTROL BY ICHSAN
+    private String getGoogleMapUrl() { ///////// START - kode untuk mengambil URL google di table setting_url pada kolom google_map
+    String googleMapUrl = ""; 
+    try {
+        PreparedStatement psMap = koneksi.prepareStatement("SELECT google_map FROM setting_url LIMIT 1");
+        ResultSet rsMap = psMap.executeQuery(); 
+        if (rsMap.next()) { 
+            googleMapUrl = rsMap.getString("google_map"); 
+        }
+        rsMap.close(); 
+        psMap.close(); 
+    } catch (Exception e) { 
+        System.out.println("gagal mengambil Google Maps URL: " + e); 
+    }
+
+    // Fallback to a default URL if nothing is found
+    if (googleMapUrl == null || googleMapUrl.trim().isEmpty()) { 
+        googleMapUrl = "";  //kalau belum ada, diisi kosong saja
+    }
+
+    //System.out.println("Fetched Google Map URL: " + googleMapUrl);  //aktifkan line ini kalau mau debug print ke kotak hitam
+    return googleMapUrl; 
+}   //////////////////////////  END - kode untuk mengambil URL google di table setting_url pada kolom google_map    
+    
+    
     private void kirimWhatsAppMessage() {
+    String googleMapUrl = getGoogleMapUrl(); // Ambil url googlemap dari kode di atas
     // ambil detik sekarang, lalu tambahkan + 5 detik ke depan
     LocalDateTime waktuSekarang = LocalDateTime.now().plusSeconds(5);
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -1152,15 +1177,19 @@ public class SuratKontrol extends javax.swing.JDialog {
 
     // Membuat isi pesan ke dalam whatsapp
     String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
-        "Kami dari " + akses.getnamars() + " ingin mengingatkan bahwa Anda memiliki jadwal kontrol/tindak lanjut pada: \n\n" +
-        //"0xF0 0x9F 0x93 0x85 Tanggal: " + TanggalPeriksa.getSelectedItem() + "\n" +
-        "0xF0 0x9F 0x93 0x85 Tanggal: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
-        "0xF0 0x9F 0x91 0xA8 Dokter : " + NmDokter.getText() + "\n" +
-        "0xF0 0x9F 0x8F 0xA5 Spesialis : " + NmPoli.getText() + "\n" +
-        "0xF0 0x9F 0x8F 0xA0 Alamat : " + akses.getalamatrs() + "\n\n" +
-        "Apabila Anda menggunakan BPJS, silakan ambil antrian menggunakan aplikasi MJKN, atau hubungi kami di:"+ akses.getkontakrs()+ " atau email ke:" + akses.getemailrs() + "\n" +
-        "0xF0 0x9F 0x93 0x84 Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n\n" +
-        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
+        "Kami dari " + akses.getnamars() + " ingin mengingatkan bahwa Anda memiliki jadwal kontrol/tindak lanjut pada: \n\n" +        
+        "0xF0 0x9F 0x93 0x85 *Tanggal*: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
+        "0xF0 0x9F 0x91 0xA8 *Dokter* : " + NmDokter.getText() + "\n" +
+        "0xF0 0x9F 0x8F 0xA5 *Spesialis* : " + NmPoli.getText() + "\n" +
+        "0xF0 0x9F 0x8F 0xA0 *Alamat* : " + akses.getalamatrs() + "\n" +
+        "0xF0 0x9F 0x8C 0x8F Lokasi map :" + googleMapUrl + " \n\n" +            
+        "Apabila Anda menggunakan BPJS, silakan ambil antrian menggunakan aplikasi MJKN. \n "+
+        "Atau hubungi kami di: "+ akses.getkontakrs()+ "\n" +
+        "Email ke:" + akses.getemailrs() + "\n" +
+        "0xF0 0x9F 0x93 0x84 Apabila ada perubahan jadwal atau kendala, silakan balas pesan ini.\n\n" +
+        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F"+
+        "\n \n ---\n"+
+        "_Ini adalah pesan otomatis berdasarkan nomor pasien yang terdaftar di " + akses.getnamars() + ". Anda bisa membalas pesan ini untuk konfirmasi apabila terdapat kekeliruan._";
 
     // Insert into wa_outbox
     try {
@@ -1190,7 +1219,7 @@ public class SuratKontrol extends javax.swing.JDialog {
 }
     
     private void kirimWhatsAppMessageReminderKontrol() {
-
+    String googleMapUrl = getGoogleMapUrl(); //ambil isi url googlemap dari fungsi di atas
     // Fetch nomor hp pasien, gender, serta tanggal kontrol
     String nohppasien = "";  //ubah format nomor hp pasien
     String jk = "";  //ubah format jenis kelamin
@@ -1253,11 +1282,11 @@ public class SuratKontrol extends javax.swing.JDialog {
     // Membuat isi pesan ke dalam whatsapp
     String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
         "Kami dari " + akses.getnamars() + " izin reminder / mengingatkan bahwa Anda besok memiliki jadwal kontrol/tindak lanjut pada: \n\n" +        
-        "0xF0 0x9F 0x93 0x85 Tanggal: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
-        "0xF0 0x9F 0x91 0xA8 Dokter : " + NmDokter.getText() + "\n" +
-        "0xF0 0x9F 0x8F 0xA5 Spesialis : " + NmPoli.getText() + "\n" +
-        "0xF0 0x9F 0x8F 0xA0 Alamat : " + akses.getalamatrs() + "\n\n" +
-        "0xF0 0x9F 0x8F 0xA0 Lokasi map : https://maps.app.goo.gl/hYx9zEgC4fnN2xE2A \n\n" +            
+        "0xF0 0x9F 0x93 0x85 *Tanggal* : " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
+        "0xF0 0x9F 0x91 0xA8 *Dokter* : " + NmDokter.getText() + "\n" +
+        "0xF0 0x9F 0x8F 0xA5 *Spesialis* : " + NmPoli.getText() + "\n" +
+        "0xF0 0x9F 0x8F 0xA0 *Alamat* : " + akses.getalamatrs() + "\n" +
+        "0xF0 0x9F 0x8F 0xA0 *Lokasi map* :" + googleMapUrl + " \n\n" +            
         "0xF0 0x9F 0x93 0x84 Jangan lupa untuk membawa surat kontrol yang telah diisi oleh dokter. Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
         "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
 

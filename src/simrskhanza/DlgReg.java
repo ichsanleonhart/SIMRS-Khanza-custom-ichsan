@@ -7204,7 +7204,32 @@ public final class DlgReg extends javax.swing.JDialog {
         }
 }//GEN-LAST:event_BtnSimpanActionPerformed
 //////////////////////////////////////////////////// script untuk kirim WA by ichsan
+    private String getGoogleMapUrl() { ///////// START - kode untuk mengambil URL google di table setting_url pada kolom google_map
+    String googleMapUrl = ""; 
+    try {
+        PreparedStatement psMap = koneksi.prepareStatement("SELECT google_map FROM setting_url LIMIT 1");
+        ResultSet rsMap = psMap.executeQuery(); 
+        if (rsMap.next()) { 
+            googleMapUrl = rsMap.getString("google_map"); 
+        }
+        rsMap.close(); 
+        psMap.close(); 
+    } catch (Exception e) { 
+        System.out.println("gagal mengambil Google Maps URL: " + e); 
+    }
+
+    // Fallback to a default URL if nothing is found
+    if (googleMapUrl == null || googleMapUrl.trim().isEmpty()) { 
+        googleMapUrl = "";  //kalau belum ada, diisi kosong saja
+    }
+
+    //System.out.println("Fetched Google Map URL: " + googleMapUrl);  //aktifkan line ini kalau mau debug print ke kotak hitam
+    return googleMapUrl; 
+}   //////////////////////////  END - kode untuk mengambil URL google di table setting_url pada kolom google_map
+    
+    
     private void kirimWhatsAppMessage() {
+    String googleMapUrl = getGoogleMapUrl(); // Ambil url googlemap dari kode di atas
     // ambil detik sekarang, lalu tambahkan + 1 detik ke depan
     LocalDateTime waktuSekarang = LocalDateTime.now().plusSeconds(1);
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -7259,16 +7284,18 @@ public final class DlgReg extends javax.swing.JDialog {
 
     // Membuat isi pesan ke dalam whatsapp
     String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
-        "Terima kasih sudah mendaftar di " + akses.getnamars() + ". Berikut adalah informasi antrian Anda:\n\n" +
-        //"0xF0 0x9F 0x93 0x85 Tanggal: " + TanggalPeriksa.getSelectedItem() + "\n" +
-        "*Nomor Antrian Poli : " + TNoReg.getText() + "*\n" +
-        "Nomor Kunjungan : " + TNoRw.getText() + "\n" +
-        "Nomor Rekam Medis : " + TNoRM.getText() + "\n" +
+        "Terima kasih sudah mendaftar di " + akses.getnamars() + ". Berikut adalah informasi antrian Anda:\n\n" +        
+        "0xF0 0x9F 0x94 0x84 *Nomor Antrian Poli : " + TNoReg.getText() + "*\n" +
+        "0xF0 0x9F 0x93 0x91 Nomor Kunjungan : " + TNoRw.getText() + "\n" +
+        "0xF0 0x9F 0x93 0x9D Nomor Rekam Medis : " + TNoRM.getText() + "\n" +
         "0xF0 0x9F 0x8F 0xA5 Spesialis : " + TPoli.getText() + "\n" +
         "0xF0 0x9F 0x91 0xA8 Dokter : " + TDokter.getText() + "\n" +
         "0xF0 0x9F 0x93 0x85 Tanggal: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia        
+        "0xF0 0x9F 0x92 0xB3 Penjamin : " + nmpnj.getText() + "\n" +
         "Mohon menuju loket perawat / menunggu dipanggil oleh petugas pelayanan untuk dilakukan pemeriksaan tensi.\n" +
-        "Terima kasih atas perhatiannya. \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
+        "Terima kasih atas perhatiannya. \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F"+
+        "\n \n ---\n"+
+        "_Ini adalah pesan otomatis berdasarkan nomor pasien yang terdaftar di " + akses.getnamars() + ". Anda bisa membalas pesan ini untuk konfirmasi apabila terdapat kekeliruan._";
 
     // Insert into wa_outbox
     try {
