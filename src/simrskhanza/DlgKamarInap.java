@@ -190,6 +190,7 @@ import surat.SuratPersetujuanUmum;
 import surat.SuratPulangAtasPermintaanSendiri;
 import surat.SuratSakit;
 import surat.SuratSakitPihak2;
+import java.time.LocalDateTime; //tambahan by ichsan
 
 /**
  *
@@ -216,7 +217,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
     private ResultSet rs,rs2,rssetjam;
     private int i,row=0;
     private double lama=0,persenbayi=0,hargakamar=0;
-    private String tgl,finger="",kodedokter="", gabungkan="",norawatgabung="",kamaryangdigabung="",dokterranap="",bangsal="",diagnosa_akhir="",namakamar="",umur="0",sttsumur="Th",order="order by bangsal.nm_bangsal,kamar_inap.tgl_masuk,kamar_inap.jam_masuk";
+    private String tgl,finger="",kodedokter="", gabungkan="",norawatgabung="",kamaryangdigabung="",dokterranap="",bangsal="",diagnosa_akhir="",namakamar="",umur="0",sttsumur="Th",order="order by bangsal.nm_bangsal,kamar_inap.tgl_masuk,kamar_inap.jam_masuk", waktukirim="";
 	//modifikasi ichsan, tambahkan private string [penambahan tgl,finger="", namadokter="" ] di line atas ini (line 219)
     /** Creates new form DlgKamarInap
      * @param parent
@@ -9144,11 +9145,97 @@ public class DlgKamarInap extends javax.swing.JDialog {
                         Valid.MyReport("rptSuratPengantarPulang.jasper",param,"::[ Surat Pengantar Pulang ]::"); 
                         this.setCursor(Cursor.getDefaultCursor());
                 }
+                ///////////////////Selesai cetak surat pengantar pulang, dilanjutkan dengan script untuk mengirim pesan WA ke nomor hp pasien - by ichsan
+                //////////////// start - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+                        try {
+                             if(koneksiDB.WANOTIFPASIEN().equals("yes")){   
+                                 kirimWhatsAppMessage();  //kirim pesan WA by ichsan 
+                             }else{
+                             }
+                         } catch (Exception e) {                         
+                         }
+                ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan        
             }
         } 
                 
     }//GEN-LAST:event_MnPengantarPulangActionPerformed
+    
+    //////////////////////////////////////////////////// START - script untuk kirim WA by ichsan
+    
+    private void kirimWhatsAppMessage() {        
+    String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
+    // Fetch nomor hp pasien, gender, serta tanggal kontrol
+    String nohppasien = "";  //ubah format nomor hp pasien
+    String jk = "";  //ubah format jenis kelamin    
+    
+    try {
+        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
+        ps.setString(1, TNoRMCari.getText());
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            nohppasien = rs.getString("no_tlp");
+            jk = rs.getString("jk");
+
+            // Convert phone number from 08xxxxxx to 628xxxxxx
+            if (nohppasien.startsWith("0")) {
+                nohppasien = "62" + nohppasien.substring(1);
+            }
+        }
+
+        rs.close();
+        ps.close();
+    } catch (Exception e) {
+        System.out.println("Error fetching phone number: " + e);
+        System.out.println("Error formatting date: " + e);               
+    }
+
+    // Set greeting based on gender
+    String salampembuka;
+    if ("L".equalsIgnoreCase(jk)) {
+        salampembuka = "Assalamualaikum, Bpk " + TPasien.getText() + "\n";
+    } else if ("P".equalsIgnoreCase(jk)) {
+        salampembuka = "Assalamualaikum, Ibu " + TPasien.getText() + "\n";
+    } else {
+        salampembuka = "Assalamualaikum, Bpk / Ibu " + TPasien.getText() + "\n";
+    }
+
+    // Membuat isi pesan ke dalam whatsapp
+    String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
+        "Izin menginformasikan terkait perawatan Anda di " + akses.getnamars() + " dengan nomor rawat " + TNoRwCari.getText() + 
+        " dinyatakan telah selesai proses administrasinya dan sudah diperbolehkan untuk pulang.\n\n" +
+        "Mohon bersabar menunggu konfirmasi dari petugas rawat inap untuk edukasi perihal obat pulang dan surat kontrol pada kunjungan selanjutnya. \n \n" +                
+        "Terima kasih atas perhatiannya. \n Semoga lekas sembuh. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
+
+    // Insert into wa_outbox
+    try {
+        String sql = "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, SUCCESS, RESPONSE, REQUEST, TYPE, FILE) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        PreparedStatement psWa = koneksi.prepareStatement(sql);
+        psWa.setLong(1, 0);
+        psWa.setString(2, nohppasien + "@c.us");
+        psWa.setString(3, pesan);
+        psWa.setString(4, waktukirim);
+        psWa.setString(5, "ANTRIAN");
+        psWa.setString(6, "KHANZA");
+        psWa.setString(7, "NODEJS");
+        psWa.setString(8, "");
+        psWa.setString(9, "");
+        psWa.setString(10, "");
+        psWa.setString(11, "TEXT");
+        psWa.setString(12, "");
+        psWa.executeUpdate();
+
+        //System.out.println("Tanggal booking : " + formattedTanggal);
+        //System.out.println("Pesan Whatsapp dalam antrian untuk dikirim ke pasien.");
+    } catch (Exception e) {
+        System.out.println("Gagal mengirim pesan WA ke Pasien: " + e);
+    }
+}
+    //////////////////////////////////////////////////// END - script untuk kirim WA by ichsan
+    
     private void MnGabungkanRanapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MnGabungkanRanapActionPerformed
         if(tabMode.getRowCount()==0){
             JOptionPane.showMessageDialog(null,"Maaf, data kamar inap pasien sudah habis...!!!!");
