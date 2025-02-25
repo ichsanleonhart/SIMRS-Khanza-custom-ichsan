@@ -395,46 +395,54 @@
                 </td>
             </tr>
             <?php 
-                $prosedur_non_bedah=getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Ralan Dokter Paramedis' and billing.nm_perawatan not like '%terapi%'")+
-                                    getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Ranap Dokter Paramedis' and billing.nm_perawatan not like '%terapi%'");
+                $prosedur_non_bedah=getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(PNB)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )");
                 if($prosedur_non_bedah==""){
                     $prosedur_non_bedah="0";
                 }
-                $prosedur_bedah=getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Operasi'");
-                if($prosedur_bedah==""){
+                $prosedur_bedah=(getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where no_rawat='".$norawat."' and status='Operasi'")
+								+getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(PSB)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )")
+					);
+				if($prosedur_bedah==""){
                     $prosedur_bedah="0";
                 }
-                $konsultasi=(getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Ranap Dokter'")+
-                             getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Ralan Dokter'"));
+                $konsultasi=getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(KSL)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )");
                 if($konsultasi==""){
                     $konsultasi="0";
                 }
-                $tenaga_ahli=0;
+                $tenaga_ahli=getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(TNA)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )");
                 if($tenaga_ahli==""){
                     $tenaga_ahli="0";
                 }
-                $keperawatan=(getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Ranap Paramedis'")+
-                              getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Ralan Paramedis'"));
+                $keperawatan=getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(TDP)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )");
                 if($keperawatan==""){
                     $keperawatan="0";
                 }
-                $radiologi=getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Radiologi'");
+                $radiologi=(getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where no_rawat='".$norawat."' and status='Radiologi'")
+							+getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(RAD)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )")
+							+getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(FIS)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )")
+								);
                 if($radiologi==""){
                     $radiologi="0";
                 }
-                $laboratorium=getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Laborat'");
-                if($laboratorium==""){
+                $laboratorium=(getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where no_rawat='".$norawat."' and status='Laborat'")
+								+getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(LAB)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )")
+								);
+				if($laboratorium==""){
                     $laboratorium="0";
                 }
-                $kamar=(getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Kamar'")+getOne("select biaya_reg from reg_periksa where no_rawat='".$norawat."'"));
+                $kamar=(getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where no_rawat='".$norawat."' and status='Kamar'")
+					    +getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where no_rawat='".$norawat."' and status='Service'")
+					    +getOne("select biaya_reg from reg_periksa where no_rawat='".$norawat."'")
+					    +getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(HRP)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )")
+					   );
                 if($kamar==""){
                     $kamar="0";
                 }
-                $obat_kronis=getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.nm_perawatan like '%kronis%' and billing.no_rawat='".$norawat."' and billing.status='Obat'");
-                $obat_kemoterapi=getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.nm_perawatan like '%kemo%' and billing.no_rawat='".$norawat."' and billing.status='Obat'");
-                $obat=(getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Obat'")+
-                       getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Retur Obat'")+
-                       getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Resep Pulang'")-$obat_kronis-$obat_kemoterapi);
+                $obat_kronis=getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%kronis%' and no_rawat='".$norawat."' and status='Obat'");
+                $obat_kemoterapi=getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%kemo%' and no_rawat='".$norawat."' and status='Obat'");
+                $obat=(getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where no_rawat='".$norawat."' and nm_perawatan NOT LIKE '%(BMHP)%' and status='Obat'")+
+                       getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where no_rawat='".$norawat."' and status='Retur Obat'")+
+                       getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where no_rawat='".$norawat."' and status='Resep Pulang'")-$obat_kronis-$obat_kemoterapi);
                 if($obat==""){
                     $obat="0";
                 }
@@ -444,21 +452,43 @@
                 if($obat_kronis==""){
                     $obat_kronis="0";
                 }
-                $bmhp=getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Tambahan'");
+                $bmhp=(getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where no_rawat='".$norawat."' and status='Tambahan'")+
+					   getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(BMHP)%' and no_rawat='".$norawat."' and status='Obat'")
+					   );				
                 if($bmhp==""){
                     $bmhp="0";
                 }
-                $sewa_alat=(getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Harian'")+
-                            getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Service'"));
+                $sewa_alat=getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(ALM)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Harian' or  status='Service' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )");				
                 if($sewa_alat==""){
                     $sewa_alat="0";
                 }
-                $rehabilitasi=getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Ralan Dokter Paramedis' and billing.nm_perawatan like '%terapi%'")+
-                              getOne("select if(sum(billing.totalbiaya)='','0',sum(billing.totalbiaya)) from billing where billing.no_rawat='".$norawat."' and billing.status='Ranap Dokter Paramedis' and billing.nm_perawatan like '%terapi%'");
+                ////TAMBAHAN DARAH BY ICHSAN
+				$bpdarah=getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(DRH)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )");
+                if($bpdarah==""){
+                    $bpdarah="0";
+                }
+				////TAMBAHAN RAWAT INTENSIF BY ICHSAN
+				$rawatintensif=getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(HRI)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )");
+                if($rawatintensif==""){
+                    $rawatintensif="0";
+                }
+				////TAMBAHAN BIAYA ALKES BY ICHSAN
+				$biaya_alkes=getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(ALK)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )");
+                if($biaya_alkes==""){
+                    $biaya_alkes="0";
+                }
+				////TAMBAHAN BIAYA PENUNJANG BY ICHSAN
+				$biaya_penunjang=getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(PNG)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )");
+                if($biaya_penunjang==""){
+                    $biaya_penunjang="0";
+                }
+				////TAMBAHAN REHABILITASI BY ICHSAN
+                $rehabilitasi=getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(FIS)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )");
                 if($rehabilitasi==""){
                     $rehabilitasi="0";
                 }
             ?>
+			
             <tr class="head">
                 <td width="41%" >Biaya Prosedur Non Bedah</td><td width="">:</td>
                 <td width="57%">
@@ -492,7 +522,7 @@
             <tr class="head">
                 <td width="41%" >Biaya Penunjang</td><td width="">:</td>
                 <td width="57%">
-                    <input name="penunjang" class="text" type="text" class="inputbox" value="0" size="20" maxlength="15" pattern="[0-9]{1,15}" title=" 0-9 (Maksimal 15 karakter)" autocomplete="off">
+                    <input name="penunjang" class="text" type="text" class="inputbox" value="<?php echo $biaya_penunjang; ?>" size="20" maxlength="15" pattern="[0-9]{1,15}" title=" 0-9 (Maksimal 15 karakter)" autocomplete="off">
                 </td>
             </tr>
             <tr class="head">
@@ -510,13 +540,13 @@
             <tr class="head">
                 <td width="41%" >Biaya Pelayanan Darah</td><td width="">:</td>
                 <td width="57%">
-                    <input name="pelayanan_darah" class="text" type="text" class="inputbox" value="0" size="20" maxlength="15" pattern="[0-9]{1,15}" title=" 0-9 (Maksimal 15 karakter)" autocomplete="off">
+                    <input name="pelayanan_darah" class="text" type="text" class="inputbox" value="<?php echo $bpdarah;?>" size="20" maxlength="15" pattern="[0-9]{1,15}" title=" 0-9 (Maksimal 15 karakter)" autocomplete="off">
                 </td>
             </tr>
             <tr class="head">
                 <td width="41%" >Biaya Rehabilitasi</td><td width="">:</td>
                 <td width="57%">
-                    <input name="rehabilitasi" class="text" type="text" class="inputbox" value="0" size="20" maxlength="15" pattern="[0-9]{1,15}" title=" 0-9 (Maksimal 15 karakter)" autocomplete="off">
+                    <input name="rehabilitasi" class="text" type="text" class="inputbox" value="<?php echo $rehabilitasi;?>" size="20" maxlength="15" pattern="[0-9]{1,15}" title=" 0-9 (Maksimal 15 karakter)" autocomplete="off">
                 </td>
             </tr>
             <tr class="head">
@@ -528,7 +558,7 @@
             <tr class="head">
                 <td width="41%" >Biaya Rawat Intensif</td><td width="">:</td>
                 <td width="57%">
-                    <input name="rawat_intensif" class="text" type="text" class="inputbox" value="0" size="20" maxlength="15" pattern="[0-9]{1,15}" title=" 0-9 (Maksimal 15 karakter)" autocomplete="off">
+                    <input name="rawat_intensif" class="text" type="text" class="inputbox" value="<?php echo $rawatintensif;?>" size="20" maxlength="15" pattern="[0-9]{1,15}" title=" 0-9 (Maksimal 15 karakter)" autocomplete="off">
                 </td>
             </tr>
             <tr class="head">
@@ -552,7 +582,7 @@
             <tr class="head">
                 <td width="41%" >Biaya Alkes</td><td width="">:</td>
                 <td width="57%">
-                    <input name="alkes" class="text" type="text" class="inputbox" value="0" size="20" maxlength="15" pattern="[0-9]{1,15}" title=" 0-9 (Maksimal 15 karakter)" autocomplete="off">
+                    <input name="alkes" class="text" type="text" class="inputbox" value="<?php echo $biaya_alkes;?>" size="20" maxlength="15" pattern="[0-9]{1,15}" title=" 0-9 (Maksimal 15 karakter)" autocomplete="off">
                 </td>
             </tr>
             <tr class="head">
