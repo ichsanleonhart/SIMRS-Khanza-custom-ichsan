@@ -3537,7 +3537,10 @@ private void MnPeriksaLabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
                      "Mohon klik link: " + questionaire_ralanUrl + "\n" +
                       "_(Jika Link tidak dapat di-klik, mohon save nomor kami terlebih dahulu.)_ \n\n";
                                               }
-            pesan += "Terima kasih atas waktu yang diberikan, \n semoga Anda dan keluarga selalu diberikan kesehatan \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F"+
+            pesan += "Terima kasih atas waktu yang diberikan, \n semoga Anda dan keluarga selalu diberikan kesehatan \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F \n \n" +
+                    "Note : \n"+
+                    "Untuk pendaftaran Booking saat kontrol pasien BPJS Kesehatan hanya bisa melalui Aplikasi MJKN. \n Jika belum memiliki aplikasinya, silakan mendownload terlebih dahulu dan melakukan booking pendaftaran di Aplikasi tersebut."+
+                    "Link Aplikasi MJKN : https://play.google.com/store/apps/details?id=app.bpjs.mobile"+
                      "\n \n *Pendaftaran " + akses.getnamars() + "*\n";
 
     // Insert into wa_outbox
