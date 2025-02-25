@@ -7229,11 +7229,8 @@ public final class DlgReg extends javax.swing.JDialog {
     
     
     private void kirimWhatsAppMessage() {
-    String googleMapUrl = getGoogleMapUrl(); // Ambil url googlemap dari kode di atas
-    // ambil detik sekarang, lalu tambahkan + 1 detik ke depan
-    LocalDateTime waktuSekarang = LocalDateTime.now().plusSeconds(1);
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    String waktukirim = waktuSekarang.format(formatter);    
+    String googleMapUrl = getGoogleMapUrl(); // Ambil url googlemap dari kode di atas    
+    String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
     // Fetch nomor hp pasien, gender, serta tanggal kontrol
     String nohppasien = "";  //ubah format nomor hp pasien
@@ -7244,13 +7241,12 @@ public final class DlgReg extends javax.swing.JDialog {
         /////////format tanggal dan jam kontrol        
         //System.out.println("Raw value of TanggalPeriksa: " + TanggalPeriksa.getSelectedItem());        // aktifkan baris ini untuk Print debug ke kotak hitam
         String rawDate = DTPReg.getSelectedItem().toString().trim(); // Convert to string properly      
-        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
+        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);
         SimpleDateFormat outputFormat = new SimpleDateFormat("dd MMMM yyyy", new Locale("id", "ID"));   //penyesuaian menjadi format yang enak dibaca           
         Date date = inputFormat.parse(rawDate);  // Parse the input date string into a Date object        
         formattedTanggal = outputFormat.format(date); // Format the date into the desired Indonesian format                 
-        /////////format tanggal dan jam kontrol        
-        
-        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
+        /////////format tanggal dan jam kontrol         
+        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");  //ambil nomor hp pasien
         ps.setString(1, TNoRM.getText());
         ResultSet rs = ps.executeQuery();
 
@@ -7272,15 +7268,30 @@ public final class DlgReg extends javax.swing.JDialog {
         formattedTanggal = DTPReg.getSelectedItem().toString(); // Fallback to original format
     }
 
-    // Set greeting based on gender
+    // ========== 🆕 Tambahkan greeting berdasarkan waktu saat ini ==========
+    int currentHour = java.time.LocalTime.now().getHour(); // 🆕 Ambil jam saat ini
+
+    String greeting; // 🆕 Variabel untuk menyimpan greeting
+    if (currentHour >= 4 && currentHour <= 10) {
+        greeting = "Selamat Pagi"; // 🆕 Pagi (04.00 - 10.00)
+    } else if (currentHour >= 10 && currentHour <= 15) {
+        greeting = "Selamat Siang"; // 🆕 Siang (10.01 - 15.00)
+    } else if (currentHour >= 15 && currentHour <= 18) {
+        greeting = "Selamat Sore"; // 🆕 Sore (15.01 - 18.00)
+    } else {
+        greeting = "Selamat Malam"; // 🆕 Malam (18.01 - 03.59)
+    }
+    
+    // ========== 🆕 Gunakan greeting ini ke dalam salam pembuka ==========
     String salampembuka;
     if ("L".equalsIgnoreCase(jk)) {
-        salampembuka = "Assalamualaikum, Bpk " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Bpk " + TPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Bpk
     } else if ("P".equalsIgnoreCase(jk)) {
-        salampembuka = "Assalamualaikum, Ibu " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Ibu " + TPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Ibu
     } else {
-        salampembuka = "Assalamualaikum, Bpk / Ibu " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Bpk / Ibu " + TPasien.getText() + "\n"; // 🆕 Jika gender tidak diketahui
     }
+
 
     // Membuat isi pesan ke dalam whatsapp
     String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
@@ -7324,11 +7335,8 @@ public final class DlgReg extends javax.swing.JDialog {
     }
 }
     
-    private void kirimWhatsAppMessageMJKN() {
-    // ambil detik sekarang, lalu tambahkan + 1 detik ke depan
-    LocalDateTime waktuSekarang = LocalDateTime.now().plusSeconds(1);
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    String waktukirim = waktuSekarang.format(formatter);    
+    private void kirimWhatsAppMessageMJKN() {    
+    String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
     // Fetch nomor hp pasien, gender, serta tanggal kontrol
     String nohppasien = "";  //ubah format nomor hp pasien
@@ -7336,15 +7344,6 @@ public final class DlgReg extends javax.swing.JDialog {
     String formattedTanggal = "";  //ubah format tanggal kontrol
     
     try {
-        /////////format tanggal dan jam kontrol        
-        //System.out.println("Raw value of TanggalPeriksa: " + TanggalPeriksa.getSelectedItem());        // aktifkan baris ini untuk Print debug ke kotak hitam
-        String rawDate = DTPReg.getSelectedItem().toString().trim(); // Convert to string properly      
-        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
-        SimpleDateFormat outputFormat = new SimpleDateFormat("dd MMMM yyyy", new Locale("id", "ID"));   //penyesuaian menjadi format yang enak dibaca           
-        Date date = inputFormat.parse(rawDate);  // Parse the input date string into a Date object        
-        formattedTanggal = outputFormat.format(date); // Format the date into the desired Indonesian format                 
-        /////////format tanggal dan jam kontrol        
-        
         PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
         ps.setString(1, TNoRM.getText());
         ResultSet rs = ps.executeQuery();
@@ -7367,14 +7366,28 @@ public final class DlgReg extends javax.swing.JDialog {
         formattedTanggal = DTPReg.getSelectedItem().toString(); // Fallback to original format
     }
 
-    // Set greeting based on gender
+     // ========== 🆕 Tambahkan greeting berdasarkan waktu saat ini ==========
+    int currentHour = java.time.LocalTime.now().getHour(); // 🆕 Ambil jam saat ini
+
+    String greeting; // 🆕 Variabel untuk menyimpan greeting
+    if (currentHour >= 4 && currentHour <= 10) {
+        greeting = "Selamat Pagi"; // 🆕 Pagi (04.00 - 10.00)
+    } else if (currentHour >= 10 && currentHour <= 15) {
+        greeting = "Selamat Siang"; // 🆕 Siang (10.01 - 15.00)
+    } else if (currentHour >= 15 && currentHour <= 18) {
+        greeting = "Selamat Sore"; // 🆕 Sore (15.01 - 18.00)
+    } else {
+        greeting = "Selamat Malam"; // 🆕 Malam (18.01 - 03.59)
+    }
+    
+    // ========== 🆕 Gunakan greeting ini ke dalam salam pembuka ==========
     String salampembuka;
     if ("L".equalsIgnoreCase(jk)) {
-        salampembuka = "Assalamualaikum, Bpk " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Bpk " + TPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Bpk
     } else if ("P".equalsIgnoreCase(jk)) {
-        salampembuka = "Assalamualaikum, Ibu " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Ibu " + TPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Ibu
     } else {
-        salampembuka = "Assalamualaikum, Bpk / Ibu " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Bpk / Ibu " + TPasien.getText() + "\n"; // 🆕 Jika gender tidak diketahui
     }
 
     // Membuat isi pesan ke dalam whatsapp
@@ -7410,9 +7423,6 @@ public final class DlgReg extends javax.swing.JDialog {
         psWa.setString(11, "TEXT");
         psWa.setString(12, "");
         psWa.executeUpdate();
-
-        //System.out.println("Tanggal booking : " + formattedTanggal);
-        //System.out.println("Pesan Whatsapp dalam antrian untuk dikirim ke pasien.");
     } catch (Exception e) {
         System.out.println("Gagal mengirim pesan WA ke Pasien: " + e);
     }

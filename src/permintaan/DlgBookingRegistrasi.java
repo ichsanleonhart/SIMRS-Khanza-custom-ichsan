@@ -1391,10 +1391,8 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     }//GEN-LAST:event_BtnEditActionPerformed
    
     ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA  BY ICHSAN
-    private void kirimWhatsAppMessageRegistBooking() {
-    LocalDateTime waktuSekarang = LocalDateTime.now().plusSeconds(5); // ambil detik sekarang, lalu tambahkan + 5 detik ke depan
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");  //penyesuaian format waktu untuk dikirim ke table wa_outbox
-    String waktukirim = waktuSekarang.format(formatter);    //isi value untuk dikirim ke jadwal pengiriman di wa gateway
+    private void kirimWhatsAppMessageRegistBooking() {    
+    String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));    //isi value untuk dikirim ke jadwal pengiriman di wa gateway
 
     // Fetch nomor hp pasien, gender, serta tanggal kontrol
     String nohppasien = "";  //ubah format nomor hp pasien
@@ -1402,14 +1400,14 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     String formattedTanggal = "";  //ubah format tanggal kontrol
     
     try {
-        ///////// start - format tanggal dan jam kontrol        
+         /////////format tanggal dan jam kontrol        
         //System.out.println("Raw value of TanggalPeriksa: " + TanggalPeriksa.getSelectedItem());        // aktifkan baris ini untuk Print debug ke kotak hitam
-        String rawDate = TanggalPeriksa.getSelectedItem().toString().trim(); // Step 1, ambil tanggal dan jam        
-        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH); //step 2, sesuaikan format sesuai isi kolom
-        SimpleDateFormat outputFormat = new SimpleDateFormat("dd MMMM yyyy 'jam' HH:mm", new Locale("id", "ID"));   //step 3, penyesuaian menjadi format yang enak dibaca, untuk nanti di-insert ke dalam isi pesan WA           
-        Date date = inputFormat.parse(rawDate);  // Parse string dari tanggal yang diinput menjadi objek tanggal
-        formattedTanggal = outputFormat.format(date); // memformat tanggal menjadi format indonesia 
-        ///////// end - format tanggal dan jam kontrol ke dalam isi pesan WA        
+        String rawDate = TanggalPeriksa.getSelectedItem().toString().trim(); // Convert to string properly      
+        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);
+        SimpleDateFormat outputFormat = new SimpleDateFormat("dd MMMM yyyy 'jam' HH:mm", new Locale("id", "ID"));   //penyesuaian menjadi format yang enak dibaca           
+        Date date = inputFormat.parse(rawDate);  // Parse the input date string into a Date object        
+        formattedTanggal = outputFormat.format(date); // Format the date into the desired Indonesian format                 
+        /////////format tanggal dan jam kontrol 
         
         PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
         ps.setString(1, TNoRM.getText());
@@ -1428,21 +1426,32 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         rs.close();
         ps.close();
     } catch (Exception e) {
-        System.out.println("Error fetching phone number: " + e);
-        System.out.println("Error formatting date: " + e);
-        System.out.println("Error formatting date: " + e);
-        formattedTanggal = TanggalPeriksa.getSelectedItem().toString(); // Fallback to original format
+        System.out.println("Error fetching phone number: " + e);                
     }
 
 
-    // Set greeting based on gender
+    // ========== 🆕 Tambahkan greeting berdasarkan waktu saat ini ==========
+    int currentHour = java.time.LocalTime.now().getHour(); // 🆕 Ambil jam saat ini
+
+    String greeting; // 🆕 Variabel untuk menyimpan greeting
+    if (currentHour >= 4 && currentHour <= 10) {
+        greeting = "Selamat Pagi"; // 🆕 Pagi (04.00 - 10.00)
+    } else if (currentHour >= 10 && currentHour <= 15) {
+        greeting = "Selamat Siang"; // 🆕 Siang (10.01 - 15.00)
+    } else if (currentHour >= 15 && currentHour <= 18) {
+        greeting = "Selamat Sore"; // 🆕 Sore (15.01 - 18.00)
+    } else {
+        greeting = "Selamat Malam"; // 🆕 Malam (18.01 - 03.59)
+    }
+
+    // ========== 🆕 Gunakan greeting ini ke dalam salam pembuka ==========
     String salampembuka;
     if ("L".equalsIgnoreCase(jk)) {
-        salampembuka = "Yth, Bpk " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Bpk " + TPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Bpk
     } else if ("P".equalsIgnoreCase(jk)) {
-        salampembuka = "Yth, Ibu " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Ibu " + TPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Ibu
     } else {
-        salampembuka = "Yth, Bpk / Ibu " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Bpk / Ibu " + TPasien.getText() + "\n"; // 🆕 Jika gender tidak diketahui
     }
 
     // Membuat isi pesan ke dalam whatsapp
@@ -1732,8 +1741,34 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         // TODO add your handling code here:
     }//GEN-LAST:event_NoRegActionPerformed
 
+    ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA SETELAH SIMPAN SURAT KONTROL BY ICHSAN
+    private String getGoogleMapUrl() { ///////// START - kode untuk mengambil URL google di table setting_url pada kolom google_map
+    String googleMapUrl = ""; 
+    try {
+        PreparedStatement psMap = koneksi.prepareStatement("SELECT google_map FROM setting_url LIMIT 1");
+        ResultSet rsMap = psMap.executeQuery(); 
+        if (rsMap.next()) { 
+            googleMapUrl = rsMap.getString("google_map"); 
+        }
+        rsMap.close(); 
+        psMap.close(); 
+    } catch (Exception e) { 
+        System.out.println("gagal mengambil Google Maps URL: " + e); 
+    }
+
+    // Fallback to a default URL if nothing is found
+    if (googleMapUrl == null || googleMapUrl.trim().isEmpty()) { 
+        googleMapUrl = "";  //kalau belum ada, diisi kosong saja
+    }
+
+    //System.out.println("Fetched Google Map URL: " + googleMapUrl);  //aktifkan line ini kalau mau debug print ke kotak hitam
+    return googleMapUrl; 
+}   //////////////////////////  END - kode untuk mengambil URL google di table setting_url pada kolom google_map    
+    
+    
     ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA  BY ICHSAN
     private void kirimWhatsAppMessage() {
+    String googleMapUrl = getGoogleMapUrl(); // Ambil url googlemap dari kode di atas        
     LocalDateTime waktuSekarang = LocalDateTime.now().plusSeconds(5); // ambil detik sekarang, lalu tambahkan + 5 detik ke depan
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");  //penyesuaian format waktu untuk dikirim ke table wa_outbox
     String waktukirim = waktuSekarang.format(formatter);    //isi value untuk dikirim ke jadwal pengiriman di wa gateway
@@ -1776,14 +1811,28 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         formattedTanggal = TanggalPeriksa.getSelectedItem().toString(); // Fallback to original format
     }
 
-    // Set greeting based on gender
+     // ========== 🆕 Tambahkan greeting berdasarkan waktu saat ini ==========
+    int currentHour = java.time.LocalTime.now().getHour(); // 🆕 Ambil jam saat ini
+
+    String greeting; // 🆕 Variabel untuk menyimpan greeting
+    if (currentHour >= 4 && currentHour <= 10) {
+        greeting = "Selamat Pagi"; // 🆕 Pagi (04.00 - 10.00)
+    } else if (currentHour >= 10 && currentHour <= 15) {
+        greeting = "Selamat Siang"; // 🆕 Siang (10.01 - 15.00)
+    } else if (currentHour >= 15 && currentHour <= 18) {
+        greeting = "Selamat Sore"; // 🆕 Sore (15.01 - 18.00)
+    } else {
+        greeting = "Selamat Malam"; // 🆕 Malam (18.01 - 03.59)
+    }
+
+    // ========== 🆕 Gunakan greeting ini ke dalam salam pembuka ==========
     String salampembuka;
     if ("L".equalsIgnoreCase(jk)) {
-        salampembuka = "Assalamualaikum, Bpk " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Bpk " + TPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Bpk
     } else if ("P".equalsIgnoreCase(jk)) {
-        salampembuka = "Assalamualaikum, Ibu " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Ibu " + TPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Ibu
     } else {
-        salampembuka = "Assalamualaikum, Bpk / Ibu " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Bpk / Ibu " + TPasien.getText() + "\n"; // 🆕 Jika gender tidak diketahui
     }
 
     // Membuat isi pesan ke dalam whatsapp
@@ -1794,6 +1843,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         "0xF0 0x9F 0x8F 0xA5 Spesialis : " + NmPoli.getText() + "\n" +
         "*Nomor Antrian Poli : " + NoReg.getText() + "*\n" +
         "0xF0 0x9F 0x8F 0xA0 Alamat : " + akses.getalamatrs() + "\n\n" +
+        "0xF0 0x9F 0x8C 0x8F Lokasi map : " + googleMapUrl + " \n\n" +            
         "0xF0 0x9F 0x93 0x84 Mohon konfirmasi menuju bagian admisi. Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
         "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
 

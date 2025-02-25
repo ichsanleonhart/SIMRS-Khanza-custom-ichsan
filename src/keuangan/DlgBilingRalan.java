@@ -3447,17 +3447,17 @@ private void MnPeriksaLabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
                              }
                          } catch (Exception e) {                         
                          }
-                ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+        ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
     }//GEN-LAST:event_BtnSimpanActionPerformed
 
     //////////////////////////////////////////////////// START - script untuk kirim WA by ichsan     
     private String getquestionaire_ralanUrl() { ///////// START - kode untuk mengambil URL google di table setting_url pada kolom google_map
-    String googleMapUrl = ""; 
+    String questionaire_ralanUrl = ""; 
     try {
         PreparedStatement psMap = koneksi.prepareStatement("SELECT questionaire_ralan FROM setting_url LIMIT 1");
         ResultSet rsMap = psMap.executeQuery(); 
         if (rsMap.next()) { 
-            googleMapUrl = rsMap.getString("google_map"); 
+            questionaire_ralanUrl = rsMap.getString("questionaire_ralan"); 
         }
         rsMap.close(); 
         psMap.close(); 
@@ -3466,12 +3466,12 @@ private void MnPeriksaLabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
     }
 
     // Fallback to a default URL if nothing is found
-    if (googleMapUrl == null || googleMapUrl.trim().isEmpty()) { 
-        googleMapUrl = "";  //kalau belum ada, diisi kosong saja
+    if (questionaire_ralanUrl == null || questionaire_ralanUrl.trim().isEmpty()) { 
+        questionaire_ralanUrl = "";  //kalau belum ada, diisi kosong saja
     }
 
     //System.out.println("Fetched Google Map URL: " + googleMapUrl);  //aktifkan line ini kalau mau debug print ke kotak hitam
-    return googleMapUrl; 
+    return questionaire_ralanUrl; 
 }   //////////////////////////  END - kode untuk mengambil URL google di table setting_url pada kolom google_map 
     
     private void kirimWhatsAppMessage() {  
@@ -3502,22 +3502,43 @@ private void MnPeriksaLabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
         System.out.println("Error fetching phone number: " + e);
         System.out.println("Error formatting date: " + e);               
     }
-    // Set greeting based on gender
+    // ========== 🆕 Tambahkan greeting berdasarkan waktu saat ini ==========
+    int currentHour = java.time.LocalTime.now().getHour(); // 🆕 Ambil jam saat ini
+
+    String greeting; // 🆕 Variabel untuk menyimpan greeting
+    if (currentHour >= 4 && currentHour <= 10) {
+        greeting = "Selamat Pagi"; // 🆕 Pagi (04.00 - 10.00)
+    } else if (currentHour >= 10 && currentHour <= 15) {
+        greeting = "Selamat Siang"; // 🆕 Siang (10.01 - 15.00)
+    } else if (currentHour >= 15 && currentHour <= 18) {
+        greeting = "Selamat Sore"; // 🆕 Sore (15.01 - 18.00)
+    } else {
+        greeting = "Selamat Malam"; // 🆕 Malam (18.01 - 03.59)
+    }
+
+    // ========== 🆕 Gunakan greeting ini ke dalam salam pembuka ==========
     String salampembuka;
     if ("L".equalsIgnoreCase(jk)) {
-        salampembuka = "Assalamualaikum, Bpk " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Bpk " + TPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Bpk
     } else if ("P".equalsIgnoreCase(jk)) {
-        salampembuka = "Assalamualaikum, Ibu " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Ibu " + TPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Ibu
     } else {
-        salampembuka = "Assalamualaikum, Bpk / Ibu " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Bpk / Ibu " + TPasien.getText() + "\n"; // 🆕 Jika gender tidak diketahui
     }
 
     // Membuat isi pesan ke dalam whatsapp
     String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
         "Salam sehat mitra sehat " + akses.getnamars() + " kami mengucapakan terima kasih telah memilih kami sebagai mitra kesehatan keluarga Anda. " +
-        "Kami mohon anda dapat mengisi survey kepuasan pasien untuk evaluasi yang akan kami lakukan di Rumah Sakit kami. \n \n" + 
-        "Mohon klik link: "+ questionaire_ralanUrl +"\n" +        
-        "_(Jika Link tidak dapat di-klik, mohon save nomor kami terlebih dahulu.)_ \n\n " +
+        ""  ;
+        //"Mohon klik link: "+ questionaire_ralanUrl +"\n" +        
+            // 🆕 Cek apakah questionaire_ralanUrl kosong atau tidak
+        if (!questionaire_ralanUrl.isEmpty()) {  
+            pesan += "Kami mohon anda dapat mengisi survey kepuasan pasien untuk evaluasi yang akan kami lakukan di Rumah Sakit kami. \n \n " +
+                     "Mohon klik link: " + questionaire_ralanUrl + "\n" +
+                      "_(Jika Link tidak dapat di-klik, mohon save nomor kami terlebih dahulu.)_ \n\n";
+                                              }
+
+        pesan +=
         "Terima kasih atas waktu yang diberikan, \n semoga Anda dan keluarga selalu diberikan kesehatan \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F"+
         "\n \n - Marketing & Humas " + akses.getnamars() + "\n" + akses.getnamars() ;
 

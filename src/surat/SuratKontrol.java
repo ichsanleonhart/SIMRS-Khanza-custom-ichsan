@@ -1121,11 +1121,8 @@ public class SuratKontrol extends javax.swing.JDialog {
     
     
     private void kirimWhatsAppMessage() {
-    String googleMapUrl = getGoogleMapUrl(); // Ambil url googlemap dari kode di atas
-    // ambil detik sekarang, lalu tambahkan + 5 detik ke depan
-    LocalDateTime waktuSekarang = LocalDateTime.now().plusSeconds(5);
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    String waktukirim = waktuSekarang.format(formatter);    
+    String googleMapUrl = getGoogleMapUrl(); // Ambil url googlemap dari kode di atas        
+    String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));    //isi value untuk dikirim ke jadwal pengiriman di wa gateway
 
     // Fetch nomor hp pasien, gender, serta tanggal kontrol
     String nohppasien = "";  //ubah format nomor hp pasien
@@ -1165,14 +1162,28 @@ public class SuratKontrol extends javax.swing.JDialog {
         formattedTanggal = TanggalPeriksa.getSelectedItem().toString(); // Fallback to original format
     }
 
-    // Set greeting based on gender
+     // ========== 🆕 Tambahkan greeting berdasarkan waktu saat ini ==========
+    int currentHour = java.time.LocalTime.now().getHour(); // 🆕 Ambil jam saat ini
+
+    String greeting; // 🆕 Variabel untuk menyimpan greeting
+    if (currentHour >= 4 && currentHour <= 10) {
+        greeting = "Selamat Pagi"; // 🆕 Pagi (04.00 - 10.00)
+    } else if (currentHour >= 10 && currentHour <= 15) {
+        greeting = "Selamat Siang"; // 🆕 Siang (10.01 - 15.00)
+    } else if (currentHour >= 15 && currentHour <= 18) {
+        greeting = "Selamat Sore"; // 🆕 Sore (15.01 - 18.00)
+    } else {
+        greeting = "Selamat Malam"; // 🆕 Malam (18.01 - 03.59)
+    }
+
+    // ========== 🆕 Gunakan greeting ini ke dalam salam pembuka ==========
     String salampembuka;
     if ("L".equalsIgnoreCase(jk)) {
-        salampembuka = "Assalamualaikum, Bpk " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Bpk " + TPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Bpk
     } else if ("P".equalsIgnoreCase(jk)) {
-        salampembuka = "Assalamualaikum, Ibu " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Ibu " + TPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Ibu
     } else {
-        salampembuka = "Assalamualaikum, Bpk / Ibu " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Bpk / Ibu " + TPasien.getText() + "\n"; // 🆕 Jika gender tidak diketahui
     }
 
     // Membuat isi pesan ke dalam whatsapp
@@ -1269,14 +1280,28 @@ public class SuratKontrol extends javax.swing.JDialog {
         formattedTanggal = TanggalPeriksa.getSelectedItem().toString(); // Fallback to original format
     }
 
-    // Set greeting based on gender
+     // ========== 🆕 Tambahkan greeting berdasarkan waktu saat ini ==========
+    int currentHour = java.time.LocalTime.now().getHour(); // 🆕 Ambil jam saat ini
+
+    String greeting; // 🆕 Variabel untuk menyimpan greeting
+    if (currentHour >= 4 && currentHour <= 10) {
+        greeting = "Selamat Pagi"; // 🆕 Pagi (04.00 - 10.00)
+    } else if (currentHour >= 10 && currentHour <= 15) {
+        greeting = "Selamat Siang"; // 🆕 Siang (10.01 - 15.00)
+    } else if (currentHour >= 15 && currentHour <= 18) {
+        greeting = "Selamat Sore"; // 🆕 Sore (15.01 - 18.00)
+    } else {
+        greeting = "Selamat Malam"; // 🆕 Malam (18.01 - 03.59)
+    }
+
+    // ========== 🆕 Gunakan greeting ini ke dalam salam pembuka ==========
     String salampembuka;
     if ("L".equalsIgnoreCase(jk)) {
-        salampembuka = "Assalamualaikum, Bpk " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Bpk " + TPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Bpk
     } else if ("P".equalsIgnoreCase(jk)) {
-        salampembuka = "Assalamualaikum, Ibu " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Ibu " + TPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Ibu
     } else {
-        salampembuka = "Assalamualaikum, Bpk / Ibu " + TPasien.getText() + "\n";
+        salampembuka = greeting + ", Bpk / Ibu " + TPasien.getText() + "\n"; // 🆕 Jika gender tidak diketahui
     }
 
     // Membuat isi pesan ke dalam whatsapp

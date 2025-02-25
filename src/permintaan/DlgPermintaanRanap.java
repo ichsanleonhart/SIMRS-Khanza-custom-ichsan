@@ -48,7 +48,7 @@ public class DlgPermintaanRanap extends javax.swing.JDialog {
     private validasi Valid=new validasi();
     private PreparedStatement ps;
     private ResultSet rs;
-    private int i=0,nilai_detik,bookingbaru=0;
+    private int i=0,nilai_detik,bookingbaru=0, reply=0;  //tambahan [reply=0] by ichsan untuk layar tampilan yes / no;
     private String alarm="",nol_detik,detik,sql="",finger="";
     private DlgKamar kamar=new DlgKamar(null,false);
     private boolean aktif=false;
@@ -953,15 +953,21 @@ public class DlgPermintaanRanap extends javax.swing.JDialog {
             })==true){
                 
                 ///////////////////Selesai simpan permintaan ranap, dilanjutkan dengan script untuk mengirim pesan WA ke nomor hp pasien - by ichsan
+                ///////////////////Selesai simpan billing, dilanjutkan dengan script untuk konfirmasi mau mengirim pesan WA ke nomor hp pasien - by ichsan
                 //////////////// start - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
                         try {
-                             if(koneksiDB.WANOTIFPASIEN().equals("yes")){   
-                                 kirimWhatsAppMessage();  //kirim pesan WA by ichsan 
+                             if(koneksiDB.WANOTIFPASIEN().equals("yes")){
+                                reply = JOptionPane.showConfirmDialog(rootPane,"Mau memberitahukan ke Pasien via WA..?","Konfirmasi",JOptionPane.YES_NO_OPTION);
+                                if (reply == JOptionPane.YES_OPTION) {                                    
+                                     kirimWhatsAppMessage();  //kirim pesan WA by ichsan 
+                                     JOptionPane.showMessageDialog(null, "OK, WA sudah terkirim ke Pasien. \n ");
+                                } 
                              }else{
+                                 JOptionPane.showMessageDialog(null,"Coba cek settingan WA, ada error soalnya.");
                              }
                          } catch (Exception e) {                         
                          }
-                ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+        ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
                 
                 tampil();
                 // Sequel.mengedit("kamar","kd_kamar=?","status='DIBOOKING'",1,new String[]{KdKamar.getText()});  //dinonaktifkan karena bikin ribet ketika validasi
@@ -999,19 +1005,34 @@ public class DlgPermintaanRanap extends javax.swing.JDialog {
         System.out.println("Error formatting date: " + e);               
     }
 
-    // Set greeting based on gender
+    
+     // ========== 🆕 Tambahkan greeting berdasarkan waktu saat ini ==========
+    int currentHour = java.time.LocalTime.now().getHour(); // 🆕 Ambil jam saat ini
+
+    String greeting; // 🆕 Variabel untuk menyimpan greeting
+    if (currentHour >= 4 && currentHour <= 10) {
+        greeting = "Selamat Pagi"; // 🆕 Pagi (04.00 - 10.00)
+    } else if (currentHour >= 10 && currentHour <= 15) {
+        greeting = "Selamat Siang"; // 🆕 Siang (10.01 - 15.00)
+    } else if (currentHour >= 15 && currentHour <= 18) {
+        greeting = "Selamat Sore"; // 🆕 Sore (15.01 - 18.00)
+    } else {
+        greeting = "Selamat Malam"; // 🆕 Malam (18.01 - 03.59)
+    }
+
+    // ========== 🆕 Gunakan greeting ini ke dalam salam pembuka ==========
     String salampembuka;
     if ("L".equalsIgnoreCase(jk)) {
-        salampembuka = "Yth, Bpk " + NmPasien.getText() + "\n";
+        salampembuka = greeting + ", Bpk " + NmPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Bpk
     } else if ("P".equalsIgnoreCase(jk)) {
-        salampembuka = "Yth, Ibu " + NmPasien.getText() + "\n";
+        salampembuka = greeting + ", Ibu " + NmPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Ibu
     } else {
-        salampembuka = "Yth, Bpk / Ibu " + NmPasien.getText() + "\n";
-    }
+        salampembuka = greeting + ", Bpk / Ibu " + NmPasien.getText() + "\n"; // 🆕 Jika gender tidak diketahui
+    }    
 
     // Membuat isi pesan ke dalam whatsapp
     String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
-        "Anda telah dimasukkan ke dalam antrian masuk kamar inap di " + akses.getnamars() + " dari rawat jalan "+ Poli.getText() +" dengan kamar tujuan : " + NmBangsal.getText() +         
+        "Anda direncanakan masuk ke dalam perawatan inap di " + akses.getnamars() + " dari layanan rawat jalan "+ Poli.getText() +" dengan kamar tujuan : " + NmBangsal.getText() +         
         "\n \n Mohon bersabar menunggu konfirmasi dari perawat untuk peroses pemindahannya, ya. 0xF0 0x9F 0x99 0x8F \n \n" ;
         
 
