@@ -7238,35 +7238,40 @@ public final class DlgReg extends javax.swing.JDialog {
     String formattedTanggal = "";  //ubah format tanggal kontrol
     
     try {
-        /////////format tanggal dan jam kontrol        
+        /////////format tanggal dan jam kunjungan        
         //System.out.println("Raw value of TanggalPeriksa: " + TanggalPeriksa.getSelectedItem());        // aktifkan baris ini untuk Print debug ke kotak hitam
         String rawDate = DTPReg.getSelectedItem().toString().trim(); // Convert to string properly      
-        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);
+        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
         SimpleDateFormat outputFormat = new SimpleDateFormat("dd MMMM yyyy", new Locale("id", "ID"));   //penyesuaian menjadi format yang enak dibaca           
         Date date = inputFormat.parse(rawDate);  // Parse the input date string into a Date object        
         formattedTanggal = outputFormat.format(date); // Format the date into the desired Indonesian format                 
         /////////format tanggal dan jam kontrol         
-        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");  //ambil nomor hp pasien
-        ps.setString(1, TNoRM.getText());
+        
+        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
+        ps.setString(1, TNoRM.getText());    
+        System.out.println("Menjalankan query: SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = '" + TNoRM.getText() + "'");
         ResultSet rs = ps.executeQuery();
-
         if (rs.next()) {
-            nohppasien = rs.getString("no_tlp");
-            jk = rs.getString("jk");
+        nohppasien = rs.getString("no_tlp");
+        jk = rs.getString("jk");
+        System.out.println("Nomor HP ditemukan: " + nohppasien);
+        System.out.println("Jenis Kelamin ditemukan: " + jk);
 
-            // Convert phone number from 08xxxxxx to 628xxxxxx
-            if (nohppasien.startsWith("0")) {
-                nohppasien = "62" + nohppasien.substring(1);
-            }
+        // Pastikan nomor telepon memiliki format yang benar
+        if (nohppasien == null || nohppasien.trim().isEmpty()) {
+            System.out.println("Nomor telepon pasien kosong!");
+        } else if (nohppasien.startsWith("0")) {
+            nohppasien = "62" + nohppasien.substring(1);
+            System.out.println("Nomor telepon setelah konversi: " + nohppasien);
         }
-
-        rs.close();
-        ps.close();
-    } catch (Exception e) {
-        System.out.println("Error fetching phone number: " + e);
-        System.out.println("Error formatting date: " + e);       
-        formattedTanggal = DTPReg.getSelectedItem().toString(); // Fallback to original format
-    }
+         } else {
+        System.out.println("Data pasien tidak ditemukan!");
+            }    
+         rs.close();
+         ps.close();
+        } catch (Exception e) {
+            System.out.println("Error saat mengambil nomor telepon pasien: " + e);
+        }
 
     // ========== 🆕 Tambahkan greeting berdasarkan waktu saat ini ==========
     int currentHour = java.time.LocalTime.now().getHour(); // 🆕 Ambil jam saat ini
@@ -7344,27 +7349,40 @@ public final class DlgReg extends javax.swing.JDialog {
     String formattedTanggal = "";  //ubah format tanggal kontrol
     
     try {
+        /////////format tanggal dan jam kunjungan        
+        //System.out.println("Raw value of TanggalPeriksa: " + TanggalPeriksa.getSelectedItem());        // aktifkan baris ini untuk Print debug ke kotak hitam
+        String rawDate = DTPReg.getSelectedItem().toString().trim(); // Convert to string properly      
+        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
+        SimpleDateFormat outputFormat = new SimpleDateFormat("dd MMMM yyyy", new Locale("id", "ID"));   //penyesuaian menjadi format yang enak dibaca           
+        Date date = inputFormat.parse(rawDate);  // Parse the input date string into a Date object        
+        formattedTanggal = outputFormat.format(date); // Format the date into the desired Indonesian format                 
+        /////////format tanggal dan jam kontrol
+        
         PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
-        ps.setString(1, TNoRM.getText());
+        ps.setString(1, TNoRM.getText());    
+        System.out.println("Menjalankan query: SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = '" + TNoRM.getText() + "'");
         ResultSet rs = ps.executeQuery();
-
         if (rs.next()) {
-            nohppasien = rs.getString("no_tlp");
-            jk = rs.getString("jk");
+        nohppasien = rs.getString("no_tlp");
+        jk = rs.getString("jk");
+        System.out.println("Nomor HP ditemukan: " + nohppasien);
+        System.out.println("Jenis Kelamin ditemukan: " + jk);
 
-            // Convert phone number from 08xxxxxx to 628xxxxxx
-            if (nohppasien.startsWith("0")) {
-                nohppasien = "62" + nohppasien.substring(1);
-            }
+        // Pastikan nomor telepon memiliki format yang benar
+        if (nohppasien == null || nohppasien.trim().isEmpty()) {
+            System.out.println("Nomor telepon pasien kosong!");
+        } else if (nohppasien.startsWith("0")) {
+            nohppasien = "62" + nohppasien.substring(1);
+            System.out.println("Nomor telepon setelah konversi: " + nohppasien);
         }
-
-        rs.close();
-        ps.close();
-    } catch (Exception e) {
-        System.out.println("Error fetching phone number: " + e);
-        System.out.println("Error formatting date: " + e);       
-        formattedTanggal = DTPReg.getSelectedItem().toString(); // Fallback to original format
-    }
+         } else {
+        System.out.println("Data pasien tidak ditemukan!");
+            }    
+         rs.close();
+         ps.close();
+        } catch (Exception e) {
+            System.out.println("Error saat mengambil nomor telepon pasien: " + e);
+        }
 
      // ========== 🆕 Tambahkan greeting berdasarkan waktu saat ini ==========
     int currentHour = java.time.LocalTime.now().getHour(); // 🆕 Ambil jam saat ini
