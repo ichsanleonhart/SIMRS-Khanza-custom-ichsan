@@ -3474,14 +3474,52 @@ private void MnPeriksaLabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
     return questionaire_ralanUrl; 
 }   //////////////////////////  END - kode untuk mengambil URL google di table setting_url pada kolom google_map 
     
-    private void kirimWhatsAppMessage() {  
-    String questionaire_ralanUrl = getquestionaire_ralanUrl(); // Ambil url questionaire ralan dari kode di atas
+    private String getKdPj() { //script untuk mengecek apabila jenis penjaminnya adalah BPJS (dengan kode BPJ)
+    String kd_pj = ""; 
+    try {
+        PreparedStatement psKdPj = koneksi.prepareStatement("SELECT kd_pj FROM reg_periksa WHERE no_rawat = ?");
+        psKdPj.setString(1, TNoRw.getText());
+        ResultSet rsKdPj = psKdPj.executeQuery(); 
+
+        if (rsKdPj.next()) { 
+            kd_pj = rsKdPj.getString("kd_pj"); 
+        }
+        rsKdPj.close(); 
+        psKdPj.close(); 
+    } catch (Exception e) { 
+        System.out.println("Gagal mengambil kd_pj: " + e); 
+    }
+
+    return kd_pj; 
+}  
+
+    private String getKontakHpPIC() { //script untuk mengecek apabila nomorhp kontak pic ada diisi di table setting_url
+    String kontakHpPIC = ""; 
+    try {
+        PreparedStatement psKontak = koneksi.prepareStatement("SELECT kontakhp_pic FROM setting_url LIMIT 1");
+        ResultSet rsKontak = psKontak.executeQuery(); 
+
+        if (rsKontak.next()) { 
+            kontakHpPIC = rsKontak.getString("kontakhp_pic"); 
+        }
+        rsKontak.close(); 
+        psKontak.close(); 
+    } catch (Exception e) { 
+        System.out.println("Gagal mengambil nomor kontak PIC: " + e); 
+    }
+
+    return kontakHpPIC; 
+}  
+private void kirimWhatsAppMessage() {  
+    String questionaire_ralanUrl = getquestionaire_ralanUrl(); // Ambil url questionaire ralan
+    String kontakHpPIC = getKontakHpPIC(); // Ambil kontak HP PIC
+    String kd_pj = getKdPj(); // Ambil kode pembayaran pasien
     String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-    // Fetch nomor hp pasien, gender, serta tanggal kontrol
-    String nohppasien = "";  //ubah format nomor hp pasien
-    String jk = "";  //ubah format jenis kelamin    
-    
+    // Fetch nomor hp pasien, gender
+    String nohppasien = "";  
+    String jk = "";  
+
     try {
         PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
         ps.setString(1, TNoRM.getText());
@@ -3500,48 +3538,57 @@ private void MnPeriksaLabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
         ps.close();
     } catch (Exception e) {
         System.out.println("Error fetching phone number: " + e);
-        System.out.println("Error formatting date: " + e);               
     }
-    // ========== 🆕 Tambahkan greeting berdasarkan waktu saat ini ==========
-    int currentHour = java.time.LocalTime.now().getHour(); // 🆕 Ambil jam saat ini
 
-    String greeting; // 🆕 Variabel untuk menyimpan greeting
+    // Tentukan greeting berdasarkan waktu saat ini
+    int currentHour = java.time.LocalTime.now().getHour();
+    String greeting;
+
     if (currentHour >= 4 && currentHour <= 10) {
-        greeting = "Selamat Pagi"; // 🆕 Pagi (04.00 - 10.00)
+        greeting = "Selamat Pagi";
     } else if (currentHour >= 10 && currentHour <= 15) {
-        greeting = "Selamat Siang"; // 🆕 Siang (10.01 - 15.00)
+        greeting = "Selamat Siang";
     } else if (currentHour >= 15 && currentHour <= 18) {
-        greeting = "Selamat Sore"; // 🆕 Sore (15.01 - 18.00)
+        greeting = "Selamat Sore";
     } else {
-        greeting = "Selamat Malam"; // 🆕 Malam (18.01 - 03.59)
+        greeting = "Selamat Malam";
     }
 
-    // ========== 🆕 Gunakan greeting ini ke dalam salam pembuka ==========
     String salampembuka;
     if ("L".equalsIgnoreCase(jk)) {
-        salampembuka = greeting + ", Bpk " + TPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Bpk
+        salampembuka = greeting + ", Bpk " + TPasien.getText() + "\n";
     } else if ("P".equalsIgnoreCase(jk)) {
-        salampembuka = greeting + ", Ibu " + TPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Ibu
+        salampembuka = greeting + ", Ibu " + TPasien.getText() + "\n";
     } else {
-        salampembuka = greeting + ", Bpk / Ibu " + TPasien.getText() + "\n"; // 🆕 Jika gender tidak diketahui
+        salampembuka = greeting + ", Bpk / Ibu " + TPasien.getText() + "\n";
     }
 
-    // Membuat isi pesan ke dalam whatsapp
-    String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
-        "Salam sehat mitra sehat " + akses.getnamars() + " kami mengucapakan terima kasih telah memilih kami sebagai mitra kesehatan keluarga Anda. " +
-        ""  ;
-        //"Mohon klik link: "+ questionaire_ralanUrl +"\n" +        
-            // 🆕 Cek apakah questionaire_ralanUrl kosong atau tidak
-        if (!questionaire_ralanUrl.isEmpty()) {  
-            pesan += "Kami mohon anda dapat mengisi survey kepuasan pasien untuk evaluasi yang akan kami lakukan di Rumah Sakit kami. \n \n " +
-                     "Mohon klik link: " + questionaire_ralanUrl + "\n" +
-                      "_(Jika Link tidak dapat di-klik, mohon save nomor kami terlebih dahulu.)_ \n\n";
-                                              }
-            pesan += "Terima kasih atas waktu yang diberikan, \n semoga Anda dan keluarga selalu diberikan kesehatan \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F \n \n" +
-                    "Note : \n"+
-                    "Untuk pendaftaran Booking saat kontrol pasien BPJS Kesehatan hanya bisa melalui Aplikasi MJKN. \n Jika belum memiliki aplikasinya, silakan mendownload terlebih dahulu dan melakukan booking pendaftaran di Aplikasi tersebut."+
-                    "Link Aplikasi MJKN : https://play.google.com/store/apps/details?id=app.bpjs.mobile"+
-                     "\n \n *Pendaftaran " + akses.getnamars() + "*\n";
+    // Membuat isi pesan ke dalam WhatsApp
+    String pesan = salampembuka + "\n" +
+        "Salam sehat mitra sehat " + akses.getnamars() + ", kami mengucapkan terima kasih telah memilih kami sebagai mitra kesehatan keluarga Anda.\n\n";
+
+    if (!questionaire_ralanUrl.isEmpty()) {  
+        pesan += "Kami mohon Anda dapat mengisi survey kepuasan pasien untuk evaluasi yang akan kami lakukan di Rumah Sakit kami.\n\n" +
+                 "Mohon klik link: " + questionaire_ralanUrl + "\n" +
+                 "_(Jika link tidak dapat di-klik, mohon save nomor kami terlebih dahulu.)_\n\n";
+    }
+
+    // 🆕 Sesuaikan pesan berdasarkan jenis pembayaran pasien
+    if ("BPJ".equalsIgnoreCase(kd_pj)) {
+        pesan += "Note: Untuk pendaftaran booking saat kontrol pasien BPJS Kesehatan hanya bisa melalui Aplikasi MJKN.\n" +
+                 "Silakan download aplikasi MJKN melalui link berikut: \n" +
+                 "https://play.google.com/store/apps/details?id=app.bpjs.mobile\n\n";
+
+        // 🆕 Jika ada kontakHpPIC, tambahkan informasi tambahan
+        if (!kontakHpPIC.isEmpty()) {
+            pesan += "Jika ada kendala, mohon dapat menghubungi kami melalui " + kontakHpPIC + 
+                     " (Nomor Pelayanan dan Pengaduan).\n\n";
+        }
+    } else {  //jika bukan pasien BPJS, maka lanjutkan ke isi pesan ini
+        pesan += "Note: Untuk pasien umum atau asuransi swasta, silakan hubungi bagian pendaftaran (nomor ini) untuk informasi lebih lanjut.\n\n";
+    }
+    pesan += "Terima kasih atas waktu yang diberikan, semoga Anda dan keluarga selalu diberikan kesehatan.\n\n" +  //ini isi paragraf penutup
+             "*Pendaftaran " + akses.getnamars() + "*\n";
 
     // Insert into wa_outbox
     try {
@@ -3563,10 +3610,9 @@ private void MnPeriksaLabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
         psWa.setString(12, "");
         psWa.executeUpdate();
 
-        //System.out.println("Tanggal booking : " + formattedTanggal);
-        //System.out.println("Pesan Whatsapp dalam antrian untuk dikirim ke pasien.");
+        System.out.println("Pesan WhatsApp telah dikirim ke pasien.");
     } catch (Exception e) {
-        System.out.println("Gagal mengirim pesan WA ke Pasien: " + e);
+        System.out.println("Gagal mengirim pesan WA ke pasien: " + e);
     }
 }
     //////////////////////////////////////////////////// END - script untuk kirim WA by ichsan
