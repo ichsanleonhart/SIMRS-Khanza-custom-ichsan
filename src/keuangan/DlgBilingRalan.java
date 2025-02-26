@@ -3574,7 +3574,7 @@ private void kirimWhatsAppMessage() {
     }
 
     // 🆕 Sesuaikan pesan berdasarkan jenis pembayaran pasien
-    if ("BPJ".equalsIgnoreCase(kd_pj)) {
+    if (kd_pj.toUpperCase().contains("BPJ")) { 
         pesan += "Note: Untuk pendaftaran booking saat kontrol pasien BPJS Kesehatan hanya bisa melalui Aplikasi MJKN.\n" +
                  "Silakan download aplikasi MJKN melalui link berikut: \n" +
                  "https://play.google.com/store/apps/details?id=app.bpjs.mobile\n\n";
