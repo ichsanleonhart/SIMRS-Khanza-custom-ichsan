@@ -1379,8 +1379,8 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                 }
             }
         }
-        System.out.println("Debug: No Rawat = " + no_rawat);
-        System.out.println("Debug: Panjang No Rawat = " + no_rawat.length());
+        // System.out.println("Debug: No Rawat = " + no_rawat);
+        // System.out.println("Debug: Panjang No Rawat = " + no_rawat.length());
         
         //////////////kirim WA ke Pasien setelah regist dari menu booking
         kirimWhatsAppMessageRegistBooking();  //kirim pesan WA by ichsan 
@@ -1990,7 +1990,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                 while(rs.next()){ 
                     Timestamp tsPeriksa = rs.getTimestamp("waktu_kunjungan");  // tambahan by ichsan
                     String tanggalPeriksa = (tsPeriksa != null) ? tsPeriksa.toString() : "N/A";  // tambahan by ichsan
-                    System.out.println("Debug: waktu_kunjungan = " + tanggalPeriksa);
+                    // System.out.println("Debug: waktu_kunjungan = " + tanggalPeriksa);
                     tabMode.addRow(new Object[]{
                         false,rs.getString("tanggal_booking"),rs.getString("jam_booking"),rs.getString("no_rkm_medis"),rs.getString("nm_pasien"),
                         //rs.getString("tanggal_periksa"),rs.getString("kd_dokter"),rs.getString("nm_dokter"),

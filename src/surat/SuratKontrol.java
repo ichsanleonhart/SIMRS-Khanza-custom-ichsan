@@ -1998,7 +1998,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     
     private void isNomer() {
     String query = "";
-    
+
     switch (URUTNOREG) {
         case "poli":
             query = "SELECT IFNULL(MAX(CONVERT(no_reg, SIGNED)), 0) FROM (" +
@@ -2008,7 +2008,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                     "SELECT no_reg FROM reg_periksa WHERE kd_poli='" + KdPoli.getText() + 
                     "' AND tgl_registrasi='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "') AS merged";
             break;
-            
+
         case "dokter":
             query = "SELECT IFNULL(MAX(CONVERT(no_reg, SIGNED)), 0) FROM (" +
                     "SELECT no_reg FROM booking_registrasi WHERE kd_dokter='" + KdDokter.getText() + 
@@ -2017,7 +2017,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                     "SELECT no_reg FROM reg_periksa WHERE kd_dokter='" + KdDokter.getText() + 
                     "' AND tgl_registrasi='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "') AS merged";
             break;
-            
+
         case "dokter + poli":             
             query = "SELECT IFNULL(MAX(CONVERT(no_reg, SIGNED)), 0) FROM (" +
                     "SELECT no_reg FROM booking_registrasi WHERE kd_dokter='" + KdDokter.getText() + 
@@ -2026,7 +2026,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                     "SELECT no_reg FROM reg_periksa WHERE kd_dokter='" + KdDokter.getText() + 
                     "' AND kd_poli='" + KdPoli.getText() + "' AND tgl_registrasi='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "') AS merged";
             break;
-            
+
         default:
             query = "SELECT IFNULL(MAX(CONVERT(no_reg, SIGNED)), 0) FROM (" +
                     "SELECT no_reg FROM booking_registrasi WHERE kd_dokter='" + KdDokter.getText() + 
@@ -2037,9 +2037,23 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
             break;
     }
 
-    // Gunakan query yang sudah dibuat untuk mendapatkan nomor registrasi terbesar
+    // Menjalankan query untuk mendapatkan nomor registrasi terbesar
     Valid.autoNomer3(query, "", 3, NoReg);
+
+    // Menjalankan kembali autoNomer3 untuk NoSurat agar tetap terisi
+    Valid.autoNomer3(
+        "SELECT IFNULL(MAX(CONVERT(RIGHT(skdp_bpjs.no_antrian,6),SIGNED)),0) FROM skdp_bpjs " +
+        "WHERE skdp_bpjs.tahun='" + TanggalPeriksa.getSelectedItem().toString().substring(6, 10) + "' ",
+        "",
+        6,
+        NoSurat
+    );
+
+    // Debugging: Menampilkan hasil NoReg dan NoSurat di konsol
+    System.out.println("Nomor Registrasi: " + NoReg.getText());
+    System.out.println("Nomor Surat: " + NoSurat.getText());
 }
+
 
     private void getData() {
         if(tbObat.getSelectedRow()!= -1){
@@ -2109,7 +2123,78 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     public JTable getTable(){
         return tbObat;
     }
+//////// start - mengecek sudah ada atau belum di reg_periksa, untuk menghindari bentrok dengan registasi dari MJKN by ichsan
+    private boolean isSudahTerdaftar(String noRM, String tanggalSurat) {
+    boolean sudahTerdaftar = false;
+    try {
+        String query = "SELECT COUNT(*) FROM reg_periksa WHERE no_rkm_medis = ? AND tgl_registrasi = ?";
+        PreparedStatement ps = koneksi.prepareStatement(query);
+        ps.setString(1, noRM);
+        ps.setString(2, Valid.SetTgl(tanggalSurat)); // Convert ke format yyyy-MM-dd
+        ResultSet rs = ps.executeQuery();
+        
+        if (rs.next() && rs.getInt(1) > 0) {
+            sudahTerdaftar = true;
+        }
+        
+        rs.close();
+        ps.close();
+    } catch (Exception e) {
+        System.out.println("Error checking registration: " + e);
+    }
+    return sudahTerdaftar;
+    }
+ //////// start - mengecek sudah ada atau belum di reg_periksa, untuk menghindari bentrok dengan registasi dari MJKN by ichsan
+    
+    private void isBooking() {
+    if (Sequel.menyimpantf("skdp_bpjs", "?,?,?,?,?,?,?,?,?,?,?,?,?", "Tahun dan nomor surat", 13, new String[]{
+        TanggalPeriksa.getSelectedItem().toString().substring(6, 10), TNoRM.getText(), Diagnosa.getText(), Terapi.getText(),
+        Alasan1.getText(), Alasan2.getText(), Rtl1.getText(), Rtl2.getText(),
+        Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + " " + TanggalPeriksa.getSelectedItem().toString().substring(11, 19),
+        Valid.SetTgl(TanggalSurat.getSelectedItem() + "") + " " + TanggalSurat.getSelectedItem().toString().substring(11, 19),
+        NoSurat.getText(), KdDokter.getText(), Status.getSelectedItem().toString()
+    }) == true) {
+        
+        if (JADIKANBOOKINGSURATKONTROL.equals("yes")) {
+            // Ambil nilai-nilai yang dibutuhkan
+            String noRM = TNoRM.getText();
+            String tanggalSurat = TanggalSurat.getSelectedItem().toString();
 
+            // 🛑 Cek apakah sudah terdaftar di reg_periksa sebelum menyimpan ke booking_registrasi
+            if (!isSudahTerdaftar(noRM, tanggalSurat)) {
+                Sequel.menyimpan2("booking_registrasi", "?,?,?,?,?,?,?,?,?,?,?", "Pasien dan Tanggal", 11, new String[]{
+                    Valid.SetTgl(TanggalSurat.getSelectedItem() + ""), 
+                    TanggalSurat.getSelectedItem().toString().substring(11, 19), 
+                    noRM,
+                    Valid.SetTgl(TanggalPeriksa.getSelectedItem() + ""), 
+                    KdDokter.getText(),
+                    KdPoli.getText(), 
+                    NoReg.getText(), 
+                    Sequel.cariIsi("SELECT pasien.kd_pj FROM pasien WHERE pasien.no_rkm_medis=?", noRM), 
+                    "0",
+                    Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + " " + TanggalPeriksa.getSelectedItem().toString().substring(11, 19),
+                    "belum"
+                });
+            } else {
+                System.out.println("‼️ Data sudah ada di registrasi! Kemungkinan sudah booking menggunakan MJKN, jadi tidak menyimpan ke booking_registrasi.");
+            }
+        }
+
+        // Menambahkan data ke dalam tabel tampilan
+        tabMode.addRow(new String[]{
+            TanggalPeriksa.getSelectedItem().toString().substring(6, 10), TNoRM.getText(), TPasien.getText(), Diagnosa.getText(), 
+            Terapi.getText(), Alasan1.getText(), Alasan2.getText(),
+            Rtl1.getText(), Rtl2.getText(), 
+            Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + " " + TanggalPeriksa.getSelectedItem().toString().substring(11, 19),
+            Valid.SetTgl(TanggalSurat.getSelectedItem() + "") + " " + TanggalSurat.getSelectedItem().toString().substring(11, 19),
+            NoSurat.getText(), NoReg.getText(),
+            KdDokter.getText(), NmDokter.getText(), KdPoli.getText(), NmPoli.getText(), Status.getSelectedItem().toString()
+        });
+
+        LCount.setText("" + tabMode.getRowCount());
+    }
+}
+    /*   ///////////backup script lama
     private void isBooking(){
         if(Sequel.menyimpantf("skdp_bpjs","?,?,?,?,?,?,?,?,?,?,?,?,?","Tahun dan nomor surat",13,new String[]{
              TanggalPeriksa.getSelectedItem().toString().substring(6,10),TNoRM.getText(),Diagnosa.getText(),Terapi.getText(),
@@ -2117,14 +2202,15 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
              Valid.SetTgl(TanggalSurat.getSelectedItem()+"")+" "+TanggalSurat.getSelectedItem().toString().substring(11,19),NoSurat.getText(),KdDokter.getText(),Status.getSelectedItem().toString()
          })==true){
              /*if(JADIKANBOOKINGSURATKONTROL.equals("yes")){
-                /*Sequel.menyimpan2("booking_registrasi","?,?,?,?,?,?,?,?,?,?,?","Pasien dan Tanggal",11,new String[]{
+                Sequel.menyimpan2("booking_registrasi","?,?,?,?,?,?,?,?,?,?,?","Pasien dan Tanggal",11,new String[]{
                    Valid.SetTgl(TanggalSurat.getSelectedItem()+""),TanggalSurat.getSelectedItem().toString().substring(11,19),TNoRM.getText(),
                    Valid.SetTgl(TanggalPeriksa.getSelectedItem()+""),KdDokter.getText(),
                    KdPoli.getText(),NoReg.getText(),Sequel.cariIsi("select pasien.kd_pj from pasien where pasien.no_rkm_medis=?",TNoRM.getText()),"0",
                    Valid.SetTgl(TanggalPeriksa.getSelectedItem()+"")+" "+TanggalPeriksa.getSelectedItem().toString().substring(11,19),
                    "belum"    
                 });
-             }*/  // modif by ichsan agar surat kontrol tidak masuk ke list booking registrasi (karena bentrok dengan booking dari MJKN)
+             } */ // modif by ichsan agar surat kontrol tidak masuk ke list booking registrasi (karena bentrok dengan booking dari MJKN) 
+        /*
              tabMode.addRow(new String[]{
                 TanggalPeriksa.getSelectedItem().toString().substring(6,10),TNoRM.getText(),TPasien.getText(),Diagnosa.getText(),Terapi.getText(),Alasan1.getText(),Alasan2.getText(),
                 Rtl1.getText(),Rtl2.getText(),Valid.SetTgl(TanggalPeriksa.getSelectedItem()+"")+" "+TanggalPeriksa.getSelectedItem().toString().substring(11,19),
@@ -2134,5 +2220,5 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
              // emptTeks();  //ini dihapus karena bikin isian pesan WA kosong
              LCount.setText(""+tabMode.getRowCount());
          } 
-    }
+    } */
 }
