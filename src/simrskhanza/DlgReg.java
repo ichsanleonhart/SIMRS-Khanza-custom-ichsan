@@ -255,7 +255,7 @@ public final class DlgReg extends javax.swing.JDialog {
     public  DlgRujukMasuk rujukmasuk=new DlgRujukMasuk(null,false);
     private PreparedStatement ps,ps3,pscaripiutang;
     private ResultSet rs;
-    private int pilihan=0,i=0,kuota=0,jmlparsial=0;
+    private int pilihan=0,i=0,kuota=0,jmlparsial=0, reply=0;  //tambahan [reply=0] by ichsan untuk layar tampilan yes / no;
     private boolean ceksukses=false;
     private String nosisrute="",aktifkanparsial="no",BASENOREG="",finger="",TANGGALMUNDUR="yes",
             URUTNOREG="",status="Baru",order="reg_periksa.tgl_registrasi,reg_periksa.jam_reg desc",alamatperujuk="-",aktifjadwal="",IPPRINTERTRACER="",umur="0",sttsumur="Th",terbitsep="",
@@ -7057,20 +7057,22 @@ public final class DlgReg extends javax.swing.JDialog {
 
     private void BtnCheckinKeyPressed(java.awt.event.KeyEvent evt) {          //ketika tombol checkin ditekan                             
         if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
-            BtnCheckinActionPerformed(null);
-            
-            ////////////////////Selesai tekan tombol checkin, dilanjutkan dengan script untuk mengirim pesan WA ke nomor hp pasien
-             //////////////// start - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
-        try {
-            if(koneksiDB.WANOTIFPASIEN().equals("yes")){   
-                kirimWhatsAppMessageMJKN();  //kirim pesan WA by ichsan 
-            }else{
-            }
+            BtnCheckinActionPerformed(null);            
+            ////////////////////Selesai tekan tombol checkin, dilanjutkan dengan script untuk mengirim pesan WA ke nomor hp pasien             
+        try { //////////////// start - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+             if(koneksiDB.WANOTIFPASIEN().equals("yes")){
+                 kirimWhatsAppMessageMJKN();  //kirim pesan WA by ichsan
+                 reply = JOptionPane.showConfirmDialog(rootPane,"Mau sekalian bikin SEP..?","Konfirmasi",JOptionPane.YES_NO_OPTION);
+                 if (reply == JOptionPane.YES_OPTION) {                                    
+                               MnSEPActionPerformed(new java.awt.event.ActionEvent(this, ActionEvent.ACTION_PERFORMED, "MnSEP")); // Trigger SEP action
+                                } 
+                             }else{
+                                 JOptionPane.showMessageDialog(null,"Maaf ada kesalahan, mungkin kunjungan ini bukan pasien BPJS");
+                             }            
         } catch (Exception e) {
+            e.printStackTrace(); // Debugging: shows the actual error in the console
             emptTeks();  //kosongkan isi form setelah tekan simpan
-        }
-        ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
-          
+        }  ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan     
         
         } else {
             Valid.pindah(evt, BtnCari, BtnBatal);
@@ -7301,8 +7303,8 @@ public final class DlgReg extends javax.swing.JDialog {
 
 
     // Membuat isi pesan ke dalam whatsapp
-    String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
-        "Terima kasih sudah mendaftar di " + akses.getnamars() + ". Berikut adalah informasi antrian Anda:\n\n" +        
+    String pesan = salampembuka + " - (" + TNoRM.getText() + ") \n 0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
+        "Terima kasih telah melakukan registrasi di " + akses.getnamars() + ". Berikut adalah informasi antrian Anda:\n\n" +        
         "0xF0 0x9F 0x94 0x84 *Nomor Antrian Poli : " + TNoReg.getText() + "*\n" +
         "0xF0 0x9F 0x93 0x91 Nomor Kunjungan : " + TNoRw.getText() + "\n" +
         "0xF0 0x9F 0x93 0x9D Nomor Rekam Medis : " + TNoRM.getText() + "\n" +
@@ -7310,8 +7312,8 @@ public final class DlgReg extends javax.swing.JDialog {
         "0xF0 0x9F 0x91 0xA8 Dokter : " + TDokter.getText() + "\n" +
         "0xF0 0x9F 0x93 0x85 Tanggal: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia        
         "0xF0 0x9F 0x92 0xB3 Penjamin : " + nmpnj.getText() + "\n" +
-        "Mohon menuju loket perawat / menunggu dipanggil oleh petugas pelayanan untuk dilakukan pemeriksaan tensi.\n" +
-        "Terima kasih atas perhatiannya. \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F"+
+        "Mohon menuju loket perawat / menunggu dipanggil oleh petugas pelayanan untuk dilakukan pemeriksaan awal kesehatan.\n" +
+        "Terima kasih atas perhatiannya. \n Salam sehat. 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F \n \n *Pendaftaran " + akses.getnamars() + "*"+
         "\n \n ---\n"+
         "_Ini adalah pesan otomatis berdasarkan nomor pasien yang terdaftar di " + akses.getnamars() + ". Anda bisa membalas pesan ini untuk konfirmasi apabila terdapat kekeliruan._";
 
@@ -7411,18 +7413,17 @@ public final class DlgReg extends javax.swing.JDialog {
     }
 
     // Membuat isi pesan ke dalam whatsapp
-    String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
-        "Terima kasih sudah mendaftar di " + akses.getnamars() + ". menggunakan aplikasi MJKN BPJS. \n"+
-        "Berikut adalah informasi antrian Anda:\n\n" +
-        //"0xF0 0x9F 0x93 0x85 Tanggal: " + TanggalPeriksa.getSelectedItem() + "\n" +
+    String pesan = salampembuka + " - (" + TNoRM.getText() + ") \n 0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
+        "Terima kasih telah menggunakan MJKN dan melakukan registrasi di " + akses.getnamars() + ". menggunakan aplikasi MJKN BPJS. \n"+
+        "Berikut adalah informasi antrian Anda:\n\n" +        
         "*Nomor Antrian Poli : " + TNoReg.getText() + "*\n" +
         "Nomor Kunjungan : " + TNoRw.getText() + "\n" +
         "Nomor Rekam Medis : " + TNoRM.getText() + "\n" +
         "0xF0 0x9F 0x8F 0xA5 Spesialis : " + TPoli.getText() + "\n" +
         "0xF0 0x9F 0x91 0xA8 Dokter : " + TDokter.getText() + "\n" +
         "0xF0 0x9F 0x93 0x85 Tanggal: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia        
-        "Mohon menuju loket perawat / menunggu dipanggil oleh petugas pelayanan untuk dilakukan pemeriksaan tensi.\n" +
-        "Terima kasih atas perhatiannya. \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
+        "Mohon menuju loket perawat / menunggu dipanggil oleh petugas pelayanan untuk dilakukan pemeriksaan awal kesehatan.\n" +
+        "Terima kasih atas perhatiannya. \n Salam sehat. 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F \n \n *Pendaftaran " + akses.getnamars() + "*";
 
     // Insert into wa_outbox
     try {

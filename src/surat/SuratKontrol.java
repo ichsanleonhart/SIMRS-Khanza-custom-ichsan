@@ -631,11 +631,10 @@ public class SuratKontrol extends javax.swing.JDialog {
         R2.setPreferredSize(new java.awt.Dimension(90, 23));
         panelCari.add(R2);
 
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "20-02-2025" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-02-2025" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
-        DTPCari1.setPreferredSize(new java.awt.Dimension(100, 23));
         DTPCari1.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 DTPCari1ItemStateChanged(evt);
@@ -654,11 +653,10 @@ public class SuratKontrol extends javax.swing.JDialog {
         jLabel22.setPreferredSize(new java.awt.Dimension(25, 23));
         panelCari.add(jLabel22);
 
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "20-02-2025" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-02-2025" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
-        DTPCari2.setPreferredSize(new java.awt.Dimension(100, 23));
         DTPCari2.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 DTPCari2KeyPressed(evt);
@@ -675,11 +673,10 @@ public class SuratKontrol extends javax.swing.JDialog {
         R3.setPreferredSize(new java.awt.Dimension(85, 23));
         panelCari.add(R3);
 
-        DTPCari3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "20-02-2025" }));
+        DTPCari3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-02-2025" }));
         DTPCari3.setDisplayFormat("dd-MM-yyyy");
         DTPCari3.setName("DTPCari3"); // NOI18N
         DTPCari3.setOpaque(false);
-        DTPCari3.setPreferredSize(new java.awt.Dimension(100, 23));
         DTPCari3.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 DTPCari3ItemStateChanged(evt);
@@ -698,11 +695,10 @@ public class SuratKontrol extends javax.swing.JDialog {
         jLabel25.setPreferredSize(new java.awt.Dimension(25, 23));
         panelCari.add(jLabel25);
 
-        DTPCari4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "20-02-2025" }));
+        DTPCari4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-02-2025" }));
         DTPCari4.setDisplayFormat("dd-MM-yyyy");
         DTPCari4.setName("DTPCari4"); // NOI18N
         DTPCari4.setOpaque(false);
-        DTPCari4.setPreferredSize(new java.awt.Dimension(100, 23));
         DTPCari4.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 DTPCari4ItemStateChanged(evt);
@@ -782,7 +778,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         TPasien.setBounds(185, 10, 190, 23);
 
         TanggalSurat.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalSurat.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "20-02-2025 10:29:18" }));
+        TanggalSurat.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-02-2025 10:24:03" }));
         TanggalSurat.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         TanggalSurat.setName("TanggalSurat"); // NOI18N
         TanggalSurat.setOpaque(false);
@@ -927,7 +923,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         jLabel14.setBounds(0, 160, 92, 23);
 
         TanggalPeriksa.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalPeriksa.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "20-02-2025 10:29:18" }));
+        TanggalPeriksa.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-02-2025 10:24:03" }));
         TanggalPeriksa.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         TanggalPeriksa.setName("TanggalPeriksa"); // NOI18N
         TanggalPeriksa.setOpaque(false);
@@ -991,6 +987,11 @@ public class SuratKontrol extends javax.swing.JDialog {
 
         NoReg.setHighlighter(null);
         NoReg.setName("NoReg"); // NOI18N
+        NoReg.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NoRegActionPerformed(evt);
+            }
+        });
         NoReg.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 NoRegKeyPressed(evt);
@@ -1029,7 +1030,7 @@ public class SuratKontrol extends javax.swing.JDialog {
             }
         });
         FormInput.add(Status);
-        Status.setBounds(610, 160, 100, 20);
+        Status.setBounds(610, 160, 100, 23);
 
         PanelInput.add(FormInput, java.awt.BorderLayout.CENTER);
 
@@ -1122,8 +1123,7 @@ public class SuratKontrol extends javax.swing.JDialog {
     
     private void kirimWhatsAppMessage() {
     String googleMapUrl = getGoogleMapUrl(); // Ambil url googlemap dari kode di atas        
-    String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));    //isi value untuk dikirim ke jadwal pengiriman di wa gateway
-
+    String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));    //isi value detik ini untuk dikirim ke jadwal pengiriman di wa gateway
     // Fetch nomor hp pasien, gender, serta tanggal kontrol
     String nohppasien = "";  //ubah format nomor hp pasien
     String jk = "";  //ubah format jenis kelamin
@@ -1187,11 +1187,12 @@ public class SuratKontrol extends javax.swing.JDialog {
     }
 
     // Membuat isi pesan ke dalam whatsapp
-    String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
-        "Kami dari " + akses.getnamars() + " ingin mengingatkan bahwa Anda memiliki jadwal kontrol/tindak lanjut pada: \n\n" +        
+    String pesan = salampembuka + " - (" + TNoRM.getText() + ") \n 0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
+        "Kami dari " + akses.getnamars() + " izin mengingatkan bahwa Anda memiliki jadwal sudah terdaftar booking untuk pemeriksaan pada: \n\n" +        
         "0xF0 0x9F 0x93 0x85 *Tanggal*: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
         "0xF0 0x9F 0x91 0xA8 *Dokter* : " + NmDokter.getText() + "\n" +
         "0xF0 0x9F 0x8F 0xA5 *Spesialis* : " + NmPoli.getText() + "\n" +
+        "0xF0 0x9F 0x94 0xA2 *Nomor Antrian Poli : " + NoReg.getText() + "* \n" +
         "0xF0 0x9F 0x8F 0xA0 *Alamat* : " + akses.getalamatrs() + "\n" +
         "0xF0 0x9F 0x8C 0x8F Lokasi map :" + googleMapUrl + " \n\n" +            
         "Apabila Anda menggunakan BPJS, silakan ambil antrian menggunakan aplikasi MJKN. \n "+
@@ -1310,6 +1311,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         "0xF0 0x9F 0x93 0x85 *Tanggal* : " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
         "0xF0 0x9F 0x91 0xA8 *Dokter* : " + NmDokter.getText() + "\n" +
         "0xF0 0x9F 0x8F 0xA5 *Spesialis* : " + NmPoli.getText() + "\n" +
+        "0xF0 0x9F 0x94 0xA2 *Nomor Antrian Poli : " + NoReg.getText() + "* \n" +
         "0xF0 0x9F 0x8F 0xA0 *Alamat* : " + akses.getalamatrs() + "\n" +
         "0xF0 0x9F 0x8F 0xA0 *Lokasi map* :" + googleMapUrl + " \n\n" +            
         "0xF0 0x9F 0x93 0x84 Jangan lupa untuk membawa surat kontrol yang telah diisi oleh dokter. Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
@@ -1785,6 +1787,10 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         Valid.pindah(evt,Status,Terapi);
     }//GEN-LAST:event_btnDiagnosaKeyPressed
 
+    private void NoRegActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NoRegActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_NoRegActionPerformed
+
     /**
     * @param args the command line arguments
     */
@@ -1971,7 +1977,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         isNomer();
     }
     
-    private void isNomer(){
+   /* private void isNomer(){
         switch (URUTNOREG) {
             case "poli":
                 Valid.autoNomer3("select ifnull(MAX(CONVERT(booking_registrasi.no_reg,signed)),0) from booking_registrasi where booking_registrasi.kd_poli='"+KdPoli.getText()+"' and booking_registrasi.tanggal_periksa='"+Valid.SetTgl(TanggalPeriksa.getSelectedItem()+"")+"'","",3,NoReg);
@@ -1988,6 +1994,52 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         }
         Valid.autoNomer3("select ifnull(MAX(CONVERT(RIGHT(skdp_bpjs.no_antrian,6),signed)),0) from skdp_bpjs where skdp_bpjs.tahun='"+TanggalPeriksa.getSelectedItem().toString().substring(6,10)+"' ","",6,NoSurat);  
     }
+    */
+    
+    private void isNomer() {
+    String query = "";
+    
+    switch (URUTNOREG) {
+        case "poli":
+            query = "SELECT IFNULL(MAX(CONVERT(no_reg, SIGNED)), 0) FROM (" +
+                    "SELECT no_reg FROM booking_registrasi WHERE kd_poli='" + KdPoli.getText() + 
+                    "' AND tanggal_periksa='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "' " +
+                    "UNION ALL " +
+                    "SELECT no_reg FROM reg_periksa WHERE kd_poli='" + KdPoli.getText() + 
+                    "' AND tgl_registrasi='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "') AS merged";
+            break;
+            
+        case "dokter":
+            query = "SELECT IFNULL(MAX(CONVERT(no_reg, SIGNED)), 0) FROM (" +
+                    "SELECT no_reg FROM booking_registrasi WHERE kd_dokter='" + KdDokter.getText() + 
+                    "' AND tanggal_periksa='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "' " +
+                    "UNION ALL " +
+                    "SELECT no_reg FROM reg_periksa WHERE kd_dokter='" + KdDokter.getText() + 
+                    "' AND tgl_registrasi='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "') AS merged";
+            break;
+            
+        case "dokter + poli":             
+            query = "SELECT IFNULL(MAX(CONVERT(no_reg, SIGNED)), 0) FROM (" +
+                    "SELECT no_reg FROM booking_registrasi WHERE kd_dokter='" + KdDokter.getText() + 
+                    "' AND kd_poli='" + KdPoli.getText() + "' AND tanggal_periksa='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "' " +
+                    "UNION ALL " +
+                    "SELECT no_reg FROM reg_periksa WHERE kd_dokter='" + KdDokter.getText() + 
+                    "' AND kd_poli='" + KdPoli.getText() + "' AND tgl_registrasi='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "') AS merged";
+            break;
+            
+        default:
+            query = "SELECT IFNULL(MAX(CONVERT(no_reg, SIGNED)), 0) FROM (" +
+                    "SELECT no_reg FROM booking_registrasi WHERE kd_dokter='" + KdDokter.getText() + 
+                    "' AND tanggal_periksa='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "' " +
+                    "UNION ALL " +
+                    "SELECT no_reg FROM reg_periksa WHERE kd_dokter='" + KdDokter.getText() + 
+                    "' AND tgl_registrasi='" + Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + "') AS merged";
+            break;
+    }
+
+    // Gunakan query yang sudah dibuat untuk mendapatkan nomor registrasi terbesar
+    Valid.autoNomer3(query, "", 3, NoReg);
+}
 
     private void getData() {
         if(tbObat.getSelectedRow()!= -1){

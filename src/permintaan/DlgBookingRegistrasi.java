@@ -1456,7 +1456,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
 
     // Membuat isi pesan ke dalam whatsapp
     String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
-        "Terima kasih sudah registrasi di loket admisi " + akses.getnamars() + ". \n " +
+        "Terima kasih telah melakukan registrasi di " + akses.getnamars() + ". \n " +
         "Berikut adalah informasi antrian Anda:\n\n" +       
         "0xF0 0x9F 0x94 0xA2 *Nomor Antrian Poli : " + NoReg.getText() + "* \n" +
         "0xF0 0x9F 0x93 0x85 Tanggal: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
@@ -1845,7 +1845,8 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         "0xF0 0x9F 0x8F 0xA0 Alamat : " + akses.getalamatrs() + "\n\n" +
         "0xF0 0x9F 0x8C 0x8F Lokasi map : " + googleMapUrl + " \n\n" +            
         "0xF0 0x9F 0x93 0x84 Mohon konfirmasi menuju bagian admisi. Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
-        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
+        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F"+
+        "*Pendaftaran " + akses.getnamars() + "*";
 
     // Insert into wa_outbox
     try {

@@ -2,17 +2,17 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
     <comment>KhanzaHMS</comment> 
-	<entry key="HOST">5k7+C7EnUw9nUv2Nix+DBA==</entry>
-    <entry key="DATABASE">AZHNccBwSmSho84f+X8GyQ==</entry>
-    <entry key="PORT">nioxtijcpDaKSUiUiP5FAg==</entry>
-    <entry key="USER">kMR3WfAwUK6MbhCyydxa0g==</entry>
-    <entry key="PAS">l4nh5eVYrLAER/I2A4b3Tw==</entry>
+	<entry key="HOST">NbJF6sXmOvgOdPEIDTb5BQ==</entry>
+    <entry key="DATABASE">B/VFXMnPOQpwL6aPTlmEcQ==</entry>
+    <entry key="PORT">0sWcq2h64U8ou1kQJstC5g==</entry>
+    <entry key="USER">3fsjwvKJn8IpzysMeNu3bA==</entry>
+    <entry key="PAS">z5EhF4xxNihimsGB3AkUAQ==</entry>
     <entry key="CARICEPAT">nonaktif</entry>
-    <entry key="HOSTHYBRIDWEB">Hz0KKJW+I7CuPwFn6lvXmw==</entry>
+    <entry key="HOSTHYBRIDWEB">NbJF6sXmOvgOdPEIDTb5BQ==</entry>
 	<entry key="USERHYBRIDWEB">CUHISWJ0/JBvloH7LbhvsA==</entry>
     <entry key="PASHYBRIDWEB">c/6y8XztRzLrI5/Hlzbouw==</entry>
     <entry key="HYBRIDWEB">webapps</entry>
-    <entry key="PORTWEB">80</entry>
+    <entry key="PORTWEB">84</entry>
     <entry key="AKTIFKANWARNARALAN">no</entry>
     <entry key="ANTRIAN">player</entry>
     <entry key="LOKETANTRIAN">1</entry>
