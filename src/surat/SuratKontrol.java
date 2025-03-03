@@ -48,7 +48,7 @@ public class SuratKontrol extends javax.swing.JDialog {
     private DlgCariDokter2 dokter2=new DlgCariDokter2(null,false);
     private DlgCariPoli poli=new DlgCariPoli(null,false);
     private DlgCariPoli2 poli2=new DlgCariPoli2(null,false);
-    private String URUTNOREG="",status="",kdpoli="",nmpoli="",noantri="",aktifjadwal="";
+    private String URUTNOREG="",status="",kdpoli="",nmpoli="",noantri="",aktifjadwal="", tglPeriksa="", waktuPeriksa="", tglSurat="", waktuSurat="", count=""; //tambahan tglPeriksa="", waktuPeriksa="", tglSurat="", waktuSurat="", count=""oleh ichsan
     private DlgCariPenyakit penyakit=new DlgCariPenyakit(null,false);
     private String finger="",JADIKANBOOKINGSURATKONTROL="no";
     
@@ -1080,21 +1080,7 @@ public class SuratKontrol extends javax.swing.JDialog {
                     isBooking();
                 } 
             } 
-        }
-        //////////////// fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
-        try {
-            if(koneksiDB.WANOTIFPASIEN().equals("yes")){   
-                kirimWhatsAppMessage();  //kirim pesan WA by ichsan
-                kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol
-                JOptionPane.showMessageDialog(null, "Surat kontrol berhasil dibuat. \n "
-                + "WA reminder akan otomatis terkirim sekarang dan pada H-1 sebelum tanggal kontrol  ;-)");
-                emptTeks();  //kosongkan isi form setelah tekan simpan
-            }else{
-                emptTeks();  //kosongkan isi form setelah tekan simpan
-            }
-        } catch (Exception e) {
-            emptTeks();  //kosongkan isi form setelah tekan simpan
-        }
+        }        
 }//GEN-LAST:event_BtnSimpanActionPerformed
 ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA SETELAH SIMPAN SURAT KONTROL BY ICHSAN
     private String getGoogleMapUrl() { ///////// START - kode untuk mengambil URL google di table setting_url pada kolom google_map
@@ -2135,73 +2121,119 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private boolean isSudahTerdaftar(String noRM, String tanggalSurat) {
     boolean sudahTerdaftar = false;
     try {
-        String query = "SELECT COUNT(*) FROM reg_periksa WHERE no_rkm_medis = ? AND tgl_registrasi = ?";
+        // ✅ Ensure tanggalSurat is manually formatted as YYYY-MM-DD
+        String formattedDate = tanggalSurat; // Assume it's already correct
+
+        // Debugging: Print the input date
+        System.out.println("Raw input tanggalSurat: " + tanggalSurat);
+        System.out.println("Formatted date used for SQL: " + formattedDate);
+
+        String query = "SELECT ( " +
+                       "SELECT COUNT(*) FROM reg_periksa WHERE no_rkm_medis = ? AND DATE(tgl_registrasi) = ? " +
+                       ") + ( " +
+                       "SELECT COUNT(*) FROM booking_registrasi WHERE no_rkm_medis = ? AND DATE(tanggal_booking) = ? " +
+                       ") AS total";
+
         PreparedStatement ps = koneksi.prepareStatement(query);
         ps.setString(1, noRM);
-        ps.setString(2, Valid.SetTgl(tanggalSurat)); // Convert ke format yyyy-MM-dd
+        ps.setString(2, formattedDate);
+        ps.setString(3, noRM);
+        ps.setString(4, formattedDate);
+
+        System.out.println("Checking registration for RM: " + noRM + " on " + formattedDate);
+
         ResultSet rs = ps.executeQuery();
-        
-        if (rs.next() && rs.getInt(1) > 0) {
-            sudahTerdaftar = true;
+        if (rs.next()) {
+            int totalRecords = rs.getInt("total");
+            System.out.println("Total records found (reg_periksa + booking_registrasi): " + totalRecords);
+            sudahTerdaftar = totalRecords > 0;
         }
-        
+
         rs.close();
         ps.close();
     } catch (Exception e) {
         System.out.println("Error checking registration: " + e);
     }
     return sudahTerdaftar;
-    }
+}
+
+
+
+
+
+
+
  //////// start - mengecek sudah ada atau belum di reg_periksa, untuk menghindari bentrok dengan registasi dari MJKN by ichsan
-    
     private void isBooking() {
     if (Sequel.menyimpantf("skdp_bpjs", "?,?,?,?,?,?,?,?,?,?,?,?,?", "Tahun dan nomor surat", 13, new String[]{
-        TanggalPeriksa.getSelectedItem().toString().substring(6, 10), TNoRM.getText(), Diagnosa.getText(), Terapi.getText(),
-        Alasan1.getText(), Alasan2.getText(), Rtl1.getText(), Rtl2.getText(),
-        Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + " " + TanggalPeriksa.getSelectedItem().toString().substring(11, 19),
-        Valid.SetTgl(TanggalSurat.getSelectedItem() + "") + " " + TanggalSurat.getSelectedItem().toString().substring(11, 19),
-        NoSurat.getText(), KdDokter.getText(), Status.getSelectedItem().toString()
-    }) == true) {
+            TanggalPeriksa.getSelectedItem().toString().substring(6, 10), TNoRM.getText(), Diagnosa.getText(), Terapi.getText(),
+            Alasan1.getText(), Alasan2.getText(), Rtl1.getText(), Rtl2.getText(),
+            Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + " " + extractTime(TanggalPeriksa.getSelectedItem().toString()),
+            Valid.SetTgl(TanggalSurat.getSelectedItem() + "") + " " + extractTime(TanggalSurat.getSelectedItem().toString()),
+            NoSurat.getText(), KdDokter.getText(), Status.getSelectedItem().toString()
+    })) {
         
         if (JADIKANBOOKINGSURATKONTROL.equals("yes")) {
             // Ambil nilai-nilai yang dibutuhkan
             String noRM = TNoRM.getText();
-            String tanggalSurat = TanggalSurat.getSelectedItem().toString();
-
-            // 🛑 Cek apakah sudah terdaftar di reg_periksa sebelum menyimpan ke booking_registrasi
-            if (!isSudahTerdaftar(noRM, tanggalSurat)) {
+            String tglSurat = Valid.SetTgl(TanggalSurat.getSelectedItem() + "");
+            String waktuSurat = extractTime(TanggalSurat.getSelectedItem().toString());
+            String tglPeriksa = Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "");
+            String waktuPeriksa = extractTime(TanggalPeriksa.getSelectedItem().toString());
+            String kdPj = Sequel.cariIsi("SELECT pasien.kd_pj FROM pasien WHERE pasien.no_rkm_medis=?", noRM);            
+            
+            System.out.println("Checking if patient is already registered...");  //debug ke console
+            System.out.println("noRM: " + noRM + ", tglSurat: " + tglSurat);        //debug ke console
+            System.out.println("isSudahTerdaftar result: " + isSudahTerdaftar(noRM, tglSurat)); //debug ke console
+            
+            if (!isSudahTerdaftar(noRM, tglSurat)) {
                 Sequel.menyimpan2("booking_registrasi", "?,?,?,?,?,?,?,?,?,?,?", "Pasien dan Tanggal", 11, new String[]{
-                    Valid.SetTgl(TanggalSurat.getSelectedItem() + ""), 
-                    TanggalSurat.getSelectedItem().toString().substring(11, 19), 
-                    noRM,
-                    Valid.SetTgl(TanggalPeriksa.getSelectedItem() + ""), 
-                    KdDokter.getText(),
-                    KdPoli.getText(), 
-                    NoReg.getText(), 
-                    Sequel.cariIsi("SELECT pasien.kd_pj FROM pasien WHERE pasien.no_rkm_medis=?", noRM), 
-                    "0",
-                    Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + " " + TanggalPeriksa.getSelectedItem().toString().substring(11, 19),
-                    "belum"
-                });
+                        tglSurat, waktuSurat, noRM, 
+                        tglPeriksa, KdDokter.getText(),
+                        KdPoli.getText(), NoReg.getText(), kdPj, "0",
+                        tglPeriksa + " " + waktuPeriksa, "belum"
+                });                
+                //jika berhasil menyimpan, kirim pesan whatsapp
+                if(koneksiDB.WANOTIFPASIEN().equals("yes")){   //////////////// fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+                   kirimWhatsAppMessage();  //kirim pesan WA by ichsan
+                   kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol
+                   JOptionPane.showMessageDialog(null, "Surat kontrol berhasil dibuat. \n "
+                                                             + "WA reminder akan otomatis terkirim sekarang dan pada H-1 sebelum tanggal kontrol  ;-)");  
+                 }
+                JOptionPane.showMessageDialog(null, "Data booking berhasil disimpan.");
             } else {
-                System.out.println("‼️ Data sudah ada di registrasi! Kemungkinan sudah booking menggunakan MJKN, jadi tidak menyimpan ke booking_registrasi.");
+                JOptionPane.showMessageDialog(null, "Pasien sudah terdaftar registrasi di tanggal " + tglPeriksa + ", tidak menyimpan ke booking_registrasi..!");
+                System.out.println("‼️ Pasien sudah terdaftar pada tanggal " + tglPeriksa);
+                return; // Stop execution here to prevent sending WhatsApp message
             }
+            emptTeks();  //kosongkan isi form setelah tekan simpan
         }
-
+        
         // Menambahkan data ke dalam tabel tampilan
         tabMode.addRow(new String[]{
-            TanggalPeriksa.getSelectedItem().toString().substring(6, 10), TNoRM.getText(), TPasien.getText(), Diagnosa.getText(), 
-            Terapi.getText(), Alasan1.getText(), Alasan2.getText(),
-            Rtl1.getText(), Rtl2.getText(), 
-            Valid.SetTgl(TanggalPeriksa.getSelectedItem() + "") + " " + TanggalPeriksa.getSelectedItem().toString().substring(11, 19),
-            Valid.SetTgl(TanggalSurat.getSelectedItem() + "") + " " + TanggalSurat.getSelectedItem().toString().substring(11, 19),
-            NoSurat.getText(), NoReg.getText(),
-            KdDokter.getText(), NmDokter.getText(), KdPoli.getText(), NmPoli.getText(), Status.getSelectedItem().toString()
+                TanggalPeriksa.getSelectedItem().toString().substring(6, 10), TNoRM.getText(), TPasien.getText(), Diagnosa.getText(),
+                Terapi.getText(), Alasan1.getText(), Alasan2.getText(),
+                Rtl1.getText(), Rtl2.getText(),
+                tglPeriksa + " " + waktuPeriksa,
+                tglSurat + " " + waktuSurat,
+                NoSurat.getText(), NoReg.getText(),
+                KdDokter.getText(), NmDokter.getText(), KdPoli.getText(), NmPoli.getText(), Status.getSelectedItem().toString()
         });
 
         LCount.setText("" + tabMode.getRowCount());
     }
 }
+
+// Utility method to extract time from a date string safely
+private String extractTime(String dateTime) {
+    try {
+        return dateTime.substring(11, 19); // Extract HH:mm:ss
+    } catch (Exception e) {
+        System.out.println("Error extracting time: " + e);
+        return "00:00:00"; // Default value to prevent errors
+    }
+}    
+    
     /*   ///////////backup script lama
     private void isBooking(){
         if(Sequel.menyimpantf("skdp_bpjs","?,?,?,?,?,?,?,?,?,?,?,?,?","Tahun dan nomor surat",13,new String[]{
