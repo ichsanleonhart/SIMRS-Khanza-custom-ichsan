@@ -20,9 +20,16 @@
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/WORK/GITHUB/SIMRS-Khanza-custom-ichsan/src/keuangan/DlgBilingRalan.java</file>
-            <file>file:/D:/WORK/GITHUB/SIMRS-Khanza-custom-ichsan/src/simrskhanza/frmUtama.java</file>
-            <file>file:/D:/WORK/GITHUB/SIMRS-Khanza-custom-ichsan/src/keuangan/DlgBilingRanap.java</file>
+            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/permintaan/DlgPermintaanRanap.java</file>
+            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/simrskhanza/DlgRawatJalan.java</file>
+            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/widget/MenuBar.java</file>
+            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/rekammedis/RMRiwayatPerawatan.java</file>
+            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/keuangan/DlgBilingRalan.java</file>
+            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/simrskhanza/frmUtama.java</file>
+            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/bridging/BPJSSuratKontrol.java</file>
+            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/simrskhanza/DlgReg.java</file>
+            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/surat/SuratKontrol.java</file>
+            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/permintaan/DlgBookingRegistrasi.java</file>
         </group>
     </open-files>
 </project-private>

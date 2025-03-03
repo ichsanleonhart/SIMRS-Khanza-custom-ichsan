@@ -517,7 +517,20 @@
                                                                 $sisakuota=getOne2("select count(no_rawat) from reg_periksa where kd_poli='$kdpoli' and kd_dokter='$kddokter' and tgl_registrasi='".validTeks4($decode['tanggalperiksa'],20)."' ");
                                                                 if ($sisakuota < $jadwal['kuota']) {
                                                                     $datapeserta     = cekpasien(validTeks4($decode['nik'],20),validTeks4($decode['nomorkartu'],20));
-                                                                    $noReg           = noRegPoli($kdpoli,$kddokter,validTeks4($decode['tanggalperiksa'],20));
+                                                                    //$noReg           = noRegPoli($kdpoli,$kddokter,validTeks4($decode['tanggalperiksa'],20));   //this line is disabled
+																	// Check if no_reg already exists in booking_registrasi
+                                                                    $existingNoReg = getOne("SELECT no_reg FROM booking_registrasi 
+                                                                                             WHERE no_rkm_medis = '".validTeks4($datapeserta['no_rkm_medis'],20)."' 
+                                                                                             AND kd_dokter = '".validTeks4($jadwal['kd_dokter'],20)."' 
+                                                                                             AND tanggal_periksa = '".validTeks4($decode['tanggalperiksa'],20)."'");
+                                                                
+                                                                    if ($existingNoReg) {
+                                                                        // If found, use existing no_reg
+                                                                        $noReg = sprintf("%03s", $existingNoReg);
+                                                                    } else {
+                                                                        // Otherwise, generate a new one using noRegPoli
+                                                                        $noReg = noRegPoli($kdpoli, $kddokter, validTeks4($decode['tanggalperiksa'],20));
+                                                                    }
                                                                     $max             = getOne2("select ifnull(MAX(CONVERT(RIGHT(no_rawat,6),signed)),0)+1 from reg_periksa where tgl_registrasi='".validTeks4($decode['tanggalperiksa'],20)."'");
                                                                     $no_rawat        = str_replace("-","/",validTeks4($decode['tanggalperiksa'],20)."/").sprintf("%06s", $max);
                                                                     $maxbooking      = getOne2("select ifnull(MAX(CONVERT(RIGHT(nobooking,6),signed)),0)+1 from referensi_mobilejkn_bpjs where tanggalperiksa='".validTeks4($decode['tanggalperiksa'],20)."'");
