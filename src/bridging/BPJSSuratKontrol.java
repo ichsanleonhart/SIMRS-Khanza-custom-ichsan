@@ -1045,8 +1045,16 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
     String waktukirim = ""; // format waktu pengiriman WA (delayed message)
     
     try {
-        /////////format tanggal dan jam kontrol, agar tanggal terkirim adalah 24 jam sebelum tanggal kontrol                
-        String rawDate = TanggalKontrol.getSelectedItem().toString().trim();   // Convert to string properly      
+        /////////format tanggal dan jam kontrol        
+        //System.out.println("Raw value of TanggalPeriksa: " + TanggalPeriksa.getSelectedItem());        // aktifkan baris ini untuk Print debug ke kotak hitam
+        String rawDate = TanggalKontrol.getSelectedItem().toString().trim(); // Convert to string properly      
+        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);
+        SimpleDateFormat outputFormat = new SimpleDateFormat("dd MMMM yyyy 'jam' HH:mm", new Locale("id", "ID"));   //penyesuaian menjadi format yang enak dibaca           
+        Date date = inputFormat.parse(rawDate);  // Parse the input date string into a Date object        
+        formattedTanggal = outputFormat.format(date); // Format the date into the desired Indonesian format                 
+        /////////format tanggal dan jam kontrol 
+        
+        ////////format tanggal dan jam kontrol, agar tanggal terkirim adalah 24 jam sebelum tanggal kontrol                        
         DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);        
         DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); 
         
