@@ -589,6 +589,105 @@ public final class validasi {
         cmb.setSelectedItem(year+"1");
     }
 
+////////////////////////////////////////////  - start validasi auto upload berkas digital perawatan - by ichsan
+public void MyReportPDFUpload(String reportName, String reportDirName, String judul, String FileName, Map parameters) {
+        Properties systemProp = System.getProperties();
+
+        // Ambil current dir
+        String currentDir = systemProp.getProperty("user.dir");
+
+        File dir = new File(currentDir);
+
+        File fileRpt;
+        String fullPath = "";
+        if (dir.isDirectory()) {
+            String[] isiDir = dir.list();
+            for (String iDir : isiDir) {
+                fileRpt = new File(currentDir + File.separatorChar + iDir + File.separatorChar + reportDirName + File.separatorChar + reportName);
+                if (fileRpt.isFile()) { // Cek apakah file RptMaster.jasper ada
+                    fullPath = fileRpt.toString();
+                    System.out.println("Found Report File at : " + fullPath);
+                }
+            }
+        }
+
+        try {
+            try (Statement stm = connect.createStatement()) {
+                try {
+                    // Pastikan folder tmpPDF ada
+                    File tmpPDFDir = new File(currentDir + File.separatorChar + "tmpPDF");
+                    if (!tmpPDFDir.exists()) {
+                        tmpPDFDir.mkdir(); // Buat folder tmpPDF jika belum ada
+                    }
+
+                    // Nama file PDF dihasilkan di folder tmpPDF
+                    String outputPdfPath = tmpPDFDir + File.separator + FileName + ".pdf";
+                    String inputJasperPath = "./" + reportDirName + "/" + reportName;
+
+                    JasperPrint jasperPrint = JasperFillManager.fillReport(inputJasperPath, parameters, connect);
+                    JasperExportManager.exportReportToPdfFile(jasperPrint, outputPdfPath);
+
+                    // Buka file PDF yang dihasilkan
+                    File f = new File(outputPdfPath);
+                    //    Desktop.getDesktop().open(f);
+                } catch (Exception rptexcpt) {
+                    System.out.println("Report Can't view because : " + rptexcpt);
+                    JOptionPane.showMessageDialog(null, "Report Can't view because : " + rptexcpt);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+    
+    public void MyReportPDFqryUpload(String reportName, String reportDirName, String judul, String qry, String FileName, Map parameters) {
+        Properties systemProp = System.getProperties();
+
+        // Ambil current dir
+        String currentDir = systemProp.getProperty("user.dir");
+
+        File dir = new File(currentDir);
+        File fileRpt;
+        String fullPath = "";
+        if (dir.isDirectory()) {
+            String[] isiDir = dir.list();
+            for (String iDir : isiDir) {
+                fileRpt = new File(currentDir + File.separatorChar + iDir + File.separatorChar + reportDirName + File.separatorChar + reportName);
+                if (fileRpt.isFile()) { // Cek apakah file RptMaster.jasper ada
+                    fullPath = fileRpt.toString();
+                    System.out.println("Found Report File at : " + fullPath);
+                }
+            }
+        }
+
+        try (PreparedStatement ps = connect.prepareStatement(qry)) {
+            try {
+                // Pastikan folder tmpPDF ada
+                File tmpPDFDir = new File(currentDir + File.separatorChar + "tmpPDF");
+                if (!tmpPDFDir.exists()) {
+                    tmpPDFDir.mkdir();
+                }
+
+                String outputPdfPath = tmpPDFDir + File.separator + FileName + ".pdf";
+                String inputJasperPath = "./" + reportDirName + "/" + reportName;
+
+                ResultSet rs = ps.executeQuery();
+                JRResultSetDataSource rsdt = new JRResultSetDataSource(rs);
+                JasperPrint jasperPrint = JasperFillManager.fillReport(inputJasperPath, parameters, rsdt);
+                JasperExportManager.exportReportToPdfFile(jasperPrint, outputPdfPath);
+
+            } catch (Exception rptexcpt) {
+                System.out.println("Report Can't view because : " + rptexcpt);
+                JOptionPane.showMessageDialog(null, "Report Can't view because : " + rptexcpt);
+            } finally {
+                ps.close();
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+	////////////////////////////////////////////  - end validasi auto upload berkas digital perawatan - by ichsan
+	 
     @SuppressWarnings("empty-statement")
     public void MyReport(String reportName,String reportDirName,String judul,Map parameters){
         Properties systemProp = System.getProperties();
@@ -1245,16 +1344,6 @@ public final class validasi {
         return s;
     }
     
-/*     public void SetTglJam(DefaultTableModel tabMode,JTable table,JDateTimePicker dtp,int i){  //tambahan dari ichsan
-        j=table.getSelectedRow();
-        try {
-           Date dtpa = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(tabMode.getValueAt(j,i).toString().replaceAll("'",""));
-           dtp.setDate(dtpa);
-        } catch (ParseException ex) {
-           dtp.setDate(new Date());
-        }
-    }
- */   
     public String SetTgl3(String original){
         original=original.replaceAll("'","");
         s = "";
