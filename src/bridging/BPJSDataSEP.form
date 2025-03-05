@@ -3486,7 +3486,7 @@
                           </AuxValues>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                              <AbsoluteConstraints x="990" y="100" width="220" height="360"/>
+                              <AbsoluteConstraints x="990" y="100" width="210" height="360"/>
                             </Constraint>
                           </Constraints>
 
@@ -3496,7 +3496,7 @@
                               <Properties>
                                 <Property name="columns" type="int" value="20"/>
                                 <Property name="rows" type="int" value="5"/>
-                                <Property name="text" type="java.lang.String" value="5. Pasien Post Ranap&#xa;-Poli Tujuan = Sesuai Ranap&#xa;-No Rujukan = SEP Ranap&#xa;- Tanggal Rujukan = Tanggal SEP Ranap &#xa;                                 dibuat&#xa;-Inputkan Sukon (SKDP)&#xa;-Tujuan Kontrol = Normal&#xa;&#xa;6. Pasien IGD&#xa;-Poli Tujuan = IGD&#xa;- DOkter tujukan masukan DPJP&#xa;-Tujuan Kunjungan = Normal"/>
+                                <Property name="text" type="java.lang.String" value="4. Pasien Rawat Inap&#xa;-Jenis Pelayanan = Rawat Inap&#xa;-Asal Rujukan RS (Apabila dari IGD)&#xa;-Asal Rujukan FKTP (Apabila dari POLI)&#xa;-Masukan Nomor SPRI&#xa;-Tujuan Kunjungan = Normal&#xa;-PPK Rujukan = RST REKSODIWIRYO&#xa;&#xa;5. Pasien Post Ranap&#xa;-Poli Tujuan = Sesuai Ranap&#xa;-No Rujukan = SEP Ranap&#xa;- Tanggal Rujukan = Tanggal SEP Ranap &#xa;                                 dibuat&#xa;-Inputkan Sukon (SKDP)&#xa;-Tujuan Kontrol = Normal&#xa;&#xa;6. Pasien IGD&#xa;-Poli Tujuan = IGD&#xa;- DOkter tujukan masukan DPJP&#xa;-Tujuan Kunjungan = Normal"/>
                                 <Property name="name" type="java.lang.String" value="jTextArea1" noResource="true"/>
                               </Properties>
                             </Component>
