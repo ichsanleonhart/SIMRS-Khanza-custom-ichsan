@@ -6123,7 +6123,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
             }
         }
     }//GEN-LAST:event_ppRiwayatBtnPrintActionPerformed
-
+///////////////////////// start - upload berkas digital perawatan by ichsan
 private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ppUploadPDFBtnPrintActionPerformed
         FileName = "LAB_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString().replaceAll("/", "") + "_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1).toString().replaceAll("[/()\\-:, ]", "");
         CreatePDF(FileName);
@@ -6312,6 +6312,8 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
         }
         this.setCursor(Cursor.getDefaultCursor());
     }
+    
+    ///////////////////////// end - upload berkas digital perawatan by ichsan
     /**
     * @param args the command line arguments
     */
@@ -6948,7 +6950,7 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
     public void setPasien(String pasien){
         NoRawat.setText(pasien);
     }
-	
+///////////////////////// start - upload berkas digital perawatan by ichsan
 	private void UploadPDF(String FileName, String docpath) {
         try {
             File file = new File("tmpPDF/" + FileName + ".pdf");
@@ -6997,7 +6999,7 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
             }
         }
     } 
- 
+ ///////////////////////// start - upload berkas digital perawatan by ichsan
 
  
 }
