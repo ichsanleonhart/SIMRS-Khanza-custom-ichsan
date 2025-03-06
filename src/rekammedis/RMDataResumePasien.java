@@ -11,8 +11,6 @@
 
 package rekammedis;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import fungsi.WarnaTable;
 import fungsi.batasInput;
 import fungsi.koneksiDB;
@@ -43,6 +41,13 @@ import javax.swing.table.TableColumn;
 import kepegawaian.DlgCariDokter;
 import laporan.DlgBerkasRawat;
 import laporan.DlgDiagnosaPenyakit;
+import org.apache.commons.io.FileUtils;  //tambahan ichsan
+import org.apache.http.client.HttpClient; //tambahan ichsan
+import org.apache.http.client.methods.HttpPost; //tambahan ichsan
+import org.apache.http.entity.mime.HttpMultipartMode; //tambahan ichsan
+import org.apache.http.entity.mime.MultipartEntity; //tambahan ichsan
+import org.apache.http.entity.mime.content.ByteArrayBody; //tambahan ichsan
+import org.apache.http.impl.client.DefaultHttpClient; //tambahan ichsan
 
 
 /**
@@ -64,7 +69,7 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
     private RMCariHasilLaborat carilaborat=new RMCariHasilLaborat(null,false);
     private RMCariJumlahObat cariobat=new RMCariJumlahObat(null,false);
     private DlgDiagnosaPenyakit penyakit=new DlgDiagnosaPenyakit(null,false);
-    private String tanggal="",finger="",variabel="";
+    private String tanggal="",finger="",variabel="", FileName ="",kodeberkas=""; //tambahan ichsan FileName ="",kodeberkas="";
     
     /** Creates new form DlgRujuk
      * @param parent
@@ -382,6 +387,7 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
     private void initComponents() {
 
         jPopupMenu1 = new javax.swing.JPopupMenu();
+		UploadResume = new javax.swing.JMenuItem(); //tambahan ichsan
         MnLaporanResume = new javax.swing.JMenuItem();
         MnInputDiagnosa = new javax.swing.JMenuItem();
         ppBerkasDigital = new javax.swing.JMenuItem();
@@ -476,6 +482,21 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
         BtnDokter6 = new widget.Button();
 
         jPopupMenu1.setName("jPopupMenu1"); // NOI18N
+		UploadResume.setBackground(new java.awt.Color(255, 255, 254));
+        UploadResume.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
+        UploadResume.setForeground(new java.awt.Color(50, 50, 50));
+        UploadResume.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
+        UploadResume.setText("Upload Resume ke Berkas Digital");
+        UploadResume.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        UploadResume.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        UploadResume.setName("UploadResume"); // NOI18N
+        UploadResume.setPreferredSize(new java.awt.Dimension(300, 25));
+        UploadResume.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                UploadResumeBtnPrintActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(UploadResume);
 
         MnLaporanResume.setBackground(new java.awt.Color(255, 255, 254));
         MnLaporanResume.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
@@ -2041,6 +2062,44 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
         resume.setVisible(true);
         this.setCursor(Cursor.getDefaultCursor());
     }//GEN-LAST:event_BtnDokter6ActionPerformed
+	
+	private void UploadResumeBtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UploadResumeBtnPrintActionPerformed
+        FileName = "RESUME_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().replaceAll("/", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 2).toString().trim()+ "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 3).toString().replaceAll(" ", "");
+        CreatePDF(FileName);
+        String filePath = "tmpPDF/" + FileName;
+        UploadPDF(FileName, "berkasrawat/pages/upload/");
+        HapusPDF();
+        ppBerkasDigitalBtnPrintActionPerformed(evt);
+    }//GEN-LAST:event_UploadResumeBtnPrintActionPerformed
+
+    private void CreatePDF(String FileName) {
+      if(tbObat.getSelectedRow()>-1){
+            Map<String, Object> param = new HashMap<>();    
+            param.put("namars",akses.getnamars());
+            param.put("alamatrs",akses.getalamatrs());
+            param.put("kotars",akses.getkabupatenrs());
+            param.put("propinsirs",akses.getpropinsirs());
+            param.put("kontakrs",akses.getkontakrs());
+            param.put("emailrs",akses.getemailrs());   
+            param.put("logo",Sequel.cariGambar("select setting.logo from setting")); 
+            param.put("norawat",tbObat.getValueAt(tbObat.getSelectedRow(),1).toString());
+            param.put("jamkeluar",Sequel.cariIsi("select jam_rawat from pemeriksaan_ralan where no_rawat=?",tbObat.getValueAt(tbObat.getSelectedRow(),1).toString()));
+            tanggal="";
+            if(Sequel.cariIsi("select reg_periksa.status_lanjut from reg_periksa where reg_periksa.no_rawat=?",TNoRw.getText()).equals("Ralan")){
+                param.put("ruang",Sequel.cariIsi("select poliklinik.nm_poli from poliklinik inner join reg_periksa on reg_periksa.kd_poli=poliklinik.kd_poli where reg_periksa.no_rawat=?",tbObat.getValueAt(tbObat.getSelectedRow(),1).toString()));
+                tanggal=Sequel.cariIsi("select DATE_FORMAT(tgl_registrasi, '%d-%m-%Y') from reg_periksa where no_rawat=?",tbObat.getValueAt(tbObat.getSelectedRow(),1).toString());
+                param.put("tanggalkeluar",tanggal);
+            }else{
+                param.put("ruang",Sequel.cariIsi("select nm_bangsal from bangsal inner join kamar inner join kamar_inap on bangsal.kd_bangsal=kamar.kd_bangsal and kamar_inap.kd_kamar=kamar.kd_kamar where no_rawat=? order by tgl_masuk desc limit 1 ",tbObat.getValueAt(tbObat.getSelectedRow(),1).toString()));
+                tanggal=Sequel.cariIsi("select DATE_FORMAT(tgl_keluar, '%d-%m-%Y') from kamar_inap where no_rawat=? order by tgl_keluar desc limit 1 ",tbObat.getValueAt(tbObat.getSelectedRow(),1).toString());
+                param.put("tanggalkeluar",tanggal);
+            }
+            finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",tbObat.getValueAt(tbObat.getSelectedRow(),4).toString());
+            param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+tbObat.getValueAt(tbObat.getSelectedRow(),5).toString()+"\nID "+(finger.equals("")?tbObat.getValueAt(tbObat.getSelectedRow(),4).toString():finger)+"\n"+tanggal); 
+
+            Valid.MyReportPDFUpload("rptLaporanResume.jasper", "report", "::[ Upload Resume ]::", FileName, param);
+        }
+    } 
 
     /**
     * @param args the command line arguments
@@ -2116,6 +2175,7 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
     private widget.TextBox TNoRw;
     private widget.TextBox TPasien;
     private widget.TextBox Tanggal;
+	 private javax.swing.JMenuItem UploadResume; //tambahan ichsan
     private widget.InternalFrame internalFrame1;
     private widget.Label jLabel10;
     private widget.Label jLabel11;
@@ -2506,6 +2566,54 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
             emptTeks();
         }else{
             JOptionPane.showMessageDialog(null,"Gagal menghapus..!!");
+        }
+    }
+	private void UploadPDF(String FileName, String docpath) {
+        try {
+            File file = new File("tmpPDF/" + FileName + ".pdf");
+            byte[] data = FileUtils.readFileToByteArray(file);
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpPost postRequest = new HttpPost("http://" + koneksiDB.HOSTHYBRIDWEB() + ":" + koneksiDB.PORTWEB() + "/" + koneksiDB.HYBRIDWEB() + "/upload.php?doc=" + docpath);
+            ByteArrayBody fileData = new ByteArrayBody(data, FileName + ".pdf");
+            MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+            reqEntity.addPart("file", fileData);
+            postRequest.setEntity(reqEntity);
+            httpClient.execute(postRequest);
+
+            // Menyimpan ke database
+            boolean uploadSuccess = false;
+            kodeberkas = Sequel.cariIsi("SELECT kode FROM master_berkas_digital WHERE nama LIKE '%KLAIM%'");
+            if (Sequel.cariInteger("SELECT COUNT(no_rawat) AS jumlah FROM berkas_digital_perawatan WHERE lokasi_file='pages/upload/" + FileName + ".pdf'") > 0) {
+                uploadSuccess = Sequel.mengedittf("berkas_digital_perawatan", "lokasi_file=?","no_rawat=?,kode=?, lokasi_file=?", 4, new String[]{
+                    tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().trim(),kodeberkas,"pages/upload/" + FileName + ".pdf", "pages/upload/" + FileName + ".pdf"
+                });
+            } else {
+                uploadSuccess = Sequel.menyimpantf("berkas_digital_perawatan", "?,?,?", "No.Rawat", 3, new String[]{
+                    tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().trim(), kodeberkas, "pages/upload/" + FileName + ".pdf"
+                });
+            }
+
+            // Menampilkan notifikasi
+            if (uploadSuccess) {
+                JOptionPane.showMessageDialog(null, "Upload berhasil!", "Informasi", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Upload gagal disimpan ke database.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (Exception e) {
+            System.out.println("Upload error: " + e);
+            JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void HapusPDF() {
+        File file = new File("tmpPDF");
+        String[] myFiles;
+        if (file.isDirectory()) {
+            myFiles = file.list();
+            for (int i = 0; i < myFiles.length; i++) {
+                File myFile = new File(file, myFiles[i]);
+                myFile.delete();
+            }
         }
     }
 }
