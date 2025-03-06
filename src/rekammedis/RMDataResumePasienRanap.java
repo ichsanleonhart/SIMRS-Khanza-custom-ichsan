@@ -19,6 +19,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File; // tambahan by ichsan
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -33,6 +34,13 @@ import javax.swing.table.TableColumn;
 import kepegawaian.DlgCariDokter;
 import laporan.DlgBerkasRawat;
 import laporan.DlgDiagnosaPenyakit;
+import org.apache.commons.io.FileUtils;  //tambahan by ichsan
+import org.apache.http.client.HttpClient;  //tambahan by ichsan
+import org.apache.http.client.methods.HttpPost;  //tambahan by ichsan
+import org.apache.http.entity.mime.HttpMultipartMode;  //tambahan by ichsan
+import org.apache.http.entity.mime.MultipartEntity;  //tambahan by ichsan
+import org.apache.http.entity.mime.content.ByteArrayBody;  //tambahan by ichsan
+import org.apache.http.impl.client.DefaultHttpClient;  //tambahan by ichsan
 
 
 /**
@@ -58,7 +66,7 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
     private RMCariDiet caridiet=new RMCariDiet(null,false);
     private RMCariLabPending carilabpending=new RMCariLabPending(null,false);
     private DlgDiagnosaPenyakit penyakit=new DlgDiagnosaPenyakit(null,false);
-    private String kodekamar="",namakamar="",tglkeluar="",jamkeluar="",finger="",kamaranak="", tglkeluaranak="", no_rawat_ibu="";
+    private String kodekamar="",namakamar="",tglkeluar="",jamkeluar="",finger="",kamaranak="", tglkeluaranak="", no_rawat_ibu="", FileName ="",kodeberkas="";
     
     /** Creates new form DlgRujuk
      * @param parent
@@ -531,6 +539,7 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
         jPopupMenu1 = new javax.swing.JPopupMenu();
         MnLaporanResume = new javax.swing.JMenuItem();
         MnLaporanResumeAnak = new javax.swing.JMenuItem();
+		UploadResume = new javax.swing.JMenuItem(); //tambahan ichsan
         MnInputDiagnosa = new javax.swing.JMenuItem();
         ppBerkasDigital = new javax.swing.JMenuItem();
         internalFrame1 = new widget.InternalFrame();
@@ -675,6 +684,22 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
         BtnDokter6 = new widget.Button();
 
         jPopupMenu1.setName("jPopupMenu1"); // NOI18N
+		        UploadResume.setBackground(new java.awt.Color(255, 255, 254));
+        UploadResume.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
+        UploadResume.setForeground(new java.awt.Color(50, 50, 50));
+        UploadResume.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
+        UploadResume.setText("Upload Resume ke Berkas Digital");
+        UploadResume.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        UploadResume.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        UploadResume.setName("UploadResume"); // NOI18N
+        UploadResume.setPreferredSize(new java.awt.Dimension(300, 25));
+        UploadResume.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                UploadResumeBtnPrintActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(UploadResume);
+
 
         MnLaporanResume.setBackground(new java.awt.Color(255, 255, 254));
         MnLaporanResume.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
@@ -2670,6 +2695,68 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_MnLaporanResumeAnakActionPerformed
 
+private void UploadResumeBtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UploadResumeBtnPrintActionPerformed
+        FileName = "RESUME_" + tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().replaceAll("/", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().trim()+ "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 2).toString().replaceAll(" ", "_");
+        CreatePDF(FileName);
+        String filePath = "tmpPDF/" + FileName;
+        UploadPDF(FileName, "berkasrawat/pages/upload/");
+        HapusPDF();
+        ppBerkasDigitalBtnPrintActionPerformed(evt);
+    }//GEN-LAST:event_UploadResumeBtnPrintActionPerformed
+
+    private void CreatePDF(String FileName) {
+        if (tbObat.getSelectedRow() > -1) {
+            Map<String, Object> param = new HashMap<>();
+            param.put("namars", akses.getnamars());
+            param.put("alamatrs", akses.getalamatrs());
+            param.put("kotars", akses.getkabupatenrs());
+            param.put("propinsirs", akses.getpropinsirs());
+            param.put("kontakrs", akses.getkontakrs());
+            param.put("emailrs", akses.getemailrs());
+            param.put("logo", Sequel.cariGambar("select setting.logo from setting"));
+            param.put("norawat", tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString());
+            finger = Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?", tbObat.getValueAt(tbObat.getSelectedRow(), 3).toString());
+            param.put("finger", "Dikeluarkan di " + akses.getnamars() + ", Kabupaten/Kota " + akses.getkabupatenrs() + "\nDitandatangani secara elektronik oleh " + tbObat.getValueAt(tbObat.getSelectedRow(), 4).toString() + "\nID " + (finger.equals("") ? tbObat.getValueAt(tbObat.getSelectedRow(), 3).toString() : finger) + "\n" + Valid.SetTgl3(Keluar.getText()));
+            try {
+                ps = koneksi.prepareStatement("select dpjp_ranap.kd_dokter,dokter.nm_dokter from dpjp_ranap inner join dokter on dpjp_ranap.kd_dokter=dokter.kd_dokter where dpjp_ranap.no_rawat=? and dpjp_ranap.kd_dokter<>?");
+                try {
+                    ps.setString(1, tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString());
+                    ps.setString(2, tbObat.getValueAt(tbObat.getSelectedRow(), 5).toString());
+                    rs = ps.executeQuery();
+                    i = 2;
+                    while (rs.next()) {
+                        if (i == 2) {
+                            finger = Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?", rs.getString("kd_dokter"));
+                            param.put("finger2", "Dikeluarkan di " + akses.getnamars() + ", Kabupaten/Kota " + akses.getkabupatenrs() + "\nDitandatangani secara elektronik oleh " + rs.getString("nm_dokter") + "\nID " + (finger.equals("") ? rs.getString("kd_dokter") : finger) + "\n" + Valid.SetTgl3(Keluar.getText()));
+                            param.put("namadokter2", rs.getString("nm_dokter"));
+                        }
+                        if (i == 3) {
+                            finger = Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?", rs.getString("kd_dokter"));
+                            param.put("finger3", "Dikeluarkan di " + akses.getnamars() + ", Kabupaten/Kota " + akses.getkabupatenrs() + "\nDitandatangani secara elektronik oleh " + rs.getString("nm_dokter") + "\nID " + (finger.equals("") ? rs.getString("kd_dokter") : finger) + "\n" + Valid.SetTgl3(Keluar.getText()));
+                            param.put("namadokter3", rs.getString("nm_dokter"));
+                        }
+                        i++;
+                    }
+                } catch (Exception e) {
+                    System.out.println("Notif : " + e);
+                } finally {
+                    if (rs != null) {
+                        rs.close();
+                    }
+                    if (ps != null) {
+                        ps.close();
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("Notif : " + e);
+            }
+            param.put("ruang", KdRuang.getText() + " " + NmRuang.getText());
+            param.put("tanggalkeluar", Valid.SetTgl3(Keluar.getText()));
+            param.put("jamkeluar", JamKeluar.getText());
+            Valid.MyReportPDFUpload("rptLaporanResumeRanap.jasper", "report", "::[ Laporan Resume Pasien ]::", FileName, param);
+        }
+    }
+    
     /**
     * @param args the command line arguments
     */
@@ -2771,6 +2858,7 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
     private widget.TextBox TNoRw;
     private widget.TextBox TPasien;
     private widget.TextArea TindakanSelamaDiRS;
+	private javax.swing.JMenuItem UploadResume;  //tambahan ichsan
     private widget.InternalFrame internalFrame1;
     private widget.Label jLabel10;
     private widget.Label jLabel11;
@@ -3296,5 +3384,53 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
         }
     }
 
+private void UploadPDF(String FileName, String docpath) {
+        try {
+            File file = new File("tmpPDF/" + FileName + ".pdf");
+            byte[] data = FileUtils.readFileToByteArray(file);
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpPost postRequest = new HttpPost("http://" + koneksiDB.HOSTHYBRIDWEB() + ":" + koneksiDB.PORTWEB() + "/" + koneksiDB.HYBRIDWEB() + "/upload.php?doc=" + docpath);
+            ByteArrayBody fileData = new ByteArrayBody(data, FileName + ".pdf");
+            MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+            reqEntity.addPart("file", fileData);
+            postRequest.setEntity(reqEntity);
+            httpClient.execute(postRequest);
+
+            // Menyimpan ke database
+            boolean uploadSuccess = false;
+            kodeberkas = Sequel.cariIsi("SELECT kode FROM master_berkas_digital WHERE nama LIKE '%KLAIM%'");
+            if (Sequel.cariInteger("SELECT COUNT(no_rawat) AS jumlah FROM berkas_digital_perawatan WHERE lokasi_file='pages/upload/" + FileName + ".pdf'") > 0) {
+                uploadSuccess = Sequel.mengedittf("berkas_digital_perawatan", "lokasi_file=?","no_rawat=?,kode=?, lokasi_file=?", 4, new String[]{
+                    tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().trim(),kodeberkas,"pages/upload/" + FileName + ".pdf", "pages/upload/" + FileName + ".pdf"
+                });
+            } else {
+                uploadSuccess = Sequel.menyimpantf("berkas_digital_perawatan", "?,?,?", "No.Rawat", 3, new String[]{
+                    tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().trim(), kodeberkas, "pages/upload/" + FileName + ".pdf"
+                });
+            }
+
+            // Menampilkan notifikasi
+            if (uploadSuccess) {
+                JOptionPane.showMessageDialog(null, "Upload berhasil!", "Informasi", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Upload gagal disimpan ke database.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (Exception e) {
+            System.out.println("Upload error: " + e);
+            JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void HapusPDF() {
+        File file = new File("tmpPDF");
+        String[] myFiles;
+        if (file.isDirectory()) {
+            myFiles = file.list();
+            for (int i = 0; i < myFiles.length; i++) {
+                File myFile = new File(file, myFiles[i]);
+                myFile.delete();
+            }
+        }
+    }
     
 }
