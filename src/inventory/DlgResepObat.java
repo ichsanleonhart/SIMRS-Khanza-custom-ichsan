@@ -2273,7 +2273,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         }
     }//GEN-LAST:event_ppLembarObat2ActionPerformed
 	private void ppUploadPDFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ppUploadPDFActionPerformed
-        FileName = "RESEP_" + tbResep.getValueAt(tbResep.getSelectedRow(), 0).toString().trim() + "_" + tbResep.getValueAt(tbResep.getSelectedRow(), 2).toString().replaceAll("[/, ]", "_");
+        FileName = "BERKAS_RESEP_" + tbResep.getValueAt(tbResep.getSelectedRow(), 0).toString().trim() + "_" + tbResep.getValueAt(tbResep.getSelectedRow(), 2).toString().replaceAll("[/, ]", "_");
         CreatePDF(FileName);
         String filePath = "tmpPDF/" + FileName;
         UploadPDF(FileName, "berkasrawat/pages/upload/");

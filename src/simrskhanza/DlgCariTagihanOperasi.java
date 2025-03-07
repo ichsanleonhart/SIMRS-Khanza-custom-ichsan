@@ -3246,7 +3246,7 @@ private void MnHapusObatOperasiActionPerformed(java.awt.event.ActionEvent evt) {
     }//GEN-LAST:event_btnAmbilPhoto1ActionPerformed
 ////////////////////////////  start - upload berkas digital perawatan by ichsan
     private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ppUploadPDFBtnPrintActionPerformed
-        FileName = "LAP_OPERASI_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1).toString().replaceAll("/", "") + "_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 2).toString().replaceAll("[/()\\-:, ]", "");
+        FileName = "BERKAS_OPERASI_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1).toString().replaceAll("/", "") + "_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 2).toString().replaceAll("[/()\\-:, ]", "");
         CreatePDF(FileName);
         String filePath = "tmpPDF/" + FileName;
         UploadPDF(FileName, "berkasrawat/pages/upload/");
