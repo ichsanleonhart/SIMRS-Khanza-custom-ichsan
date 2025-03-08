@@ -371,7 +371,7 @@ where resume_pasien_ranap.no_rawat= $P{norawat}]]>
 				<text><![CDATA[RESUME MEDIS PASIEN]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="48" y="3" width="486" height="17" uuid="6c31c284-e35b-4e6c-8447-af5f9207b9b4"/>
+				<reportElement x="1" y="3" width="533" height="17" uuid="6c31c284-e35b-4e6c-8447-af5f9207b9b4"/>
 				<textElement textAlignment="Center">
 					<font fontName="Tahoma" size="12"/>
 					<paragraph lineSpacing="Single"/>
@@ -379,7 +379,7 @@ where resume_pasien_ranap.no_rawat= $P{norawat}]]>
 				<textFieldExpression><![CDATA[$P{namars}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="48" y="17" width="486" height="14" uuid="ba45cdb1-6e88-4a05-8795-1ae63b3ef11b"/>
+				<reportElement x="1" y="17" width="533" height="14" uuid="ba45cdb1-6e88-4a05-8795-1ae63b3ef11b"/>
 				<textElement textAlignment="Center">
 					<font fontName="Tahoma" size="8"/>
 					<paragraph lineSpacing="Single"/>
@@ -387,7 +387,7 @@ where resume_pasien_ranap.no_rawat= $P{norawat}]]>
 				<textFieldExpression><![CDATA[$P{alamatrs}+", "+$P{kotars}+", "+$P{propinsirs}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="48" y="28" width="486" height="14" uuid="6bb20c38-1c6d-461e-993d-04653cb69342"/>
+				<reportElement x="1" y="28" width="533" height="14" uuid="6bb20c38-1c6d-461e-993d-04653cb69342"/>
 				<textElement textAlignment="Center">
 					<font fontName="Tahoma" size="8"/>
 					<paragraph lineSpacing="Single"/>
@@ -401,17 +401,13 @@ where resume_pasien_ranap.no_rawat= $P{norawat}]]>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="48" y="42" width="486" height="14" uuid="14bd74cb-266d-4524-b5f1-6402afbb3b8f"/>
+				<reportElement x="1" y="42" width="533" height="14" uuid="14bd74cb-266d-4524-b5f1-6402afbb3b8f"/>
 				<textElement textAlignment="Center">
 					<font fontName="Tahoma" size="8"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA["E-mail : "+$P{emailrs}]]></textFieldExpression>
 			</textField>
-			<image scaleImage="FillFrame" onErrorType="Blank">
-				<reportElement x="0" y="3" width="48" height="51" uuid="40ef1091-7eb7-4f93-9136-3d283d6ac80c"/>
-				<imageExpression><![CDATA[$P{logo}]]></imageExpression>
-			</image>
 			<staticText>
 				<reportElement x="5" y="85" width="70" height="10" uuid="a9805458-48f4-4dea-a7db-ee41a82f82c7">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -693,14 +689,6 @@ where resume_pasien_ranap.no_rawat= $P{norawat}]]>
 				</textElement>
 				<text><![CDATA[Dokter Penanggung Jawab]]></text>
 			</staticText>
-			<componentElement>
-				<reportElement positionType="Float" x="370" y="727" width="157" height="49" isRemoveLineWhenBlank="true" uuid="92ab0356-8454-4b64-a117-5ac52c90d28f">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<jr:QRCode xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" errorCorrectionLevel="H">
-					<jr:codeExpression><![CDATA[$P{finger}]]></jr:codeExpression>
-				</jr:QRCode>
-			</componentElement>
 			<line>
 				<reportElement x="0" y="800" width="534" height="1" uuid="b3a4f55b-ef2f-4f60-bbb5-92b2f31a7ad7"/>
 				<graphicElement>
@@ -1796,6 +1784,18 @@ where resume_pasien_ranap.no_rawat= $P{norawat}]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{jamkeluar}]]></textFieldExpression>
 			</textField>
+			<textField>
+				<reportElement positionType="Float" x="366" y="744" width="164" height="11" uuid="3b395f96-ffdc-4c3d-b434-eeb3dcfab92a"/>
+				<textElement textAlignment="Center">
+					<font fontName="Tahoma" size="8" isBold="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{finger}]]></textFieldExpression>
+			</textField>
+			<image scaleImage="FillFrame" isUsingCache="true" onErrorType="Blank">
+				<reportElement x="1" y="10" width="45" height="45" uuid="df9a16bf-9f26-4a00-9e90-2e8f492515ab"/>
+				<imageExpression><![CDATA[$P{logo}]]></imageExpression>
+			</image>
 		</band>
 	</detail>
 	<columnFooter>

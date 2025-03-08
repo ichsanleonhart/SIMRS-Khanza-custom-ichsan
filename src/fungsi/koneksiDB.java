@@ -31,8 +31,15 @@ public class koneksiDB {
                 dataSource.setUser(EnkripsiAES.decrypt(prop.getProperty("USER")));
                 dataSource.setPassword(EnkripsiAES.decrypt(prop.getProperty("PAS")));
                 dataSource.setCachePreparedStatements(true);
+                dataSource.setPreparedStatementCacheSize(100);    
+                dataSource.setPreparedStatementCacheSqlLimit(2048);
                 dataSource.setUseCompression(true);
-                dataSource.setAutoReconnect(true);
+                dataSource.setAutoReconnect(true);                      
+                dataSource.setAutoReconnectForPools(true);
+                dataSource.setReconnectAtTxEnd(true);
+                dataSource.setUseServerPrepStmts(true);                 
+                dataSource.setUseLocalSessionState(true);               
+                dataSource.setUseLocalTransactionState(true); 
                 connection=dataSource.getConnection();       
                 System.out.println("  Koneksi Berhasil. Sorry bro loading, silahkan baca dulu.... \n\n"+
                         "	Software ini adalah Software Menejemen Rumah Sakit/Klinik/\n" +
@@ -61,8 +68,15 @@ public class koneksiDB {
                         dataSource.setUser(EnkripsiAES.decrypt(prop.getProperty("USER")));
                         dataSource.setPassword(EnkripsiAES.decrypt(prop.getProperty("PAS")));
                         dataSource.setCachePreparedStatements(true);
+                        dataSource.setPreparedStatementCacheSize(100);          
+                        dataSource.setPreparedStatementCacheSqlLimit(2048); 
                         dataSource.setUseCompression(true);
-                        dataSource.setAutoReconnect(true);
+                        dataSource.setAutoReconnect(true);                      
+                        dataSource.setAutoReconnectForPools(true);
+                        dataSource.setReconnectAtTxEnd(true);
+                        dataSource.setUseServerPrepStmts(true);                 
+                        dataSource.setUseLocalSessionState(true);               
+                        dataSource.setUseLocalTransactionState(true); 
                         connection=dataSource.getConnection();  
                     }
                 } catch (Exception ex) {
@@ -1665,27 +1679,6 @@ public class koneksiDB {
         try{
             prop.loadFromXML(new FileInputStream("setting/database.xml"));
             var=prop.getProperty("URLDOKUMENSERTISIGN");
-        }catch(Exception e){
-            var=""; 
-        }
-        return var;
-    }
-    
-//TAMBAHAN DARI ICHSAN
-    public static String AKTIFKANWARNARANAP(){
-        try{
-            prop.loadFromXML(new FileInputStream("setting/database.xml"));
-            var=prop.getProperty("AKTIFKANWARNARANAP");
-        }catch(Exception e){
-            var=""; 
-        }
-        return var;
-    }
-    //TAMBAHAN DARI ICHSAN
-    public static String WANOTIFPASIEN(){
-        try{
-            prop.loadFromXML(new FileInputStream("setting/database.xml"));
-            var=prop.getProperty("WANOTIFPASIEN");
         }catch(Exception e){
             var=""; 
         }
