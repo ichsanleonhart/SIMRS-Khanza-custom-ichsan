@@ -2,14 +2,14 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
     <comment>KhanzaHMS</comment> 
-	<entry key="HOST">r19bAXRY6BQOI4hBcfSnHw==</entry>
+	<entry key="HOST">S4ECfT2/eiCXJbUl3KLUR42EoFB3YZNqdswIsAMiN1A=</entry>
     <entry key="DATABASE">B/VFXMnPOQpwL6aPTlmEcQ==</entry>
-    <entry key="PORT">nioxtijcpDaKSUiUiP5FAg==</entry>
+    <entry key="PORT">0sWcq2h64U8ou1kQJstC5g==</entry>
     <entry key="USER">3fsjwvKJn8IpzysMeNu3bA==</entry>
     <entry key="PAS">z5EhF4xxNihimsGB3AkUAQ==</entry>
     <entry key="CARICEPAT">nonaktif</entry>
-    <entry key="HOSTHYBRIDWEB">r19bAXRY6BQOI4hBcfSnHw==</entry>
-	<entry key="USERHYBRIDWEB">CUHISWJ0/JBvloH7LbhvsA==</entry>
+    <entry key="HOSTHYBRIDWEB">S4ECfT2/eiCXJbUl3KLUR42EoFB3YZNqdswIsAMiN1A=</entry>
+    <entry key="USERHYBRIDWEB">CUHISWJ0/JBvloH7LbhvsA==</entry>
     <entry key="PASHYBRIDWEB">c/6y8XztRzLrI5/Hlzbouw==</entry>
     <entry key="HYBRIDWEB">webapps</entry>
     <entry key="PORTWEB">80</entry>

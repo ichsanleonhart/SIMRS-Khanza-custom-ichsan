@@ -2450,12 +2450,11 @@ public final class RMTransferPasienAntarRuang extends javax.swing.JDialog {
     }//GEN-LAST:event_ppBerkasDigitalActionPerformed
 
     private void UploadTransferPasienActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UploadTransferPasienActionPerformed
-        FileName = "Form_transfer_pasien_" + tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().replaceAll("/", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().trim()+ "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 2).toString().replaceAll(" ", "_");
+        FileName = "tf_pasien_" + tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().replaceAll("/", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().trim()+ "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 2).toString().replaceAll(" ", "_");
         CreatePDF(FileName);
         String filePath = "tmpPDF/" + FileName;
         UploadPDF(FileName, "berkasrawat/pages/upload/");
         HapusPDF();
-        ppBerkasDigitalActionPerformed(evt);
     }//GEN-LAST:event_UploadTransferPasienActionPerformed
 
     private void CreatePDF(String FileName) {
@@ -3019,6 +3018,7 @@ public final class RMTransferPasienAntarRuang extends javax.swing.JDialog {
         }
     }
     
+    ////////////////////// start - fungsi upload pdf by ichsan
     private void UploadPDF(String FileName, String docpath) {
         try {
             File file = new File("tmpPDF/" + FileName + ".pdf");
@@ -3067,4 +3067,5 @@ public final class RMTransferPasienAntarRuang extends javax.swing.JDialog {
             }
         }
     }
+    ////////////////////// end - fungsi upload pdf by ichsan
 }
