@@ -2450,48 +2450,81 @@ public final class RMTransferPasienAntarRuang extends javax.swing.JDialog {
     }//GEN-LAST:event_ppBerkasDigitalActionPerformed
 
     private void UploadTransferPasienActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UploadTransferPasienActionPerformed
-        FileName = "tf_pasien_" + tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().replaceAll("/", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().trim()+ "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 2).toString().replaceAll(" ", "_");
-        CreatePDF(FileName);
-        String filePath = "tmpPDF/" + FileName;
-        UploadPDF(FileName, "berkasrawat/pages/upload/");
-        HapusPDF();
+        // Properly generate the file name
+    String noRawat = tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().replaceAll("/", ""); // sanitize slashes
+    String noRM = tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().trim();
+    String namaPasien = tbObat.getValueAt(tbObat.getSelectedRow(), 2).toString().replaceAll(" ", "_");
+    String FileName = "tf_pasien_" + noRawat + "_" + noRM + "_" + namaPasien;
+
+    // Debugging to check the generated file name
+    System.out.println("Generated FileName: " + FileName);  
+    System.out.println("Raw no_rawat: " + tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString());  
+
+    // Generate the PDF
+    CreatePDF(FileName);
+
+    // Verify the generated file path (ensure .pdf extension is added)
+    String filePath = "tmpPDF/" + FileName + ".pdf";  
+    System.out.println("Expected File Path: " + filePath);  
+
+    File file = new File(filePath);
+    if (file.exists()) {
+        System.out.println("PDF berhasil dibuat: " + file.getAbsolutePath());
+    } else {
+        System.out.println("PDF gak ditemukan! ada yang salah ketika bikin PDF.");
+    }
+
+    // Upload the PDF
+    UploadPDF(FileName, "berkasrawat/pages/upload/");
+
+    // Clean up temporary files
+    HapusPDF();
     }//GEN-LAST:event_UploadTransferPasienActionPerformed
 
     private void CreatePDF(String FileName) {
-    if(tbObat.getSelectedRow()>-1){
-            Map<String, Object> param = new HashMap<>();
-            param.put("namars",akses.getnamars());
-            param.put("alamatrs",akses.getalamatrs());
-            param.put("kotars",akses.getkabupatenrs());
-            param.put("propinsirs",akses.getpropinsirs());
-            param.put("kontakrs",akses.getkontakrs());
-            param.put("emailrs",akses.getemailrs());
-            param.put("logo",Sequel.cariGambar("select setting.logo from setting"));
-            try {
-                param.put("lokalis",getClass().getResource("/picture/semua.png").openStream());
-            } catch (Exception e) {
-            }
-            finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",tbObat.getValueAt(tbObat.getSelectedRow(),5).toString());
-            param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+tbObat.getValueAt(tbObat.getSelectedRow(),6).toString()+"\nID "+(finger.equals("")?tbObat.getValueAt(tbObat.getSelectedRow(),5).toString():finger)+"\n"+Valid.SetTgl3(tbObat.getValueAt(tbObat.getSelectedRow(),7).toString()));
+    if (tbObat.getSelectedRow() > -1) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("namars", akses.getnamars());
+        param.put("alamatrs", akses.getalamatrs());
+        param.put("kotars", akses.getkabupatenrs());
+        param.put("propinsirs", akses.getpropinsirs());
+        param.put("kontakrs", akses.getkontakrs());
+        param.put("emailrs", akses.getemailrs());
+        param.put("logo", Sequel.cariGambar("select setting.logo from setting"));
 
-            Valid.MyReportqry("rptCetakTransperPasien.jasper","report","::[ Laporan Tranfer Pasien ]::",
-                "SELECT reg_periksa.no_rawat, pasien.no_rkm_medis, pasien.nm_pasien, IF(pasien.jk='L', 'Laki-Laki', 'Perempuan') AS jk, pasien.tgl_lahir, transfer_pasien_antar_ruang.tanggal_pindah," +
-             "transfer_pasien_antar_ruang.asal_ruang, transfer_pasien_antar_ruang.ruang_selanjutnya, transfer_pasien_antar_ruang.diagnosa_utama, transfer_pasien_antar_ruang.diagnosa_sekunder," +
-             "transfer_pasien_antar_ruang.indikasi_pindah_ruang, transfer_pasien_antar_ruang.keterangan_indikasi_pindah_ruang, transfer_pasien_antar_ruang.prosedur_yang_sudah_dilakukan," +
-             "transfer_pasien_antar_ruang.obat_yang_telah_diberikan,transfer_pasien_antar_ruang.obat_yang_akan_diberikan, transfer_pasien_antar_ruang.metode_pemindahan_pasien, transfer_pasien_antar_ruang.peralatan_yang_menyertai," +
-             "transfer_pasien_antar_ruang.keterangan_peralatan_yang_menyertai, transfer_pasien_antar_ruang.pemeriksaan_penunjang_yang_dilakukan, transfer_pasien_antar_ruang.pasien_keluarga_menyetujui," +
-             "transfer_pasien_antar_ruang.nama_menyetujui, transfer_pasien_antar_ruang.hubungan_menyetujui, transfer_pasien_antar_ruang.keluhan_utama_sebelum_transfer," +
-             "transfer_pasien_antar_ruang.keadaan_umum_sebelum_transfer, transfer_pasien_antar_ruang.td_sebelum_transfer, transfer_pasien_antar_ruang.nadi_sebelum_transfer," +
-             "transfer_pasien_antar_ruang.rr_sebelum_transfer, transfer_pasien_antar_ruang.suhu_sebelum_transfer, transfer_pasien_antar_ruang.keluhan_utama_sesudah_transfer," +
-             "transfer_pasien_antar_ruang.keadaan_umum_sesudah_transfer, transfer_pasien_antar_ruang.td_sesudah_transfer, transfer_pasien_antar_ruang.nadi_sesudah_transfer," +
-             "transfer_pasien_antar_ruang.rr_sesudah_transfer, transfer_pasien_antar_ruang.suhu_sesudah_transfer, transfer_pasien_antar_ruang.nip_menyerahkan," +
-             "transfer_pasien_antar_ruang.nip_menerima, p1.nama AS nama_menyerahkan, p2.nama AS nama_menerima " +
-                "from reg_periksa INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis "+
-                "INNER JOIN transfer_pasien_antar_ruang ON reg_periksa.no_rawat = transfer_pasien_antar_ruang.no_rawat "+
-                "INNER JOIN petugas p1 ON transfer_pasien_antar_ruang.nip_menyerahkan = p1.nip "+ 
-                "INNER JOIN petugas p2 ON transfer_pasien_antar_ruang.nip_menerima = p2.nip  where transfer_pasien_antar_ruang.no_rawat='"+tbObat.getValueAt(tbObat.getSelectedRow(),0).toString()+"'",param);
+        try {
+            param.put("lokalis", getClass().getResource("/picture/semua.png").openStream());
+        } catch (Exception e) {
+            System.out.println("Failed to load logo: " + e.getMessage());
         }
+
+        // Add digital signature
+        finger = Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari " +
+                "inner join pegawai on pegawai.id = sidikjari.id " +
+                "where pegawai.nik = ?", tbObat.getValueAt(tbObat.getSelectedRow(), 5).toString());
+        param.put("finger", "Dikeluarkan di " + akses.getnamars() +
+                ", Kabupaten/Kota " + akses.getkabupatenrs() +
+                "\nDitandatangani secara elektronik oleh " + tbObat.getValueAt(tbObat.getSelectedRow(), 6).toString() +
+                "\nID " + (finger.isEmpty() ? tbObat.getValueAt(tbObat.getSelectedRow(), 5).toString() : finger) +
+                "\n" + Valid.SetTgl3(tbObat.getValueAt(tbObat.getSelectedRow(), 7).toString()));
+
+        // Pass no_rawat for filtering the report
+        param.put("no_rawat", tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString());
+
+        // Debug: Show the file name and params
+        System.out.println("Generating PDF with FileName: " + FileName);
+        System.out.println("no_rawat parameter: " + tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString());
+
+        // Generate the PDF using MyReportPDFUpload
+        Valid.MyReportPDFUpload("rptCetakTransperPasien.jasper", "report", "::[ Laporan Transfer Pasien ]::", FileName, param);
+    } else {
+        System.out.println("No row selected from tbObat!");
     }
+}
+
+
+
+
     /**
     * @param args the command line arguments
     */
