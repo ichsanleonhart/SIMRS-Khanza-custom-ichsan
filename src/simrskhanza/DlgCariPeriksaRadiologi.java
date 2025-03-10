@@ -37,6 +37,16 @@ import laporan.DlgBerkasRawat;
 import rekammedis.MasterCariTemplateHasilRadiologi;
 import rekammedis.RMRiwayatPerawatan;
 
+
+import java.io.File; //tambahan by ichsan
+import org.apache.commons.io.FileUtils;  //tambahan ichsan
+import org.apache.http.client.HttpClient; //tambahan ichsan
+import org.apache.http.client.methods.HttpPost; //tambahan ichsan
+import org.apache.http.entity.mime.HttpMultipartMode; //tambahan ichsan
+import org.apache.http.entity.mime.MultipartEntity; //tambahan ichsan
+import org.apache.http.entity.mime.content.ByteArrayBody; //tambahan ichsan
+import org.apache.http.impl.client.DefaultHttpClient; //tambahan ichsan
+
 public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
     private final DefaultTableModel tabMode,tabModeDicom;
     private sekuel Sequel=new sekuel();
@@ -51,7 +61,7 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
     private StringBuilder htmlContent;
     private PreparedStatement ps,ps2,ps3,ps4,ps5,psrekening;
     private ResultSet rs,rs2,rs3,rs5,rsrekening;
-    private String kamar,namakamar,pemeriksaan="",pilihan="",status="",finger="",statushasil="", lokasifile="", SQLException="";  //tambahan ichsan lokasifile="" SQLException=""
+    private String kamar,namakamar,pemeriksaan="",pilihan="",status="",finger="",statushasil="", lokasifile="", SQLException="", FileName ="",kodeberkas=""; //tambahan ichsan FileName ="",kodeberkas="", lokasifile="" SQLException=""
     private double ttl=0,item=0;
     private double ttljmdokter=0,ttljmpetugas=0,ttlkso=0,ttlpendapatan=0,ttlbhp=0,ttljasasarana=0,ttljmperujuk=0,ttlmenejemen=0;;
     private String kdpetugas="",kdpenjab="",Suspen_Piutang_Radiologi_Ranap="",Radiologi_Ranap="",Beban_Jasa_Medik_Dokter_Radiologi_Ranap="",Utang_Jasa_Medik_Dokter_Radiologi_Ranap="",
@@ -408,6 +418,7 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
         btnAmbilPhoto1 = new widget.Button();
         BtnSimpan = new widget.Button();
         BtnPrint1 = new widget.Button();
+        UploadRadiologi = new widget.Button();
         FormOrthan = new widget.PanelBiasa();
         Scroll5 = new widget.ScrollPane();
         tbListDicom = new widget.Table();
@@ -1068,7 +1079,7 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
 
         panelGlass6.setBorder(null);
         panelGlass6.setName("panelGlass6"); // NOI18N
-        panelGlass6.setPreferredSize(new java.awt.Dimension(115, 40));
+        panelGlass6.setPreferredSize(new java.awt.Dimension(115, 70));
 
         btnAmbilPhoto1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         btnAmbilPhoto1.setMnemonic('U');
@@ -1118,6 +1129,24 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
             }
         });
         panelGlass6.add(BtnPrint1);
+
+        UploadRadiologi.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/upload24.png"))); // NOI18N
+        UploadRadiologi.setMnemonic('T');
+        UploadRadiologi.setText("Upload Berkas Digital");
+        UploadRadiologi.setToolTipText("Alt+T");
+        UploadRadiologi.setName("UploadRadiologi"); // NOI18N
+        UploadRadiologi.setPreferredSize(new java.awt.Dimension(180, 30));
+        UploadRadiologi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                UploadRadiologiActionPerformed(evt);
+            }
+        });
+        UploadRadiologi.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                UploadRadiologiKeyPressed(evt);
+            }
+        });
+        panelGlass6.add(UploadRadiologi);
 
         FormHasilRadiologi.add(panelGlass6, java.awt.BorderLayout.PAGE_END);
 
@@ -2236,6 +2265,148 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
         tampil();
     }//GEN-LAST:event_ppBelumKeluarBacaanBtnPrintActionPerformed
 
+    private void UploadRadiologiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UploadRadiologiActionPerformed
+        FileName = "Berkas_Radiologi_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString().replaceAll("/", "") + "_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1).toString().replaceAll(" ", "");
+        CreatePDF(FileName);
+        String filePath = "tmpPDF/" + FileName;
+        UploadPDF(FileName, "berkasrawat/pages/upload/");
+        HapusPDF();
+        ppBerkasDigitalBtnPrintActionPerformed(evt);
+    }//GEN-LAST:event_UploadRadiologiActionPerformed
+
+    private void CreatePDF(String FileName) {   //isi kode ini, mengambil dari isi ppSEPBtnPrintActionPerformed (button untuk cetak PDF dari SEP / form apa pun itu)
+        if(Kd2.getText().equals("")){
+               JOptionPane.showMessageDialog(null,"Maaf, silahkan pilih data terlebih dahulu...!!!!"); 
+        }else{
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            
+            //////////////////////// start - tambahan code buat fetch foto radiologi by ichsan
+            try {
+                    ps = koneksi.prepareStatement(
+                        "SELECT gambar_radiologi.lokasi_gambar FROM gambar_radiologi " +
+                        "WHERE gambar_radiologi.no_rawat = ? AND gambar_radiologi.tgl_periksa = ? " +
+                        "AND gambar_radiologi.jam = ?"
+                    );
+                        
+                    if (tbDokter.getSelectedRow() != -1) {
+                        ps.setString(1, tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString());
+                        ps.setString(2, tbDokter.getValueAt(tbDokter.getSelectedRow(), 3).toString());
+                        ps.setString(3, tbDokter.getValueAt(tbDokter.getSelectedRow(), 4).toString());
+
+                        rs = ps.executeQuery();
+                        lokasifile = ""; // Initialize to empty string
+
+                        if (rs.next()) {
+                            lokasifile = rs.getString("lokasi_gambar");
+                        }
+                
+                        System.out.println("Lokasi Gambar Radiologi: " + lokasifile); // Debugging Output
+                    } else {
+                        System.out.println("No row selected in tbDokter.");
+                    }
+                } catch (SQLException e) {
+                    System.out.println("Error fetching radiology image location: " + e);
+                } finally {
+                    try {
+                        if (rs != null) rs.close();
+                        if (ps != null) ps.close();
+                    } catch (SQLException e) {
+                        System.out.println("Error closing resources: " + e);
+                    }
+                }
+
+
+            //////////////////////// end - tambahan code buat fetch foto radiologi by ichsan
+            
+            pemeriksaan="";
+            try {
+                ps2=koneksi.prepareStatement(
+                            "select jns_perawatan_radiologi.kd_jenis_prw,jns_perawatan_radiologi.nm_perawatan,periksa_radiologi.biaya,"+
+                            "periksa_radiologi.kd_dokter,periksa_radiologi.nip,periksa_radiologi.proyeksi,periksa_radiologi.kV,periksa_radiologi.mAS,periksa_radiologi.FFD,"+
+                            "periksa_radiologi.BSF,periksa_radiologi.inak,periksa_radiologi.jml_penyinaran,periksa_radiologi.dosis from periksa_radiologi inner join jns_perawatan_radiologi "+
+                            "on periksa_radiologi.kd_jenis_prw=jns_perawatan_radiologi.kd_jenis_prw where periksa_radiologi.no_rawat=? and periksa_radiologi.tgl_periksa=? "+
+                            "and periksa_radiologi.jam=?"); 
+                try {
+                    ps2.setString(1,NoRawatDicari.getText());
+                    ps2.setString(2,TglDicari.getText());
+                    ps2.setString(3,JamDicari.getText());
+                    rs2=ps2.executeQuery();
+                    while(rs2.next()){
+                        pemeriksaan=rs2.getString("nm_perawatan")+", "+pemeriksaan;
+                        kdpenjab=rs2.getString("kd_dokter");
+                        kdpetugas=rs2.getString("nip");
+                    }
+                } catch (Exception e) {
+                    System.out.println("simrskhanza.DlgCariPeriksaRadiologi.BtnPrint1ActionPerformed() ps2 : "+e);
+                } finally{
+                    if(rs2!=null){
+                        rs2.close();
+                    }
+                    if(ps2!=null){
+                        ps2.close();
+                    }
+                }
+                
+            } catch (Exception e) {
+                System.out.println("Notifikasi Pemeriksaan : "+e);
+            }          
+            Sequel.cariIsi("select reg_periksa.no_rkm_medis from reg_periksa where reg_periksa.no_rawat=? ",NoRM,Kd2.getText());
+            Sequel.cariIsi("select pasien.jk from pasien where pasien.no_rkm_medis=? ",Jk,NoRM.getText());
+            Sequel.cariIsi("select pasien.umur from pasien where pasien.no_rkm_medis=?",Umur,NoRM.getText());
+            Sequel.cariIsi("select concat(pasien.alamat,', ',kelurahan.nm_kel,', ',kecamatan.nm_kec,', ',kabupaten.nm_kab) as alamat from pasien inner join kelurahan inner join kecamatan inner join kabupaten on pasien.kd_kel=kelurahan.kd_kel and pasien.kd_kec=kecamatan.kd_kec and pasien.kd_kab=kabupaten.kd_kab where no_rkm_medis=? ",Alamat,NoRM.getText());
+            
+            kamar=Sequel.cariIsi("select ifnull(kamar_inap.kd_kamar,'') from kamar_inap where kamar_inap.no_rawat='"+Kd2.getText()+"' order by kamar_inap.tgl_masuk desc limit 1");
+            if(!kamar.equals("")){
+                namakamar=kamar+", "+Sequel.cariIsi("select bangsal.nm_bangsal from bangsal inner join kamar on bangsal.kd_bangsal=kamar.kd_bangsal "+
+                            " where kamar.kd_kamar='"+kamar+"' ");            
+                kamar="Kamar";
+            }else if(kamar.equals("")){
+                kamar="Poli";
+                namakamar=Sequel.cariIsi("select poliklinik.nm_poli from poliklinik inner join reg_periksa on poliklinik.kd_poli=reg_periksa.kd_poli "+
+                            "where reg_periksa.no_rawat='"+Kd2.getText()+"'");
+            }
+            Map<String, Object> param = new HashMap<>();
+            param.put("noperiksa",Kd2.getText());
+            param.put("norm",NoRM.getText());
+            param.put("namapasien",Sequel.cariIsi("select pasien.nm_pasien from pasien where pasien.no_rkm_medis=? ",NoRM.getText()));
+            param.put("jkel",Jk.getText());
+            param.put("umur",Umur.getText());
+            param.put("lahir",Sequel.cariIsi("select DATE_FORMAT(pasien.tgl_lahir,'%d-%m-%Y') from pasien where pasien.no_rkm_medis=? ",NoRM.getText()));
+            param.put("pengirim",tbDokter.getValueAt(tbDokter.getSelectedRow(),5).toString());
+            param.put("tanggal",Valid.SetTgl3(tbDokter.getValueAt(tbDokter.getSelectedRow(),3).toString()));
+            param.put("penjab",tbDokter.getValueAt(tbDokter.getSelectedRow(),6).toString());
+            param.put("petugas",tbDokter.getValueAt(tbDokter.getSelectedRow(),2).toString());
+            param.put("alamat",Alamat.getText());
+            param.put("kamar",kamar);
+            param.put("namakamar",namakamar);
+            param.put("pemeriksaan",pemeriksaan);
+            param.put("jam",tbDokter.getValueAt(tbDokter.getSelectedRow(),4).toString());
+            param.put("namars",akses.getnamars());
+            param.put("alamatrs",akses.getalamatrs());
+            param.put("kotars",akses.getkabupatenrs());
+            param.put("propinsirs",akses.getpropinsirs());
+            param.put("kontakrs",akses.getkontakrs());
+            param.put("emailrs",akses.getemailrs());
+            param.put("hasil",HasilPeriksa.getText());
+            param.put("photo", "http://" + koneksiDB.HOSTHYBRIDWEB() + ":" + koneksiDB.PORTWEB() + "/" + koneksiDB.HYBRIDWEB() + "/radiologi/" + lokasifile);  //tambahan untuk ambil lokasi foto
+            System.out.println("URL Image for Report: " + param.get("photo")); // Debugging Output
+            param.put("logo",Sequel.cariGambar("select setting.logo from setting"));  
+            finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",kdpenjab);
+            param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+tbDokter.getValueAt(tbDokter.getSelectedRow(),6).toString()+"\nID "+(finger.equals("")?kdpenjab:finger)+"\n"+Valid.SetTgl3(tbDokter.getValueAt(tbDokter.getSelectedRow(),3).toString()));  
+            finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",kdpetugas);
+            param.put("finger2","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+tbDokter.getValueAt(tbDokter.getSelectedRow(),2).toString()+"\nID "+(finger.equals("")?kdpetugas:finger)+"\n"+Valid.SetTgl3(tbDokter.getValueAt(tbDokter.getSelectedRow(),3).toString()));  
+            
+            Valid.MyReportPDFUpload("rptPeriksaRadiologi3.jasper","report","::[ Pemeriksaan Radiologi ]::",FileName,param);
+                     
+                                  
+            
+            this.setCursor(Cursor.getDefaultCursor());
+        }
+    }
+    private void UploadRadiologiKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_UploadRadiologiKeyPressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_UploadRadiologiKeyPressed
+
     /**
     * @param args the command line arguments
     */
@@ -2300,6 +2471,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
     private widget.Tanggal Tgl2;
     private widget.Label TglDicari;
     private widget.TextBox Umur;
+    private widget.Button UploadRadiologi;
     private javax.swing.JDialog WindowGantiDokterParamedis;
     private widget.Button btnAmbilPhoto;
     private widget.Button btnAmbilPhoto1;
@@ -2670,4 +2842,55 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
             }
         }
     }
+    
+    ////////////////////// start - fungsi upload pdf by ichsan
+    private void UploadPDF(String FileName, String docpath) {
+        try {
+            File file = new File("tmpPDF/" + FileName + ".pdf");
+            byte[] data = FileUtils.readFileToByteArray(file);
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpPost postRequest = new HttpPost("http://" + koneksiDB.HOSTHYBRIDWEB() + ":" + koneksiDB.PORTWEB() + "/" + koneksiDB.HYBRIDWEB() + "/upload.php?doc=" + docpath);
+            ByteArrayBody fileData = new ByteArrayBody(data, FileName + ".pdf");
+            MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+            reqEntity.addPart("file", fileData);
+            postRequest.setEntity(reqEntity);
+            httpClient.execute(postRequest);
+
+            // Menyimpan ke database
+            boolean uploadSuccess = false;
+            kodeberkas = Sequel.cariIsi("SELECT kode FROM master_berkas_digital WHERE nama LIKE '%Klaim%'");
+            if (Sequel.cariInteger("SELECT COUNT(no_rawat) AS jumlah FROM berkas_digital_perawatan WHERE lokasi_file='pages/upload/" + FileName + ".pdf'") > 0) {
+                uploadSuccess = Sequel.mengedittf("berkas_digital_perawatan", "lokasi_file=?","no_rawat=?,kode=?, lokasi_file=?", 4, new String[]{
+                    tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString().trim(),kodeberkas,"pages/upload/" + FileName + ".pdf", "pages/upload/" + FileName + ".pdf"
+                });
+            } else {
+                uploadSuccess = Sequel.menyimpantf("berkas_digital_perawatan", "?,?,?", "No.Rawat", 3, new String[]{
+                    tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString().trim(), kodeberkas, "pages/upload/" + FileName + ".pdf"
+                });
+            }
+
+            // Menampilkan notifikasi
+            if (uploadSuccess) {
+                JOptionPane.showMessageDialog(null, "Upload berhasil!", "Informasi", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Upload gagal disimpan ke database.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (Exception e) {
+            System.out.println("Upload error: " + e);
+            JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void HapusPDF() {
+        File file = new File("tmpPDF");
+        String[] myFiles;
+        if (file.isDirectory()) {
+            myFiles = file.list();
+            for (int i = 0; i < myFiles.length; i++) {
+                File myFile = new File(file, myFiles[i]);
+                myFile.delete();
+            }
+        }
+    }
+    ////////////////////// end - fungsi upload pdf by ichsan
 }
