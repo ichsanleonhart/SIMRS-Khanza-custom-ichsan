@@ -20,6 +20,7 @@ import java.awt.event.WindowListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JOptionPane;
@@ -50,7 +51,7 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
     private StringBuilder htmlContent;
     private PreparedStatement ps,ps2,ps3,ps4,ps5,psrekening;
     private ResultSet rs,rs2,rs3,rs5,rsrekening;
-    private String kamar,namakamar,pemeriksaan="",pilihan="",status="",finger="",statushasil="";
+    private String kamar,namakamar,pemeriksaan="",pilihan="",status="",finger="",statushasil="", lokasifile="", SQLException="";  //tambahan ichsan lokasifile="" SQLException=""
     private double ttl=0,item=0;
     private double ttljmdokter=0,ttljmpetugas=0,ttlkso=0,ttlpendapatan=0,ttlbhp=0,ttljasasarana=0,ttljmperujuk=0,ttlmenejemen=0;;
     private String kdpetugas="",kdpenjab="",Suspen_Piutang_Radiologi_Ranap="",Radiologi_Ranap="",Beban_Jasa_Medik_Dokter_Radiologi_Ranap="",Utang_Jasa_Medik_Dokter_Radiologi_Ranap="",
@@ -1786,6 +1787,45 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
                JOptionPane.showMessageDialog(null,"Maaf, silahkan pilih data terlebih dahulu...!!!!"); 
         }else{
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            
+            //////////////////////// start - tambahan code buat fetch foto radiologi by ichsan
+            try {
+                    ps = koneksi.prepareStatement(
+                        "SELECT gambar_radiologi.lokasi_gambar FROM gambar_radiologi " +
+                        "WHERE gambar_radiologi.no_rawat = ? AND gambar_radiologi.tgl_periksa = ? " +
+                        "AND gambar_radiologi.jam = ?"
+                    );
+                        
+                    if (tbDokter.getSelectedRow() != -1) {
+                        ps.setString(1, tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString());
+                        ps.setString(2, tbDokter.getValueAt(tbDokter.getSelectedRow(), 3).toString());
+                        ps.setString(3, tbDokter.getValueAt(tbDokter.getSelectedRow(), 4).toString());
+
+                        rs = ps.executeQuery();
+                        lokasifile = ""; // Initialize to empty string
+
+                        if (rs.next()) {
+                            lokasifile = rs.getString("lokasi_gambar");
+                        }
+                
+                        System.out.println("Lokasi Gambar Radiologi: " + lokasifile); // Debugging Output
+                    } else {
+                        System.out.println("No row selected in tbDokter.");
+                    }
+                } catch (SQLException e) {
+                    System.out.println("Error fetching radiology image location: " + e);
+                } finally {
+                    try {
+                        if (rs != null) rs.close();
+                        if (ps != null) ps.close();
+                    } catch (SQLException e) {
+                        System.out.println("Error closing resources: " + e);
+                    }
+                }
+
+
+            //////////////////////// end - tambahan code buat fetch foto radiologi by ichsan
+            
             pemeriksaan="";
             try {
                 ps2=koneksi.prepareStatement(
@@ -1856,13 +1896,15 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
             param.put("kontakrs",akses.getkontakrs());
             param.put("emailrs",akses.getemailrs());
             param.put("hasil",HasilPeriksa.getText());
-            param.put("logo",Sequel.cariGambar("select setting.logo from setting"));
+            param.put("photo", "http://" + koneksiDB.HOSTHYBRIDWEB() + ":" + koneksiDB.PORTWEB() + "/" + koneksiDB.HYBRIDWEB() + "/radiologi/" + lokasifile);  //tambahan untuk ambil lokasi foto
+            System.out.println("URL Image for Report: " + param.get("photo")); // Debugging Output
+            param.put("logo",Sequel.cariGambar("select setting.logo from setting"));  
             finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",kdpenjab);
             param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+tbDokter.getValueAt(tbDokter.getSelectedRow(),6).toString()+"\nID "+(finger.equals("")?kdpenjab:finger)+"\n"+Valid.SetTgl3(tbDokter.getValueAt(tbDokter.getSelectedRow(),3).toString()));  
             finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",kdpetugas);
             param.put("finger2","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+tbDokter.getValueAt(tbDokter.getSelectedRow(),2).toString()+"\nID "+(finger.equals("")?kdpetugas:finger)+"\n"+Valid.SetTgl3(tbDokter.getValueAt(tbDokter.getSelectedRow(),3).toString()));  
 
-            pilihan = (String)JOptionPane.showInputDialog(null,"Silahkan pilih hasil pemeriksaan..!","Hasil Pemeriksaan",JOptionPane.QUESTION_MESSAGE,null,new Object[]{"Model 1","Model 2", "Model 3","PDF Model 1","PDF Model 2","PDF Model 3"},"Model 1");
+            pilihan = (String)JOptionPane.showInputDialog(null,"Silahkan pilih hasil pemeriksaan..!","Hasil Pemeriksaan",JOptionPane.QUESTION_MESSAGE,null,new Object[]{"Model 1","Model 2", "Model 3 (Dengan Foto)","PDF Model 1","PDF Model 2","PDF Model 3"},"Model 1");
             switch (pilihan) {
                 case "Model 1":
                       Valid.MyReport("rptPeriksaRadiologi.jasper","report","::[ Pemeriksaan Radiologi ]::",param);
@@ -1870,7 +1912,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
                 case "Model 2":
                       Valid.MyReport("rptPeriksaRadiologi2.jasper","report","::[ Pemeriksaan Radiologi ]::",param);
                       break;
-                case "Model 3":
+                case "Model 3 (Dengan Foto)":
                       Valid.MyReport("rptPeriksaRadiologi3.jasper","report","::[ Pemeriksaan Radiologi ]::",param);
                       break;
                 case "PDF Model 1":
@@ -2530,7 +2572,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
     }
     
     private void panggilPhoto() {
-        if(TabData.isVisible()==true){
+        if(TabData.isVisible()==true){            
             if(tbDokter.getSelectedRow()!= -1){
                 if((!Kd2.getText().equals(""))&&(!Petugas.getText().equals(""))){
                      NoRawatDicari.setText(tbDokter.getValueAt(tbDokter.getSelectedRow(),0).toString());
@@ -2546,8 +2588,9 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
                             rs=ps.executeQuery();
                             htmlContent = new StringBuilder();
                             while(rs.next()){
+                                lokasifile=rs.getString("lokasi_gambar");  //tambahan ichsan
                                 htmlContent.append("<tr><td border='0' align='center'><a href='http://"+koneksiDB.HOSTHYBRIDWEB()+":"+koneksiDB.PORTWEB()+"/"+koneksiDB.HYBRIDWEB()+"/radiologi/"+rs.getString("lokasi_gambar")+"'><img src='http://"+koneksiDB.HOSTHYBRIDWEB()+":"+koneksiDB.PORTWEB()+"/"+koneksiDB.HYBRIDWEB()+"/radiologi/"+rs.getString("lokasi_gambar")+"' alt='photo' width='"+(internalFrame1.getWidth()-370)+"' height='"+(internalFrame1.getWidth()-370)+"'/></a></td></tr>");
-                            }
+                            }                            
                             LoadHTML.setText(
                                 "<html>"+
                                   "<table width='100%' border='0' align='center' cellpadding='1px' cellspacing='1px' class='tbl_form'>"+
@@ -2578,6 +2621,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
                                 HasilPeriksa.setText("");
                             }
                         } catch (Exception e) {
+                            lokasifile="";  //tambahan ichsan
                             System.out.println("Notif ps5 : "+e);
                         } finally{
                             if(rs5!=null){
