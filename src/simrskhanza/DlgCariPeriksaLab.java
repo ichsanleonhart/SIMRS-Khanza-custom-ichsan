@@ -6125,7 +6125,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
     }//GEN-LAST:event_ppRiwayatBtnPrintActionPerformed
 ///////////////////////// start - upload berkas digital perawatan by ichsan
 private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ppUploadPDFBtnPrintActionPerformed
-        FileName = "BERKAS_LAB_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString().replaceAll("/", "") + "_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1).toString().replaceAll("[/()\\-:, ]", "");
+        FileName = "BERKAS_LAB_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 4).toString().replaceAll(":", "") + "_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString().replaceAll("/", "") + "_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1).toString().replaceAll("[/()\\-:, ]", "");
         CreatePDF(FileName);
         String filePath = "tmpPDF/" + FileName;
         UploadPDF(FileName, "berkasrawat/pages/upload/");
