@@ -1729,4 +1729,45 @@ public class koneksiDB {
         }
         return var;
     }
+    //////////////// tambahan untuk setup upload file ke WA Pasien
+    
+    public static String HOSTWAWEB() {
+        try {
+            prop.loadFromXML(new FileInputStream("setting/database.xml"));
+            var = EnkripsiAES.decrypt(prop.getProperty("HOSTWAWEB"));
+        } catch (Exception e) {
+            var = "";
+        }
+        return var;
+    }
+
+    public static String HOSTWA() {
+        try {
+            prop.loadFromXML(new FileInputStream("setting/database.xml"));
+            var = EnkripsiAES.decrypt(prop.getProperty("HOSTWA"));
+        } catch (Exception e) {
+            var = "";
+        }
+        return var;
+    }
+
+    public static String PORTWEBWA() {
+        try {
+            prop.loadFromXML(new FileInputStream("setting/database.xml"));
+            var = EnkripsiAES.decrypt(prop.getProperty("PORTWEBWA"));
+        } catch (Exception e) {
+            var = "";
+        }
+        return var;
+    }
+
+    public static String    FOLDERFILEWA() {
+        try {
+            prop.loadFromXML(new FileInputStream("setting/database.xml"));
+            var = prop.getProperty("FOLDERFILEWA");
+        } catch (Exception e) {
+            var = "";
+        }
+        return var;
+    }
 }

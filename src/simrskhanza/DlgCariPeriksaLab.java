@@ -1,5 +1,6 @@
 package simrskhanza;
 import kepegawaian.DlgCariPetugas;
+import bridging.koneksiDBWa;  //tambahan import koneksidbwa di folder bridging by ichsan
 import keuangan.Jurnal;
 import fungsi.WarnaTable;
 import fungsi.batasInput;
@@ -21,7 +22,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -41,6 +45,7 @@ import org.apache.http.entity.mime.HttpMultipartMode; //tambahan ichsan
 import org.apache.http.entity.mime.MultipartEntity; //tambahan ichsan
 import org.apache.http.entity.mime.content.ByteArrayBody; //tambahan ichsan
 import org.apache.http.impl.client.DefaultHttpClient; //tambahan ichsan
+import org.apache.http.HttpResponse; //tambahan ichsan untuk fungsi upload pdf
 
 public class DlgCariPeriksaLab extends javax.swing.JDialog {
     private final DefaultTableModel tabMode,tabMode2;
@@ -48,6 +53,7 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
     private validasi Valid=new validasi();
     private Jurnal jur=new Jurnal();
     private Connection koneksi=koneksiDB.condb();
+    private Connection koneksiwa;  //tambahan ichsan upload pdf wa ke pasien
     private DlgCariPetugas petugas=new DlgCariPetugas(null,false);
     private int i,jmlkunjungan=0,jmlpemeriksaan=0,jmlsubpemeriksaan=0;
     private PreparedStatement ps,ps2,ps3,ps4,psrekening,ps5,pspermintaan;
@@ -73,7 +79,7 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
 
-        Object[] row={"No.Rawat","Pasien","Petugas","Tgl.Periksa","Jam Periksa","Dokter Perujuk","Penanggung Jawab"};
+        Object[] row={"No.Rawat","Pasien","Petugas","Tgl.Periksa","Jam Periksa","Dokter Perujuk","Penanggung Jawab","No Telp"}; //tambahan No Tlp by ichsan
         tabMode=new DefaultTableModel(null,row){
               @Override public boolean isCellEditable(int rowIndex, int colIndex){return false;}
         };
@@ -97,6 +103,8 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
             }else if(i==5){
                 column.setPreferredWidth(200);
             }else if(i==6){
+                column.setPreferredWidth(200);
+            }else if(i==7){  //kolom untuk nomor tlp by ichsan
                 column.setPreferredWidth(200);
             }
         }
@@ -296,7 +304,6 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
 
         Kd2 = new widget.TextBox();
         jPopupMenu1 = new javax.swing.JPopupMenu();
-		ppUploadPDF = new javax.swing.JMenuItem();  //tambahan ichsan
         MnCetakLab = new javax.swing.JMenu();
         MnCetakHasilLab = new javax.swing.JMenuItem();
         MnCetakHasilLab1 = new javax.swing.JMenuItem();
@@ -356,6 +363,7 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
         btnPetugas = new widget.Button();
         label18 = new widget.Label();
         Tgl2 = new widget.Tanggal();
+        TombolWA = new javax.swing.JButton();
         panelisi1 = new widget.panelisi();
         label10 = new widget.Label();
         TCari = new widget.TextBox();
@@ -377,21 +385,6 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
         Kd2.setPreferredSize(new java.awt.Dimension(207, 23));
 
         jPopupMenu1.setName("jPopupMenu1"); // NOI18N
-		ppUploadPDF.setBackground(new java.awt.Color(255, 255, 254));
-        ppUploadPDF.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
-        ppUploadPDF.setForeground(new java.awt.Color(50, 50, 50));
-        ppUploadPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
-        ppUploadPDF.setText("Upload Hasil Lab ke Berkas Digital");
-        ppUploadPDF.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        ppUploadPDF.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        ppUploadPDF.setName("ppUploadPDF"); // NOI18N
-        ppUploadPDF.setPreferredSize(new java.awt.Dimension(190, 26));
-        ppUploadPDF.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ppUploadPDFBtnPrintActionPerformed(evt);
-            }
-        });
-        jPopupMenu1.add(ppUploadPDF);
 
         MnCetakLab.setBackground(new java.awt.Color(250, 255, 245));
         MnCetakLab.setForeground(new java.awt.Color(50, 50, 50));
@@ -989,13 +982,13 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
         label16.setName("label16"); // NOI18N
         label16.setPreferredSize(new java.awt.Dimension(60, 23));
         panelisi3.add(label16);
-        label16.setBounds(385, 10, 60, 23);
+        label16.setBounds(330, 10, 60, 23);
 
         label13.setText("Petugas :");
         label13.setName("label13"); // NOI18N
         label13.setPreferredSize(new java.awt.Dimension(70, 23));
         panelisi3.add(label13);
-        label13.setBounds(385, 40, 60, 23);
+        label13.setBounds(330, 40, 60, 23);
 
         kdmem.setName("kdmem"); // NOI18N
         kdmem.setPreferredSize(new java.awt.Dimension(80, 23));
@@ -1005,7 +998,7 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
             }
         });
         panelisi3.add(kdmem);
-        kdmem.setBounds(449, 10, 80, 23);
+        kdmem.setBounds(400, 10, 80, 23);
 
         kdptg.setName("kdptg"); // NOI18N
         kdptg.setPreferredSize(new java.awt.Dimension(80, 23));
@@ -1015,19 +1008,19 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
             }
         });
         panelisi3.add(kdptg);
-        kdptg.setBounds(449, 40, 80, 23);
+        kdptg.setBounds(400, 40, 80, 23);
 
         nmmem.setEditable(false);
         nmmem.setName("nmmem"); // NOI18N
         nmmem.setPreferredSize(new java.awt.Dimension(207, 23));
         panelisi3.add(nmmem);
-        nmmem.setBounds(531, 10, 240, 23);
+        nmmem.setBounds(480, 10, 240, 23);
 
         nmptg.setEditable(false);
         nmptg.setName("nmptg"); // NOI18N
         nmptg.setPreferredSize(new java.awt.Dimension(207, 23));
         panelisi3.add(nmptg);
-        nmptg.setBounds(531, 40, 240, 23);
+        nmptg.setBounds(480, 40, 240, 23);
 
         btnPasien.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         btnPasien.setMnemonic('1');
@@ -1040,7 +1033,7 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
             }
         });
         panelisi3.add(btnPasien);
-        btnPasien.setBounds(774, 10, 28, 23);
+        btnPasien.setBounds(720, 10, 28, 23);
 
         btnPetugas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         btnPetugas.setMnemonic('2');
@@ -1053,7 +1046,7 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
             }
         });
         panelisi3.add(btnPetugas);
-        btnPetugas.setBounds(774, 40, 28, 23);
+        btnPetugas.setBounds(720, 40, 28, 23);
 
         label18.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         label18.setText("s.d.");
@@ -1071,6 +1064,18 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
         });
         panelisi3.add(Tgl2);
         Tgl2.setBounds(205, 40, 100, 23);
+
+        TombolWA.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/wa.png"))); // NOI18N
+        TombolWA.setText("Kirim WA");
+        TombolWA.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        TombolWA.setName("TombolWA"); // NOI18N
+        TombolWA.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                TombolWAActionPerformed(evt);
+            }
+        });
+        panelisi3.add(TombolWA);
+        TombolWA.setBounds(760, 10, 170, 30);
 
         internalFrame1.add(panelisi3, java.awt.BorderLayout.PAGE_START);
 
@@ -6133,6 +6138,25 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
         ppBerkasDigitalBtnPrintActionPerformed(evt);
     }//GEN-LAST:event_ppUploadPDFBtnPrintActionPerformed
 
+    private void TombolWAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TombolWAActionPerformed
+        //////////////// start - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+        try {
+            if(koneksiDB.WANOTIFPASIEN().equals("yes")){
+                FileName = "LAB_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString().replaceAll("/", "") + "_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1).toString().replaceAll("[/()\\-:, ]", "");
+                CreatePDF(FileName);
+                String filePath = "tmpPDF/" + FileName;
+                UploadPDF2(FileName, "media/");
+                HapusPDF();
+                
+                JOptionPane.showMessageDialog(null, "OK, ditunggu sampai WA reminder-nya dikirim bot yah~  ;-)");
+            }else{
+            }
+        } catch (Exception e) {
+            //kosong
+        }
+        ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+    }//GEN-LAST:event_TombolWAActionPerformed
+
     private void CreatePDF(String FileName) {
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         if (tabMode.getRowCount() == 0) {
@@ -6381,6 +6405,7 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
     private javax.swing.JTabbedPane TabRawat;
     private widget.Tanggal Tgl1;
     private widget.Tanggal Tgl2;
+    private javax.swing.JButton TombolWA;
     private javax.swing.JDialog WindowSaran;
     private widget.Button btnPasien;
     private widget.Button btnPetugas;
@@ -6404,7 +6429,6 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
     private widget.panelisi panelisi3;
     private javax.swing.JMenuItem ppBerkasDigital;
     private javax.swing.JMenuItem ppRiwayat;
-	private javax.swing.JMenuItem ppUploadPDF;
     private widget.ScrollPane scrollPane1;
     private widget.ScrollPane scrollPane2;
     private widget.Table tbDokter;
@@ -6417,7 +6441,7 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
             if(NoRawat.getText().equals("")&&kdmem.getText().equals("")&&kdptg.getText().equals("")&&TCari.getText().equals("")){
                 ps=koneksi.prepareStatement(
                     "select periksa_lab.no_rawat,reg_periksa.no_rkm_medis,pasien.nm_pasien,petugas.nama,periksa_lab.tgl_periksa,periksa_lab.jam,"+
-                    "periksa_lab.dokter_perujuk,periksa_lab.kd_dokter,dokter.nm_dokter,penjab.png_jawab "+
+                    "periksa_lab.dokter_perujuk,periksa_lab.kd_dokter,dokter.nm_dokter,penjab.png_jawab, pasien.no_tlp "+  //tambahan pasien.no_tlp by ichsan
                     "from periksa_lab inner join reg_periksa on periksa_lab.no_rawat=reg_periksa.no_rawat "+
                     "inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis "+
                     "inner join petugas on periksa_lab.nip=petugas.nip "+
@@ -6428,7 +6452,7 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
             }else{
                 ps=koneksi.prepareStatement(
                     "select periksa_lab.no_rawat,reg_periksa.no_rkm_medis,pasien.nm_pasien,petugas.nama,periksa_lab.tgl_periksa,periksa_lab.jam,"+
-                    "periksa_lab.dokter_perujuk,periksa_lab.kd_dokter,dokter.nm_dokter,penjab.png_jawab "+
+                    "periksa_lab.dokter_perujuk,periksa_lab.kd_dokter,dokter.nm_dokter,penjab.png_jawab, pasien.no_tlp "+  //tambahan pasien.no_tlp by ichsan
                     "from periksa_lab inner join reg_periksa on periksa_lab.no_rawat=reg_periksa.no_rawat "+
                     "inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis "+
                     "inner join petugas on periksa_lab.nip=petugas.nip "+
@@ -7000,6 +7024,128 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
         }
     } 
  ///////////////////////// start - upload berkas digital perawatan by ichsan
+    
+    private void UploadPDF2(String FileName, String docpath) {
+        try {
+            koneksiwa = koneksiDBWa.condb();
+            File file = new File("tmpPDF/" + FileName + ".pdf");
+            byte[] data = FileUtils.readFileToByteArray(file);
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpPost postRequest = new HttpPost("http://" + koneksiDB.HOSTWA() + ":" + koneksiDB.PORTWEBWA() + "/" + koneksiDB.FOLDERFILEWA() + "/upload.php?doc=" + docpath);
+            ByteArrayBody fileData = new ByteArrayBody(data, FileName + ".pdf");
+            MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+            reqEntity.addPart("file", fileData);
+            postRequest.setEntity(reqEntity);
+            HttpResponse response = httpClient.execute(postRequest);
 
+            // Cek jika response code adalah 200 (OK)
+            if (response.getStatusLine().getStatusCode() == 200) {
+                JOptionPane.showMessageDialog(null, "Pesan Berhasil di Antrikan di Wa Gateway!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Gagal mengupload file. Response code: " + response.getStatusLine().getStatusCode(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
+            }
+
+            ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA  BY ICHSAN
+    private void kirimWhatsAppMessageRegistBooking() {    
+    String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));    //isi value untuk dikirim ke jadwal pengiriman di wa gateway
+
+    // Fetch nomor hp pasien, gender, serta tanggal kontrol
+    String nohppasien = "";  //ubah format nomor hp pasien
+    String jk = "";  //ubah format jenis kelamin
+    String formattedTanggal = "";  //ubah format tanggal kontrol
+    
+    try {
+         /////////format tanggal dan jam kontrol        
+        //System.out.println("Raw value of TanggalPeriksa: " + TanggalPeriksa.getSelectedItem());        // aktifkan baris ini untuk Print debug ke kotak hitam
+        
+        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
+        ps.setString(1, TNoRM.getText());
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            nohppasien = rs.getString("no_tlp");
+            jk = rs.getString("jk");
+
+            // Convert phone number from 08xxxxxx to 628xxxxxx
+            if (nohppasien.startsWith("0")) {
+                nohppasien = "62" + nohppasien.substring(1);
+            }
+        }
+
+        rs.close();
+        ps.close();
+    } catch (Exception e) {
+        System.out.println("Error fetching phone number: " + e);                
+    }
+
+
+    // ========== 🆕 Tambahkan greeting berdasarkan waktu saat ini ==========
+    int currentHour = java.time.LocalTime.now().getHour(); // 🆕 Ambil jam saat ini
+
+    String greeting; // 🆕 Variabel untuk menyimpan greeting
+    if (currentHour >= 4 && currentHour <= 10) {
+        greeting = "Selamat Pagi"; // 🆕 Pagi (04.00 - 10.00)
+    } else if (currentHour >= 10 && currentHour <= 15) {
+        greeting = "Selamat Siang"; // 🆕 Siang (10.01 - 15.00)
+    } else if (currentHour >= 15 && currentHour <= 18) {
+        greeting = "Selamat Sore"; // 🆕 Sore (15.01 - 18.00)
+    } else {
+        greeting = "Selamat Malam"; // 🆕 Malam (18.01 - 03.59)
+    }
+
+    // ========== 🆕 Gunakan greeting ini ke dalam salam pembuka ==========
+    String salampembuka;
+    if ("L".equalsIgnoreCase(jk)) {
+        salampembuka = greeting + ", Bpk " + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1) +  "\n"; // 🆕 Tambahkan greeting sebelum Bpk
+    } else if ("P".equalsIgnoreCase(jk)) {
+        salampembuka = greeting + ", Ibu " + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1) + "\n"; // 🆕 Tambahkan greeting sebelum Ibu
+    } else {
+        salampembuka = greeting + ", Bpk / Ibu " + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1) + "\n"; // 🆕 Jika gender tidak diketahui
+    }
+
+    // Membuat isi pesan ke dalam whatsapp
+    String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
+        "Terima kasih telah melakukan Pemeriksaan Lab di " + akses.getnamars() + ". \n " +
+        "Berikut kami sampaikan hasil pemeriksaan laboratorium :\n\n" +       
+        "0xF0 0x9F 0x93 0x85 Tanggal: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
+        "0xF0 0x9F 0x91 0xA8 Dokter : " + NmDokter.getText() + "\n" +
+        "0xF0 0x9F 0x8F 0xA5 Spesialis : " + NmPoli.getText() + "\n" +         
+        + "hasil pemeriksaan laboratorium atas nama\n"
+        + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1) + "\n"
+        + "Tanggal Pemeriksaan:" + (tbDokter.getValueAt(tbDokter.getSelectedRow(), 3)) + "\n"
+        + "Dokter Perujuk:" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 5) + "\n"
+        + "Silakan unduh file terlampir.";
+
+            String tanggaljamkirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        //    TNoRm.setText(Sequel.cariIsi("select no_rkm_medis from reg_periksa where no_rawat='" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 0) + "'"));
+            String noPasien = tbDokter.getValueAt(tbDokter.getSelectedRow(),7).toString();
+            try {
+                String sql = "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, SUCCESS, RESPONSE, REQUEST, TYPE, FILE) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+                ps = koneksiwa.prepareStatement(sql);
+                ps.setLong(1, 0);  // NOMOR, jika AUTO_INCREMENT, bisa diubah atau dihilangkan sesuai kebutuhan
+                ps.setString(2, noPasien + "@c.us");  // NOWA
+                ps.setString(3, pesan);          // PESAN
+                ps.setString(4, tanggaljamkirim);  // TANGGAL_JAM
+                ps.setString(5, "ANTRIAN");                 // STATUS
+                ps.setString(6, "KHANZA");  // SOURCE
+                ps.setString(7, "NODEJS");                  // SENDER
+                ps.setString(8, "");                        // SUCCESS
+                ps.setString(9, "");                        // RESPONSE
+                ps.setString(10, "");                       // REQUEST
+                ps.setString(11, "FILE");                   // TYPE
+                ps.setString(12, FileName + ".pdf");              // FILE
+                ps.executeUpdate();
+
+            } catch (Exception e) {
+                System.out.println("Notif : " + e);
+            }
+
+        } catch (Exception e) {
+            System.out.println("Upload error: " + e);
+            JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
+        }
+    }
  
 }
