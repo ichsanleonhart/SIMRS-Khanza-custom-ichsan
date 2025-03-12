@@ -199,10 +199,10 @@
 	<!--TAMBAHAN ICHSAN-->
 	<entry key="AKTIFKANWARNARANAP">yes</entry>
 	<entry key="WANOTIFPASIEN">yes</entry>
-	<entry key="HOSTWAWEB"></entry>
-	<entry key="PORTWEBWA"></entry>
-	<entry key="FOLDERFILEWA"></entry> <!--Lokasi tempat mengirim pdf untuk dikirim by WA, lokasi tempat wa gateway ditaro di localhost-->
-	<entry key="HOSTWA"></entry>  <!--host ip address sql tempat WA_outbox, harus di-enkript AES-->
-	<entry key="USERWA"></entry>  <!--user mysql tempat WA_outbox, harus di-enkript AES-->
-	<entry key="PASWA"></entry>  <!--pass mysql tempat WA_outbox, harus di-enkript AES-->
+	<entry key="HOSTWAWEB">/Z6ggl3LSMkNHIvHhRzciA==</entry>	
+	<entry key="HOSTWA">/Z6ggl3LSMkNHIvHhRzciA==</entry>  <!--ip address sql tempat aplikasi wa_gateway, harus di-enkript AES-->
+	<entry key="FOLDERFILEWA">wa_gateway</entry> <!--nama folder Lokasi tempat mengirim pdf untuk dikirim by WA, lokasi tempat wa gateway ditaro di localhost-->
+	<entry key="PORTWEBWA">/prN8BUwM8LSZSYtHNIDBQ==</entry> <!--Port ke aplkasi wa_gatway, cek di app nya dapet port berapa. Biasanya port 8100, harus di-enkript AES-->
+	<entry key="USERWA">3fsjwvKJn8IpzysMeNu3bA==</entry>  <!--user mysql tempat WA_outbox, harus di-enkript AES-->
+	<entry key="PASWA">z5EhF4xxNihimsGB3AkUAQ==</entry>  <!--pass mysql tempat WA_outbox, harus di-enkript AES-->
 </properties>

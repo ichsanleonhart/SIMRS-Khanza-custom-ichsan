@@ -363,7 +363,8 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
         btnPetugas = new widget.Button();
         label18 = new widget.Label();
         Tgl2 = new widget.Tanggal();
-        TombolWA = new javax.swing.JButton();
+        TombolUpload = new javax.swing.JButton();
+        TombolWA1 = new javax.swing.JButton();
         panelisi1 = new widget.panelisi();
         label10 = new widget.Label();
         TCari = new widget.TextBox();
@@ -982,13 +983,13 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
         label16.setName("label16"); // NOI18N
         label16.setPreferredSize(new java.awt.Dimension(60, 23));
         panelisi3.add(label16);
-        label16.setBounds(330, 10, 60, 23);
+        label16.setBounds(320, 10, 60, 23);
 
         label13.setText("Petugas :");
         label13.setName("label13"); // NOI18N
         label13.setPreferredSize(new java.awt.Dimension(70, 23));
         panelisi3.add(label13);
-        label13.setBounds(330, 40, 60, 23);
+        label13.setBounds(320, 40, 60, 23);
 
         kdmem.setName("kdmem"); // NOI18N
         kdmem.setPreferredSize(new java.awt.Dimension(80, 23));
@@ -998,7 +999,7 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
             }
         });
         panelisi3.add(kdmem);
-        kdmem.setBounds(400, 10, 80, 23);
+        kdmem.setBounds(390, 10, 80, 23);
 
         kdptg.setName("kdptg"); // NOI18N
         kdptg.setPreferredSize(new java.awt.Dimension(80, 23));
@@ -1008,19 +1009,19 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
             }
         });
         panelisi3.add(kdptg);
-        kdptg.setBounds(400, 40, 80, 23);
+        kdptg.setBounds(390, 40, 80, 23);
 
         nmmem.setEditable(false);
         nmmem.setName("nmmem"); // NOI18N
         nmmem.setPreferredSize(new java.awt.Dimension(207, 23));
         panelisi3.add(nmmem);
-        nmmem.setBounds(480, 10, 240, 23);
+        nmmem.setBounds(470, 10, 240, 23);
 
         nmptg.setEditable(false);
         nmptg.setName("nmptg"); // NOI18N
         nmptg.setPreferredSize(new java.awt.Dimension(207, 23));
         panelisi3.add(nmptg);
-        nmptg.setBounds(480, 40, 240, 23);
+        nmptg.setBounds(470, 40, 240, 23);
 
         btnPasien.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         btnPasien.setMnemonic('1');
@@ -1033,7 +1034,7 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
             }
         });
         panelisi3.add(btnPasien);
-        btnPasien.setBounds(720, 10, 28, 23);
+        btnPasien.setBounds(710, 10, 28, 23);
 
         btnPetugas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         btnPetugas.setMnemonic('2');
@@ -1046,7 +1047,7 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
             }
         });
         panelisi3.add(btnPetugas);
-        btnPetugas.setBounds(720, 40, 28, 23);
+        btnPetugas.setBounds(710, 40, 28, 23);
 
         label18.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         label18.setText("s.d.");
@@ -1065,17 +1066,29 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
         panelisi3.add(Tgl2);
         Tgl2.setBounds(205, 40, 100, 23);
 
-        TombolWA.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/wa.png"))); // NOI18N
-        TombolWA.setText("Kirim WA");
-        TombolWA.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        TombolWA.setName("TombolWA"); // NOI18N
-        TombolWA.addActionListener(new java.awt.event.ActionListener() {
+        TombolUpload.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/upload24.png"))); // NOI18N
+        TombolUpload.setText("Upload ke Berkas digital Perawatan");
+        TombolUpload.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        TombolUpload.setName("TombolUpload"); // NOI18N
+        TombolUpload.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                TombolWAActionPerformed(evt);
+                TombolUploadActionPerformed(evt);
             }
         });
-        panelisi3.add(TombolWA);
-        TombolWA.setBounds(760, 10, 170, 30);
+        panelisi3.add(TombolUpload);
+        TombolUpload.setBounds(750, 40, 250, 30);
+
+        TombolWA1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/wa.png"))); // NOI18N
+        TombolWA1.setText("Kirim Hasil LAB ke Pasien");
+        TombolWA1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        TombolWA1.setName("TombolWA1"); // NOI18N
+        TombolWA1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                TombolWA1ActionPerformed(evt);
+            }
+        });
+        panelisi3.add(TombolWA1);
+        TombolWA1.setBounds(750, 10, 210, 30);
 
         internalFrame1.add(panelisi3, java.awt.BorderLayout.PAGE_START);
 
@@ -6135,10 +6148,19 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
         String filePath = "tmpPDF/" + FileName;
         UploadPDF(FileName, "berkasrawat/pages/upload/");
         HapusPDF();
-        ppBerkasDigitalBtnPrintActionPerformed(evt);
+        //ppBerkasDigitalBtnPrintActionPerformed(evt);
     }//GEN-LAST:event_ppUploadPDFBtnPrintActionPerformed
 
-    private void TombolWAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TombolWAActionPerformed
+    private void TombolUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TombolUploadActionPerformed
+        FileName = "BERKAS_LAB_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 4).toString().replaceAll(":", "") + "_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString().replaceAll("/", "") + "_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1).toString().replaceAll("[/()\\-:, ]", "");
+        CreatePDF(FileName);
+        String filePath = "tmpPDF/" + FileName;
+        UploadPDF(FileName, "berkasrawat/pages/upload/");
+        HapusPDF();
+        //ppBerkasDigitalBtnPrintActionPerformed(evt);
+    }//GEN-LAST:event_TombolUploadActionPerformed
+
+    private void TombolWA1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TombolWA1ActionPerformed
         //////////////// start - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
         try {
             if(koneksiDB.WANOTIFPASIEN().equals("yes")){
@@ -6148,14 +6170,14 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
                 UploadPDF2(FileName, "media/");
                 HapusPDF();
                 
-                JOptionPane.showMessageDialog(null, "OK, ditunggu sampai WA reminder-nya dikirim bot yah~  ;-)");
+                JOptionPane.showMessageDialog(null, "OK, ditunggu sampai hasil LAB-nya dikirim via WA ke nomor hp pasien yah~  ;-)");
             }else{
             }
         } catch (Exception e) {
             //kosong
         }
         ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
-    }//GEN-LAST:event_TombolWAActionPerformed
+    }//GEN-LAST:event_TombolWA1ActionPerformed
 
     private void CreatePDF(String FileName) {
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -6405,7 +6427,8 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
     private javax.swing.JTabbedPane TabRawat;
     private widget.Tanggal Tgl1;
     private widget.Tanggal Tgl2;
-    private javax.swing.JButton TombolWA;
+    private javax.swing.JButton TombolUpload;
+    private javax.swing.JButton TombolWA1;
     private javax.swing.JDialog WindowSaran;
     private widget.Button btnPasien;
     private widget.Button btnPetugas;
@@ -7026,126 +7049,129 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
  ///////////////////////// start - upload berkas digital perawatan by ichsan
     
     private void UploadPDF2(String FileName, String docpath) {
-        try {
-            koneksiwa = koneksiDBWa.condb();
-            File file = new File("tmpPDF/" + FileName + ".pdf");
-            byte[] data = FileUtils.readFileToByteArray(file);
-            HttpClient httpClient = new DefaultHttpClient();
-            HttpPost postRequest = new HttpPost("http://" + koneksiDB.HOSTWA() + ":" + koneksiDB.PORTWEBWA() + "/" + koneksiDB.FOLDERFILEWA() + "/upload.php?doc=" + docpath);
-            ByteArrayBody fileData = new ByteArrayBody(data, FileName + ".pdf");
-            MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-            reqEntity.addPart("file", fileData);
-            postRequest.setEntity(reqEntity);
-            HttpResponse response = httpClient.execute(postRequest);
-
-            // Cek jika response code adalah 200 (OK)
-            if (response.getStatusLine().getStatusCode() == 200) {
-                JOptionPane.showMessageDialog(null, "Pesan Berhasil di Antrikan di Wa Gateway!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(null, "Gagal mengupload file. Response code: " + response.getStatusLine().getStatusCode(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
-            }
-
-            ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA  BY ICHSAN
-    private void kirimWhatsAppMessageRegistBooking() {    
-    String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));    //isi value untuk dikirim ke jadwal pengiriman di wa gateway
-
-    // Fetch nomor hp pasien, gender, serta tanggal kontrol
-    String nohppasien = "";  //ubah format nomor hp pasien
-    String jk = "";  //ubah format jenis kelamin
-    String formattedTanggal = "";  //ubah format tanggal kontrol
-    
     try {
-         /////////format tanggal dan jam kontrol        
-        //System.out.println("Raw value of TanggalPeriksa: " + TanggalPeriksa.getSelectedItem());        // aktifkan baris ini untuk Print debug ke kotak hitam
-        
-        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
-        ps.setString(1, TNoRM.getText());
-        ResultSet rs = ps.executeQuery();
+        koneksiwa = koneksiDBWa.condb();
+        File file = new File("tmpPDF/" + FileName + ".pdf");
+        byte[] data = FileUtils.readFileToByteArray(file);
+        HttpClient httpClient = new DefaultHttpClient();        
+        HttpPost postRequest = new HttpPost("http://" + koneksiDB.HOSTWA() + ":" + koneksiDB.PORTWEBWA() + "/" + koneksiDB.FOLDERFILEWA() + "/upload.php?doc=" + docpath);
+        ByteArrayBody fileData = new ByteArrayBody(data, FileName + ".pdf");
+        MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+        reqEntity.addPart("file", fileData);
+        postRequest.setEntity(reqEntity);
+        HttpResponse response = httpClient.execute(postRequest);
 
-        if (rs.next()) {
-            nohppasien = rs.getString("no_tlp");
-            jk = rs.getString("jk");
-
-            // Convert phone number from 08xxxxxx to 628xxxxxx
-            if (nohppasien.startsWith("0")) {
-                nohppasien = "62" + nohppasien.substring(1);
-            }
+        // Cek jika response code adalah 200 (OK)
+        if (response.getStatusLine().getStatusCode() == 200) {
+            JOptionPane.showMessageDialog(null, "Pesan Berhasil di Antrikan di Wa Gateway!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, "Gagal mengupload file. Response code: " + response.getStatusLine().getStatusCode(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
         }
 
-        rs.close();
-        ps.close();
-    } catch (Exception e) {
-        System.out.println("Error fetching phone number: " + e);                
-    }
+        // KODE UNTUK KIRIM WA BY ICHSAN
+        String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
+        // Fetch nomor hp pasien, gender, serta tanggal kontrol
+        String nohppasien = "";
+        String jk = "";
+        String formattedTanggal = "";
+        String noRawat = tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString();
+        String noRkmMedis = "";
+        String nmPasien = "";
 
-    // ========== 🆕 Tambahkan greeting berdasarkan waktu saat ini ==========
-    int currentHour = java.time.LocalTime.now().getHour(); // 🆕 Ambil jam saat ini
+        try { 
+            // Fetch no_rkm_medis, nm_pasien, no_tlp, and jk
+            PreparedStatement ps1 = koneksi.prepareStatement(
+                "SELECT pasien.no_rkm_medis, pasien.nm_pasien, pasien.no_tlp, pasien.jk " +
+                "FROM reg_periksa " +
+                "INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis " +
+                "WHERE reg_periksa.no_rawat = ?"
+            );
+            ps1.setString(1, noRawat);
+            ResultSet rs1 = ps1.executeQuery();
 
-    String greeting; // 🆕 Variabel untuk menyimpan greeting
-    if (currentHour >= 4 && currentHour <= 10) {
-        greeting = "Selamat Pagi"; // 🆕 Pagi (04.00 - 10.00)
-    } else if (currentHour >= 10 && currentHour <= 15) {
-        greeting = "Selamat Siang"; // 🆕 Siang (10.01 - 15.00)
-    } else if (currentHour >= 15 && currentHour <= 18) {
-        greeting = "Selamat Sore"; // 🆕 Sore (15.01 - 18.00)
-    } else {
-        greeting = "Selamat Malam"; // 🆕 Malam (18.01 - 03.59)
-    }
+            if (rs1.next()) {
+                noRkmMedis = rs1.getString("no_rkm_medis");
+                nmPasien = rs1.getString("nm_pasien");
+                nohppasien = rs1.getString("no_tlp");
+                jk = rs1.getString("jk");
 
-    // ========== 🆕 Gunakan greeting ini ke dalam salam pembuka ==========
-    String salampembuka;
-    if ("L".equalsIgnoreCase(jk)) {
-        salampembuka = greeting + ", Bpk " + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1) +  "\n"; // 🆕 Tambahkan greeting sebelum Bpk
-    } else if ("P".equalsIgnoreCase(jk)) {
-        salampembuka = greeting + ", Ibu " + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1) + "\n"; // 🆕 Tambahkan greeting sebelum Ibu
-    } else {
-        salampembuka = greeting + ", Bpk / Ibu " + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1) + "\n"; // 🆕 Jika gender tidak diketahui
-    }
-
-    // Membuat isi pesan ke dalam whatsapp
-    String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
-        "Terima kasih telah melakukan Pemeriksaan Lab di " + akses.getnamars() + ". \n " +
-        "Berikut kami sampaikan hasil pemeriksaan laboratorium :\n\n" +       
-        "0xF0 0x9F 0x93 0x85 Tanggal: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
-        "0xF0 0x9F 0x91 0xA8 Dokter : " + NmDokter.getText() + "\n" +
-        "0xF0 0x9F 0x8F 0xA5 Spesialis : " + NmPoli.getText() + "\n" +         
-        + "hasil pemeriksaan laboratorium atas nama\n"
-        + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1) + "\n"
-        + "Tanggal Pemeriksaan:" + (tbDokter.getValueAt(tbDokter.getSelectedRow(), 3)) + "\n"
-        + "Dokter Perujuk:" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 5) + "\n"
-        + "Silakan unduh file terlampir.";
-
-            String tanggaljamkirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        //    TNoRm.setText(Sequel.cariIsi("select no_rkm_medis from reg_periksa where no_rawat='" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 0) + "'"));
-            String noPasien = tbDokter.getValueAt(tbDokter.getSelectedRow(),7).toString();
-            try {
-                String sql = "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, SUCCESS, RESPONSE, REQUEST, TYPE, FILE) "
-                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-                ps = koneksiwa.prepareStatement(sql);
-                ps.setLong(1, 0);  // NOMOR, jika AUTO_INCREMENT, bisa diubah atau dihilangkan sesuai kebutuhan
-                ps.setString(2, noPasien + "@c.us");  // NOWA
-                ps.setString(3, pesan);          // PESAN
-                ps.setString(4, tanggaljamkirim);  // TANGGAL_JAM
-                ps.setString(5, "ANTRIAN");                 // STATUS
-                ps.setString(6, "KHANZA");  // SOURCE
-                ps.setString(7, "NODEJS");                  // SENDER
-                ps.setString(8, "");                        // SUCCESS
-                ps.setString(9, "");                        // RESPONSE
-                ps.setString(10, "");                       // REQUEST
-                ps.setString(11, "FILE");                   // TYPE
-                ps.setString(12, FileName + ".pdf");              // FILE
-                ps.executeUpdate();
-
-            } catch (Exception e) {
-                System.out.println("Notif : " + e);
+                // Convert phone number from 08xxxxxx to 628xxxxxx
+                if (nohppasien.startsWith("0")) {
+                    nohppasien = "62" + nohppasien.substring(1);
+                }
             }
+
+            rs1.close();
+            ps1.close();
+        } catch (Exception e) {
+            System.out.println("Error fetching patient data: " + e);
+        }
+
+        // Tambahkan greeting berdasarkan waktu saat ini
+        int currentHour = java.time.LocalTime.now().getHour();
+        String greeting;
+
+        if (currentHour >= 4 && currentHour <= 10) {
+            greeting = "Selamat Pagi";
+        } else if (currentHour >= 10 && currentHour <= 15) {
+            greeting = "Selamat Siang";
+        } else if (currentHour >= 15 && currentHour <= 18) {
+            greeting = "Selamat Sore";
+        } else {
+            greeting = "Selamat Malam";
+        }
+
+        // Gunakan greeting ke dalam salam pembuka
+        String salampembuka;
+        if ("L".equalsIgnoreCase(jk)) {
+            salampembuka = greeting + ", Bpk " + nmPasien + " ("+ noRkmMedis +")\n";
+        } else if ("P".equalsIgnoreCase(jk)) {
+            salampembuka = greeting + ", Ibu " + nmPasien + " ("+ noRkmMedis +")\n";
+        } else {
+            salampembuka = greeting + ", Bpk / Ibu " + nmPasien + " ("+ noRkmMedis +")\n";
+        }
+
+        // Membuat isi pesan ke dalam whatsapp
+        String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
+            "Terima kasih telah melakukan Pemeriksaan Lab di " + akses.getnamars() + ". \n " +
+            "Berikut kami sampaikan hasil pemeriksaan laboratorium :\n\n" +
+            "Tanggal: " + formattedTanggal + "\n" +
+            "Dokter Perujuk:" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 5) + "\n" +
+            tbDokter.getValueAt(tbDokter.getSelectedRow(), 1) + "\n" +
+            "Tanggal Pemeriksaan:" + (tbDokter.getValueAt(tbDokter.getSelectedRow(), 3)) + "\n" +
+            "Silakan unduh file terlampir.";
+
+        String tanggaljamkirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+        try {
+            String sql = "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, SUCCESS, RESPONSE, REQUEST, TYPE, FILE) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            PreparedStatement ps = koneksiwa.prepareStatement(sql);
+            ps.setLong(1, 0); 
+            ps.setString(2, nohppasien + "@c.us");
+            ps.setString(3, pesan);
+            ps.setString(4, tanggaljamkirim);
+            ps.setString(5, "ANTRIAN");
+            ps.setString(6, "KHANZA");
+            ps.setString(7, "NODEJS");
+            ps.setString(8, "");
+            ps.setString(9, "");
+            ps.setString(10, "");
+            ps.setString(11, "FILE");
+            ps.setString(12, FileName + ".pdf");
+            ps.executeUpdate();
 
         } catch (Exception e) {
-            System.out.println("Upload error: " + e);
-            JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
+            System.out.println("Notif : " + e);
         }
+
+    } catch (Exception e) {
+        System.out.println("Upload error: " + e);
+        JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
     }
+}
+
  
 }
