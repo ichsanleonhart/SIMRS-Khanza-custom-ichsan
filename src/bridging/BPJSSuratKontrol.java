@@ -935,7 +935,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
                 kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol
                 JOptionPane.showMessageDialog(null, "Surat kontrol berhasil dibuat. \n "
                 + "WA reminder akan otomatis terkirim sekarang dan pada H-1 sebelum tanggal kontrol  ;-)");
-                emptTeks();  //kosongkan isi form setelah tekan simpan
+                //emptTeks();  //kosongkan isi form setelah tekan simpan
             }else{
                 emptTeks();  //kosongkan isi form setelah tekan simpan
             }

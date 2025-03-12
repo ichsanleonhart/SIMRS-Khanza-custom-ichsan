@@ -640,7 +640,7 @@ public void MyReportPDFUpload(String reportName, String reportDirName, String ju
         }
     }
     
-    public void MyReportPDFqryUpload(String reportName, String reportDirName, String judul, String qry, String FileName, Map parameters) {   //gunakan ini untuk jenis report yang menyimpan query
+public void MyReportPDFqryUpload(String reportName, String reportDirName, String judul, String qry, String FileName, Map parameters) {   //gunakan ini untuk jenis report yang menyimpan query
         Properties systemProp = System.getProperties();
 
         // Ambil current dir

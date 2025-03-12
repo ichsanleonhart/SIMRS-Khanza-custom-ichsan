@@ -26,7 +26,7 @@ public class koneksiDBWa {
         if(connection == null){
             try{
                 prop.loadFromXML(new FileInputStream("setting/database.xml"));
-                dataSource.setURL("jdbc:mysql://"+EnkripsiAES.decrypt(prop.getProperty("HOSTWA"))+":"+EnkripsiAES.decrypt(prop.getProperty("PORTWA"))+"/"+EnkripsiAES.decrypt(prop.getProperty("DATABASEWA"))+"?zeroDateTimeBehavior=convertToNull&amp;autoReconnect=true");
+                dataSource.setURL("jdbc:mysql://"+EnkripsiAES.decrypt(prop.getProperty("HOSTWA"))+":"+EnkripsiAES.decrypt(prop.getProperty("PORTWA"))+"/"+EnkripsiAES.decrypt(prop.getProperty("DATABASEWA"))+"?zeroDateTimeBehavior=convertToNull&amp;autoReconnect=true&maxAllowedPacket=1073741824");
                 dataSource.setUser(EnkripsiAES.decrypt(prop.getProperty("USERWA")));
                 dataSource.setPassword(EnkripsiAES.decrypt(prop.getProperty("PASWA")));
                 connection=dataSource.getConnection();       

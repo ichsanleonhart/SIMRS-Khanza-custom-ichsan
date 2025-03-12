@@ -27,7 +27,12 @@ public class koneksiDB {
         if(connection == null){
             try{
                 prop.loadFromXML(new FileInputStream("setting/database.xml"));
-                dataSource.setURL("jdbc:mysql://"+EnkripsiAES.decrypt(prop.getProperty("HOST"))+":"+EnkripsiAES.decrypt(prop.getProperty("PORT"))+"/"+EnkripsiAES.decrypt(prop.getProperty("DATABASE"))+"?zeroDateTimeBehavior=convertToNull&autoReconnect=true&useCompression=true");
+                //dataSource.setURL("jdbc:mysql://"+EnkripsiAES.decrypt(prop.getProperty("HOST"))+":"+EnkripsiAES.decrypt(prop.getProperty("PORT"))+"/"+EnkripsiAES.decrypt(prop.getProperty("DATABASE"))+"?zeroDateTimeBehavior=convertToNull&autoReconnect=true&useCompression=true");
+                //start - tambahan by ichsan, untuk bypass limit 1mb ketika koneksi ke mysql untuk keperluan upload blob pada wa gateway
+                dataSource.setURL("jdbc:mysql://"+EnkripsiAES.decrypt(prop.getProperty("HOST"))+":"+EnkripsiAES.decrypt(prop.getProperty("PORT"))+"/"+
+                  EnkripsiAES.decrypt(prop.getProperty("DATABASE"))+
+                  "?zeroDateTimeBehavior=convertToNull&autoReconnect=true&useCompression=true&maxAllowedPacket=1073741824");
+                //end - tambahan by ichsan, untuk bypass limit 1mb ketika koneksi ke mysql untuk keperluan upload blob pada wa gateway
                 dataSource.setUser(EnkripsiAES.decrypt(prop.getProperty("USER")));
                 dataSource.setPassword(EnkripsiAES.decrypt(prop.getProperty("PAS")));
                 dataSource.setCachePreparedStatements(true);
@@ -1740,7 +1745,17 @@ public class koneksiDB {
         }
         return var;
     }
-
+    
+    public static String PORTWEBWA() {
+        try {
+            prop.loadFromXML(new FileInputStream("setting/database.xml"));
+            var = EnkripsiAES.decrypt(prop.getProperty("PORTWEBWA"));
+        } catch (Exception e) {
+            var = "";
+        }
+        return var;
+    }
+////////////////////////////
     public static String HOSTWA() {
         try {
             prop.loadFromXML(new FileInputStream("setting/database.xml"));
@@ -1750,11 +1765,21 @@ public class koneksiDB {
         }
         return var;
     }
-
-    public static String PORTWEBWA() {
+    
+    public static String PORTWA() {
         try {
             prop.loadFromXML(new FileInputStream("setting/database.xml"));
-            var = EnkripsiAES.decrypt(prop.getProperty("PORTWEBWA"));
+            var = EnkripsiAES.decrypt(prop.getProperty("PORTWA"));
+        } catch (Exception e) {
+            var = "";
+        }
+        return var;
+    }
+    
+    public static String DATABASEWA() {
+        try {
+            prop.loadFromXML(new FileInputStream("setting/database.xml"));
+            var = EnkripsiAES.decrypt(prop.getProperty("DATABASEWA"));
         } catch (Exception e) {
             var = "";
         }
@@ -1765,6 +1790,26 @@ public class koneksiDB {
         try {
             prop.loadFromXML(new FileInputStream("setting/database.xml"));
             var = prop.getProperty("FOLDERFILEWA");
+        } catch (Exception e) {
+            var = "";
+        }
+        return var;
+    }
+    
+    public static String USERWA() {
+        try {
+            prop.loadFromXML(new FileInputStream("setting/database.xml"));
+            var = EnkripsiAES.decrypt(prop.getProperty("USERWA"));
+        } catch (Exception e) {
+            var = "";
+        }
+        return var;
+    }
+    
+    public static String PASWA() {
+        try {
+            prop.loadFromXML(new FileInputStream("setting/database.xml"));
+            var = EnkripsiAES.decrypt(prop.getProperty("PASWA"));
         } catch (Exception e) {
             var = "";
         }
