@@ -41,13 +41,13 @@ import rekammedis.RMRiwayatPerawatan;
 import java.io.File; //tambahan by ichsan
 import java.io.FileInputStream;
 import org.apache.commons.io.FileUtils;  //tambahan ichsan
-import org.apache.http.HttpResponse;
+import org.apache.http.HttpResponse; //tambahan ichsan
 import org.apache.http.client.HttpClient; //tambahan ichsan
 import org.apache.http.client.methods.HttpPost; //tambahan ichsan
 import org.apache.http.entity.mime.HttpMultipartMode; //tambahan ichsan
 import org.apache.http.entity.mime.MultipartEntity; //tambahan ichsan
 import org.apache.http.entity.mime.content.ByteArrayBody; //tambahan ichsan
-import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.entity.mime.content.InputStreamBody; //tambahan ichsan
 import org.apache.http.impl.client.DefaultHttpClient; //tambahan ichsan
 
 public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {

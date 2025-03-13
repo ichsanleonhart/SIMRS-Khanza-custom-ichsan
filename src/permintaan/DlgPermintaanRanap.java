@@ -1763,7 +1763,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
             }                
         };
         new Timer(1000, taskPerformer).start();
-    }
+    } 
     
     private void isMenu(){
         if(ChkAccor.isSelected()==true){
