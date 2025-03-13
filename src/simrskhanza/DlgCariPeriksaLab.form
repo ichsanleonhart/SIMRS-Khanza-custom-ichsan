@@ -1328,6 +1328,12 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Upload ke Berkas digital Perawatan"/>
                 <Property name="horizontalAlignment" type="int" value="2"/>
+                <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[232, 30]"/>
+                </Property>
+                <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[232, 30]"/>
+                </Property>
                 <Property name="name" type="java.lang.String" value="TombolUpload" noResource="true"/>
               </Properties>
               <Events>
@@ -1346,6 +1352,12 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Kirim Hasil LAB ke Pasien"/>
                 <Property name="horizontalAlignment" type="int" value="2"/>
+                <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[188, 30]"/>
+                </Property>
+                <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[188, 30]"/>
+                </Property>
                 <Property name="name" type="java.lang.String" value="TombolWA1" noResource="true"/>
               </Properties>
               <Events>

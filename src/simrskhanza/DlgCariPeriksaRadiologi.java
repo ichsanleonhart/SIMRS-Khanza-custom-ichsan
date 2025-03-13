@@ -39,12 +39,15 @@ import rekammedis.RMRiwayatPerawatan;
 
 
 import java.io.File; //tambahan by ichsan
+import java.io.FileInputStream;
 import org.apache.commons.io.FileUtils;  //tambahan ichsan
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient; //tambahan ichsan
 import org.apache.http.client.methods.HttpPost; //tambahan ichsan
 import org.apache.http.entity.mime.HttpMultipartMode; //tambahan ichsan
 import org.apache.http.entity.mime.MultipartEntity; //tambahan ichsan
 import org.apache.http.entity.mime.content.ByteArrayBody; //tambahan ichsan
+import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.client.DefaultHttpClient; //tambahan ichsan
 
 public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
@@ -419,6 +422,7 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
         BtnSimpan = new widget.Button();
         BtnPrint1 = new widget.Button();
         UploadRadiologi = new widget.Button();
+        TombolWA = new widget.Button();
         FormOrthan = new widget.PanelBiasa();
         Scroll5 = new widget.ScrollPane();
         tbListDicom = new widget.Table();
@@ -1147,6 +1151,19 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
             }
         });
         panelGlass6.add(UploadRadiologi);
+
+        TombolWA.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/wa.png"))); // NOI18N
+        TombolWA.setMnemonic('T');
+        TombolWA.setText("Kirim Hasil ke Pasien");
+        TombolWA.setToolTipText("Alt+T");
+        TombolWA.setName("TombolWA"); // NOI18N
+        TombolWA.setPreferredSize(new java.awt.Dimension(180, 30));
+        TombolWA.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                TombolWAActionPerformed(evt);
+            }
+        });
+        panelGlass6.add(TombolWA);
 
         FormHasilRadiologi.add(panelGlass6, java.awt.BorderLayout.PAGE_END);
 
@@ -2407,6 +2424,149 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
         // TODO add your handling code here:
     }//GEN-LAST:event_UploadRadiologiKeyPressed
 
+    private void TombolWAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TombolWAActionPerformed
+        try {  //////////////// start - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+            if(koneksiDB.WANOTIFPASIEN().equals("yes")){
+                FileName = "RAD_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 4).toString().replaceAll(":", "") + "_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString().replaceAll("/", "") + "_" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 1).toString().replaceAll("[/()\\-:, ]", "");
+                CreatePDFWA(FileName);
+                String filePath = "tmpPDF/" + FileName;
+                UploadPDF2(FileName, "media/");
+                HapusPDF();                
+                JOptionPane.showMessageDialog(null, "OK, ditunggu sampai hasil Radiologi-nya dikirim via WA ke nomor hp pasien yah~  ;-)");
+            }else{
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "WA Gateway-nya belum disetting, pack..!");
+        } ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+    }//GEN-LAST:event_TombolWAActionPerformed
+
+     private void CreatePDFWA(String FileName) {
+     if(Kd2.getText().equals("")){
+               JOptionPane.showMessageDialog(null,"Maaf, silahkan pilih data terlebih dahulu...!!!!"); 
+        }else{
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            
+            //////////////////////// start - tambahan code buat fetch foto radiologi by ichsan
+            try {
+                    ps = koneksi.prepareStatement(
+                        "SELECT gambar_radiologi.lokasi_gambar FROM gambar_radiologi " +
+                        "WHERE gambar_radiologi.no_rawat = ? AND gambar_radiologi.tgl_periksa = ? " +
+                        "AND gambar_radiologi.jam = ?"
+                    );
+                        
+                    if (tbDokter.getSelectedRow() != -1) {
+                        ps.setString(1, tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString());
+                        ps.setString(2, tbDokter.getValueAt(tbDokter.getSelectedRow(), 3).toString());
+                        ps.setString(3, tbDokter.getValueAt(tbDokter.getSelectedRow(), 4).toString());
+
+                        rs = ps.executeQuery();
+                        lokasifile = ""; // Initialize to empty string
+
+                        if (rs.next()) {
+                            lokasifile = rs.getString("lokasi_gambar");
+                        }
+                
+                        System.out.println("Lokasi Gambar Radiologi: " + lokasifile); // Debugging Output
+                    } else {
+                        System.out.println("No row selected in tbDokter.");
+                    }
+                } catch (SQLException e) {
+                    System.out.println("Error fetching radiology image location: " + e);
+                } finally {
+                    try {
+                        if (rs != null) rs.close();
+                        if (ps != null) ps.close();
+                    } catch (SQLException e) {
+                        System.out.println("Error closing resources: " + e);
+                    }
+                }
+            //////////////////////// end - tambahan code buat fetch foto radiologi by ichsan
+            
+            pemeriksaan="";
+            try {
+                ps2=koneksi.prepareStatement(
+                            "select jns_perawatan_radiologi.kd_jenis_prw,jns_perawatan_radiologi.nm_perawatan,periksa_radiologi.biaya,"+
+                            "periksa_radiologi.kd_dokter,periksa_radiologi.nip,periksa_radiologi.proyeksi,periksa_radiologi.kV,periksa_radiologi.mAS,periksa_radiologi.FFD,"+
+                            "periksa_radiologi.BSF,periksa_radiologi.inak,periksa_radiologi.jml_penyinaran,periksa_radiologi.dosis from periksa_radiologi inner join jns_perawatan_radiologi "+
+                            "on periksa_radiologi.kd_jenis_prw=jns_perawatan_radiologi.kd_jenis_prw where periksa_radiologi.no_rawat=? and periksa_radiologi.tgl_periksa=? "+
+                            "and periksa_radiologi.jam=?"); 
+                try {
+                    ps2.setString(1,NoRawatDicari.getText());
+                    ps2.setString(2,TglDicari.getText());
+                    ps2.setString(3,JamDicari.getText());
+                    rs2=ps2.executeQuery();
+                    while(rs2.next()){
+                        pemeriksaan=rs2.getString("nm_perawatan")+", "+pemeriksaan;
+                        kdpenjab=rs2.getString("kd_dokter");
+                        kdpetugas=rs2.getString("nip");
+                    }
+                } catch (Exception e) {
+                    System.out.println("simrskhanza.DlgCariPeriksaRadiologi.BtnPrint1ActionPerformed() ps2 : "+e);
+                } finally{
+                    if(rs2!=null){
+                        rs2.close();
+                    }
+                    if(ps2!=null){
+                        ps2.close();
+                    }
+                }
+                
+            } catch (Exception e) {
+                System.out.println("Notifikasi Pemeriksaan : "+e);
+            }          
+            Sequel.cariIsi("select reg_periksa.no_rkm_medis from reg_periksa where reg_periksa.no_rawat=? ",NoRM,Kd2.getText());
+            Sequel.cariIsi("select pasien.jk from pasien where pasien.no_rkm_medis=? ",Jk,NoRM.getText());
+            Sequel.cariIsi("select pasien.umur from pasien where pasien.no_rkm_medis=?",Umur,NoRM.getText());
+            Sequel.cariIsi("select concat(pasien.alamat,', ',kelurahan.nm_kel,', ',kecamatan.nm_kec,', ',kabupaten.nm_kab) as alamat from pasien inner join kelurahan inner join kecamatan inner join kabupaten on pasien.kd_kel=kelurahan.kd_kel and pasien.kd_kec=kecamatan.kd_kec and pasien.kd_kab=kabupaten.kd_kab where no_rkm_medis=? ",Alamat,NoRM.getText());
+            
+            kamar=Sequel.cariIsi("select ifnull(kamar_inap.kd_kamar,'') from kamar_inap where kamar_inap.no_rawat='"+Kd2.getText()+"' order by kamar_inap.tgl_masuk desc limit 1");
+            if(!kamar.equals("")){
+                namakamar=kamar+", "+Sequel.cariIsi("select bangsal.nm_bangsal from bangsal inner join kamar on bangsal.kd_bangsal=kamar.kd_bangsal "+
+                            " where kamar.kd_kamar='"+kamar+"' ");            
+                kamar="Kamar";
+            }else if(kamar.equals("")){
+                kamar="Poli";
+                namakamar=Sequel.cariIsi("select poliklinik.nm_poli from poliklinik inner join reg_periksa on poliklinik.kd_poli=reg_periksa.kd_poli "+
+                            "where reg_periksa.no_rawat='"+Kd2.getText()+"'");
+            }
+            Map<String, Object> param = new HashMap<>();
+            param.put("noperiksa",Kd2.getText());
+            param.put("norm",NoRM.getText());
+            param.put("namapasien",Sequel.cariIsi("select pasien.nm_pasien from pasien where pasien.no_rkm_medis=? ",NoRM.getText()));
+            param.put("jkel",Jk.getText());
+            param.put("umur",Umur.getText());
+            param.put("lahir",Sequel.cariIsi("select DATE_FORMAT(pasien.tgl_lahir,'%d-%m-%Y') from pasien where pasien.no_rkm_medis=? ",NoRM.getText()));
+            param.put("pengirim",tbDokter.getValueAt(tbDokter.getSelectedRow(),5).toString());
+            param.put("tanggal",Valid.SetTgl3(tbDokter.getValueAt(tbDokter.getSelectedRow(),3).toString()));
+            param.put("penjab",tbDokter.getValueAt(tbDokter.getSelectedRow(),6).toString());
+            param.put("petugas",tbDokter.getValueAt(tbDokter.getSelectedRow(),2).toString());
+            param.put("alamat",Alamat.getText());
+            param.put("kamar",kamar);
+            param.put("namakamar",namakamar);
+            param.put("pemeriksaan",pemeriksaan);
+            param.put("jam",tbDokter.getValueAt(tbDokter.getSelectedRow(),4).toString());
+            param.put("namars",akses.getnamars());
+            param.put("alamatrs",akses.getalamatrs());
+            param.put("kotars",akses.getkabupatenrs());
+            param.put("propinsirs",akses.getpropinsirs());
+            param.put("kontakrs",akses.getkontakrs());
+            param.put("emailrs",akses.getemailrs());
+            param.put("hasil",HasilPeriksa.getText());
+            param.put("photo", "http://" + koneksiDB.HOSTHYBRIDWEB() + ":" + koneksiDB.PORTWEB() + "/" + koneksiDB.HYBRIDWEB() + "/radiologi/" + lokasifile);  //tambahan untuk ambil lokasi foto
+            System.out.println("URL Image for Report: " + param.get("photo")); // Debugging Output
+            param.put("logo",Sequel.cariGambar("select setting.logo from setting"));  
+            finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",kdpenjab);
+            param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+tbDokter.getValueAt(tbDokter.getSelectedRow(),6).toString()+"\nID "+(finger.equals("")?kdpenjab:finger)+"\n"+Valid.SetTgl3(tbDokter.getValueAt(tbDokter.getSelectedRow(),3).toString()));  
+            finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",kdpetugas);
+            param.put("finger2","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+tbDokter.getValueAt(tbDokter.getSelectedRow(),2).toString()+"\nID "+(finger.equals("")?kdpetugas:finger)+"\n"+Valid.SetTgl3(tbDokter.getValueAt(tbDokter.getSelectedRow(),3).toString()));  
+            
+            Valid.MyReportPDFUpload("rptPeriksaRadiologi3.jasper","report","::[ Pemeriksaan Radiologi ]::",FileName,param);
+                     
+                                  
+            
+            this.setCursor(Cursor.getDefaultCursor());
+        }
+     }
     /**
     * @param args the command line arguments
     */
@@ -2470,6 +2630,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
     private widget.Tanggal Tgl1;
     private widget.Tanggal Tgl2;
     private widget.Label TglDicari;
+    private widget.Button TombolWA;
     private widget.TextBox Umur;
     private widget.Button UploadRadiologi;
     private javax.swing.JDialog WindowGantiDokterParamedis;
@@ -2892,5 +3053,126 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
             }
         }
     }
-    ////////////////////// end - fungsi upload pdf by ichsan
+    
+    
+    private void UploadPDF2(String FileName, String docpath) {
+    try {
+         // Step 1: Open the file
+        File file = new File("tmpPDF/" + FileName + ".pdf");
+        FileInputStream fis = new FileInputStream(file);
+        
+         // Step 2: Create HTTP request using DefaultHttpClient (same as UploadPDF)
+        HttpClient httpClient = new DefaultHttpClient();
+        String uploadURL = "http://" + koneksiDB.HOSTWA() + ":" +
+                           koneksiDB.PORTWEBWA() + "/" +
+                           koneksiDB.FOLDERFILEWA() + "/upload.php?doc=" + docpath;
+        HttpPost postRequest = new HttpPost(uploadURL);
+        System.out.println("Uploading to: " + uploadURL);  //debugging untuk meliat url di atas, sudah benar atau belum
+
+        // Step 3: Build multipart request
+        MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+        reqEntity.addPart("file", new InputStreamBody(fis, "application/pdf", FileName + ".pdf"));
+        postRequest.setEntity(reqEntity);
+
+        // Step 4: Execute HTTP request
+        HttpResponse response = httpClient.execute(postRequest);
+
+         // Step 5: Check response
+        if (response.getStatusLine().getStatusCode() == 200) {
+            System.out.println("File uploaded successfully.");
+        } else {
+            System.out.println("File upload failed. Response: " + response.getStatusLine().getStatusCode());
+        }
+
+        // Step 6: Close resources
+        fis.close();
+        
+        // Step 8: Fetch patient data (phone number, gender, and name)
+        String nohppasien = "";
+        String jk = "";
+        String noRawat = tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString();
+        String noRkmMedis = "";
+        String nmPasien = "";        
+        try {
+            PreparedStatement ps1 = koneksi.prepareStatement(
+                "SELECT pasien.no_rkm_medis, pasien.nm_pasien, pasien.no_tlp, pasien.jk " +
+                "FROM reg_periksa " +
+                "INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis " +
+                "WHERE reg_periksa.no_rawat = ?"
+            );
+            ps1.setString(1, noRawat);
+            ResultSet rs1 = ps1.executeQuery();
+
+            if (rs1.next()) {
+                noRkmMedis = rs1.getString("no_rkm_medis");
+                nmPasien = rs1.getString("nm_pasien");
+                nohppasien = rs1.getString("no_tlp");
+                jk = rs1.getString("jk");
+
+                // Convert phone number from 08xxxxxx to 628xxxxxx
+                if (nohppasien.startsWith("0")) {
+                    nohppasien = "62" + nohppasien.substring(1);
+                }
+            }
+
+            rs1.close();
+            ps1.close();
+        } catch (Exception e) {
+            System.out.println("Error fetching patient data: " + e);
+        }
+
+        // Step 9: Add greeting based on time of day
+        int currentHour = java.time.LocalTime.now().getHour();
+        String greeting;
+
+        if (currentHour >= 4 && currentHour <= 10) {
+            greeting = "Selamat Pagi";
+        } else if (currentHour >= 10 && currentHour <= 15) {
+            greeting = "Selamat Siang";
+        } else if (currentHour >= 15 && currentHour <= 18) {
+            greeting = "Selamat Sore";
+        } else {
+            greeting = "Selamat Malam";
+        }
+
+        // Step 10: Format WhatsApp message
+        String salampembuka = greeting + ", " + ("L".equalsIgnoreCase(jk) ? "Bpk " : "P".equalsIgnoreCase(jk) ? "Ibu " : "Bpk / Ibu ") + nmPasien + " (" + noRkmMedis + ")\n \n";
+        String pesan = salampembuka + "Terima kasih telah melakukan Pemeriksaan Radiologi di " + akses.getnamars() + ".\n \n" +
+            "Berikut kami kirimkan berkas PDF untuk hasil pemeriksaannya. \n" +
+            "Silakan unduh file terlampir. \n \n"+
+            "Terima kasih atas perhatiannya. \n Salam sehat. \n \n" +
+            "*Unit Radiologi " + akses.getnamars() + "*";        
+        
+        // Step 11: Insert message into WA outbox
+        // KODE UNTUK KIRIM WA BY ICHSAN
+        String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));        
+    try {
+        String sql = "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, SUCCESS, RESPONSE, REQUEST, TYPE, FILE) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            PreparedStatement ps = koneksi.prepareStatement(sql);
+            ps.setLong(1, 0);
+            ps.setString(2, nohppasien + "@c.us");
+            ps.setString(3, pesan);
+            ps.setString(4, waktukirim);
+            ps.setString(5, "ANTRIAN");
+            ps.setString(6, "KHANZA");
+            ps.setString(7, "NODEJS");
+            ps.setString(8, "");
+            ps.setString(9, "");
+            ps.setString(10, "");
+            ps.setString(11, "FILE");
+            ps.setString(12, FileName + ".pdf");
+            ps.executeUpdate();
+        } catch (Exception e) {
+            System.out.println("Notif : " + e);
+        }
+        
+    } catch (Exception e) {
+        System.out.println("Upload error: " + e);
+        JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
+    }
+    } 
+    
+    ////////////////////// end - fungsi upload pdf dan kirim pdf via WA  by ichsan
 }

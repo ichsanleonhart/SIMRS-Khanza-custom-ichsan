@@ -1076,6 +1076,8 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
         TombolUpload.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/upload24.png"))); // NOI18N
         TombolUpload.setText("Upload ke Berkas digital Perawatan");
         TombolUpload.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        TombolUpload.setMaximumSize(new java.awt.Dimension(232, 30));
+        TombolUpload.setMinimumSize(new java.awt.Dimension(232, 30));
         TombolUpload.setName("TombolUpload"); // NOI18N
         TombolUpload.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1088,6 +1090,8 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
         TombolWA1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/wa.png"))); // NOI18N
         TombolWA1.setText("Kirim Hasil LAB ke Pasien");
         TombolWA1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        TombolWA1.setMaximumSize(new java.awt.Dimension(188, 30));
+        TombolWA1.setMinimumSize(new java.awt.Dimension(188, 30));
         TombolWA1.setName("TombolWA1"); // NOI18N
         TombolWA1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -7308,9 +7312,12 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
         }
 
         // Step 10: Format WhatsApp message
-        String salampembuka = greeting + ", " + ("L".equalsIgnoreCase(jk) ? "Bpk " : "P".equalsIgnoreCase(jk) ? "Ibu " : "Bpk / Ibu ") + nmPasien + " (" + noRkmMedis + ")\n";
-        String pesan = salampembuka + "\nTerima kasih telah melakukan Pemeriksaan Lab di " + akses.getnamars() + ".\n" +
-            "Silakan unduh file terlampir.";        
+        String salampembuka = greeting + ", " + ("L".equalsIgnoreCase(jk) ? "Bpk " : "P".equalsIgnoreCase(jk) ? "Ibu " : "Bpk / Ibu ") + nmPasien + " (" + noRkmMedis + ")\n \n";
+        String pesan = salampembuka + "Terima kasih telah melakukan Pemeriksaan Lab di " + akses.getnamars() + ".\n" +
+            "Berikut kami kirimkan berkas PDF untuk hasil pemeriksaannya. \n" +
+            "Silakan unduh file terlampir. \n \n"+
+            "Terima kasih atas perhatiannya. \n Salam sehat. 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F  \n \n" +
+            "*Unit Radiologi " + akses.getnamars() + "*";      
         
         // Step 11: Insert message into WA outbox
         // KODE UNTUK KIRIM WA BY ICHSAN
@@ -7341,131 +7348,6 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
         System.out.println("Upload error: " + e);
         JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
     }
-} 
- 
- /*   
-private void UploadPDF2(String FileName, String docpath) {
-    try {
-        koneksiwa = koneksiDBWa.condb();
-        File file = new File("tmpPDF/" + FileName + ".pdf");
-        byte[] data = FileUtils.readFileToByteArray(file);
-        HttpClient httpClient = new DefaultHttpClient();        
-        HttpPost postRequest = new HttpPost("http://" + koneksiDB.HOSTWA() + ":" + koneksiDB.PORTWEBWA() + "/" + koneksiDB.FOLDERFILEWA() + "/upload.php?doc=" + docpath);
-        ByteArrayBody fileData = new ByteArrayBody(data, FileName + ".pdf");
-        MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-        reqEntity.addPart("file", fileData);
-        postRequest.setEntity(reqEntity);
-        HttpResponse response = httpClient.execute(postRequest);
-        
-        // Cek jika response code adalah 200 (OK)
-        if (response.getStatusLine().getStatusCode() == 200) {
-            JOptionPane.showMessageDialog(null, "Pesan Berhasil di Antrikan di Wa Gateway!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(null, "Gagal mengupload file. Response code: " + response.getStatusLine().getStatusCode(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
-        }       
-        // Fetch nomor hp pasien, gender, serta tanggal kontrol
-        String nohppasien = "";
-        String jk = "";
-        String formattedTanggal = "";
-        String noRawat = tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString();
-        String noRkmMedis = "";
-        String nmPasien = "";
-
-        try { 
-            // Fetch no_rkm_medis, nm_pasien, no_tlp, and jk
-            PreparedStatement ps1 = koneksi.prepareStatement(
-                "SELECT pasien.no_rkm_medis, pasien.nm_pasien, pasien.no_tlp, pasien.jk " +
-                "FROM reg_periksa " +
-                "INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis " +
-                "WHERE reg_periksa.no_rawat = ?"
-            );
-            ps1.setString(1, noRawat);
-            ResultSet rs1 = ps1.executeQuery();
-
-            if (rs1.next()) {
-                noRkmMedis = rs1.getString("no_rkm_medis");
-                nmPasien = rs1.getString("nm_pasien");
-                nohppasien = rs1.getString("no_tlp");
-                jk = rs1.getString("jk");
-
-                // Convert phone number from 08xxxxxx to 628xxxxxx
-                if (nohppasien.startsWith("0")) {
-                    nohppasien = "62" + nohppasien.substring(1);
-                }
-            }
-
-            rs1.close();
-            ps1.close();
-        } catch (Exception e) {
-            System.out.println("Error fetching patient data: " + e);
-        }
-
-        // Tambahkan greeting berdasarkan waktu saat ini
-        int currentHour = java.time.LocalTime.now().getHour();
-        String greeting;
-
-        if (currentHour >= 4 && currentHour <= 10) {
-            greeting = "Selamat Pagi";
-        } else if (currentHour >= 10 && currentHour <= 15) {
-            greeting = "Selamat Siang";
-        } else if (currentHour >= 15 && currentHour <= 18) {
-            greeting = "Selamat Sore";
-        } else {
-            greeting = "Selamat Malam";
-        }
-
-        // Gunakan greeting ke dalam salam pembuka
-        String salampembuka;
-        if ("L".equalsIgnoreCase(jk)) {
-            salampembuka = greeting + ", Bpk " + nmPasien + " ("+ noRkmMedis +")\n";
-        } else if ("P".equalsIgnoreCase(jk)) {
-            salampembuka = greeting + ", Ibu " + nmPasien + " ("+ noRkmMedis +")\n";
-        } else {
-            salampembuka = greeting + ", Bpk / Ibu " + nmPasien + " ("+ noRkmMedis +")\n";
-        }
-
-        // Membuat isi pesan ke dalam whatsapp
-        String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
-            "Terima kasih telah melakukan Pemeriksaan Lab di " + akses.getnamars() + ". \n " +
-            "Berikut kami sampaikan hasil pemeriksaan laboratorium :\n\n" +
-            "Tanggal: " + formattedTanggal + "\n" +
-            "Dokter Perujuk:" + tbDokter.getValueAt(tbDokter.getSelectedRow(), 5) + "\n" +
-            tbDokter.getValueAt(tbDokter.getSelectedRow(), 1) + "\n" +
-            "Tanggal Pemeriksaan:" + (tbDokter.getValueAt(tbDokter.getSelectedRow(), 3)) + "\n" +
-            "Silakan unduh file terlampir.";        
-        
-         // KODE UNTUK KIRIM WA BY ICHSAN
-        String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
-
-        try {
-            String sql = "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, SUCCESS, RESPONSE, REQUEST, TYPE, FILE) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-            PreparedStatement ps = koneksiwa.prepareStatement(sql);
-            ps.setLong(1, 0); 
-            ps.setString(2, nohppasien + "@c.us");
-            ps.setString(3, pesan);
-            ps.setString(4, waktukirim);
-            ps.setString(5, "ANTRIAN");
-            ps.setString(6, "KHANZA");
-            ps.setString(7, "NODEJS");
-            ps.setString(8, "");
-            ps.setString(9, "");
-            ps.setString(10, "");
-            ps.setString(11, "FILE");
-            ps.setString(12, FileName + ".pdf");
-            ps.executeUpdate();
-
-        } catch (Exception e) {
-            System.out.println("Notif : " + e);
-        }
-
-    } catch (Exception e) {
-        System.out.println("Upload error: " + e);
-        JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
-    }
-}
-*/
- 
+    } 
+   
 }

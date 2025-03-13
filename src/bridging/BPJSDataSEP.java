@@ -5916,55 +5916,57 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
     }//GEN-LAST:event_ppBerkasDigitalBtnPrintActionPerformed
 
     private void CreatePDF(String FileName) {   //isi kode ini, mengambil dari isi ppSEPBtnPrintActionPerformed (button untuk cetak PDF dari SEP / form apa pun itu)
-        if (TabRawat.getSelectedIndex() == 1) {
-            if (tbDataSEP.getSelectedRow() != -1) {
-                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        if(TabRawat.getSelectedIndex()==1){
+            if(tbDataSEP.getSelectedRow()!= -1){
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
                 Map<String, Object> param = new HashMap<>();
-                param.put("namars", akses.getnamars());
-                param.put("alamatrs", akses.getalamatrs());
-                param.put("kotars", akses.getkabupatenrs());
-                param.put("propinsirs", akses.getpropinsirs());
-                param.put("kontakrs", akses.getkontakrs());
-                param.put("prb", Sequel.cariIsi("select bpjs_prb.prb from bpjs_prb where bpjs_prb.no_sep=?", tbDataSEP.getValueAt(tbDataSEP.getSelectedRow(), 0).toString()));
-                param.put("logo", Sequel.cariGambar("select gambar.bpjs from gambar"));
-                param.put("parameter", tbDataSEP.getValueAt(tbDataSEP.getSelectedRow(), 0).toString());
-                if (JenisPelayanan.getSelectedIndex() == 0) {
-                    Valid.MyReportPDFUpload("rptBridgingSEP.jasper", "report", "::[ Cetak SEP ]::", FileName, param);
-                } else {
-                    Valid.MyReportPDFUpload("rptBridgingSEP2.jasper", "report", "::[ Cetak SEP ]::", FileName, param);
-                }
-
+                param.put("namars",akses.getnamars());
+                param.put("alamatrs",akses.getalamatrs());
+                param.put("kotars",akses.getkabupatenrs());
+                param.put("propinsirs",akses.getpropinsirs());
+                param.put("kontakrs",akses.getkontakrs());
+                param.put("norawat",TNoRw.getText());
+                param.put("prb",Sequel.cariIsi("select bpjs_prb.prb from bpjs_prb where bpjs_prb.no_sep=?",tbDataSEP.getValueAt(tbDataSEP.getSelectedRow(),0).toString()));
+                param.put("noreg",Sequel.cariIsi("select no_reg from reg_periksa where no_rawat=?",TNoRw.getText()));
+                param.put("logo",Sequel.cariGambar("select gambar.bpjs from gambar")); 
+                param.put("parameter",tbDataSEP.getValueAt(tbDataSEP.getSelectedRow(),0).toString());
+                if(JenisPelayanan.getSelectedIndex()==0){
+                    Valid.MyReportPDFUpload("rptBridgingSEP5.jasper","report","::[ Cetak SEP ]::", FileName, param);
+                }else{
+                    Valid.MyReportPDFUpload("rptBridgingSEP6.jasper","report","::[ Cetak SEP ]::", FileName, param);
+                }                
                 this.setCursor(Cursor.getDefaultCursor());
-            } else {
-                JOptionPane.showMessageDialog(null, "Maaf, silahkan pilih data SEP yang mau dicetak...!!!!");
+            }else{
+                JOptionPane.showMessageDialog(null,"Maaf, silahkan pilih data SEP yang mau dicetak...!!!!");
                 BtnBatal.requestFocus();
-            }
-        } else if (TabRawat.getSelectedIndex() == 2) {
-            if (tbDataSEPInternal.getSelectedRow() != -1) {
-                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            } 
+        }else if(TabRawat.getSelectedIndex()==2){
+            if(tbDataSEPInternal.getSelectedRow()!= -1){
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
                 Map<String, Object> param = new HashMap<>();
-                param.put("namars", akses.getnamars());
-                param.put("alamatrs", akses.getalamatrs());
-                param.put("kotars", akses.getkabupatenrs());
-                param.put("propinsirs", akses.getpropinsirs());
-                param.put("kontakrs", akses.getkontakrs());
-                param.put("prb", Sequel.cariIsi("select bpjs_prb.prb from bpjs_prb where bpjs_prb.no_sep=?", tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(), 0).toString()));
-                param.put("logo", Sequel.cariGambar("select gambar.bpjs from gambar"));
-                param.put("no_sep", tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(), 0).toString());
-                param.put("noskdp", tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(), 43).toString());
-                param.put("tglrujukan", tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(), 5).toString());
-                param.put("kdpolitujuan", tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(), 15).toString());
-                if (JenisPelayanan.getSelectedIndex() == 0) {
-                    //    Valid.MyReportPDFUpload(tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(), 0).toString(), "report", "::[ Cetak SEP Internal ]::", param);
-                } else {
-                    //      Valid.MyReportPDFUpload(tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(), 0).toString(), "report", "::[ Cetak SEP Internal ]::", param);
-                }
-
+                param.put("namars",akses.getnamars());
+                param.put("alamatrs",akses.getalamatrs());
+                param.put("kotars",akses.getkabupatenrs());
+                param.put("propinsirs",akses.getpropinsirs());
+                param.put("kontakrs",akses.getkontakrs());
+                param.put("norawat",TNoRw.getText());
+                param.put("prb",Sequel.cariIsi("select bpjs_prb.prb from bpjs_prb where bpjs_prb.no_sep=?",tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(),0).toString()));
+                param.put("noreg",Sequel.cariIsi("select no_reg from reg_periksa where no_rawat=?",TNoRw.getText()));
+                param.put("logo",Sequel.cariGambar("select gambar.bpjs from gambar")); param.put("no_sep",tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(),0).toString());
+                param.put("no_sep",tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(),0).toString());
+                param.put("noskdp",tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(),43).toString());
+                param.put("tglrujukan",tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(),5).toString());
+                param.put("kdpolitujuan",tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(),15).toString());
+                if(JenisPelayanan.getSelectedIndex()==0){
+                    Valid.MyReportPDFUpload("rptBridgingSEPInternal5.jasper","report","::[ Cetak SEP Internal ]::", FileName, param);
+                }else{
+                    Valid.MyReportPDFUpload("rptBridgingSEPInternal6.jasper","report","::[ Cetak SEP Internal ]::", FileName, param);
+                }                
                 this.setCursor(Cursor.getDefaultCursor());
-            } else {
-                JOptionPane.showMessageDialog(null, "Maaf, silahkan pilih data SEP yang mau dicetak...!!!!");
+            }else{
+                JOptionPane.showMessageDialog(null,"Maaf, silahkan pilih data SEP yang mau dicetak...!!!!");
                 BtnBatal.requestFocus();
-            }
+            } 
         }
     }
     
