@@ -3706,6 +3706,12 @@ private void kirimWhatsAppMessage() {
         if (rs.next()) {
             nohppasien = rs.getString("no_tlp");
             jk = rs.getString("jk");
+            
+            // Validation: Check if phone number is at least 10 digits and contains only numbers
+                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.matches("\\d+")) {
+                    JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
+                    return; // Stop execution if phone number is invalid
+                    }
 
             // Convert phone number from 08xxxxxx to 628xxxxxx
             if (nohppasien.startsWith("0")) {

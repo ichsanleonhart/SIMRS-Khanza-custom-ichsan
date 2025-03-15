@@ -7072,7 +7072,8 @@ public final class DlgReg extends javax.swing.JDialog {
                  kirimWhatsAppMessageMJKN();  //kirim pesan WA by ichsan
                  reply = JOptionPane.showConfirmDialog(rootPane,"Mau sekalian bikin SEP..?","Konfirmasi",JOptionPane.YES_NO_OPTION);
                  if (reply == JOptionPane.YES_OPTION) {                                    
-                               MnSEPActionPerformed(new java.awt.event.ActionEvent(this, ActionEvent.ACTION_PERFORMED, "MnSEP")); // Trigger SEP action
+                               //MnSEPActionPerformed(new java.awt.event.ActionEvent(this, ActionEvent.ACTION_PERFORMED, "MnSEP")); // Trigger SEP action
+                                MnSEP.doClick();  // Simulates user clicking the MnSEP menu item
                                 } 
                              }else{
                                  JOptionPane.showMessageDialog(null,"Maaf ada kesalahan, mungkin kunjungan ini bukan pasien BPJS");
@@ -7267,6 +7268,12 @@ public final class DlgReg extends javax.swing.JDialog {
         jk = rs.getString("jk");
         System.out.println("Nomor HP ditemukan: " + nohppasien);
         System.out.println("Jenis Kelamin ditemukan: " + jk);
+        
+        // **Validation: Ensure the phone number is valid**
+        if (nohppasien == null || nohppasien.trim().isEmpty() || nohppasien.length() < 10 || !nohppasien.matches("\\d+")) {
+        JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
+        return; // Stop execution if phone number is invalid
+        }
 
         // Pastikan nomor telepon memiliki format yang benar
         if (nohppasien == null || nohppasien.trim().isEmpty()) {
@@ -7378,6 +7385,12 @@ public final class DlgReg extends javax.swing.JDialog {
         jk = rs.getString("jk");
         System.out.println("Nomor HP ditemukan: " + nohppasien);
         System.out.println("Jenis Kelamin ditemukan: " + jk);
+        
+        // **Validation: Ensure the phone number is valid**
+        if (nohppasien == null || nohppasien.trim().isEmpty() || nohppasien.length() < 10 || !nohppasien.matches("\\d+")) {
+        JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
+        return; // Stop execution if phone number is invalid
+        }
 
         // Pastikan nomor telepon memiliki format yang benar
         if (nohppasien == null || nohppasien.trim().isEmpty()) {

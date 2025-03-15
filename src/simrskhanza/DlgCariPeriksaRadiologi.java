@@ -3057,37 +3057,8 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
     
     private void UploadPDF2(String FileName, String docpath) {
     try {
-         // Step 1: Open the file
-        File file = new File("tmpPDF/" + FileName + ".pdf");
-        FileInputStream fis = new FileInputStream(file);
         
-         // Step 2: Create HTTP request using DefaultHttpClient (same as UploadPDF)
-        HttpClient httpClient = new DefaultHttpClient();
-        String uploadURL = "http://" + koneksiDB.HOSTWA() + ":" +
-                           koneksiDB.PORTWEBWA() + "/" +
-                           koneksiDB.FOLDERFILEWA() + "/upload.php?doc=" + docpath;
-        HttpPost postRequest = new HttpPost(uploadURL);
-        System.out.println("Uploading to: " + uploadURL);  //debugging untuk meliat url di atas, sudah benar atau belum
-
-        // Step 3: Build multipart request
-        MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-        reqEntity.addPart("file", new InputStreamBody(fis, "application/pdf", FileName + ".pdf"));
-        postRequest.setEntity(reqEntity);
-
-        // Step 4: Execute HTTP request
-        HttpResponse response = httpClient.execute(postRequest);
-
-         // Step 5: Check response
-        if (response.getStatusLine().getStatusCode() == 200) {
-            System.out.println("File uploaded successfully.");
-        } else {
-            System.out.println("File upload failed. Response: " + response.getStatusLine().getStatusCode());
-        }
-
-        // Step 6: Close resources
-        fis.close();
-        
-        // Step 8: Fetch patient data (phone number, gender, and name)
+        // Step 1: Fetch patient data (phone number, gender, and name)
         String nohppasien = "";
         String jk = "";
         String noRawat = tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString();
@@ -3108,6 +3079,12 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
                 nmPasien = rs1.getString("nm_pasien");
                 nohppasien = rs1.getString("no_tlp");
                 jk = rs1.getString("jk");
+                
+                // Validation: Check if phone number is at least 10 digits and contains only numbers
+                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.matches("\\d+")) {
+                    JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
+                    return; // Stop execution if phone number is invalid
+                    }
 
                 // Convert phone number from 08xxxxxx to 628xxxxxx
                 if (nohppasien.startsWith("0")) {
@@ -3120,8 +3097,39 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
         } catch (Exception e) {
             System.out.println("Error fetching patient data: " + e);
         }
+        
+        
+         // Step 2: Open the file
+        File file = new File("tmpPDF/" + FileName + ".pdf");
+        FileInputStream fis = new FileInputStream(file);
+        
+         // Step 3: Create HTTP request using DefaultHttpClient (same as UploadPDF)
+        HttpClient httpClient = new DefaultHttpClient();
+        String uploadURL = "http://" + koneksiDB.HOSTWA() + ":" +
+                           koneksiDB.PORTWEBWA() + "/" +
+                           koneksiDB.FOLDERFILEWA() + "/upload.php?doc=" + docpath;
+        HttpPost postRequest = new HttpPost(uploadURL);
+        System.out.println("Uploading to: " + uploadURL);  //debugging untuk meliat url di atas, sudah benar atau belum
 
-        // Step 9: Add greeting based on time of day
+        // Step 4: Build multipart request
+        MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+        reqEntity.addPart("file", new InputStreamBody(fis, "application/pdf", FileName + ".pdf"));
+        postRequest.setEntity(reqEntity);
+
+        // Step 5: Execute HTTP request
+        HttpResponse response = httpClient.execute(postRequest);
+
+         // Step 6: Check response
+        if (response.getStatusLine().getStatusCode() == 200) {
+            System.out.println("File uploaded successfully.");
+        } else {
+            System.out.println("File upload failed. Response: " + response.getStatusLine().getStatusCode());
+        }
+
+        // Step 7: Close resources
+        fis.close();
+
+        // Step 8: Add greeting based on time of day
         int currentHour = java.time.LocalTime.now().getHour();
         String greeting;
 
@@ -3135,7 +3143,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
             greeting = "Selamat Malam";
         }
 
-        // Step 10: Format WhatsApp message
+        // Step 9: Format WhatsApp message
         String salampembuka = greeting + ", " + ("L".equalsIgnoreCase(jk) ? "Bpk " : "P".equalsIgnoreCase(jk) ? "Ibu " : "Bpk / Ibu ") + nmPasien + " (" + noRkmMedis + ")\n \n";
         String pesan = salampembuka + "Terima kasih telah melakukan Pemeriksaan Radiologi di " + akses.getnamars() + ".\n \n" +
             "Berikut kami kirimkan berkas PDF untuk hasil pemeriksaannya. \n" +
