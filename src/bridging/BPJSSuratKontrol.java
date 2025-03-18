@@ -908,7 +908,13 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
                     if(Sequel.menyimpantf("bridging_surat_kontrol_bpjs","?,?,?,?,?,?,?,?","No.Surat",8,new String[]{
                             NoSEP.getText(),Valid.SetTgl(TanggalSurat.getSelectedItem()+""),response.asText(),Valid.SetTgl(TanggalKontrol.getSelectedItem()+""),KdDokter.getText(),NmDokter.getText(),KdPoli.getText(),NmPoli.getText()
                         })==true){
-                        emptTeks();
+                                    if(koneksiDB.WANOTIFPASIEN().equals("yes")){   
+                                    kirimWhatsAppMessage();  //kirim pesan WA by ichsan
+                                    kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol
+                                    JOptionPane.showMessageDialog(null, "Surat kontrol berhasil dibuat. \n "
+                                     + "WA reminder akan otomatis terkirim sekarang dan pada H-1 sebelum tanggal kontrol  ;-)");                        
+                                 }                        
+                        //emptTeks();
                         tampil();
                         if(JADIKANBOOKINGSURATKONTROLAPIBPJS.equals("yes")){
                             if(isBooking()==false){
@@ -924,30 +930,10 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
                 if(ex.toString().contains("UnknownHostException")){
                     JOptionPane.showMessageDialog(null,"Koneksi ke server BPJS terputus...!");
                 }
-            }
-            
-            
-            ////////////////kirim WA ke pasien
-            //////////////// fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
-        try {
-            if(koneksiDB.WANOTIFPASIEN().equals("yes")){   
-                kirimWhatsAppMessage();  //kirim pesan WA by ichsan
-                kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol
-                JOptionPane.showMessageDialog(null, "Surat kontrol berhasil dibuat. \n "
-                + "WA reminder akan otomatis terkirim sekarang dan pada H-1 sebelum tanggal kontrol  ;-)");
-                //emptTeks();  //kosongkan isi form setelah tekan simpan
-            }else{
-                emptTeks();  //kosongkan isi form setelah tekan simpan
-            }
-        } catch (Exception e) {
-            emptTeks();  //kosongkan isi form setelah tekan simpan
-        }
-            
-            
+            }  
         }
 }//GEN-LAST:event_BtnSimpanActionPerformed
 
-    ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA SETELAH SIMPAN SURAT KONTROL BY ICHSAN
     private String getGoogleMapUrl() { ///////// START - kode untuk mengambil URL google di table setting_url pada kolom google_map
     String googleMapUrl = ""; 
     try {
@@ -970,8 +956,6 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
     //System.out.println("Fetched Google Map URL: " + googleMapUrl);  //aktifkan line ini kalau mau debug print ke kotak hitam
     return googleMapUrl; 
 }   //////////////////////////  END - kode untuk mengambil URL google di table setting_url pada kolom google_map   
-    
-    
     
     private void kirimWhatsAppMessage() {
     String googleMapUrl = getGoogleMapUrl(); // Ambil url googlemap dari kode di atas    
@@ -1202,9 +1186,6 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         System.out.println("Gagal mengirim pesan WA ke Pasien: " + e);
     }
 }
-///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA SETELAH SIMPAN SURAT KONTROL BY ICHSAN
-    
-    
     
     private void BtnSimpanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnSimpanKeyPressed
         if(evt.getKeyCode()==KeyEvent.VK_SPACE){
