@@ -2976,7 +2976,7 @@ private void ppBerkasDigitalBtnPrintActionPerformed(java.awt.event.ActionEvent e
                 jk = rs1.getString("jk");
                 
                 // Validation: Check if phone number is at least 10 digits and contains only numbers
-                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.matches("\\d+")) {
+                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.trim().matches("\\d+")) {
                     JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
                     return; // Stop execution if phone number is invalid
                     }

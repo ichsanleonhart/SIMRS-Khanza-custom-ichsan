@@ -1134,7 +1134,7 @@ public class SuratKontrol extends javax.swing.JDialog {
             jk = rs.getString("jk");
             
             // Validation: Check if phone number is at least 10 digits and contains only numbers
-                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.matches("\\d+")) {
+                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.trim().matches("\\d+")) {
                     JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
                     return; // Stop execution if phone number is invalid
                     }
@@ -1267,7 +1267,7 @@ public class SuratKontrol extends javax.swing.JDialog {
             jk = rs.getString("jk");
             
             // Validation: Check if phone number is at least 10 digits and contains only numbers
-                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.matches("\\d+")) {
+                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.trim().matches("\\d+")) {
                     JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
                     return; // Stop execution if phone number is invalid
                     }

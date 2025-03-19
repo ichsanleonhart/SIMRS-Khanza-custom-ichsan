@@ -542,9 +542,10 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
         jPopupMenu1 = new javax.swing.JPopupMenu();
         MnLaporanResume = new javax.swing.JMenuItem();
         MnLaporanResumeAnak = new javax.swing.JMenuItem();
-        MnInputDiagnosa = new javax.swing.JMenuItem();
-        ppBerkasDigital = new javax.swing.JMenuItem();
         ppKirimWA = new javax.swing.JMenuItem();
+        UploadBerkasDigital = new javax.swing.JMenuItem();
+        ppBerkasDigital = new javax.swing.JMenuItem();
+        MnInputDiagnosa = new javax.swing.JMenuItem();
         internalFrame1 = new widget.InternalFrame();
         Scroll = new widget.ScrollPane();
         tbObat = new widget.Table();
@@ -716,19 +717,37 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
         });
         jPopupMenu1.add(MnLaporanResumeAnak);
 
-        MnInputDiagnosa.setBackground(new java.awt.Color(255, 255, 254));
-        MnInputDiagnosa.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
-        MnInputDiagnosa.setForeground(new java.awt.Color(50, 50, 50));
-        MnInputDiagnosa.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
-        MnInputDiagnosa.setText("Input Diagnosa Pasien");
-        MnInputDiagnosa.setName("MnInputDiagnosa"); // NOI18N
-        MnInputDiagnosa.setPreferredSize(new java.awt.Dimension(220, 26));
-        MnInputDiagnosa.addActionListener(new java.awt.event.ActionListener() {
+        ppKirimWA.setBackground(new java.awt.Color(255, 255, 254));
+        ppKirimWA.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
+        ppKirimWA.setForeground(new java.awt.Color(50, 50, 50));
+        ppKirimWA.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
+        ppKirimWA.setText("Kirim Resume ke Pasien via Whatsapp");
+        ppKirimWA.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        ppKirimWA.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        ppKirimWA.setName("ppKirimWA"); // NOI18N
+        ppKirimWA.setPreferredSize(new java.awt.Dimension(220, 26));
+        ppKirimWA.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                MnInputDiagnosaActionPerformed(evt);
+                ppKirimWABtnPrintActionPerformed(evt);
             }
         });
-        jPopupMenu1.add(MnInputDiagnosa);
+        jPopupMenu1.add(ppKirimWA);
+
+        UploadBerkasDigital.setBackground(new java.awt.Color(255, 255, 254));
+        UploadBerkasDigital.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
+        UploadBerkasDigital.setForeground(new java.awt.Color(50, 50, 50));
+        UploadBerkasDigital.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
+        UploadBerkasDigital.setText("Upload ke Berkas Digital Perawatan");
+        UploadBerkasDigital.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        UploadBerkasDigital.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        UploadBerkasDigital.setName("UploadBerkasDigital"); // NOI18N
+        UploadBerkasDigital.setPreferredSize(new java.awt.Dimension(220, 26));
+        UploadBerkasDigital.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                UploadBerkasDigitalBtnPrintActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(UploadBerkasDigital);
 
         ppBerkasDigital.setBackground(new java.awt.Color(255, 255, 254));
         ppBerkasDigital.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
@@ -746,21 +765,19 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
         });
         jPopupMenu1.add(ppBerkasDigital);
 
-        ppKirimWA.setBackground(new java.awt.Color(255, 255, 254));
-        ppKirimWA.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
-        ppKirimWA.setForeground(new java.awt.Color(50, 50, 50));
-        ppKirimWA.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
-        ppKirimWA.setText("Kirim Resume ke Pasien via Whatsapp");
-        ppKirimWA.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        ppKirimWA.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        ppKirimWA.setName("ppKirimWA"); // NOI18N
-        ppKirimWA.setPreferredSize(new java.awt.Dimension(220, 26));
-        ppKirimWA.addActionListener(new java.awt.event.ActionListener() {
+        MnInputDiagnosa.setBackground(new java.awt.Color(255, 255, 254));
+        MnInputDiagnosa.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
+        MnInputDiagnosa.setForeground(new java.awt.Color(50, 50, 50));
+        MnInputDiagnosa.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
+        MnInputDiagnosa.setText("Input Diagnosa Pasien");
+        MnInputDiagnosa.setName("MnInputDiagnosa"); // NOI18N
+        MnInputDiagnosa.setPreferredSize(new java.awt.Dimension(220, 26));
+        MnInputDiagnosa.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ppKirimWABtnPrintActionPerformed(evt);
+                MnInputDiagnosaActionPerformed(evt);
             }
         });
-        jPopupMenu1.add(ppKirimWA);
+        jPopupMenu1.add(MnInputDiagnosa);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setUndecorated(true);
@@ -933,7 +950,7 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "13-03-2025" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "18-03-2025" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -947,7 +964,7 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "13-03-2025" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "18-03-2025" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -1800,7 +1817,7 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
         KetDilanjutkan.setBounds(236, 1081, 270, 23);
 
         Kontrol.setForeground(new java.awt.Color(50, 70, 50));
-        Kontrol.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "13-03-2025 11:45:52" }));
+        Kontrol.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "18-03-2025 14:53:24" }));
         Kontrol.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         Kontrol.setName("Kontrol"); // NOI18N
         Kontrol.setOpaque(false);
@@ -2699,12 +2716,7 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
     }//GEN-LAST:event_MnLaporanResumeAnakActionPerformed
 
 private void UploadResumeBtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UploadResumeBtnPrintActionPerformed
-        FileName = "RESUME_RANAP_" + tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().replaceAll("/", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().trim()+ "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 2).toString().replaceAll(" ", "_");
-        CreatePDF(FileName);
-        String filePath = "tmpPDF/" + FileName;
-        UploadPDF(FileName, "berkasrawat/pages/upload/");
-        HapusPDF();
-        ppBerkasDigitalBtnPrintActionPerformed(evt);
+        
     }//GEN-LAST:event_UploadResumeBtnPrintActionPerformed
 
     private void ppKirimWABtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ppKirimWABtnPrintActionPerformed
@@ -2715,6 +2727,15 @@ private void UploadResumeBtnPrintActionPerformed(java.awt.event.ActionEvent evt)
                 HapusPDF();                
                 JOptionPane.showMessageDialog(null, "OK, ditunggu sampai PDF Resume-nya dikirim via WA ke nomor hp pasien yah~  ;-)");
     }//GEN-LAST:event_ppKirimWABtnPrintActionPerformed
+
+    private void UploadBerkasDigitalBtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UploadBerkasDigitalBtnPrintActionPerformed
+        FileName = "RESUME_RANAP_" + tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().replaceAll("/", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().trim()+ "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 2).toString().replaceAll(" ", "_");
+        CreatePDF(FileName);
+        String filePath = "tmpPDF/" + FileName;
+        UploadPDF(FileName, "berkasrawat/pages/upload/");
+        HapusPDF();
+        ppBerkasDigitalBtnPrintActionPerformed(evt);
+    }//GEN-LAST:event_UploadBerkasDigitalBtnPrintActionPerformed
 
     private void CreatePDF(String FileName) {
         if (tbObat.getSelectedRow() > -1) {
@@ -2923,6 +2944,7 @@ private void UploadResumeBtnPrintActionPerformed(java.awt.event.ActionEvent evt)
     private widget.TextBox TNoRw;
     private widget.TextBox TPasien;
     private widget.TextArea TindakanSelamaDiRS;
+    private javax.swing.JMenuItem UploadBerkasDigital;
     private widget.InternalFrame internalFrame1;
     private widget.Label jLabel10;
     private widget.Label jLabel11;
@@ -3523,7 +3545,7 @@ private void UploadPDF(String FileName, String docpath) {
                 jk = rs1.getString("jk");
                 
                 // Validation: Check if phone number is at least 10 digits and contains only numbers
-                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.matches("\\d+")) {
+                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.trim().matches("\\d+")) {
                     JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
                     return; // Stop execution if phone number is invalid
                     }

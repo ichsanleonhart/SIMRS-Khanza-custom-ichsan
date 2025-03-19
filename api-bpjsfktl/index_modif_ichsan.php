@@ -642,19 +642,27 @@
 
                                                                                 http_response_code(200);
 																			} else {
-																			
-                                                                            $update=bukaquery2("update referensi_mobilejkn_bpjs set status='Gagal',validasi=now() where nobooking='$nobooking'");
-                                                                            $response = array(
-                                                                                'metadata' => array(
-                                                                                    'message' => "Maaf terjadi kesalahan, hubungi Admnistrator..",
-                                                                                    'code' => 401
-                                                                                )
-                                                                            );
-                                                                            http_response_code(401);
-																			}
+				   
+                                                                                $update=bukaquery2("update referensi_mobilejkn_bpjs set status='Gagal',validasi=now() where nobooking='$nobooking'");
+                                                                                $response = array(
+                                                                                    'metadata' => array(
+                                                                                        'message' => "Maaf terjadi kesalahan, hubungi Admnistrator..",
+                                                                                        'code' => 401
+                                                                                    )
+                                                                                );
+                                                                                http_response_code(401);
+                                                                            }   
 																		
 																		}
-																		
+																		} else {
+                                                                        $response = array(
+                                                                            'metadata' => array(
+                                                                                'message' => "Maaf terjadi kesalahan, hubungi Admnistrator..",
+                                                                                'code' => 401
+                                                                            )
+                                                                        );
+                                                                        http_response_code(401);
+                                                                    } 
                                                                 }else{
                                                                     $response = array(
                                                                         'metadata' => array(
@@ -671,7 +679,7 @@
                                             }
                                         }
                                     }
-                                    }
+                                    
                                 }else {
                                     $response = array(
                                         'metadata' => array(

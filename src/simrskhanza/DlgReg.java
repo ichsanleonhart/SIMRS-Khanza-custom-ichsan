@@ -7270,7 +7270,7 @@ public final class DlgReg extends javax.swing.JDialog {
         System.out.println("Jenis Kelamin ditemukan: " + jk);
         
         // **Validation: Ensure the phone number is valid**
-        if (nohppasien == null || nohppasien.trim().isEmpty() || nohppasien.length() < 10 || !nohppasien.matches("\\d+")) {
+        if (nohppasien == null || nohppasien.trim().isEmpty() || nohppasien.length() < 10 || !nohppasien.trim().matches("\\d+")) {
         JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
         return; // Stop execution if phone number is invalid
         }
@@ -7387,7 +7387,7 @@ public final class DlgReg extends javax.swing.JDialog {
         System.out.println("Jenis Kelamin ditemukan: " + jk);
         
         // **Validation: Ensure the phone number is valid**
-        if (nohppasien == null || nohppasien.trim().isEmpty() || nohppasien.length() < 10 || !nohppasien.matches("\\d+")) {
+        if (nohppasien == null || nohppasien.trim().isEmpty() || nohppasien.length() < 10 || !nohppasien.trim().matches("\\d+")) {
         JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
         return; // Stop execution if phone number is invalid
         }
