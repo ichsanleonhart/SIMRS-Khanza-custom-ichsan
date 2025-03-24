@@ -2094,6 +2094,7 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
     }//GEN-LAST:event_UploadResumeDigitalBtnPrintActionPerformed
 
     private void ppKirimWABtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ppKirimWABtnPrintActionPerformed
+        
         FileName = "RESUME_RALAN_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().replaceAll("/", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 2).toString().trim()+ "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 3).toString().replaceAll(" ", "");
                 CreatePDFWA(FileName);
                 String filePath = "tmpPDF/" + FileName;
@@ -2575,7 +2576,14 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
                 KodeDokter.setText("");
                 JOptionPane.showMessageDialog(null,"User login bukan dokter...!!");
             }
-        }            
+        }        
+        if(akses.getkode().equals("Admin Utama")){ //vambahan validasi untuk hak akses kirim WA, diambil dari hak akses Pengaduan Pasien by ichsan
+            ppKirimWA.setEnabled(true);            
+        }else{
+            if(akses.getpengaduan_pasien()==false){
+            ppKirimWA.setEnabled(false);
+            }
+        }
     }
 
     private void ganti() {

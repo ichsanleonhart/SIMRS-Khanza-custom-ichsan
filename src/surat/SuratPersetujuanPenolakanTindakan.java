@@ -2308,6 +2308,8 @@ public final class SuratPersetujuanPenolakanTindakan extends javax.swing.JDialog
     }//GEN-LAST:event_UploadRadiologiKeyPressed
 
     private void TombolWAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TombolWAActionPerformed
+        
+        
         try {  //////////////// start - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
             if(koneksiDB.WANOTIFPASIEN().equals("yes")){
                 FileName = "Persetujuan_Penolakan_" + tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().replaceAll(" ", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().replaceAll("/", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 3).toString().replaceAll(" ", "");
@@ -2744,7 +2746,14 @@ public final class SuratPersetujuanPenolakanTindakan extends javax.swing.JDialog
                 KdDokter.setText("");
                 JOptionPane.showMessageDialog(null,"User login bukan Dokter...!!");
             }
-        }            
+        }
+        if(akses.getkode().equals("Admin Utama")){ //vambahan validasi untuk hak akses kirim WA, diambil dari hak akses Pengaduan Pasien by ichsan
+            TombolWA.setEnabled(true);            
+        }else{
+            if(akses.getpengaduan_pasien()==false){
+            TombolWA.setEnabled(false);
+            }
+        }
     }
     
     public void setTampil(){
@@ -3077,4 +3086,7 @@ private void ppBerkasDigitalBtnPrintActionPerformed(java.awt.event.ActionEvent e
         JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
     }
     }
+   
+             
+           
 }

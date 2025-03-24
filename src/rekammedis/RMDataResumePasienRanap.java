@@ -2720,6 +2720,7 @@ private void UploadResumeBtnPrintActionPerformed(java.awt.event.ActionEvent evt)
     }//GEN-LAST:event_UploadResumeBtnPrintActionPerformed
 
     private void ppKirimWABtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ppKirimWABtnPrintActionPerformed
+        
         FileName = "RESUME_RANAP_" + tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().replaceAll("/", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().trim()+ "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 2).toString().replaceAll(" ", "_");
                 CreatePDFWA(FileName);
                 String filePath = "tmpPDF/" + FileName;
@@ -3009,6 +3010,7 @@ private void UploadResumeBtnPrintActionPerformed(java.awt.event.ActionEvent evt)
     private widget.Table tbObat;
     // End of variables declaration//GEN-END:variables
 
+    
     public void tampil() {
         Valid.tabelKosong(tabMode);
         try{
@@ -3382,7 +3384,14 @@ private void UploadResumeBtnPrintActionPerformed(java.awt.event.ActionEvent evt)
                 KodeDokter.setText("");
                 JOptionPane.showMessageDialog(null,"User login bukan dokter...!!");
             }
-        }            
+        }
+        if(akses.getkode().equals("Admin Utama")){  //vambahan validasi untuk hak akses kirim WA, diambil dari hak akses Pengaduan Pasien by ichsan
+            ppKirimWA.setEnabled(true);            
+        }else{
+            if(akses.getpengaduan_pasien()==false){
+            ppKirimWA.setEnabled(false);
+            }
+        }
     }
 
     private void ganti() {
