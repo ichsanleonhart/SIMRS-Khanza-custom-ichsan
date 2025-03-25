@@ -2436,7 +2436,9 @@ private void tbLabRalanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:even
                     param.put("kotars",akses.getkabupatenrs());
                     param.put("propinsirs",akses.getpropinsirs());
                     param.put("kontakrs",akses.getkontakrs());
-                    param.put("emailrs",akses.getemailrs());   
+                    param.put("emailrs",akses.getemailrs());
+                    param.put("nohp",Sequel.cariIsi("select pasien.no_tlp from pasien where pasien.no_rkm_medis=? ",norm)); //tambahan kolom nomor hp by ichsan
+                    param.put("alamatpasien",Sequel.cariIsi("select alamat from pasien where no_rkm_medis=?",norm));  //tambahan kolom alamat by ichsan
                     Valid.MyReportqry("rptBarcodePermintaanLab.jasper","report","::[ Barcode No.Permintaan Lab ]::",
                             "select noorder from permintaan_lab where no_rawat='"+NoRawat+"'",param); 
                     TeksKosong();

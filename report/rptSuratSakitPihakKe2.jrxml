@@ -286,7 +286,7 @@ and suratsakitpihak2.no_rawat=reg_periksa.no_rawat and pasien.kd_kec=kecamatan.k
 					<font fontName="Tahoma" size="10"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{jk}.equals("L")? "Laki-Laki":"Perempuan"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{jk}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="402" y="204" width="151" height="14" uuid="934f6d78-9100-47a2-abdc-32cfb19f65d9">

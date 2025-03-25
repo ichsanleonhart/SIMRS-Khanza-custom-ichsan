@@ -27,19 +27,19 @@ import kepegawaian.DlgCariDokter2;
 import laporan.DlgCariPenyakit;
 import simrskhanza.DlgCariPoli;
 import simrskhanza.DlgCariPoli2;
-import org.apache.http.client.methods.HttpPost; //tambahan ichsan
 import java.io.File; //tambahan ichsan untuk fungsi upload pdf
 import java.time.LocalDateTime;  //tambahan ambil waktu sekarang by ichsan
 import java.time.format.DateTimeFormatter;  //tambahan format paksa waktu untuk kirim pesan WA by ichsan
 import java.text.SimpleDateFormat;  //tambahan format paksa waktu untuk kirim pesan WA by ichsan
 import java.util.Locale; //tambahan format paksa waktu untuk kirim pesan WA by ichsan
 import org.apache.http.client.HttpClient; //tambahan ichsan
+import org.apache.http.client.methods.HttpPost; //tambahan ichsan
+import org.apache.http.entity.mime.HttpMultipartMode; //tambahan ichsan
+import org.apache.http.entity.mime.MultipartEntity; //tambahan ichsan
 import org.apache.http.impl.client.DefaultHttpClient; //tambahan ichsan
 import java.io.FileInputStream; //tambahan ichsan
 import org.apache.http.entity.mime.content.InputStreamBody; //tambahan ichsan
 import org.apache.http.HttpResponse; //tambahan ichsan
-import org.apache.http.entity.mime.MultipartEntity; //tambahan ichsan
-import org.apache.http.entity.mime.HttpMultipartMode; //tambahan ichsan
 
 /**
  *
@@ -380,6 +380,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         jLabel18 = new widget.Label();
         btnDiagnosa = new widget.Button();
         Status = new widget.ComboBox();
+        TombolWA = new widget.Button();
 
         jPopupMenu1.setName("jPopupMenu1"); // NOI18N
 
@@ -640,7 +641,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         R2.setPreferredSize(new java.awt.Dimension(90, 23));
         panelCari.add(R2);
 
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-02-2025" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-03-2025" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -662,7 +663,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         jLabel22.setPreferredSize(new java.awt.Dimension(25, 23));
         panelCari.add(jLabel22);
 
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-02-2025" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-03-2025" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -682,7 +683,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         R3.setPreferredSize(new java.awt.Dimension(85, 23));
         panelCari.add(R3);
 
-        DTPCari3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-02-2025" }));
+        DTPCari3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-03-2025" }));
         DTPCari3.setDisplayFormat("dd-MM-yyyy");
         DTPCari3.setName("DTPCari3"); // NOI18N
         DTPCari3.setOpaque(false);
@@ -704,7 +705,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         jLabel25.setPreferredSize(new java.awt.Dimension(25, 23));
         panelCari.add(jLabel25);
 
-        DTPCari4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-02-2025" }));
+        DTPCari4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-03-2025" }));
         DTPCari4.setDisplayFormat("dd-MM-yyyy");
         DTPCari4.setName("DTPCari4"); // NOI18N
         DTPCari4.setOpaque(false);
@@ -787,7 +788,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         TPasien.setBounds(185, 10, 190, 23);
 
         TanggalSurat.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalSurat.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-02-2025 10:24:03" }));
+        TanggalSurat.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-03-2025 12:25:15" }));
         TanggalSurat.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         TanggalSurat.setName("TanggalSurat"); // NOI18N
         TanggalSurat.setOpaque(false);
@@ -932,7 +933,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         jLabel14.setBounds(0, 160, 92, 23);
 
         TanggalPeriksa.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalPeriksa.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-02-2025 10:24:03" }));
+        TanggalPeriksa.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-03-2025 12:25:15" }));
         TanggalPeriksa.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         TanggalPeriksa.setName("TanggalPeriksa"); // NOI18N
         TanggalPeriksa.setOpaque(false);
@@ -1040,6 +1041,22 @@ public class SuratKontrol extends javax.swing.JDialog {
         });
         FormInput.add(Status);
         Status.setBounds(610, 160, 100, 23);
+
+        TombolWA.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/wa.png"))); // NOI18N
+        TombolWA.setMnemonic('T');
+        TombolWA.setText("Kirim Surkon ke Pasien");
+        TombolWA.setToolTipText("Alt+T");
+        TombolWA.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        TombolWA.setName("TombolWA"); // NOI18N
+        TombolWA.setPreferredSize(new java.awt.Dimension(180, 30));
+        TombolWA.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+        TombolWA.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                TombolWAActionPerformed(evt);
+            }
+        });
+        FormInput.add(TombolWA);
+        TombolWA.setBounds(610, 10, 260, 30);
 
         PanelInput.add(FormInput, java.awt.BorderLayout.CENTER);
 
@@ -1807,6 +1824,22 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         // TODO add your handling code here:
     }//GEN-LAST:event_NoRegActionPerformed
 
+    private void TombolWAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TombolWAActionPerformed
+        try {  //////////////// start - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+            if(koneksiDB.WANOTIFPASIEN().equals("yes")){                 
+                   FileName = "Surat_Kontrol_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().replaceAll(" ", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().trim();
+                    CreatePDFWA(FileName);
+                    String filePath = "tmpPDF/" + FileName;
+                    UploadPDF2(FileName, "media/");
+                    HapusPDF();                                   
+                JOptionPane.showMessageDialog(null, "OK, ditunggu sampai hasil PDF Surat Kontrol-nya dikirim via WA ke nomor hp pasien yah~  ;-)");
+            }else{
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "WA Gateway-nya belum disetting, pack..!");
+        } ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+    }//GEN-LAST:event_TombolWAActionPerformed
+
     /**
     * @param args the command line arguments
     */
@@ -1865,6 +1898,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private widget.Tanggal TanggalPeriksa;
     private widget.Tanggal TanggalSurat;
     private widget.TextBox Terapi;
+    private widget.Button TombolWA;
     private widget.Button btnDiagnosa;
     private javax.swing.ButtonGroup buttonGroup1;
     private widget.InternalFrame internalFrame1;
@@ -2218,15 +2252,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                 //jika berhasil menyimpan, kirim pesan whatsapp
                 if(koneksiDB.WANOTIFPASIEN().equals("yes")){   //////////////// fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
                    kirimWhatsAppMessage();  //kirim pesan WA by ichsan
-                   kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol
-                   //////////////
-                   FileName = "RESUME_RALAN_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().replaceAll("/", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 2).toString().trim()+ "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 3).toString().replaceAll(" ", "");
-                    CreatePDFWA(FileName);
-                    String filePath = "tmpPDF/" + FileName;
-                    UploadPDF2(FileName, "media/");
-                    HapusPDF();                
-                   //////////////
-                   
+                   kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol                   
                    JOptionPane.showMessageDialog(null, "Surat kontrol berhasil dibuat. \n "
                                                              + "WA reminder akan otomatis terkirim sekarang dan pada H-1 sebelum tanggal kontrol  ;-)");  
                  }
@@ -2327,11 +2353,14 @@ private void HapusPDF() {
  ///////////////////////// start - upload berkas digital perawatan by ichsan
     
    private void UploadPDF2(String FileName, String docpath) {
-    try {        
+    try {
+       String nohppasien = "";
+       String jk = "";
+       String noRkmMedis = "";
+       String nmPasien = ""; 
+       
+       try {        
         // Step 1: Fetch patient data (phone number, gender, and name)
-        String nohppasien = "";
-        String jk = "";
-        
         PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
         ps.setString(1, TNoRM.getText());
         ResultSet rs = ps.executeQuery();
@@ -2402,13 +2431,9 @@ private void HapusPDF() {
             greeting = "Selamat Malam";
         }
 
-        // Step 9: Format WhatsApp message
-        String salampembuka = greeting + ", " + ("L".equalsIgnoreCase(jk) ? "Bpk " : "P".equalsIgnoreCase(jk) ? "Ibu " : "Bpk / Ibu ") + nmPasien + " (" + noRkmMedis + ")\n \n";
-        String pesan = salampembuka + "Terima kasih telah mempercayakan tindakan pelayanan medis Anda di " + akses.getnamars() + ".\n\n" +
-            "Berikut kami kirimkan berkas PDF untuk Resume Medis Anda. \n" +
-            "Silakan unduh file terlampir. \n \n"+
-            "Terima kasih atas perhatiannya. \n Salam sehat. \n \n" +
-            "*Unit Poliklinik " + akses.getnamars() + "*";        
+        // Step 9: Format WhatsApp message        
+        String pesan = "Berikut berkas PDF untuk Surat Kontrol Anda. \n" +
+                       "Silakan unduh file terlampir. \n \n";                        
         
         // Step 10: Insert message into WA outbox
         // KODE UNTUK KIRIM WA BY ICHSAN
@@ -2440,32 +2465,6 @@ private void HapusPDF() {
         JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
     }
     } 
-    } 
-    /*   ///////////backup script lama
-    private void isBooking(){
-        if(Sequel.menyimpantf("skdp_bpjs","?,?,?,?,?,?,?,?,?,?,?,?,?","Tahun dan nomor surat",13,new String[]{
-             TanggalPeriksa.getSelectedItem().toString().substring(6,10),TNoRM.getText(),Diagnosa.getText(),Terapi.getText(),
-             Alasan1.getText(),Alasan2.getText(),Rtl1.getText(),Rtl2.getText(),Valid.SetTgl(TanggalPeriksa.getSelectedItem()+"")+" "+TanggalPeriksa.getSelectedItem().toString().substring(11,19),
-             Valid.SetTgl(TanggalSurat.getSelectedItem()+"")+" "+TanggalSurat.getSelectedItem().toString().substring(11,19),NoSurat.getText(),KdDokter.getText(),Status.getSelectedItem().toString()
-         })==true){
-             /*if(JADIKANBOOKINGSURATKONTROL.equals("yes")){
-                Sequel.menyimpan2("booking_registrasi","?,?,?,?,?,?,?,?,?,?,?","Pasien dan Tanggal",11,new String[]{
-                   Valid.SetTgl(TanggalSurat.getSelectedItem()+""),TanggalSurat.getSelectedItem().toString().substring(11,19),TNoRM.getText(),
-                   Valid.SetTgl(TanggalPeriksa.getSelectedItem()+""),KdDokter.getText(),
-                   KdPoli.getText(),NoReg.getText(),Sequel.cariIsi("select pasien.kd_pj from pasien where pasien.no_rkm_medis=?",TNoRM.getText()),"0",
-                   Valid.SetTgl(TanggalPeriksa.getSelectedItem()+"")+" "+TanggalPeriksa.getSelectedItem().toString().substring(11,19),
-                   "belum"    
-                });
-             } */ // modif by ichsan agar surat kontrol tidak masuk ke list booking registrasi (karena bentrok dengan booking dari MJKN) 
-        /*
-             tabMode.addRow(new String[]{
-                TanggalPeriksa.getSelectedItem().toString().substring(6,10),TNoRM.getText(),TPasien.getText(),Diagnosa.getText(),Terapi.getText(),Alasan1.getText(),Alasan2.getText(),
-                Rtl1.getText(),Rtl2.getText(),Valid.SetTgl(TanggalPeriksa.getSelectedItem()+"")+" "+TanggalPeriksa.getSelectedItem().toString().substring(11,19),
-                Valid.SetTgl(TanggalSurat.getSelectedItem()+"")+" "+TanggalSurat.getSelectedItem().toString().substring(11,19),NoSurat.getText(),NoReg.getText(),
-                KdDokter.getText(),NmDokter.getText(),KdPoli.getText(),NmPoli.getText(),Status.getSelectedItem().toString()
-             });
-             // emptTeks();  //ini dihapus karena bikin isian pesan WA kosong
-             LCount.setText(""+tabMode.getRowCount());
-         } 
-    } */
+     
+    
 }

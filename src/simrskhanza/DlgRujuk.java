@@ -50,7 +50,7 @@ public final class DlgRujuk extends javax.swing.JDialog {
     private Connection koneksi=koneksiDB.condb();
     private sekuel Sequel=new sekuel();
     private validasi Valid=new validasi();
-    private String diagnosa="",diagnosa2="",keluar="",tgl="",sql="";
+    private String diagnosa="",diagnosa2="",keluar="",tgl="",sql="", finger="", kodedokter="",namadokter="";
     private PreparedStatement psobat,ps;
     private ResultSet rs;
     private DlgCariDokter dokter=new DlgCariDokter(null,false);
@@ -1122,6 +1122,11 @@ private void TDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_T
             param.put("kontakrs",akses.getkontakrs());
             param.put("emailrs",akses.getemailrs());
             param.put("logo",Sequel.cariGambar("select setting.logo from setting"));
+            param.put("keterangan",tbObat.getValueAt(tbObat.getSelectedRow(),12).toString());  //edit by ichsan, tambah kolom keterangan di jasper report
+            kodedokter=Sequel.cariIsi("select rujuk.kd_dokter from rujuk where rujuk.no_rujuk=?",TNoRj.getText()); //edit by ichsan, tambah fingerprint qr code
+            namadokter=Sequel.cariIsi("select dokter.nm_dokter from dokter where dokter.kd_dokter=?",kodedokter); //edit by ichsan, tambah fingerprint qr code
+            finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",kodedokter); //edit by ichsan, tambah fingerprint qr code
+            param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+namadokter+"\nID "+(finger.equals("")?kodedokter:finger)+"\n"+Sequel.cariIsi("select DATE_FORMAT(reg_periksa.tgl_registrasi,'%d-%m-%Y') from reg_periksa where reg_periksa.no_rawat=?",TNoRw.getText()));   //edit by ichsan, tambah fingerprint qr code
             Valid.MyReportqry("rptSuratRujukan.jasper","report","::[ Surat Rujukan ]::",
                 "select rujuk.rujuk_ke,rujuk.no_rujuk,reg_periksa.no_rawat,pasien.alamat,dokter.nm_dokter, "+
                 "reg_periksa.no_rkm_medis,pasien.jk,pasien.keluarga,pasien.namakeluarga,pasien.tgl_lahir,pasien.nm_pasien,"+
