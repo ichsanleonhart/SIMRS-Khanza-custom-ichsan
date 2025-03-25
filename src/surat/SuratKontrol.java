@@ -27,10 +27,19 @@ import kepegawaian.DlgCariDokter2;
 import laporan.DlgCariPenyakit;
 import simrskhanza.DlgCariPoli;
 import simrskhanza.DlgCariPoli2;
+import org.apache.http.client.methods.HttpPost; //tambahan ichsan
+import java.io.File; //tambahan ichsan untuk fungsi upload pdf
 import java.time.LocalDateTime;  //tambahan ambil waktu sekarang by ichsan
 import java.time.format.DateTimeFormatter;  //tambahan format paksa waktu untuk kirim pesan WA by ichsan
 import java.text.SimpleDateFormat;  //tambahan format paksa waktu untuk kirim pesan WA by ichsan
 import java.util.Locale; //tambahan format paksa waktu untuk kirim pesan WA by ichsan
+import org.apache.http.client.HttpClient; //tambahan ichsan
+import org.apache.http.impl.client.DefaultHttpClient; //tambahan ichsan
+import java.io.FileInputStream; //tambahan ichsan
+import org.apache.http.entity.mime.content.InputStreamBody; //tambahan ichsan
+import org.apache.http.HttpResponse; //tambahan ichsan
+import org.apache.http.entity.mime.MultipartEntity; //tambahan ichsan
+import org.apache.http.entity.mime.HttpMultipartMode; //tambahan ichsan
 
 /**
  *
@@ -48,7 +57,7 @@ public class SuratKontrol extends javax.swing.JDialog {
     private DlgCariDokter2 dokter2=new DlgCariDokter2(null,false);
     private DlgCariPoli poli=new DlgCariPoli(null,false);
     private DlgCariPoli2 poli2=new DlgCariPoli2(null,false);
-    private String URUTNOREG="",status="",kdpoli="",nmpoli="",noantri="",aktifjadwal="", tglPeriksa="", waktuPeriksa="", tglSurat="", waktuSurat="", count=""; //tambahan tglPeriksa="", waktuPeriksa="", tglSurat="", waktuSurat="", count=""oleh ichsan
+    private String URUTNOREG="",status="",kdpoli="",nmpoli="",noantri="",aktifjadwal="", tglPeriksa="", waktuPeriksa="", tglSurat="", waktuSurat="", FileName ="", kodeberkas="", count=""; //tambahan tglPeriksa="", waktuPeriksa="", tglSurat="", waktuSurat="", count=""oleh ichsan
     private DlgCariPenyakit penyakit=new DlgCariPenyakit(null,false);
     private String finger="",JADIKANBOOKINGSURATKONTROL="no";
     
@@ -1083,6 +1092,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         }        
 }//GEN-LAST:event_BtnSimpanActionPerformed
 ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA SETELAH SIMPAN SURAT KONTROL BY ICHSAN
+   
     private String getGoogleMapUrl() { ///////// START - kode untuk mengambil URL google di table setting_url pada kolom google_map
     String googleMapUrl = ""; 
     try {
@@ -2209,6 +2219,14 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                 if(koneksiDB.WANOTIFPASIEN().equals("yes")){   //////////////// fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
                    kirimWhatsAppMessage();  //kirim pesan WA by ichsan
                    kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol
+                   //////////////
+                   FileName = "RESUME_RALAN_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().replaceAll("/", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 2).toString().trim()+ "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 3).toString().replaceAll(" ", "");
+                    CreatePDFWA(FileName);
+                    String filePath = "tmpPDF/" + FileName;
+                    UploadPDF2(FileName, "media/");
+                    HapusPDF();                
+                   //////////////
+                   
                    JOptionPane.showMessageDialog(null, "Surat kontrol berhasil dibuat. \n "
                                                              + "WA reminder akan otomatis terkirim sekarang dan pada H-1 sebelum tanggal kontrol  ;-)");  
                  }
@@ -2245,7 +2263,184 @@ private String extractTime(String dateTime) {
         return "00:00:00"; // Default value to prevent errors
     }
 }    
+
+private void CreatePDFWA(String FileName) {
+if(tabMode.getRowCount()==0){
+            JOptionPane.showMessageDialog(null,"Maaf, data sudah habis...!!!!");
+            TanggalSurat.requestFocus();
+        }else if(TPasien.getText().trim().equals("")){
+            JOptionPane.showMessageDialog(null,"Maaf, Gagal menghapus. Pilih dulu data yang mau dihapus.\nKlik data pada table untuk memilih...!!!!");
+        }else if(!(TPasien.getText().trim().equals(""))){
+            if(tbObat.getSelectedRow()!= -1){
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                Map<String, Object> param = new HashMap<>();  
+                param.put("namars",akses.getnamars());
+                param.put("alamatrs",akses.getalamatrs());
+                param.put("kotars",akses.getkabupatenrs());
+                param.put("propinsirs",akses.getpropinsirs());
+                param.put("kontakrs",akses.getkontakrs());
+                param.put("emailrs",akses.getemailrs());   
+                param.put("logo",Sequel.cariGambar("select setting.logo from setting")); 
+                finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",tbObat.getValueAt(tbObat.getSelectedRow(),13).toString());
+                param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+tbObat.getValueAt(tbObat.getSelectedRow(),14).toString()+"\nID "+(finger.equals("")?tbObat.getValueAt(tbObat.getSelectedRow(),13).toString():finger)+"\n"+Valid.SetTgl3(tbObat.getValueAt(tbObat.getSelectedRow(),10).toString()));
+                Sequel.queryu("delete from temporary_booking_registrasi");                
+                Sequel.menyimpan("temporary_booking_registrasi","'0','"+
+                    tabMode.getValueAt(tbObat.getSelectedRow(),0).toString()+"','"+
+                    tabMode.getValueAt(tbObat.getSelectedRow(),1).toString()+"','"+
+                    tabMode.getValueAt(tbObat.getSelectedRow(),2).toString()+"','"+
+                    tabMode.getValueAt(tbObat.getSelectedRow(),3).toString()+"','"+
+                    tabMode.getValueAt(tbObat.getSelectedRow(),4).toString()+"','"+
+                    tabMode.getValueAt(tbObat.getSelectedRow(),5).toString()+"','"+
+                    tabMode.getValueAt(tbObat.getSelectedRow(),6).toString()+"','"+
+                    tabMode.getValueAt(tbObat.getSelectedRow(),7).toString()+"','"+
+                    tabMode.getValueAt(tbObat.getSelectedRow(),8).toString()+"','"+
+                    TanggalPeriksa.getSelectedItem()+"','"+
+                    TanggalSurat.getSelectedItem()+"','"+
+                    tabMode.getValueAt(tbObat.getSelectedRow(),11).toString()+"','"+
+                    tabMode.getValueAt(tbObat.getSelectedRow(),12).toString()+"','"+
+                    tabMode.getValueAt(tbObat.getSelectedRow(),13).toString()+"','"+
+                    tabMode.getValueAt(tbObat.getSelectedRow(),14).toString()+"','"+
+                    tabMode.getValueAt(tbObat.getSelectedRow(),15).toString()+"','"+
+                    tabMode.getValueAt(tbObat.getSelectedRow(),16).toString()+"','"+
+                    tabMode.getValueAt(tbObat.getSelectedRow(),17).toString()+"','','','','','','','','','','','','','','','','','','',''","Surat Kotrol");
+
+                Valid.MyReportPDFUpload("rptSuratSKDPBPJS.jasper","report","::[ Surat Kontrol ]::",FileName, param); 
+                this.setCursor(Cursor.getDefaultCursor());
+            }else{
+                JOptionPane.showMessageDialog(null,"Maaf, Silahkan anda pilih terlebih dulu data yang mau anda hapus...\n Klik data pada table untuk memilih data...!!!!");
+            }  
+        }
+
+}
     
+private void HapusPDF() {
+        File file = new File("tmpPDF");
+        String[] myFiles;
+        if (file.isDirectory()) {
+            myFiles = file.list();
+            for (int i = 0; i < myFiles.length; i++) {
+                File myFile = new File(file, myFiles[i]);
+                myFile.delete();
+            }
+        }
+    } 
+ ///////////////////////// start - upload berkas digital perawatan by ichsan
+    
+   private void UploadPDF2(String FileName, String docpath) {
+    try {        
+        // Step 1: Fetch patient data (phone number, gender, and name)
+        String nohppasien = "";
+        String jk = "";
+        
+        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
+        ps.setString(1, TNoRM.getText());
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            nohppasien = rs.getString("no_tlp");
+            jk = rs.getString("jk");
+            
+            // Validation: Check if phone number is at least 10 digits and contains only numbers
+                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.trim().matches("\\d+")) {
+                    JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
+                    return; // Stop execution if phone number is invalid
+                    }
+
+            // Convert phone number from 08xxxxxx to 628xxxxxx
+            if (nohppasien.startsWith("0")) {
+                nohppasien = "62" + nohppasien.substring(1);
+            }
+        }
+
+        rs.close();
+        ps.close();
+        } catch (Exception e) {
+            System.out.println("Error fetching patient data: " + e);
+        }        
+        
+         // Step 2: Open the file
+        File file = new File("tmpPDF/" + FileName + ".pdf");
+        FileInputStream fis = new FileInputStream(file);
+        
+         // Step 3: Create HTTP request using DefaultHttpClient (same as UploadPDF)
+        HttpClient httpClient = new DefaultHttpClient();
+        String uploadURL = "http://" + koneksiDB.HOSTWA() + ":" +
+                           koneksiDB.PORTWEBWA() + "/" +
+                           koneksiDB.FOLDERFILEWA() + "/upload.php?doc=" + docpath;
+        HttpPost postRequest = new HttpPost(uploadURL);
+        System.out.println("Uploading to: " + uploadURL);  //debugging untuk meliat url di atas, sudah benar atau belum
+
+        // Step 4: Build multipart request
+        MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+        reqEntity.addPart("file", new InputStreamBody(fis, "application/pdf", FileName + ".pdf"));
+        postRequest.setEntity(reqEntity);
+
+        // Step 5: Execute HTTP request
+        HttpResponse response = httpClient.execute(postRequest);
+
+         // Step 6: Check response
+        if (response.getStatusLine().getStatusCode() == 200) {
+            System.out.println("File uploaded successfully.");
+        } else {
+            System.out.println("File upload failed. Response: " + response.getStatusLine().getStatusCode());
+        }
+
+        // Step 7: Close resources
+        fis.close();
+        
+        // Step 8: Add greeting based on time of day
+        int currentHour = java.time.LocalTime.now().getHour();
+        String greeting;
+
+        if (currentHour >= 4 && currentHour <= 10) {
+            greeting = "Selamat Pagi";
+        } else if (currentHour >= 10 && currentHour <= 15) {
+            greeting = "Selamat Siang";
+        } else if (currentHour >= 15 && currentHour <= 18) {
+            greeting = "Selamat Sore";
+        } else {
+            greeting = "Selamat Malam";
+        }
+
+        // Step 9: Format WhatsApp message
+        String salampembuka = greeting + ", " + ("L".equalsIgnoreCase(jk) ? "Bpk " : "P".equalsIgnoreCase(jk) ? "Ibu " : "Bpk / Ibu ") + nmPasien + " (" + noRkmMedis + ")\n \n";
+        String pesan = salampembuka + "Terima kasih telah mempercayakan tindakan pelayanan medis Anda di " + akses.getnamars() + ".\n\n" +
+            "Berikut kami kirimkan berkas PDF untuk Resume Medis Anda. \n" +
+            "Silakan unduh file terlampir. \n \n"+
+            "Terima kasih atas perhatiannya. \n Salam sehat. \n \n" +
+            "*Unit Poliklinik " + akses.getnamars() + "*";        
+        
+        // Step 10: Insert message into WA outbox
+        // KODE UNTUK KIRIM WA BY ICHSAN
+        String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));        
+    try {
+        String sql = "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, SUCCESS, RESPONSE, REQUEST, TYPE, FILE) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            PreparedStatement ps = koneksi.prepareStatement(sql);
+            ps.setLong(1, 0);
+            ps.setString(2, nohppasien + "@c.us");
+            ps.setString(3, pesan);
+            ps.setString(4, waktukirim);
+            ps.setString(5, "ANTRIAN");
+            ps.setString(6, "KHANZA");
+            ps.setString(7, "NODEJS");
+            ps.setString(8, "");
+            ps.setString(9, "");
+            ps.setString(10, "");
+            ps.setString(11, "FILE");
+            ps.setString(12, FileName + ".pdf");
+            ps.executeUpdate();
+        } catch (Exception e) {
+            System.out.println("Notif : " + e);
+        }
+        
+    } catch (Exception e) {
+        System.out.println("Upload error: " + e);
+        JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
+    }
+    } 
+    } 
     /*   ///////////backup script lama
     private void isBooking(){
         if(Sequel.menyimpantf("skdp_bpjs","?,?,?,?,?,?,?,?,?,?,?,?,?","Tahun dan nomor surat",13,new String[]{
