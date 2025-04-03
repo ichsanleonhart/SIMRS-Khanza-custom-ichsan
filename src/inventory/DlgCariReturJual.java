@@ -1057,11 +1057,12 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
 
     public void isCek(){
         BtnPrint.setEnabled(akses.getretur_dari_pembeli());
-        if(akses.getkode().equals("Admin Utama")){
+        ppHapus.setEnabled(akses.getretur_dari_pembeli());  //modifikasi agar user bisa hapus retur secara mandiri by ichsan
+        /* if(akses.getkode().equals("Admin Utama")){
             ppHapus.setEnabled(true);
         }else{
             ppHapus.setEnabled(false);
-        }  
+        }  */
     }
 
  

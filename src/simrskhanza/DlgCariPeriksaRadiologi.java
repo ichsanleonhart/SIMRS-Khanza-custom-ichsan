@@ -396,6 +396,8 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
         btnPetugas = new widget.Button();
         label18 = new widget.Label();
         Tgl2 = new widget.Tanggal();
+        NoHPWAPasien = new widget.TextBox();
+        label21 = new widget.Label();
         panelisi1 = new widget.panelisi();
         label10 = new widget.Label();
         TCari = new widget.TextBox();
@@ -744,11 +746,13 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
         panelisi3.setPreferredSize(new java.awt.Dimension(100, 73));
         panelisi3.setLayout(null);
 
-        label15.setText("No.Rawat :");
+        label15.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        label15.setText("Nomor WA Pasien:");
+        label15.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         label15.setName("label15"); // NOI18N
         label15.setPreferredSize(new java.awt.Dimension(60, 23));
         panelisi3.add(label15);
-        label15.setBounds(0, 10, 75, 23);
+        label15.setBounds(820, 10, 100, 23);
 
         NoRawat.setName("NoRawat"); // NOI18N
         NoRawat.setPreferredSize(new java.awt.Dimension(207, 23));
@@ -758,7 +762,7 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
             }
         });
         panelisi3.add(NoRawat);
-        NoRawat.setBounds(79, 10, 226, 23);
+        NoRawat.setBounds(80, 10, 226, 23);
 
         label11.setText("Tanggal :");
         label11.setName("label11"); // NOI18N
@@ -862,6 +866,22 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
         });
         panelisi3.add(Tgl2);
         Tgl2.setBounds(205, 40, 100, 23);
+
+        NoHPWAPasien.setName("NoHPWAPasien"); // NOI18N
+        NoHPWAPasien.setPreferredSize(new java.awt.Dimension(207, 23));
+        NoHPWAPasien.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                NoHPWAPasienKeyPressed(evt);
+            }
+        });
+        panelisi3.add(NoHPWAPasien);
+        NoHPWAPasien.setBounds(920, 10, 226, 23);
+
+        label21.setText("No.Rawat :");
+        label21.setName("label21"); // NOI18N
+        label21.setPreferredSize(new java.awt.Dimension(60, 23));
+        panelisi3.add(label21);
+        label21.setBounds(0, 10, 75, 23);
 
         internalFrame1.add(panelisi3, java.awt.BorderLayout.PAGE_START);
 
@@ -2440,6 +2460,10 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
         } ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
     }//GEN-LAST:event_TombolWAActionPerformed
 
+    private void NoHPWAPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_NoHPWAPasienKeyPressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_NoHPWAPasienKeyPressed
+
      private void CreatePDFWA(String FileName) {
      if(Kd2.getText().equals("")){
                JOptionPane.showMessageDialog(null,"Maaf, silahkan pilih data terlebih dahulu...!!!!"); 
@@ -2614,6 +2638,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
     private widget.TextBox NmDokterPj;
     private widget.TextBox NmPerujuk;
     private widget.TextBox NmPtgUbah;
+    private widget.TextBox NoHPWAPasien;
     private widget.TextBox NoRM;
     private widget.TextBox NoRawat;
     private widget.Label NoRawatDicari;
@@ -2659,6 +2684,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
     private widget.Label label18;
     private widget.Label label19;
     private widget.Label label20;
+    private widget.Label label21;
     private widget.Label label9;
     private widget.TextBox nmmem;
     private widget.TextBox nmptg;
@@ -2827,6 +2853,17 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
     
     private void getData() {
         Kd2.setText("");
+        
+        if (tbDokter.getSelectedRow() != -1) {  //tambahan buat memunculkan nomor wa pasien
+        String noRawat = tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString(); // Get no_rawat
+        NoHPWAPasien.setText(Sequel.cariIsi(
+            "SELECT pasien.no_tlp FROM reg_periksa " +
+            "INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis " +
+            "WHERE reg_periksa.no_rawat = ?", 
+            noRawat // Use noRawat instead of TNoRw
+        ));
+        }
+
         if(tbDokter.getSelectedRow()!= -1){
             Kd2.setText(tbDokter.getValueAt(tbDokter.getSelectedRow(),0).toString());     
             Petugas.setText(tbDokter.getValueAt(tbDokter.getSelectedRow(),6).toString());            

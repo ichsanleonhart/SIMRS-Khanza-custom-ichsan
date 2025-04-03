@@ -372,6 +372,7 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
         Tgl2 = new widget.Tanggal();
         TombolUpload = new javax.swing.JButton();
         TombolWA1 = new javax.swing.JButton();
+        NoHPWAPasien = new widget.TextBox();
         panelisi1 = new widget.panelisi();
         label10 = new widget.Label();
         TCari = new widget.TextBox();
@@ -1100,6 +1101,16 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
         });
         panelisi3.add(TombolWA1);
         TombolWA1.setBounds(750, 10, 250, 30);
+
+        NoHPWAPasien.setName("NoHPWAPasien"); // NOI18N
+        NoHPWAPasien.setPreferredSize(new java.awt.Dimension(207, 23));
+        NoHPWAPasien.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                NoHPWAPasienKeyPressed(evt);
+            }
+        });
+        panelisi3.add(NoHPWAPasien);
+        NoHPWAPasien.setBounds(1010, 10, 226, 23);
 
         internalFrame1.add(panelisi3, java.awt.BorderLayout.PAGE_START);
 
@@ -6190,6 +6201,10 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
         
     }//GEN-LAST:event_TombolWA1ActionPerformed
 
+    private void NoHPWAPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_NoHPWAPasienKeyPressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_NoHPWAPasienKeyPressed
+
     private void CreatePDF(String FileName) {
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         if (tabMode.getRowCount() == 0) {
@@ -6601,6 +6616,7 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
     private javax.swing.JMenuItem MnSaranKesan;
     private javax.swing.JMenuItem MnUbah;
     private javax.swing.JMenuItem MnUbah1;
+    private widget.TextBox NoHPWAPasien;
     private widget.TextBox NoRawat;
     private widget.TextArea Saran;
     private widget.ScrollPane Scroll;
@@ -7161,6 +7177,17 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
     
     private void getData() {
         Kd2.setText("");
+        
+        if (tbDokter.getSelectedRow() != -1) {  //tambahan buat memunculkan nomor wa pasien
+        String noRawat = tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString(); // Get no_rawat
+        NoHPWAPasien.setText(Sequel.cariIsi(
+            "SELECT pasien.no_tlp FROM reg_periksa " +
+            "INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis " +
+            "WHERE reg_periksa.no_rawat = ?", 
+            noRawat // Use noRawat instead of TNoRw
+        ));
+        }
+        
         if(tbDokter.getSelectedRow()!= -1){
             Kd2.setText(tbDokter.getValueAt(tbDokter.getSelectedRow(),0).toString());
         }
