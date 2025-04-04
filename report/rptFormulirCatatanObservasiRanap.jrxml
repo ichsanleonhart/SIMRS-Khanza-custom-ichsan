@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.17.0.final using JasperReports Library version 6.5.1  -->
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="null" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="0f505995-42c1-4cc5-b34d-0896041d3a11">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
@@ -20,7 +20,8 @@
 		<![CDATA[select reg_periksa.no_rawat,pasien.no_rkm_medis,pasien.nm_pasien,reg_periksa.umurdaftar,reg_periksa.sttsumur,reg_periksa.tgl_registrasi,reg_periksa.jam_reg,
 pasien.jk,pasien.tgl_lahir,catatan_observasi_ranap.tgl_perawatan,catatan_observasi_ranap.jam_rawat,catatan_observasi_ranap.gcs,
 catatan_observasi_ranap.td,catatan_observasi_ranap.hr,catatan_observasi_ranap.rr,catatan_observasi_ranap.suhu,catatan_observasi_ranap.spo2,
-petugas.nama from catatan_observasi_ranap inner join reg_periksa on catatan_observasi_ranap.no_rawat=reg_periksa.no_rawat 
+petugas.nama, catatan_observasi_ranap.IVFD, catatan_observasi_ranap.BAK, catatan_observasi_ranap.BAB,catatan_observasi_ranap.Intake, catatan_observasi_ranap.Muntah, catatan_observasi_ranap.Keterangan
+from catatan_observasi_ranap inner join reg_periksa on catatan_observasi_ranap.no_rawat=reg_periksa.no_rawat 
 inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join petugas on catatan_observasi_ranap.nip=petugas.nip]]>
 	</queryString>
 	<field name="no_rawat" class="java.lang.String">
@@ -123,6 +124,36 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 		<property name="com.jaspersoft.studio.field.name" value="nama"/>
 		<property name="com.jaspersoft.studio.field.label" value="nama"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="petugas"/>
+	</field>
+	<field name="IVFD" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="IVFD"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="catatan_observasi_ranap"/>
+		<property name="com.jaspersoft.studio.field.name" value="IVFD"/>
+	</field>
+	<field name="BAK" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="IVFD"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="catatan_observasi_ranap"/>
+		<property name="com.jaspersoft.studio.field.name" value="IVFD"/>
+	</field>
+	<field name="BAB" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BAB"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="catatan_observasi_ranap"/>
+		<property name="com.jaspersoft.studio.field.name" value="BAB"/>
+	</field>
+	<field name="Intake" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="Intake"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="catatan_observasi_ranap"/>
+		<property name="com.jaspersoft.studio.field.name" value="Intake"/>
+	</field>
+	<field name="Muntah" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="Muntah"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="catatan_observasi_ranap"/>
+		<property name="com.jaspersoft.studio.field.name" value="Muntah"/>
+	</field>
+	<field name="Keterangan" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="Keterangan"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="catatan_observasi_ranap"/>
+		<property name="com.jaspersoft.studio.field.name" value="Keterangan"/>
 	</field>
 	<background>
 		<band splitType="Stretch"/>
@@ -407,7 +438,9 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 		<band height="30" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<staticText>
-				<reportElement mode="Opaque" x="374" y="17" width="50" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="7ce1c3b1-6973-4f45-a5a6-42066509a541"/>
+				<reportElement mode="Opaque" x="265" y="17" width="35" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="7ce1c3b1-6973-4f45-a5a6-42066509a541">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8" isBold="false"/>
 					<paragraph lineSpacing="Single"/>
@@ -415,7 +448,9 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				<text><![CDATA[SpO2]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="90" y="17" width="60" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="b1b9fcfd-0623-4bdb-b3de-ccd372f94b03"/>
+				<reportElement mode="Opaque" x="90" y="17" width="35" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="b1b9fcfd-0623-4bdb-b3de-ccd372f94b03">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8" isBold="false"/>
 					<paragraph lineSpacing="Single"/>
@@ -431,7 +466,7 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				<text><![CDATA[Tanggal & Jam]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="90" y="0" width="334" height="16" forecolor="#000000" backcolor="#F0F0DC" uuid="450e4797-8923-4859-afe9-b0a8c3058fb5"/>
+				<reportElement mode="Opaque" x="90" y="0" width="430" height="16" forecolor="#000000" backcolor="#F0F0DC" uuid="450e4797-8923-4859-afe9-b0a8c3058fb5"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8" isBold="false"/>
 					<paragraph lineSpacing="Single"/>
@@ -439,7 +474,7 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				<text><![CDATA[Monitoring]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="424" y="0" width="130" height="30" forecolor="#000000" backcolor="#F0F0DC" uuid="c887ca08-c481-4a66-9883-b475de60a5cb"/>
+				<reportElement mode="Opaque" x="520" y="0" width="34" height="30" forecolor="#000000" backcolor="#F0F0DC" uuid="c887ca08-c481-4a66-9883-b475de60a5cb"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8" isBold="false"/>
 					<paragraph lineSpacing="Single"/>
@@ -475,7 +510,7 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="423" y="0" width="1" height="29" uuid="4bf829b0-8817-459e-8d52-9aff8631884c">
+				<reportElement positionType="FixRelativeToBottom" x="520" y="0" width="1" height="29" uuid="4bf829b0-8817-459e-8d52-9aff8631884c">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -491,7 +526,9 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement mode="Opaque" x="150" y="17" width="70" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="73aa4d35-49ad-46d1-91bf-effcf3d64d3a"/>
+				<reportElement mode="Opaque" x="125" y="17" width="35" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="73aa4d35-49ad-46d1-91bf-effcf3d64d3a">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8" isBold="false"/>
 					<paragraph lineSpacing="Single"/>
@@ -499,7 +536,9 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				<text><![CDATA[TD]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="220" y="17" width="52" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="6b368479-56e5-469f-9bb6-664036dc0d92"/>
+				<reportElement mode="Opaque" x="160" y="17" width="35" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="6b368479-56e5-469f-9bb6-664036dc0d92">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8" isBold="false"/>
 					<paragraph lineSpacing="Single"/>
@@ -507,7 +546,9 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				<text><![CDATA[HR]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="272" y="17" width="48" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="0a691b44-8e05-4173-bffd-4d0c61c1787a"/>
+				<reportElement mode="Opaque" x="195" y="17" width="35" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="0a691b44-8e05-4173-bffd-4d0c61c1787a">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8" isBold="false"/>
 					<paragraph lineSpacing="Single"/>
@@ -515,7 +556,9 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				<text><![CDATA[RR]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="320" y="17" width="54" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="51e058c3-020c-4479-8d8c-d8444d5b62d6"/>
+				<reportElement mode="Opaque" x="230" y="17" width="35" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="51e058c3-020c-4479-8d8c-d8444d5b62d6">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8" isBold="false"/>
 					<paragraph lineSpacing="Single"/>
@@ -523,13 +566,13 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				<text><![CDATA[Suhu]]></text>
 			</staticText>
 			<line>
-				<reportElement x="91" y="16" width="332" height="1" uuid="21fcf7ea-4d5a-47ed-8c7c-69c979959fc4"/>
+				<reportElement x="91" y="16" width="429" height="1" uuid="21fcf7ea-4d5a-47ed-8c7c-69c979959fc4"/>
 				<graphicElement>
 					<pen lineWidth="1.0"/>
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="149" y="17" width="1" height="12" uuid="5347be4e-53bf-41ef-bc41-936299d2cf4a">
+				<reportElement positionType="FixRelativeToBottom" x="124" y="17" width="1" height="12" uuid="5347be4e-53bf-41ef-bc41-936299d2cf4a">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -537,7 +580,7 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="220" y="17" width="1" height="12" uuid="df3c63e0-e742-4483-828f-722db77553cd">
+				<reportElement positionType="FixRelativeToBottom" x="160" y="17" width="1" height="12" uuid="df3c63e0-e742-4483-828f-722db77553cd">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -545,7 +588,7 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="272" y="17" width="1" height="12" uuid="62b6e97b-df79-4a06-bd6b-1ad859c81502">
+				<reportElement positionType="FixRelativeToBottom" x="195" y="17" width="1" height="12" uuid="62b6e97b-df79-4a06-bd6b-1ad859c81502">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -553,7 +596,7 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="320" y="17" width="1" height="12" uuid="716d882d-4662-4d44-8291-1aa0d3480adf">
+				<reportElement positionType="FixRelativeToBottom" x="230" y="17" width="1" height="12" uuid="716d882d-4662-4d44-8291-1aa0d3480adf">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -561,13 +604,121 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="374" y="17" width="1" height="12" uuid="18b14445-0ca4-4f81-85e1-bce716bd9e74">
+				<reportElement positionType="FixRelativeToBottom" x="265" y="17" width="1" height="12" uuid="18b14445-0ca4-4f81-85e1-bce716bd9e74">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<graphicElement>
 					<pen lineWidth="1.0"/>
 				</graphicElement>
 			</line>
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="300" y="16" width="1" height="13" uuid="3d97c522-5ec5-4bf6-bf18-c6e7773e035a">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement mode="Opaque" x="301" y="17" width="35" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="0c3c8fa6-a830-41ab-bb0c-97b7bf6ce857">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[IVFD]]></text>
+			</staticText>
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="336" y="16" width="1" height="13" uuid="02e62779-1dc3-4af3-961d-aaea629dc3d7">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement mode="Opaque" x="337" y="17" width="35" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="8a710918-1c0d-488f-960e-a45e88d28263">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[BAK]]></text>
+			</staticText>
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="372" y="16" width="1" height="13" uuid="bc3e4796-0e71-4acf-8a7d-db26b57710c0">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement mode="Opaque" x="373" y="17" width="35" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="25c2949e-6901-4c95-807f-73c3cc1439c0">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[BAB]]></text>
+			</staticText>
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="408" y="16" width="1" height="13" uuid="deb4bdbc-40ab-48b8-abf0-6f70968dc1ae">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement mode="Opaque" x="409" y="17" width="35" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="3b989998-6cc9-4524-963e-94875b938521">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Intake]]></text>
+			</staticText>
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="443" y="16" width="1" height="13" uuid="86e6ea30-b331-4d94-8a46-5766501887ad">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement mode="Opaque" x="444" y="17" width="35" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="41269854-4911-4c5b-8c92-f7642947d03d">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Muntah]]></text>
+			</staticText>
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="478" y="16" width="1" height="13" uuid="b1fb3ce0-2f0f-4f1b-9893-cd39c0ee04c4">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement mode="Opaque" x="479" y="17" width="41" height="12" forecolor="#000000" backcolor="#F0F0DC" uuid="c2d76d32-cf4a-45ca-a2fb-67c8ff26e07e">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8" isBold="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Keterangan]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
@@ -583,7 +734,9 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				<textFieldExpression><![CDATA[$F{tgl_perawatan}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement positionType="Float" x="91" y="1" width="58" height="10" uuid="8ccda384-6ed4-4843-8596-bf675bb62e18"/>
+				<reportElement positionType="Float" x="91" y="1" width="35" height="10" uuid="8ccda384-6ed4-4843-8596-bf675bb62e18">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center">
 					<font fontName="Tahoma" size="8"/>
 					<paragraph lineSpacing="Single"/>
@@ -591,7 +744,9 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				<textFieldExpression><![CDATA[$F{gcs}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement positionType="Float" x="273" y="1" width="47" height="10" uuid="795a99c8-7a8d-4db4-814a-4d0aa1c0dd9d"/>
+				<reportElement positionType="Float" x="196" y="1" width="35" height="10" uuid="795a99c8-7a8d-4db4-814a-4d0aa1c0dd9d">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center">
 					<font fontName="Tahoma" size="8"/>
 					<paragraph lineSpacing="Single"/>
@@ -599,7 +754,7 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				<textFieldExpression><![CDATA[$F{rr}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement positionType="Float" x="425" y="1" width="129" height="10" uuid="a81a96e5-b43b-4fc6-9133-c930b2a533cd"/>
+				<reportElement positionType="Float" x="521" y="1" width="33" height="10" uuid="a81a96e5-b43b-4fc6-9133-c930b2a533cd"/>
 				<textElement textAlignment="Center">
 					<font fontName="Tahoma" size="8"/>
 					<paragraph lineSpacing="Single"/>
@@ -633,7 +788,7 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="272" y="0" width="1" height="11" uuid="4d0ef31f-b50b-48b6-b611-28679cc15624">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="195" y="0" width="1" height="11" uuid="4d0ef31f-b50b-48b6-b611-28679cc15624">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -650,7 +805,7 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="423" y="0" width="1" height="11" uuid="29bdadbc-2fcb-4469-9fe9-12267a833a8b">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="520" y="0" width="1" height="11" uuid="29bdadbc-2fcb-4469-9fe9-12267a833a8b">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -668,7 +823,7 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				<textFieldExpression><![CDATA[$F{jam_rawat}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="149" y="0" width="1" height="11" uuid="cd492e8b-ba82-4992-b65f-bc6e9fcb6920">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="124" y="0" width="1" height="11" uuid="cd492e8b-ba82-4992-b65f-bc6e9fcb6920">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -677,7 +832,9 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				</graphicElement>
 			</line>
 			<textField isStretchWithOverflow="true">
-				<reportElement positionType="Float" x="150" y="1" width="70" height="10" uuid="85cf41a4-0e14-4a2d-9936-31009f58c570"/>
+				<reportElement positionType="Float" x="125" y="1" width="35" height="10" uuid="85cf41a4-0e14-4a2d-9936-31009f58c570">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center">
 					<font fontName="Tahoma" size="8"/>
 					<paragraph lineSpacing="Single"/>
@@ -685,7 +842,7 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				<textFieldExpression><![CDATA[$F{td}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="220" y="0" width="1" height="11" uuid="09a62f81-05d8-4f3e-b4df-ca41cedd8eb7">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="160" y="0" width="1" height="11" uuid="09a62f81-05d8-4f3e-b4df-ca41cedd8eb7">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -694,7 +851,9 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				</graphicElement>
 			</line>
 			<textField isStretchWithOverflow="true">
-				<reportElement positionType="Float" x="221" y="1" width="51" height="10" uuid="67de4489-1b5f-4810-9a0b-57de4687fca1"/>
+				<reportElement positionType="Float" x="161" y="1" width="35" height="10" uuid="67de4489-1b5f-4810-9a0b-57de4687fca1">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center">
 					<font fontName="Tahoma" size="8"/>
 					<paragraph lineSpacing="Single"/>
@@ -702,7 +861,7 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				<textFieldExpression><![CDATA[$F{hr}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="320" y="0" width="1" height="11" uuid="c27269d6-ca00-4dac-a740-8ee7d21e3627">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="230" y="0" width="1" height="11" uuid="c27269d6-ca00-4dac-a740-8ee7d21e3627">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -711,7 +870,7 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="374" y="0" width="1" height="11" uuid="860aec38-313c-4056-a0c1-214e31bbc55e">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="265" y="0" width="1" height="11" uuid="860aec38-313c-4056-a0c1-214e31bbc55e">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -720,7 +879,9 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				</graphicElement>
 			</line>
 			<textField isStretchWithOverflow="true">
-				<reportElement positionType="Float" x="321" y="1" width="53" height="10" uuid="0dbd269a-eefb-4ed1-ab39-a546142f7255"/>
+				<reportElement positionType="Float" x="231" y="1" width="35" height="10" uuid="0dbd269a-eefb-4ed1-ab39-a546142f7255">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center">
 					<font fontName="Tahoma" size="8"/>
 					<paragraph lineSpacing="Single"/>
@@ -728,12 +889,161 @@ inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pet
 				<textFieldExpression><![CDATA[$F{suhu}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement positionType="Float" x="375" y="1" width="47" height="10" uuid="5b0f5209-87ca-46a9-9b5b-085b662ce02c"/>
+				<reportElement positionType="Float" x="266" y="1" width="35" height="10" uuid="5b0f5209-87ca-46a9-9b5b-085b662ce02c">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center">
 					<font fontName="Tahoma" size="8"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{spo2}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="300" y="0" width="1" height="11" uuid="81e1ad99-9793-40b1-8826-0468b3683a2f">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement positionType="Float" x="0" y="11" width="555" height="1" uuid="4e104229-2815-4dc0-a2a5-fc0ae4491611">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="302" y="1" width="35" height="10" uuid="61c3220a-35a8-47aa-bede-60c553586374">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="Tahoma" size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{IVFD}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="336" y="0" width="1" height="11" uuid="b4fd4344-c121-4fdc-a997-f3289f488802">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement positionType="Float" x="1" y="10" width="555" height="1" uuid="8b6ce6e1-8863-4f41-8c57-a55e1af160a1">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="338" y="1" width="35" height="10" uuid="5fcde44f-c5f9-4cf7-b30a-2cea4020a625">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="Tahoma" size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BAK}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="372" y="0" width="1" height="11" uuid="3029c350-cee1-494a-9f5d-a1ad5f254cfd">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement positionType="Float" x="0" y="11" width="555" height="1" uuid="fd264605-8952-4fba-a13b-612aef26990b">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="374" y="1" width="35" height="10" uuid="7dca710b-d564-4013-a194-9dcb216e2c2d">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="Tahoma" size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BAB}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="408" y="0" width="1" height="11" uuid="7d239ac7-2adf-4723-88f9-c44218ca8077">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="409" y="1" width="35" height="10" uuid="a22bb0fd-3834-46c5-ba47-961391e3ded7">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="Tahoma" size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Intake}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="443" y="0" width="1" height="11" uuid="b4b1c46b-3c30-4e88-b591-e62dc2a79fa2">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="478" y="0" width="1" height="11" uuid="364d6b13-a88a-47c8-9237-0012e8f74a8e">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="443" y="0" width="1" height="11" uuid="c47af9a7-f5e3-4243-b092-62426371ddb9">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="444" y="1" width="35" height="10" uuid="54459c9c-ab6e-4e20-8c24-2844836569f9">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="Tahoma" size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Muntah}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="479" y="1" width="41" height="10" uuid="5f955468-9e8b-42bb-befb-82e01387d357">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="Tahoma" size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Keterangan}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
