@@ -56,11 +56,14 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         this.setLocation(8,1);
-        setSize(628,674);
+        //setSize(628,674);
+        setSize(1270,674); //ubah ukuran lebih lebar by ichsan
 
+        
         tabMode=new DefaultTableModel(null,new Object[]{
             "No.Rawat","No.R.M.","Nama Pasien","Umur","JK","Tgl.Lahir","Tgl.Obser","Jam Obser","GCS (E,V,M)",
-            "TD(mmHg)","HR(x/menit)","RR(x/menit)","Suhu(°C)","SpO2(%)","NIP","Nama Petugas"
+            "TD(mmHg)","HR(x/menit)","RR(x/menit)","Suhu(°C)","SpO2(%)","NIP","Nama Petugas",
+            "IVFD", "BAK", "BAB", "Intake", "Muntah", "Keterangan" // Nambahin kolom baru satu baris ini by ichsan
         }){
               @Override public boolean isCellEditable(int rowIndex, int colIndex){return false;}
         };
@@ -70,7 +73,7 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
         tbObat.setPreferredScrollableViewportSize(new Dimension(500,500));
         tbObat.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-        for (i = 0; i < 16; i++) {
+        for (i = 0; i < 22; i++) {
             TableColumn column = tbObat.getColumnModel().getColumn(i);
             if(i==0){
                 column.setPreferredWidth(105);
@@ -104,6 +107,18 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
                 column.setPreferredWidth(90);
             }else if(i==15){
                 column.setPreferredWidth(160);
+            }else if(i==16){ // IVFD
+                column.setPreferredWidth(50);
+            }else if(i==17){ // BAK
+                column.setPreferredWidth(50);
+            }else if(i==18){ // BAB
+                column.setPreferredWidth(50);
+            }else if(i==19){ // Intake
+                column.setPreferredWidth(50);
+            }else if(i==20){ // Muntah
+                column.setPreferredWidth(50);
+            }else if(i==21){ // Keterangan
+                column.setPreferredWidth(200);
             }
         }
         tbObat.setDefaultRenderer(Object.class, new WarnaTable());
@@ -116,6 +131,14 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
         RR.setDocument(new batasInput((byte)5).getKata(RR));
         Suhu.setDocument(new batasInput((byte)5).getKata(Suhu));
         SPO.setDocument(new batasInput((byte)3).getKata(SPO));
+        TCari.setDocument(new batasInput((int)100).getKata(TCari));
+        // Added batasInput untuk kolom yang baru by ichsan
+        IVFD.setDocument(new batasInput((byte)5).getKata(IVFD));
+        BAK.setDocument(new batasInput((byte)5).getKata(BAK));
+        BAB.setDocument(new batasInput((byte)5).getKata(BAB));
+        Intake.setDocument(new batasInput((byte)5).getKata(Intake));
+        Muntah.setDocument(new batasInput((byte)5).getKata(Muntah));
+        Keterangan.setDocument(new batasInput((int)500).getKata(Keterangan)); // Increased limit for Keterangan
         TCari.setDocument(new batasInput((int)100).getKata(TCari));
         
         if(koneksiDB.CARICEPAT().equals("aktif")){
@@ -247,6 +270,19 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
         jLabel29 = new widget.Label();
         SPO = new widget.TextBox();
         jLabel35 = new widget.Label();
+        IVFD = new widget.TextBox();
+        jLabel30 = new widget.Label();
+        BAK = new widget.TextBox();
+        jLabel31 = new widget.Label();
+        BAB = new widget.TextBox();
+        jLabel32 = new widget.Label();
+        jLabel33 = new widget.Label();
+        Intake = new widget.TextBox();
+        Muntah = new widget.TextBox();
+        jLabel34 = new widget.Label();
+        scrollPane8 = new widget.ScrollPane();
+        Keterangan = new javax.swing.JTextArea();
+        jLabel83 = new widget.Label();
         ChkInput = new widget.CekBox();
 
         jPopupMenu1.setName("jPopupMenu1"); // NOI18N
@@ -444,7 +480,7 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "04-01-2024" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "04-04-2025" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -458,7 +494,7 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "04-01-2024" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "04-04-2025" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -554,7 +590,7 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
         TPasien.setBounds(336, 10, 285, 23);
 
         Tanggal.setForeground(new java.awt.Color(50, 70, 50));
-        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "04-01-2024" }));
+        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "04-04-2025" }));
         Tanggal.setDisplayFormat("dd-MM-yyyy");
         Tanggal.setName("Tanggal"); // NOI18N
         Tanggal.setOpaque(false);
@@ -772,7 +808,7 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
         jLabel29.setText("SpO2 :");
         jLabel29.setName("jLabel29"); // NOI18N
         FormInput.add(jLabel29);
-        jLabel29.setBounds(686, 70, 40, 23);
+        jLabel29.setBounds(680, 70, 40, 23);
 
         SPO.setFocusTraversalPolicyProvider(true);
         SPO.setName("SPO"); // NOI18N
@@ -789,6 +825,103 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
         jLabel35.setName("jLabel35"); // NOI18N
         FormInput.add(jLabel35);
         jLabel35.setBounds(773, 70, 30, 23);
+
+        IVFD.setFocusTraversalPolicyProvider(true);
+        IVFD.setName("IVFD"); // NOI18N
+        IVFD.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                IVFDKeyPressed(evt);
+            }
+        });
+        FormInput.add(IVFD);
+        IVFD.setBounds(860, 10, 40, 23);
+
+        jLabel30.setText("IVFD :");
+        jLabel30.setName("jLabel30"); // NOI18N
+        FormInput.add(jLabel30);
+        jLabel30.setBounds(810, 10, 40, 23);
+
+        BAK.setFocusTraversalPolicyProvider(true);
+        BAK.setName("BAK"); // NOI18N
+        BAK.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                BAKKeyPressed(evt);
+            }
+        });
+        FormInput.add(BAK);
+        BAK.setBounds(860, 40, 40, 23);
+
+        jLabel31.setText("BAK :");
+        jLabel31.setName("jLabel31"); // NOI18N
+        FormInput.add(jLabel31);
+        jLabel31.setBounds(810, 40, 40, 23);
+
+        BAB.setFocusTraversalPolicyProvider(true);
+        BAB.setName("BAB"); // NOI18N
+        BAB.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                BABKeyPressed(evt);
+            }
+        });
+        FormInput.add(BAB);
+        BAB.setBounds(860, 70, 40, 23);
+
+        jLabel32.setText("BAB :");
+        jLabel32.setName("jLabel32"); // NOI18N
+        FormInput.add(jLabel32);
+        jLabel32.setBounds(810, 70, 40, 23);
+
+        jLabel33.setText("Intake :");
+        jLabel33.setName("jLabel33"); // NOI18N
+        FormInput.add(jLabel33);
+        jLabel33.setBounds(910, 40, 40, 23);
+
+        Intake.setFocusTraversalPolicyProvider(true);
+        Intake.setName("Intake"); // NOI18N
+        Intake.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                IntakeKeyPressed(evt);
+            }
+        });
+        FormInput.add(Intake);
+        Intake.setBounds(950, 40, 40, 23);
+
+        Muntah.setFocusTraversalPolicyProvider(true);
+        Muntah.setName("Muntah"); // NOI18N
+        Muntah.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                MuntahKeyPressed(evt);
+            }
+        });
+        FormInput.add(Muntah);
+        Muntah.setBounds(950, 70, 40, 23);
+
+        jLabel34.setText("Muntah:");
+        jLabel34.setName("jLabel34"); // NOI18N
+        FormInput.add(jLabel34);
+        jLabel34.setBounds(880, 70, 70, 23);
+
+        scrollPane8.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        scrollPane8.setName("scrollPane8"); // NOI18N
+
+        Keterangan.setColumns(20);
+        Keterangan.setRows(5);
+        Keterangan.setName("Keterangan"); // NOI18N
+        Keterangan.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                KeteranganKeyPressed(evt);
+            }
+        });
+        scrollPane8.setViewportView(Keterangan);
+
+        FormInput.add(scrollPane8);
+        scrollPane8.setBounds(1000, 0, 250, 100);
+
+        jLabel83.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jLabel83.setText("Keterangan :");
+        jLabel83.setName("jLabel83"); // NOI18N
+        FormInput.add(jLabel83);
+        jLabel83.setBounds(930, 0, 70, 23);
 
         PanelInput.add(FormInput, java.awt.BorderLayout.CENTER);
 
@@ -855,7 +988,7 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
         if(evt.getKeyCode()==KeyEvent.VK_SPACE){
             BtnSimpanActionPerformed(null);
         }else{
-            Valid.pindah(evt,SPO,BtnBatal);
+            Valid.pindah(evt,Keterangan,BtnBatal); //// Changed navigation target from SPO to Keterangan (last input field) by ichsan
         }
 }//GEN-LAST:event_BtnSimpanKeyPressed
 
@@ -965,7 +1098,9 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
                     "select reg_periksa.no_rawat,pasien.no_rkm_medis,pasien.nm_pasien,reg_periksa.umurdaftar,reg_periksa.sttsumur,"+
                     "pasien.jk,pasien.tgl_lahir,catatan_observasi_ranap.tgl_perawatan,catatan_observasi_ranap.jam_rawat,catatan_observasi_ranap.gcs,"+
                     "catatan_observasi_ranap.td,catatan_observasi_ranap.hr,catatan_observasi_ranap.rr,catatan_observasi_ranap.suhu,catatan_observasi_ranap.spo2,"+
-                    "catatan_observasi_ranap.nip,petugas.nama from catatan_observasi_ranap inner join reg_periksa on catatan_observasi_ranap.no_rawat=reg_periksa.no_rawat "+
+                    "catatan_observasi_ranap.nip,petugas.nama, "+
+                    "catatan_observasi_ranap.ivfd, catatan_observasi_ranap.bak, catatan_observasi_ranap.bab,catatan_observasi_ranap.intake, catatan_observasi_ranap.muntah, catatan_observasi_ranap.keterangan "+  //query tambahan untuk field baru by ichsan
+                    "from catatan_observasi_ranap inner join reg_periksa on catatan_observasi_ranap.no_rawat=reg_periksa.no_rawat "+
                     "inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis "+
                     "inner join petugas on catatan_observasi_ranap.nip=petugas.nip where "+
                     "catatan_observasi_ranap.tgl_perawatan between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' order by catatan_observasi_ranap.tgl_perawatan,catatan_observasi_ranap.jam_rawat",param);
@@ -974,7 +1109,9 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
                     "select reg_periksa.no_rawat,pasien.no_rkm_medis,pasien.nm_pasien,reg_periksa.umurdaftar,reg_periksa.sttsumur,"+
                     "pasien.jk,pasien.tgl_lahir,catatan_observasi_ranap.tgl_perawatan,catatan_observasi_ranap.jam_rawat,catatan_observasi_ranap.gcs,"+
                     "catatan_observasi_ranap.td,catatan_observasi_ranap.hr,catatan_observasi_ranap.rr,catatan_observasi_ranap.suhu,catatan_observasi_ranap.spo2,"+
-                    "catatan_observasi_ranap.nip,petugas.nama from catatan_observasi_ranap inner join reg_periksa on catatan_observasi_ranap.no_rawat=reg_periksa.no_rawat "+
+                    "catatan_observasi_ranap.nip,petugas.nama, "+
+                    "catatan_observasi_ranap.ivfd, catatan_observasi_ranap.bak, catatan_observasi_ranap.bab,catatan_observasi_ranap.intake, catatan_observasi_ranap.muntah, catatan_observasi_ranap.keterangan "+  //query tambahan untuk field baru by ichsan
+                    "from catatan_observasi_ranap inner join reg_periksa on catatan_observasi_ranap.no_rawat=reg_periksa.no_rawat "+
                     "inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis "+
                     "inner join petugas on catatan_observasi_ranap.nip=petugas.nip where "+
                     "catatan_observasi_ranap.tgl_perawatan between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and "+
@@ -1117,7 +1254,9 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
                     "select reg_periksa.no_rawat,pasien.no_rkm_medis,pasien.nm_pasien,reg_periksa.umurdaftar,reg_periksa.sttsumur,reg_periksa.tgl_registrasi,reg_periksa.jam_reg,"+
                     "pasien.jk,pasien.tgl_lahir,catatan_observasi_ranap.tgl_perawatan,catatan_observasi_ranap.jam_rawat,catatan_observasi_ranap.gcs,"+
                     "catatan_observasi_ranap.td,catatan_observasi_ranap.hr,catatan_observasi_ranap.rr,catatan_observasi_ranap.suhu,catatan_observasi_ranap.spo2,"+
-                    "petugas.nama from catatan_observasi_ranap inner join reg_periksa on catatan_observasi_ranap.no_rawat=reg_periksa.no_rawat "+
+                    "petugas.nama, "+
+                    "catatan_observasi_ranap.ivfd, catatan_observasi_ranap.bak, catatan_observasi_ranap.bab,catatan_observasi_ranap.intake, catatan_observasi_ranap.muntah, catatan_observasi_ranap.keterangan "+  //query tambahan untuk field baru by ichsan
+                    " from catatan_observasi_ranap inner join reg_periksa on catatan_observasi_ranap.no_rawat=reg_periksa.no_rawat "+
                     "inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis "+
                     "inner join petugas on catatan_observasi_ranap.nip=petugas.nip where reg_periksa.no_rawat='"+tbObat.getValueAt(tbObat.getSelectedRow(),0).toString()+"' "+
                     "order by catatan_observasi_ranap.tgl_perawatan,catatan_observasi_ranap.jam_rawat",param);
@@ -1145,8 +1284,32 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
     }//GEN-LAST:event_RRKeyPressed
 
     private void SPOKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_SPOKeyPressed
-        Valid.pindah(evt,Suhu,BtnSimpan);
+        Valid.pindah(evt,Suhu,IVFD);
     }//GEN-LAST:event_SPOKeyPressed
+
+    private void IVFDKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_IVFDKeyPressed
+        Valid.pindah(evt,IVFD,BAK);
+    }//GEN-LAST:event_IVFDKeyPressed
+
+    private void BAKKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BAKKeyPressed
+        Valid.pindah(evt,BAK,BAB);
+    }//GEN-LAST:event_BAKKeyPressed
+
+    private void BABKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BABKeyPressed
+        Valid.pindah(evt,BAB,Intake);
+    }//GEN-LAST:event_BABKeyPressed
+
+    private void IntakeKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_IntakeKeyPressed
+        Valid.pindah(evt,Intake,Muntah);
+    }//GEN-LAST:event_IntakeKeyPressed
+
+    private void MuntahKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_MuntahKeyPressed
+        Valid.pindah(evt,Muntah,Keterangan);
+    }//GEN-LAST:event_MuntahKeyPressed
+
+    private void KeteranganKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_KeteranganKeyPressed
+       Valid.pindah(evt,Keterangan,BtnSimpan);
+    }//GEN-LAST:event_KeteranganKeyPressed
 
     /**
     * @param args the command line arguments
@@ -1165,6 +1328,8 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private widget.TextBox BAB;
+    private widget.TextBox BAK;
     private widget.Button BtnAll;
     private widget.Button BtnBatal;
     private widget.Button BtnCari;
@@ -1181,11 +1346,15 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
     private widget.PanelBiasa FormInput;
     private widget.TextBox GCS;
     private widget.TextBox HR;
+    private widget.TextBox IVFD;
+    private widget.TextBox Intake;
     private widget.TextBox JK;
     private widget.ComboBox Jam;
+    private javax.swing.JTextArea Keterangan;
     private widget.Label LCount;
     private widget.ComboBox Menit;
     private javax.swing.JMenuItem MnCatatanObservasiIGD;
+    private widget.TextBox Muntah;
     private widget.TextBox NIP;
     private widget.TextBox NamaPetugas;
     private javax.swing.JPanel PanelInput;
@@ -1218,15 +1387,22 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
     private widget.Label jLabel27;
     private widget.Label jLabel28;
     private widget.Label jLabel29;
+    private widget.Label jLabel30;
+    private widget.Label jLabel31;
+    private widget.Label jLabel32;
+    private widget.Label jLabel33;
+    private widget.Label jLabel34;
     private widget.Label jLabel35;
     private widget.Label jLabel4;
     private widget.Label jLabel6;
     private widget.Label jLabel7;
     private widget.Label jLabel8;
+    private widget.Label jLabel83;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPopupMenu jPopupMenu1;
     private widget.panelisi panelGlass8;
     private widget.panelisi panelGlass9;
+    private widget.ScrollPane scrollPane8;
     private widget.Table tbObat;
     // End of variables declaration//GEN-END:variables
     
@@ -1238,7 +1414,9 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
                     "select reg_periksa.no_rawat,pasien.no_rkm_medis,pasien.nm_pasien,reg_periksa.umurdaftar,reg_periksa.sttsumur,"+
                     "pasien.jk,pasien.tgl_lahir,catatan_observasi_ranap.tgl_perawatan,catatan_observasi_ranap.jam_rawat,catatan_observasi_ranap.gcs,"+
                     "catatan_observasi_ranap.td,catatan_observasi_ranap.hr,catatan_observasi_ranap.rr,catatan_observasi_ranap.suhu,catatan_observasi_ranap.spo2,"+
-                    "catatan_observasi_ranap.nip,petugas.nama from catatan_observasi_ranap inner join reg_periksa on catatan_observasi_ranap.no_rawat=reg_periksa.no_rawat "+
+                    "catatan_observasi_ranap.nip,petugas.nama, "+
+                    "catatan_observasi_ranap.ivfd, catatan_observasi_ranap.bak, catatan_observasi_ranap.bab,catatan_observasi_ranap.intake, catatan_observasi_ranap.muntah, catatan_observasi_ranap.keterangan "+  //query tambahan untuk field baru by ichsan
+                    " from catatan_observasi_ranap inner join reg_periksa on catatan_observasi_ranap.no_rawat=reg_periksa.no_rawat "+
                     "inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis "+
                     "inner join petugas on catatan_observasi_ranap.nip=petugas.nip where "+
                     "catatan_observasi_ranap.tgl_perawatan between ? and ? order by catatan_observasi_ranap.tgl_perawatan,catatan_observasi_ranap.jam_rawat");
@@ -1247,7 +1425,9 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
                     "select reg_periksa.no_rawat,pasien.no_rkm_medis,pasien.nm_pasien,reg_periksa.umurdaftar,reg_periksa.sttsumur,"+
                     "pasien.jk,pasien.tgl_lahir,catatan_observasi_ranap.tgl_perawatan,catatan_observasi_ranap.jam_rawat,catatan_observasi_ranap.gcs,"+
                     "catatan_observasi_ranap.td,catatan_observasi_ranap.hr,catatan_observasi_ranap.rr,catatan_observasi_ranap.suhu,catatan_observasi_ranap.spo2,"+
-                    "catatan_observasi_ranap.nip,petugas.nama from catatan_observasi_ranap inner join reg_periksa on catatan_observasi_ranap.no_rawat=reg_periksa.no_rawat "+
+                    "catatan_observasi_ranap.nip,petugas.nama, "+
+                    "catatan_observasi_ranap.ivfd, catatan_observasi_ranap.bak, catatan_observasi_ranap.bab,catatan_observasi_ranap.intake, catatan_observasi_ranap.muntah, catatan_observasi_ranap.keterangan "+  //query tambahan untuk field baru by ichsan
+                    "from catatan_observasi_ranap inner join reg_periksa on catatan_observasi_ranap.no_rawat=reg_periksa.no_rawat "+
                     "inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis "+
                     "inner join petugas on catatan_observasi_ranap.nip=petugas.nip where "+
                     "catatan_observasi_ranap.tgl_perawatan between ? and ? and (reg_periksa.no_rawat like ? or pasien.no_rkm_medis like ? or pasien.nm_pasien like ? or catatan_observasi_ranap.nip like ? or petugas.nama like ?) "+
@@ -1275,7 +1455,8 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
                         rs.getString("umurdaftar")+" "+rs.getString("sttsumur"),rs.getString("jk"),rs.getString("tgl_lahir"),
                         rs.getString("tgl_perawatan"),rs.getString("jam_rawat"),rs.getString("gcs"),rs.getString("td"),
                         rs.getString("hr"),rs.getString("rr"),rs.getString("suhu"),rs.getString("spo2"),rs.getString("nip"),
-                        rs.getString("nama")
+                        rs.getString("nama"), 
+                        rs.getString("ivfd"), rs.getString("bak"), rs.getString("bab"), rs.getString("intake"), rs.getString("muntah"), rs.getString("keterangan")  //tambahan row baru by ichsan
                     });
                 }
             } catch (Exception e) {
@@ -1301,10 +1482,19 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
         RR.setText("");
         Suhu.setText("");
         SPO.setText("");
+         // Added clearing for new fields by ichsan
+        IVFD.setText("");
+        BAK.setText("");
+        BAB.setText("");
+        Intake.setText("");
+        Muntah.setText("");
+        Keterangan.setText("");
+        //
         Tanggal.setDate(new Date());
         GCS.requestFocus();
     } 
 
+    
     private void getData() {
         if(tbObat.getSelectedRow()!= -1){
             TNoRw.setText(tbObat.getValueAt(tbObat.getSelectedRow(),0).toString());
@@ -1322,9 +1512,20 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
             RR.setText(tbObat.getValueAt(tbObat.getSelectedRow(),11).toString());
             Suhu.setText(tbObat.getValueAt(tbObat.getSelectedRow(),12).toString());
             SPO.setText(tbObat.getValueAt(tbObat.getSelectedRow(),13).toString());
+            //tambahan kolom baru by ichsan
+            IVFD.setText(tbObat.getValueAt(tbObat.getSelectedRow(), 16).toString());
+            BAK.setText(tbObat.getValueAt(tbObat.getSelectedRow(), 17).toString());
+            BAB.setText(tbObat.getValueAt(tbObat.getSelectedRow(), 18).toString());
+            Intake.setText(tbObat.getValueAt(tbObat.getSelectedRow(), 19).toString());
+            Muntah.setText(tbObat.getValueAt(tbObat.getSelectedRow(), 20).toString());
+            Keterangan.setText(tbObat.getValueAt(tbObat.getSelectedRow(), 21).toString());
+            //tambahan kolom baru by ichsan
             Valid.SetTgl(Tanggal,tbObat.getValueAt(tbObat.getSelectedRow(),6).toString());  
         }
     }
+    
+    
+    
     
     private void isRawat() {
         try {
@@ -1462,6 +1663,7 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
         new Timer(1000, taskPerformer).start();
     }
 
+/*
     private void ganti() {
         if(Sequel.mengedittf("catatan_observasi_ranap","tgl_perawatan=? and jam_rawat=? and no_rawat=?","no_rawat=?,tgl_perawatan=?,jam_rawat=?,gcs=?,td=?,hr=?,rr=?,suhu=?,spo2=?,nip=?",13,new String[]{
             TNoRw.getText(),Valid.SetTgl(Tanggal.getSelectedItem()+""),Jam.getSelectedItem()+":"+Menit.getSelectedItem()+":"+Detik.getSelectedItem(),
@@ -1487,6 +1689,46 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
             emptTeks();
         }
     }
+    */
+    private void ganti() {
+        // Updated SET clause and parameter count (19)
+        if(Sequel.mengedittf("catatan_observasi_ranap","tgl_perawatan=? and jam_rawat=? and no_rawat=?","no_rawat=?,tgl_perawatan=?,jam_rawat=?,gcs=?,td=?,hr=?,rr=?,suhu=?,spo2=?,nip=?,ivfd=?,bak=?,bab=?,intake=?,muntah=?,keterangan=?",19,new String[]{
+            TNoRw.getText(),Valid.SetTgl(Tanggal.getSelectedItem()+""),Jam.getSelectedItem()+":"+Menit.getSelectedItem()+":"+Detik.getSelectedItem(),
+            GCS.getText(),TD.getText(),HR.getText(),RR.getText(),Suhu.getText(),SPO.getText(),NIP.getText(),
+            // Added new field values
+            IVFD.getText(), BAK.getText(), BAB.getText(), Intake.getText(), Muntah.getText(), Keterangan.getText(),
+            // WHERE clause parameters
+            tbObat.getValueAt(tbObat.getSelectedRow(),6).toString(), // tgl_perawatan old
+            tbObat.getValueAt(tbObat.getSelectedRow(),7).toString(), // jam_rawat old
+            tbObat.getValueAt(tbObat.getSelectedRow(),0).toString()  // no_rawat old
+        })==true){
+            // Update table display including new columns
+            tbObat.setValueAt(TNoRw.getText(),tbObat.getSelectedRow(),0);
+            tbObat.setValueAt(TNoRM.getText(),tbObat.getSelectedRow(),1);
+            tbObat.setValueAt(TPasien.getText(),tbObat.getSelectedRow(),2);
+            tbObat.setValueAt(Umur.getText(),tbObat.getSelectedRow(),3);
+            tbObat.setValueAt(JK.getText(),tbObat.getSelectedRow(),4);
+            tbObat.setValueAt(TglLahir.getText(),tbObat.getSelectedRow(),5);
+            tbObat.setValueAt(Valid.SetTgl(Tanggal.getSelectedItem()+""),tbObat.getSelectedRow(),6);
+            tbObat.setValueAt(Jam.getSelectedItem()+":"+Menit.getSelectedItem()+":"+Detik.getSelectedItem(),tbObat.getSelectedRow(),7);
+            tbObat.setValueAt(GCS.getText(),tbObat.getSelectedRow(),8);
+            tbObat.setValueAt(TD.getText(),tbObat.getSelectedRow(),9);
+            tbObat.setValueAt(HR.getText(),tbObat.getSelectedRow(),10);
+            tbObat.setValueAt(RR.getText(),tbObat.getSelectedRow(),11);
+            tbObat.setValueAt(Suhu.getText(),tbObat.getSelectedRow(),12);
+            tbObat.setValueAt(SPO.getText(),tbObat.getSelectedRow(),13);
+            tbObat.setValueAt(NIP.getText(),tbObat.getSelectedRow(),14);
+            tbObat.setValueAt(NamaPetugas.getText(),tbObat.getSelectedRow(),15);
+            // Added updates for new columns in table view
+            tbObat.setValueAt(IVFD.getText(),tbObat.getSelectedRow(),16);
+            tbObat.setValueAt(BAK.getText(),tbObat.getSelectedRow(),17);
+            tbObat.setValueAt(BAB.getText(),tbObat.getSelectedRow(),18);
+            tbObat.setValueAt(Intake.getText(),tbObat.getSelectedRow(),19);
+            tbObat.setValueAt(Muntah.getText(),tbObat.getSelectedRow(),20);
+            tbObat.setValueAt(Keterangan.getText(),tbObat.getSelectedRow(),21);
+            emptTeks();
+        }
+    }
 
     private void hapus() {
         if(Sequel.queryu2tf("delete from catatan_observasi_ranap where tgl_perawatan=? and jam_rawat=? and no_rawat=?",3,new String[]{
@@ -1500,6 +1742,7 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
         }
     }
 
+    /*
     private void simpan() {
         if(Sequel.menyimpantf("catatan_observasi_ranap","?,?,?,?,?,?,?,?,?,?","Data",10,new String[]{
                 TNoRw.getText(),Valid.SetTgl(Tanggal.getSelectedItem()+""),Jam.getSelectedItem()+":"+Menit.getSelectedItem()+":"+Detik.getSelectedItem(),
@@ -1513,6 +1756,27 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
             LCount.setText(""+tabMode.getRowCount());
             emptTeks();
         } 
+    }  
+    */
+    private void simpan() {
+        // Updated SQL parameter count (16) and added new field values
+        if(Sequel.menyimpantf("catatan_observasi_ranap","?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?","Data",16,new String[]{
+                TNoRw.getText(),Valid.SetTgl(Tanggal.getSelectedItem()+""),Jam.getSelectedItem()+":"+Menit.getSelectedItem()+":"+Detik.getSelectedItem(),
+                GCS.getText(),TD.getText(),HR.getText(),RR.getText(),Suhu.getText(),SPO.getText(),NIP.getText(),
+                // Added new field values
+                IVFD.getText(), BAK.getText(), BAB.getText(), Intake.getText(), Muntah.getText(), Keterangan.getText()
+        })==true){
+            // Added new columns to addRow
+            tabMode.addRow(new String[]{
+                TNoRw.getText(),TNoRM.getText(),TPasien.getText(),Umur.getText(),JK.getText(),TglLahir.getText(),
+                Valid.SetTgl(Tanggal.getSelectedItem()+""),Jam.getSelectedItem()+":"+Menit.getSelectedItem()+":"+Detik.getSelectedItem(),
+                GCS.getText(),TD.getText(),HR.getText(),RR.getText(),Suhu.getText(),SPO.getText(),NIP.getText(),NamaPetugas.getText(),
+                // Added new field values to table view
+                IVFD.getText(), BAK.getText(), BAB.getText(), Intake.getText(), Muntah.getText(), Keterangan.getText()
+            });
+            LCount.setText(""+tabMode.getRowCount());
+            emptTeks();
+        }
     }
     
     
