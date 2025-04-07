@@ -3915,7 +3915,7 @@ private void kirimWhatsAppMessage() {
                     pscarilab.setString(1,TNoRw.getText());
                     rscarilab=pscarilab.executeQuery();
                     while(rscarilab.next()){
-                        tabModeLab.addRow(new String[]{
+                        tabModeLab.addRow(new Object[]{
                             rscarilab.getString("noorder"),rscarilab.getString("tgl_permintaan"),rscarilab.getString("jam_permintaan"),rscarilab.getString("nm_dokter"),rscarilab.getString("status")
                         });
                     }
@@ -3939,7 +3939,7 @@ private void kirimWhatsAppMessage() {
                     pscarilab.setString(1,TNoRw.getText());
                     rscarilab=pscarilab.executeQuery();
                     while(rscarilab.next()){
-                        tabModeLab.addRow(new String[]{
+                        tabModeLab.addRow(new Object[]{
                             rscarilab.getString("noorder"),rscarilab.getString("tgl_permintaan"),rscarilab.getString("jam_permintaan"),rscarilab.getString("nm_dokter"),rscarilab.getString("status")
                         });
                     }
@@ -3963,7 +3963,7 @@ private void kirimWhatsAppMessage() {
                     pscarilab.setString(1,TNoRw.getText());
                     rscarilab=pscarilab.executeQuery();
                     while(rscarilab.next()){
-                        tabModeLab.addRow(new String[]{
+                        tabModeLab.addRow(new Object[]{
                             rscarilab.getString("noorder"),rscarilab.getString("tgl_permintaan"),rscarilab.getString("jam_permintaan"),rscarilab.getString("nm_dokter"),rscarilab.getString("status")
                         });
                     }
@@ -3988,7 +3988,7 @@ private void kirimWhatsAppMessage() {
                     pscariradiologi.setString(1,TNoRw.getText());
                     rscariradiologi=pscariradiologi.executeQuery();
                     while(rscariradiologi.next()){
-                        tabModeRad.addRow(new String[]{
+                        tabModeRad.addRow(new Object[]{
                             rscariradiologi.getString("noorder"),rscariradiologi.getString("tgl_permintaan"),rscariradiologi.getString("jam_permintaan"),rscariradiologi.getString("nm_dokter"),rscariradiologi.getString("status")
                         });
                     }
@@ -4012,7 +4012,7 @@ private void kirimWhatsAppMessage() {
                     psobatlangsung.setString(1,TNoRw.getText());
                     rscariobat=psobatlangsung.executeQuery();
                     while(rscariobat.next()){
-                        tabModeApotek.addRow(new String[]{
+                        tabModeApotek.addRow(new Object[]{
                             rscariobat.getString("no_resep"),rscariobat.getString("tgl_peresepan"),rscariobat.getString("jam_peresepan"),rscariobat.getString("nm_dokter"),rscariobat.getString("status")
                         });
                     }

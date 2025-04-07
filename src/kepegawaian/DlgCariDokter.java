@@ -416,7 +416,7 @@ public final class DlgCariDokter extends javax.swing.JDialog {
             try{
                 rs=ps.executeQuery();
                 while(rs.next()){
-                    tabMode.addRow(new String[]{
+                    tabMode.addRow(new Object[]{
                         rs.getString(1),rs.getString(2),rs.getString(3),
                         rs.getString(4),rs.getString(5),rs.getString(6),
                         rs.getString(7),rs.getString(8),rs.getString(9),
@@ -506,11 +506,10 @@ public final class DlgCariDokter extends javax.swing.JDialog {
         try {
             myObj = new FileReader("./cache/dokter.iyem");
             root = mapper.readTree(myObj);
-            Valid.tabelKosong(tabMode);
             response = root.path("dokter");
             if(response.isArray()){
                 for(JsonNode list:response){
-                    if(list.path("KodeDokter").asText().toLowerCase().equals(kode)){
+                    if(list.path("KodeDokter").asText().equalsIgnoreCase(kode)){
                         iyem=list.path("NamaDokter").asText();
                     }
                 }

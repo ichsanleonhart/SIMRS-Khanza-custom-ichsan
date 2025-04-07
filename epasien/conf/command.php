@@ -37,12 +37,28 @@
     function formProtek() {
         $aksi=isset($_GET['act'])?$_GET['act']:NULL;
         if (!cekSessiPasien()) {
-            $form = array ('HomeUser','FasilitasKamarUser','InformasiKamarUser','FasilitasRadiologiUser','FasilitasLaboratUser','FasilitasOperasiUser',
-                           'FasilitasOnlineUser','JadwalDokterUser','CekPoliUser','CekAsuransiUser','RiwayatPeriksa','CekResume','CekBilling','BuktiRegistrasi',
-                           'CekBilling2','Pengaduan','BookingRegistrasi','SuratSakit','TampilSuratSakit','SuratHamil','TampilSuratHamil','SuratBebasNarkoba',
-                           'TampilSuratBebasNarkoba','SuratRujuk','TampilSuratRujuk','SuratCovid','TampilSuratCovid','SuratKontrol','TampilSuratKontrol',
-                           'SimpanBookingRegistrasi','CekinRegistrasi','CekinRegistrasi2','BuktiRegistrasi2','Perpustakaan','KartuPasien','RiwayatLaboratUser',
-                           'UpdatePassword','RiwayatMCU');
+            $form = array ('HomeUser','FasilitasKamarUser','InformasiKamarUser','FasilitasRadiologiUser','FasilitasLaboratUser',
+                'FasilitasOperasiUser','FasilitasOnlineUser','JadwalDokterUser','CekPoliUser','CekAsuransiUser','RiwayatPeriksa',
+                'CekResume','CekBilling','CekBilling2','Pengaduan','BookingRegistrasi','SimpanBookingRegistrasi','CekinRegistrasi',
+                'CekinRegistrasi2','BuktiRegistrasi','BuktiRegistrasi2','SuratSakit','TampilSuratSakit','SuratHamil','TampilSuratHamil',
+                'SuratBebasNarkoba','TampilSuratBebasNarkoba','SuratRujuk','TampilSuratRujuk','SuratCovid','TampilSuratCovid','SuratKontrol',
+                'TampilSuratKontrol','Perpustakaan','AntrianPemeriksaanLab','AntrianPemeriksaanLabMB','AntrianPemeriksaanLabPA',
+                'AntrianPemeriksaanRad','AntrianUSGKandungan','AntrianUSGUrologi','AntrianUSGGynecologi','AntrianUSGNeonatus','AntrianEKG',
+                'AntrianEcho','AntrianEndoskopiFaring','AntrianEndoskopiHidung','AntrianEndoskopiTelinga','PersetujuanUmum',
+                'PersetujuanRencanaPemulangan','PersetujuanPenyerahanResepRalan','PersetujuanPernyataanPasienUmum','PersetujuanPernyataanPulangAPS',
+                'PersetujuanTransferAntarRuang','PersetujuanRawatInap','PersetujuanPenundaanPelayanan','PersetujuanPenolakanAnjuranMedis',
+                'PersetujuanRestrain','PersetujuanPenolakanTindakan','BuktiPelaksanaanEdukasi','BuktiPelayananRehabilitasi','KartuPasien',
+                'TampilPermintaanLab','TampilHasilLab','UpdatePassword','RiwayatMCU','HasilMCU','HasilLabPK','HasilLabMB','HasilLabPA',
+                'HasilRad','HasilUSGKandungan','HasilUSGUrologi','HasilUSGGynecologi','HasilUSGNeonatus','HasilEKG','HasilEcho',
+                'HasilEndoskopiFaring','HasilEndoskopiHidung','HasilEndoskopiTelinga','AmbilPersetujuanUmum','AmbilPersetujuanRencanaPemulangan',
+                'AmbilPenyerahanResepRalan','AmbilPersetujuanPernyataanPasienUmum','AmbilPersetujuanRawatInap','AmbilPersetujuanTransferAntarRuang',
+                'AmbilPersetujuanPenundaanPelayanan','AmbilPersetujuanPenolakanAnjuranMedis','AmbilPersetujuanRestrain',
+                'AmbilPersetujuanPernyataanPulangAPS','AmbilPersetujuanPenolakanTindakan','AmbilBuktiPelaksanaanEdukasi','AmbilBuktiPelayananRehabilitasi',
+                'HasilPersetujuanUmum','HasilPersetujuanRencanaPemulangan','HasilPenyerahanResepRalan','HasilPersetujuanPernyataanPasienUmum',
+                'HasilPersetujuanTransferAntarRuang','HasilPersetujuanRawatInap','HasilPersetujuanPenundaanPelayanan','HasilPersetujuanPenolakanAnjuranMedis',
+                'HasilPersetujuanRestrain','HasilPersetujuanPernyataanPulangAPS','HasilPersetujuanPenolakanTindakan','HasilBuktiPelaksanaanEdukasi',
+                'HasilBuktiPelayananRehabilitasi','BuktiPelayananProgramKFR','AmbilBuktiPelayananProgramKFR','HasilBuktiPelayananProgramKFR'
+            );
             foreach ($form as $page) {
                 if ($aksi==$page) {
                     echo "<META HTTP-EQUIV = 'Refresh' Content = '0; URL = ?act=Home'>";
@@ -135,6 +151,8 @@
                 case "PersetujuanRestrain"                     : include_once("pages/listriwayatpersetujuanrestrain.php"); break;
                 case "PersetujuanPenolakanTindakan"            : include_once("pages/listriwayatpersetujuanpenolakantindakan.php"); break;
                 case "BuktiPelaksanaanEdukasi"                 : include_once("pages/listriwayatbuktipelaksanaanedukasi.php"); break;
+                case "BuktiPelayananRehabilitasi"              : include_once("pages/listriwayatbuktipelayananrehabilitasi.php"); break;
+                case "BuktiPelayananProgramKFR"                : include_once("pages/listriwayatbuktipelayananprogramkfr.php"); break;
                 case "KartuPasien"                             : include_once("pages/listkartu.php"); break;
                 case "TampilPermintaanLab"                     : include_once("pages/listtampilpermintaanlab.php"); break;
                 case "TampilHasilLab"                          : include_once("pages/listtampilhasillab.php"); break;
@@ -166,6 +184,8 @@
                 case "AmbilPersetujuanPernyataanPulangAPS"     : include_once("pages/ambilpersetujuanpernyataanpulangaps.php"); break;
                 case "AmbilPersetujuanPenolakanTindakan"       : include_once("pages/ambilpersetujuanpenolakantindakan.php"); break;
                 case "AmbilBuktiPelaksanaanEdukasi"            : include_once("pages/ambilbuktipelaksanaanedukasi.php"); break;
+                case "AmbilBuktiPelayananRehabilitasi"         : include_once("pages/ambilbuktipelayananrehabilitasi.php"); break;
+                case "AmbilBuktiPelayananProgramKFR"           : include_once("pages/ambilbuktipelayananprogramkfr.php"); break;
                 case "HasilPersetujuanUmum"                    : include_once("pages/listhasilpersetujuanumum.php"); break;
                 case "HasilPersetujuanRencanaPemulangan"       : include_once("pages/listhasilpersetujuanrencanapemulangan.php"); break;
                 case "HasilPenyerahanResepRalan"               : include_once("pages/listhasilpersetujuanpenyerahanresepralan.php"); break;
@@ -178,6 +198,8 @@
                 case "HasilPersetujuanPernyataanPulangAPS"     : include_once("pages/listhasilpersetujuanpernyataanpulangaps.php"); break;
                 case "HasilPersetujuanPenolakanTindakan"       : include_once("pages/listhasilpersetujuanpenolakantindakan.php"); break;
                 case "HasilBuktiPelaksanaanEdukasi"            : include_once("pages/listhasilbuktipelaksanaanedukasi.php"); break;
+                case "HasilBuktiPelayananRehabilitasi"         : include_once("pages/listhasilbuktipelayananrehabilitasi.php"); break;
+                case "HasilBuktiPelayananProgramKFR"           : include_once("pages/listhasilbuktipelayananprogramkfr.php"); break;
                 default                                        : include_once("pages/homeuser.php");
             }
         }
