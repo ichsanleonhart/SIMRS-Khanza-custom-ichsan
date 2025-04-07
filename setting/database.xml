@@ -2,14 +2,14 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
     <comment>KhanzaHMS</comment> 
-	<entry key="HOST">NbJF6sXmOvgOdPEIDTb5BQ==</entry>
-    <entry key="DATABASE">9rUVx6+yjXttR8FIJtNITw==</entry>
-    <entry key="PORT">0sWcq2h64U8ou1kQJstC5g==</entry>
+	<entry key="HOST">r19bAXRY6BQOI4hBcfSnHw==</entry>
+    <entry key="DATABASE">B/VFXMnPOQpwL6aPTlmEcQ==</entry>
+    <entry key="PORT">nioxtijcpDaKSUiUiP5FAg==</entry>
     <entry key="USER">3fsjwvKJn8IpzysMeNu3bA==</entry>
     <entry key="PAS">z5EhF4xxNihimsGB3AkUAQ==</entry>
     <entry key="CARICEPAT">nonaktif</entry>
-    <entry key="HOSTHYBRIDWEB">NbJF6sXmOvgOdPEIDTb5BQ==</entry>
-    <entry key="USERHYBRIDWEB">CUHISWJ0/JBvloH7LbhvsA==</entry>
+    <entry key="HOSTHYBRIDWEB">r19bAXRY6BQOI4hBcfSnHw==</entry>
+	<entry key="USERHYBRIDWEB">CUHISWJ0/JBvloH7LbhvsA==</entry>
     <entry key="PASHYBRIDWEB">c/6y8XztRzLrI5/Hlzbouw==</entry>
     <entry key="HYBRIDWEB">webapps</entry>
     <entry key="PORTWEB">80</entry>
@@ -201,13 +201,19 @@
 	<entry key="WANOTIFPASIEN">yes</entry>
 	<entry key="HOSTWA">47ho8/1sg6u11kCGRJT11A==</entry>  <!--ip address sql tempat aplikasi wa_gateway, harus di-enkript AES-->
 	<entry key="PORTWEBWA">ZhB7fM96Hq28mN8/XoXjfA==</entry> <!--Port ke aplkasi web wa_gateway, biasanya port 80, harus di-enkript AES-->
+	<entry key="PORTWA">/prN8BUwM8LSZSYtHNIDBQ==</entry> <!--Port ke aplkasi wa_gateway, cek di app nya dapet port berapa. Biasanya port 8100, harus di-enkript AES-->	
 	<entry key="FOLDERFILEWA">wa_gateway</entry> <!--nama folder Lokasi tempat mengirim pdf untuk dikirim by WA, lokasi tempat wa gateway ditaro di localhost-->
         
 	<!--START - SETTINGAN WA GATEWAY YANG NARO WA_OUTBOX DI DATABASE UTAMA-->
+	<entry key="HOSTWA1">r19bAXRY6BQOI4hBcfSnHw==</entry>  <!--ip address sql tempat aplikasi wa_gateway, harus di-enkript AES-->
+	<entry key="PORTWA1">nioxtijcpDaKSUiUiP5FAg==</entry> <!--Port mysql ke aplkasi wa_gateway, biasanya 3306, harus di-enkript AES-->	
+	<entry key="DATABASEWA1">prq/7kj/0nlvlzpcLCx3PQ==</entry> <!--nama database untuk wa_gateway, kalo ditaro di server utama, copas aja dari value di atas (DATABASE). Harus di-enkript AES-->		
+	<entry key="USERWA1">3fsjwvKJn8IpzysMeNu3bA==</entry>  <!--user mysql tempat mysql wa_outboox, harus di-enkript AES-->
+	<entry key="PASWA1">z5EhF4xxNihimsGB3AkUAQ==</entry>  <!--pass mysql tempat WA_outbox, harus di-enkript AES-->
+	
 	<entry key="HOSTWAWEB">47ho8/1sg6u11kCGRJT11A==</entry>
-	<entry key="PORTWA">/prN8BUwM8LSZSYtHNIDBQ==</entry> <!--Port ke aplkasi wa_gateway, cek di app nya dapet port berapa. Biasanya port 8100, harus di-enkript AES-->	
-	<entry key="DATABASEWA">B/VFXMnPOQpwL6aPTlmEcQ==</entry> <!--nama database untuk wa_gateway, kalo ditaro di server utama, copas aja dari value di atas (DATABASE). Harus di-enkript AES-->		
-	<entry key="USERWA">3fsjwvKJn8IpzysMeNu3bA==</entry>  <!--user mysql tempat mysql wa_outboox, harus di-enkript AES-->
-	<entry key="PASWA">z5EhF4xxNihimsGB3AkUAQ==</entry>  <!--pass mysql tempat WA_outbox, harus di-enkript AES-->
+	
+	
+	
 	<!--END - SETTINGAN WA GATEWAY YANG NARO WA_OUTBOX DI DATABASE UTAMA-->
 </properties>

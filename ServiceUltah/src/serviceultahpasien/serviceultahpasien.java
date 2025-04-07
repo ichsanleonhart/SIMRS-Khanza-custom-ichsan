@@ -3,13 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package khanzahmsservicemobilejkn;
+package serviceultahpasien;
 
 /**
  *
  * @author windiartonugroho
  */
-public class KhanzaHMSServiceMobileJKN {
+public class serviceultahpasien {
     
 
     /**
