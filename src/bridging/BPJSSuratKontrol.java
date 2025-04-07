@@ -35,7 +35,6 @@ import javax.swing.JTable;
 import javax.swing.event.DocumentEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
-import laporan.DlgBerkasRawat;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.scheme.Scheme;
@@ -47,15 +46,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
-import java.io.File;
-import java.io.File; // tambahan by ichsan
-import org.apache.commons.io.FileUtils;  //tambahan by ichsan
-import org.apache.http.client.HttpClient;  //tambahan by ichsan
-import org.apache.http.client.methods.HttpPost;  //tambahan by ichsan
-import org.apache.http.entity.mime.HttpMultipartMode;  //tambahan by ichsan
-import org.apache.http.entity.mime.MultipartEntity;  //tambahan by ichsan
-import org.apache.http.entity.mime.content.ByteArrayBody;  //tambahan by ichsan
-import org.apache.http.impl.client.DefaultHttpClient;  //tambahan by ichsan
 
 /**
  *
@@ -69,13 +59,15 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
     private PreparedStatement ps;
     private ResultSet rs;
     private int i=0;
+    private BPJSCekReferensiDokterKontrol dokter=new BPJSCekReferensiDokterKontrol(null,false);
+    private BPJSCekReferensiSpesialistikKontrol poli=new BPJSCekReferensiSpesialistikKontrol(null,false);
     private HttpHeaders headers;
     private HttpEntity requestEntity;
     private ObjectMapper mapper = new ObjectMapper();
     private JsonNode root;
     private JsonNode nameNode;
     private JsonNode response;
-    private String link="",requestJson="",URL="",user="",URUTNOREG="",utc="",JADIKANBOOKINGSURATKONTROLAPIBPJS="no",kodedokter="",kodepoli="",noreg="", FileName ="",kodeberkas=""; //tambahan ichsan 
+    private String link="",requestJson="",URL="",user="",URUTNOREG="",utc="",JADIKANBOOKINGSURATKONTROLAPIBPJS="no",kodedokter="",kodepoli="",noreg="";
     private ApiBPJS api=new ApiBPJS();
     private boolean status=false;
 
@@ -164,6 +156,76 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         ChkInput.setSelected(false);
         isForm();
         
+        dokter.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {;}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(dokter.getTable().getSelectedRow()!= -1){                    
+                    KdDokter.setText(dokter.getTable().getValueAt(dokter.getTable().getSelectedRow(),1).toString());
+                    NmDokter.setText(dokter.getTable().getValueAt(dokter.getTable().getSelectedRow(),2).toString());
+                }
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        dokter.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    dokter.dispose();
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });  
+        
+        poli.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(poli.getTable().getSelectedRow()!= -1){                    
+                    KdPoli.setText(poli.getTable().getValueAt(poli.getTable().getSelectedRow(),1).toString());
+                    NmPoli.setText(poli.getTable().getValueAt(poli.getTable().getSelectedRow(),2).toString());
+                }   
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        poli.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    poli.dispose();
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });  
+        
         try {
             user=akses.getkode().replace(" ","").substring(0,9);
         } catch (Exception e) {
@@ -201,8 +263,6 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         buttonGroup1 = new javax.swing.ButtonGroup();
         jPopupMenu1 = new javax.swing.JPopupMenu();
         MnSurat = new javax.swing.JMenuItem();
-        UploadSurkon = new javax.swing.JMenuItem();
-        ppBerkasDigital = new javax.swing.JMenuItem();
         NoKartu = new widget.TextBox();
         internalFrame1 = new widget.InternalFrame();
         Scroll = new widget.ScrollPane();
@@ -280,38 +340,6 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
             }
         });
         jPopupMenu1.add(MnSurat);
-
-        UploadSurkon.setBackground(new java.awt.Color(255, 255, 254));
-        UploadSurkon.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
-        UploadSurkon.setForeground(new java.awt.Color(50, 50, 50));
-        UploadSurkon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
-        UploadSurkon.setText("Upload Surkon ke Berkas Digital");
-        UploadSurkon.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        UploadSurkon.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        UploadSurkon.setName("UploadSurkon"); // NOI18N
-        UploadSurkon.setPreferredSize(new java.awt.Dimension(160, 26));
-        UploadSurkon.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                UploadSurkonActionPerformed(evt);
-            }
-        });
-        jPopupMenu1.add(UploadSurkon);
-
-        ppBerkasDigital.setBackground(new java.awt.Color(255, 255, 254));
-        ppBerkasDigital.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
-        ppBerkasDigital.setForeground(new java.awt.Color(50, 50, 50));
-        ppBerkasDigital.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
-        ppBerkasDigital.setText("Berkas Digital Perawatan");
-        ppBerkasDigital.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        ppBerkasDigital.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        ppBerkasDigital.setName("ppBerkasDigital"); // NOI18N
-        ppBerkasDigital.setPreferredSize(new java.awt.Dimension(160, 26));
-        ppBerkasDigital.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ppBerkasDigitalActionPerformed(evt);
-            }
-        });
-        jPopupMenu1.add(ppBerkasDigital);
 
         NoKartu.setEditable(false);
         NoKartu.setHighlighter(null);
@@ -544,7 +572,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         R1.setPreferredSize(new java.awt.Dimension(115, 23));
         panelCari.add(R1);
 
-        DTPTanggalSurat1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "03-03-2025" }));
+        DTPTanggalSurat1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "09-07-2023" }));
         DTPTanggalSurat1.setDisplayFormat("dd-MM-yyyy");
         DTPTanggalSurat1.setName("DTPTanggalSurat1"); // NOI18N
         DTPTanggalSurat1.setOpaque(false);
@@ -567,7 +595,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         jLabel22.setPreferredSize(new java.awt.Dimension(25, 23));
         panelCari.add(jLabel22);
 
-        DTPTanggalSurat2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "03-03-2025" }));
+        DTPTanggalSurat2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "09-07-2023" }));
         DTPTanggalSurat2.setDisplayFormat("dd-MM-yyyy");
         DTPTanggalSurat2.setName("DTPTanggalSurat2"); // NOI18N
         DTPTanggalSurat2.setOpaque(false);
@@ -593,7 +621,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         R2.setPreferredSize(new java.awt.Dimension(120, 23));
         panelCari.add(R2);
 
-        DTPTanggalKontrol1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "03-03-2025" }));
+        DTPTanggalKontrol1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "09-07-2023" }));
         DTPTanggalKontrol1.setDisplayFormat("dd-MM-yyyy");
         DTPTanggalKontrol1.setName("DTPTanggalKontrol1"); // NOI18N
         DTPTanggalKontrol1.setOpaque(false);
@@ -616,7 +644,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         jLabel25.setPreferredSize(new java.awt.Dimension(25, 23));
         panelCari.add(jLabel25);
 
-        DTPTanggalKontrol2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "03-03-2025" }));
+        DTPTanggalKontrol2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "09-07-2023" }));
         DTPTanggalKontrol2.setDisplayFormat("dd-MM-yyyy");
         DTPTanggalKontrol2.setName("DTPTanggalKontrol2"); // NOI18N
         DTPTanggalKontrol2.setOpaque(false);
@@ -695,7 +723,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         NoSEP.setBounds(286, 10, 150, 23);
 
         TanggalSurat.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalSurat.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "03-03-2025" }));
+        TanggalSurat.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "09-07-2023" }));
         TanggalSurat.setDisplayFormat("dd-MM-yyyy");
         TanggalSurat.setName("TanggalSurat"); // NOI18N
         TanggalSurat.setOpaque(false);
@@ -775,7 +803,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         jLabel14.setBounds(491, 70, 100, 23);
 
         TanggalKontrol.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalKontrol.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "03-03-2025 09:28:33" }));
+        TanggalKontrol.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "09-07-2023 16:29:08" }));
         TanggalKontrol.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         TanggalKontrol.setName("TanggalKontrol"); // NOI18N
         TanggalKontrol.setOpaque(false);
@@ -908,13 +936,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
                     if(Sequel.menyimpantf("bridging_surat_kontrol_bpjs","?,?,?,?,?,?,?,?","No.Surat",8,new String[]{
                             NoSEP.getText(),Valid.SetTgl(TanggalSurat.getSelectedItem()+""),response.asText(),Valid.SetTgl(TanggalKontrol.getSelectedItem()+""),KdDokter.getText(),NmDokter.getText(),KdPoli.getText(),NmPoli.getText()
                         })==true){
-                                    if(koneksiDB.WANOTIFPASIEN().equals("yes")){   
-                                    kirimWhatsAppMessage();  //kirim pesan WA by ichsan
-                                    kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol
-                                    JOptionPane.showMessageDialog(null, "Surat kontrol berhasil dibuat. \n "
-                                     + "WA reminder akan otomatis terkirim sekarang dan pada H-1 sebelum tanggal kontrol  ;-)");                        
-                                 }                        
-                        //emptTeks();
+                        emptTeks();
                         tampil();
                         if(JADIKANBOOKINGSURATKONTROLAPIBPJS.equals("yes")){
                             if(isBooking()==false){
@@ -930,36 +952,36 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
                 if(ex.toString().contains("UnknownHostException")){
                     JOptionPane.showMessageDialog(null,"Koneksi ke server BPJS terputus...!");
                 }
-            }  
+            }
+            
+            
+            ////////////////kirim WA ke pasien
+            //////////////// fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+        try {
+            if(koneksiDB.WANOTIFPASIEN().equals("yes")){   
+                kirimWhatsAppMessage();  //kirim pesan WA by ichsan
+                kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol
+                JOptionPane.showMessageDialog(null, "Surat kontrol berhasil dibuat. \n "
+                + "WA reminder akan otomatis terkirim sekarang dan pada H-1 sebelum tanggal kontrol  ;-)");
+                emptTeks();  //kosongkan isi form setelah tekan simpan
+            }else{
+                emptTeks();  //kosongkan isi form setelah tekan simpan
+            }
+        } catch (Exception e) {
+            emptTeks();  //kosongkan isi form setelah tekan simpan
+        }
+            
+            
         }
 }//GEN-LAST:event_BtnSimpanActionPerformed
 
-    private String getGoogleMapUrl() { ///////// START - kode untuk mengambil URL google di table setting_url pada kolom google_map
-    String googleMapUrl = ""; 
-    try {
-        PreparedStatement psMap = koneksi.prepareStatement("SELECT google_map FROM setting_url LIMIT 1");
-        ResultSet rsMap = psMap.executeQuery(); 
-        if (rsMap.next()) { 
-            googleMapUrl = rsMap.getString("google_map"); 
-        }
-        rsMap.close(); 
-        psMap.close(); 
-    } catch (Exception e) { 
-        System.out.println("gagal mengambil Google Maps URL: " + e); 
-    }
-
-    // Fallback to a default URL if nothing is found
-    if (googleMapUrl == null || googleMapUrl.trim().isEmpty()) { 
-        googleMapUrl = "";  //kalau belum ada, diisi kosong saja
-    }
-
-    //System.out.println("Fetched Google Map URL: " + googleMapUrl);  //aktifkan line ini kalau mau debug print ke kotak hitam
-    return googleMapUrl; 
-}   //////////////////////////  END - kode untuk mengambil URL google di table setting_url pada kolom google_map   
-    
+    ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA SETELAH SIMPAN SURAT KONTROL BY ICHSAN
     private void kirimWhatsAppMessage() {
-    String googleMapUrl = getGoogleMapUrl(); // Ambil url googlemap dari kode di atas    
-    String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));    //isi value detik ini untuk dikirim ke jadwal pengiriman di wa gateway
+    // ambil detik sekarang, lalu tambahkan + 5 detik ke depan
+    LocalDateTime waktuSekarang = LocalDateTime.now().plusSeconds(5);
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    String waktukirim = waktuSekarang.format(formatter);    
+
     // Fetch nomor hp pasien, gender, serta tanggal kontrol
     String nohppasien = "";  //ubah format nomor hp pasien
     String jk = "";  //ubah format jenis kelamin
@@ -983,12 +1005,6 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
             nohppasien = rs.getString("no_tlp");
             jk = rs.getString("jk");
 
-            // Validation: Check if phone number is at least 10 digits and contains only numbers
-                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.trim().matches("\\d+")) {
-                    JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
-                    return; // Stop execution if phone number is invalid
-                    }
-                 
             // Convert phone number from 08xxxxxx to 628xxxxxx
             if (nohppasien.startsWith("0")) {
                 nohppasien = "62" + nohppasien.substring(1);
@@ -1004,44 +1020,25 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         formattedTanggal = TanggalKontrol.getSelectedItem().toString(); // Fallback to original format
     }
 
-    // ========== 🆕 Tambahkan greeting berdasarkan waktu saat ini ==========
-    int currentHour = java.time.LocalTime.now().getHour(); // 🆕 Ambil jam saat ini
-
-    String greeting; // 🆕 Variabel untuk menyimpan greeting
-    if (currentHour >= 4 && currentHour <= 10) {
-        greeting = "Selamat Pagi"; // 🆕 Pagi (04.00 - 10.00)
-    } else if (currentHour >= 10 && currentHour <= 15) {
-        greeting = "Selamat Siang"; // 🆕 Siang (10.01 - 15.00)
-    } else if (currentHour >= 15 && currentHour <= 18) {
-        greeting = "Selamat Sore"; // 🆕 Sore (15.01 - 18.00)
-    } else {
-        greeting = "Selamat Malam"; // 🆕 Malam (18.01 - 03.59)
-    }
-
-    // ========== 🆕 Gunakan greeting ini ke dalam salam pembuka ==========
+    // Set greeting based on gender
     String salampembuka;
     if ("L".equalsIgnoreCase(jk)) {
-        salampembuka = greeting + ", Bpk " + NmPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Bpk
+        salampembuka = "Assalamualaikum, Bpk " + NoRM.getText() + "\n";
     } else if ("P".equalsIgnoreCase(jk)) {
-        salampembuka = greeting + ", Ibu " + NmPasien.getText() + "\n"; // 🆕 Tambahkan greeting sebelum Ibu
+        salampembuka = "Assalamualaikum, Ibu " + NoRM.getText() + "\n";
     } else {
-        salampembuka = greeting + ", Bpk / Ibu " + NmPasien.getText() + "\n"; // 🆕 Jika gender tidak diketahui
+        salampembuka = "Assalamualaikum, Bpk / Ibu " + NoRM.getText() + "\n";
     }
 
     // Membuat isi pesan ke dalam whatsapp
-    String pesan = salampembuka + " - (" + NoRM.getText() + ") \n 0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
+    String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
         "Kami dari " + akses.getnamars() + " ingin mengingatkan bahwa Anda memiliki jadwal kontrol/tindak lanjut pada: \n\n" +       
-        "0xF0 0x9F 0x93 0x85 *Tanggal*: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
-        "0xF0 0x9F 0x91 0xA8 *Dokter* : " + NmDokter.getText() + "\n" +
-        "0xF0 0x9F 0x8F 0xA5 *Spesialis* : " + NmPoli.getText() + "\n" +
-        "0xF0 0x9F 0x8F 0xA0 *Alamat* : " + akses.getalamatrs() + "\n" +
-        "0xF0 0x9F 0x8C 0x8F Lokasi map :" + googleMapUrl + " \n\n" +            
+        "0xF0 0x9F 0x93 0x85 Tanggal: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
+        "0xF0 0x9F 0x91 0xA8 Dokter : " + NmDokter.getText() + "\n" +
+        "0xF0 0x9F 0x8F 0xA5 Spesialis : " + NmPoli.getText() + "\n" +
+        "0xF0 0x9F 0x8F 0xA0 Alamat : " + akses.getalamatrs() + "\n\n" +
         "0xF0 0x9F 0x93 0x84 Mohon untuk mengambil antrean pada aplikasi MJKN BPJS. Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
-        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F \n \n "+
-        "Applikasi *MJKN BPJS* bisa didownload di alamat playstore berikut : \n " +
-        "https://play.google.com/store/apps/details?id=app.bpjs.mobile "+
-        "\n \n ---\n"+
-        "_Ini adalah pesan otomatis berdasarkan nomor pasien yang terdaftar di " + akses.getnamars() + ". Anda bisa membalas pesan ini untuk konfirmasi apabila terdapat kekeliruan._";
+        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
 
     // Insert into wa_outbox
     try {
@@ -1071,7 +1068,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
 }
     
     private void kirimWhatsAppMessageReminderKontrol() {
-    String googleMapUrl = getGoogleMapUrl(); // Ambil url googlemap dari kode di atas
+
     // Fetch nomor hp pasien, gender, serta tanggal kontrol
     String nohppasien = "";  //ubah format nomor hp pasien
     String jk = "";  //ubah format jenis kelamin
@@ -1079,16 +1076,8 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
     String waktukirim = ""; // format waktu pengiriman WA (delayed message)
     
     try {
-        /////////format tanggal dan jam kontrol        
-        //System.out.println("Raw value of TanggalPeriksa: " + TanggalPeriksa.getSelectedItem());        // aktifkan baris ini untuk Print debug ke kotak hitam
-        String rawDate = TanggalKontrol.getSelectedItem().toString().trim(); // Convert to string properly      
-        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);
-        SimpleDateFormat outputFormat = new SimpleDateFormat("dd MMMM yyyy 'jam' HH:mm", new Locale("id", "ID"));   //penyesuaian menjadi format yang enak dibaca           
-        Date date = inputFormat.parse(rawDate);  // Parse the input date string into a Date object        
-        formattedTanggal = outputFormat.format(date); // Format the date into the desired Indonesian format                 
-        /////////format tanggal dan jam kontrol 
-        
-        ////////format tanggal dan jam kontrol, agar tanggal terkirim adalah 24 jam sebelum tanggal kontrol                        
+        /////////format tanggal dan jam kontrol, agar tanggal terkirim adalah 24 jam sebelum tanggal kontrol                
+        String rawDate = TanggalKontrol.getSelectedItem().toString().trim();   // Convert to string properly      
         DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);        
         DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); 
         
@@ -1113,12 +1102,6 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         if (rs.next()) {
             nohppasien = rs.getString("no_tlp");
             jk = rs.getString("jk");
-            
-            // Validation: Check if phone number is at least 10 digits and contains only numbers
-                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.trim().matches("\\d+")) {
-                    JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
-                    return; // Stop execution if phone number is invalid
-                    }
 
             // Convert phone number from 08xxxxxx to 628xxxxxx
             if (nohppasien.startsWith("0")) {
@@ -1138,26 +1121,24 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
     // Set greeting based on gender
     String salampembuka;
     if ("L".equalsIgnoreCase(jk)) {
-        salampembuka = "Halo, Bpk " + NmPasien.getText() + "\n";
+        salampembuka = "Assalamualaikum, Bpk " + NoRM.getText() + "\n";
     } else if ("P".equalsIgnoreCase(jk)) {
-        salampembuka = "Halo, Ibu " + NmPasien.getText() + "\n";
+        salampembuka = "Assalamualaikum, Ibu " + NoRM.getText() + "\n";
     } else {
-        salampembuka = "Halo, Bpk / Ibu " + NmPasien.getText() + "\n";
+        salampembuka = "Assalamualaikum, Bpk / Ibu " + NoRM.getText() + "\n";
     }
 
     // Membuat isi pesan ke dalam whatsapp
-    String pesan = salampembuka + " - (" + NoRM.getText() + ") \n 0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
+    String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
         "Kami dari " + akses.getnamars() + " izin reminder / mengingatkan bahwa Anda besok memiliki jadwal kontrol/tindak lanjut pada: \n\n" +        
-        "0xF0 0x9F 0x93 0x85 *Tanggal*: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
-        "0xF0 0x9F 0x91 0xA8 *Dokter* : " + NmDokter.getText() + "\n" +
-        "0xF0 0x9F 0x8F 0xA5 *Spesialis* : " + NmPoli.getText() + "\n" +
-        "0xF0 0x9F 0x8F 0xA0 *Alamat* : " + akses.getalamatrs() + "\n" +
-        "0xF0 0x9F 0x8C 0x8F Lokasi map :" + googleMapUrl + " \n\n" +            
+        "0xF0 0x9F 0x93 0x85 Tanggal: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
+        "0xF0 0x9F 0x91 0xA8 Dokter : " + NmDokter.getText() + "\n" +
+        "0xF0 0x9F 0x8F 0xA5 Spesialis : " + NmPoli.getText() + "\n" +
+        "0xF0 0x9F 0x8F 0xA0 Alamat : " + akses.getalamatrs() + "\n\n" +
+        "0xF0 0x9F 0x8F 0xA0 Lokasi map : https://maps.app.goo.gl/hYx9zEgC4fnN2xE2A \n\n" +            
         "0xF0 0x9F 0x93 0x84 Mohon untuk mengecek kembali aplikasi MJKN BPJS dan memastikan antrean sudah diambil untuk tanggal " + formattedTanggal + ". /n" +
         " Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
-        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F \n \n " +
-        "Applikasi *MJKN BPJS* bisa didownload di alamat playstore berikut : \n " +
-        "https://play.google.com/store/apps/details?id=app.bpjs.mobile ";
+        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
 
     // Insert into wa_outbox
     try {
@@ -1186,6 +1167,9 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         System.out.println("Gagal mengirim pesan WA ke Pasien: " + e);
     }
 }
+///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA SETELAH SIMPAN SURAT KONTROL BY ICHSAN
+    
+    
     
     private void BtnSimpanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnSimpanKeyPressed
         if(evt.getKeyCode()==KeyEvent.VK_SPACE){
@@ -1344,41 +1328,6 @@ private void BtnDokterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     if(KdPoli.getText().equals("")||NmPoli.getText().equals("")){
         Valid.textKosong(BtnPoli,"Unit/Poli");
     }else{
-        BPJSCekReferensiDokterKontrol dokter=new BPJSCekReferensiDokterKontrol(null,false);
-        dokter.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {;}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(dokter.getTable().getSelectedRow()!= -1){                    
-                    KdDokter.setText(dokter.getTable().getValueAt(dokter.getTable().getSelectedRow(),1).toString());
-                    NmDokter.setText(dokter.getTable().getValueAt(dokter.getTable().getSelectedRow(),2).toString());
-                }
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        dokter.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                    dokter.dispose();
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        }); 
         dokter.SetKontrol(KdPoli.getText(),"2: Rencana Kontrol",Valid.SetTgl(TanggalKontrol.getSelectedItem()+""));
         dokter.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         dokter.setLocationRelativeTo(internalFrame1);
@@ -1496,41 +1445,6 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     }//GEN-LAST:event_BtnPoliKeyPressed
 
     private void BtnPoliActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPoliActionPerformed
-        BPJSCekReferensiSpesialistikKontrol poli=new BPJSCekReferensiSpesialistikKontrol(null,false);
-        poli.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(poli.getTable().getSelectedRow()!= -1){                    
-                    KdPoli.setText(poli.getTable().getValueAt(poli.getTable().getSelectedRow(),1).toString());
-                    NmPoli.setText(poli.getTable().getValueAt(poli.getTable().getSelectedRow(),2).toString());
-                }   
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        poli.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                    poli.dispose();
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        }); 
         poli.SetKontrol(NoSEP.getText(),"2: Rencana Kontrol",Valid.SetTgl(TanggalKontrol.getSelectedItem()+""));
         poli.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         poli.setLocationRelativeTo(internalFrame1);
@@ -1584,70 +1498,6 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private void DTPTanggalSurat2KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_DTPTanggalSurat2KeyPressed
         R1.setSelected(true);
     }//GEN-LAST:event_DTPTanggalSurat2KeyPressed
-
-    private void UploadSurkonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UploadSurkonActionPerformed
-        FileName = "Surkon_BPJS_" + tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().replaceAll("/", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().trim()+ "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 2).toString().replaceAll(" ", "_");
-        CreatePDF(FileName);
-        String filePath = "tmpPDF/" + FileName;
-        UploadPDF(FileName, "berkasrawat/pages/upload/");
-        HapusPDF();
-        ppBerkasDigitalActionPerformed(evt);
-    }//GEN-LAST:event_UploadSurkonActionPerformed
-
-    private void CreatePDF(String FileName) {
-    if(tbObat.getSelectedRow()!= -1){
-            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
-            Map<String, Object> param = new HashMap<>();
-            param.put("namars",akses.getnamars());
-            param.put("alamatrs",akses.getalamatrs());
-            param.put("kotars",akses.getkabupatenrs());
-            param.put("propinsirs",akses.getpropinsirs());
-            param.put("kontakrs",akses.getkontakrs());
-            param.put("logo",Sequel.cariGambar("select gambar.bpjs from gambar")); 
-            param.put("parameter",tbObat.getValueAt(tbObat.getSelectedRow(),0).toString());
-            param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+tbObat.getValueAt(tbObat.getSelectedRow(),12).toString()+"\nID "+tbObat.getValueAt(tbObat.getSelectedRow(),8).toString()+"\n"+Valid.SetTgl3(tbObat.getValueAt(tbObat.getSelectedRow(),10).toString()));
-            Valid.MyReportPDFqryUpload("rptBridgingSuratKontrol2.jasper","report","::[ Data Surat Kontrol VClaim ]::",
-                    "select bridging_sep.no_rawat,bridging_sep.no_sep,bridging_sep.no_kartu,bridging_sep.nomr,bridging_sep.nama_pasien,bridging_sep.tanggal_lahir,"+
-                    "bridging_sep.jkel,bridging_sep.diagawal,bridging_sep.nmdiagnosaawal,bridging_surat_kontrol_bpjs.tgl_surat,bridging_surat_kontrol_bpjs.no_surat,"+
-                    "bridging_surat_kontrol_bpjs.tgl_rencana,bridging_surat_kontrol_bpjs.kd_dokter_bpjs,bridging_surat_kontrol_bpjs.nm_dokter_bpjs,"+
-                    "bridging_surat_kontrol_bpjs.kd_poli_bpjs,bridging_surat_kontrol_bpjs.nm_poli_bpjs from bridging_sep inner join bridging_surat_kontrol_bpjs "+
-                    "on bridging_surat_kontrol_bpjs.no_sep=bridging_sep.no_sep where bridging_surat_kontrol_bpjs.no_surat='"+NoSurat.getText()+"'",FileName,param);              
-            this.setCursor(Cursor.getDefaultCursor());
-        }else{
-            JOptionPane.showMessageDialog(null,"Maaf, silahkan pilih data Surat Kontrol yang mau dicetak...!!!!");
-            BtnBatal.requestFocus();
-        }  
-    }
-    private void ppBerkasDigitalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ppBerkasDigitalActionPerformed
-        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        if(tabMode.getRowCount()==0){
-            JOptionPane.showMessageDialog(null,"Maaf, data sudah habis...!!!!");
-            TCari.requestFocus();
-        }else{
-            if(tbObat.getSelectedRow()>-1){
-                if(!tbObat.getValueAt(tbObat.getSelectedRow(),0).toString().equals("")){
-                    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                    DlgBerkasRawat berkas=new DlgBerkasRawat(null,true);
-                    berkas.setJudul("::[ Berkas Digital Perawatan ]::","berkasrawat/pages");
-                    try {
-                        if(akses.gethapus_berkas_digital_perawatan()==true){
-                            berkas.loadURL("http://"+koneksiDB.HOSTHYBRIDWEB()+":"+koneksiDB.PORTWEB()+"/"+koneksiDB.HYBRIDWEB()+"/"+"berkasrawat/login2.php?act=login&usere="+koneksiDB.USERHYBRIDWEB()+"&passwordte="+koneksiDB.PASHYBRIDWEB()+"&no_rawat="+tbObat.getValueAt(tbObat.getSelectedRow(),0).toString());
-                        }else{
-                            berkas.loadURL("http://"+koneksiDB.HOSTHYBRIDWEB()+":"+koneksiDB.PORTWEB()+"/"+koneksiDB.HYBRIDWEB()+"/"+"berkasrawat/login2nonhapus.php?act=login&usere="+koneksiDB.USERHYBRIDWEB()+"&passwordte="+koneksiDB.PASHYBRIDWEB()+"&no_rawat="+tbObat.getValueAt(tbObat.getSelectedRow(),0).toString());
-                        }   
-                    } catch (Exception ex) {
-                        System.out.println("Notifikasi : "+ex);
-                    }
-
-                    berkas.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-                    berkas.setLocationRelativeTo(internalFrame1);
-                    berkas.setVisible(true);
-                    this.setCursor(Cursor.getDefaultCursor());
-                }
-            }
-        }
-        this.setCursor(Cursor.getDefaultCursor());
-    }//GEN-LAST:event_ppBerkasDigitalActionPerformed
 
     /**
     * @param args the command line arguments
@@ -1705,7 +1555,6 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private widget.Tanggal TanggalKontrol;
     private widget.Tanggal TanggalSurat;
     private widget.TextBox TglLahir;
-    private javax.swing.JMenuItem UploadSurkon;
     private javax.swing.ButtonGroup buttonGroup1;
     private widget.InternalFrame internalFrame1;
     private widget.Label jLabel10;
@@ -1728,7 +1577,6 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private widget.panelisi panelCari;
     private widget.panelisi panelGlass10;
     private widget.panelisi panelGlass8;
-    private javax.swing.JMenuItem ppBerkasDigital;
     private widget.Table tbObat;
     // End of variables declaration//GEN-END:variables
 
@@ -2020,54 +1868,5 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         }
             
         return status;
-    }
-    
-    private void UploadPDF(String FileName, String docpath) {
-        try {
-            File file = new File("tmpPDF/" + FileName + ".pdf");
-            byte[] data = FileUtils.readFileToByteArray(file);
-            HttpClient httpClient = new DefaultHttpClient();
-            HttpPost postRequest = new HttpPost("http://" + koneksiDB.HOSTHYBRIDWEB() + ":" + koneksiDB.PORTWEB() + "/" + koneksiDB.HYBRIDWEB() + "/upload.php?doc=" + docpath);
-            ByteArrayBody fileData = new ByteArrayBody(data, FileName + ".pdf");
-            MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-            reqEntity.addPart("file", fileData);
-            postRequest.setEntity(reqEntity);
-            httpClient.execute(postRequest);
-
-            // Menyimpan ke database
-            boolean uploadSuccess = false;
-            kodeberkas = Sequel.cariIsi("SELECT kode FROM master_berkas_digital WHERE nama LIKE '%Klaim%'");
-            if (Sequel.cariInteger("SELECT COUNT(no_rawat) AS jumlah FROM berkas_digital_perawatan WHERE lokasi_file='pages/upload/" + FileName + ".pdf'") > 0) {
-                uploadSuccess = Sequel.mengedittf("berkas_digital_perawatan", "lokasi_file=?","no_rawat=?,kode=?, lokasi_file=?", 4, new String[]{
-                    tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().trim(),kodeberkas,"pages/upload/" + FileName + ".pdf", "pages/upload/" + FileName + ".pdf"
-                });
-            } else {
-                uploadSuccess = Sequel.menyimpantf("berkas_digital_perawatan", "?,?,?", "No.Rawat", 3, new String[]{
-                    tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().trim(), kodeberkas, "pages/upload/" + FileName + ".pdf"
-                });
-            }
-
-            // Menampilkan notifikasi
-            if (uploadSuccess) {
-                JOptionPane.showMessageDialog(null, "Upload berhasil!", "Informasi", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(null, "Upload gagal disimpan ke database.", "Peringatan", JOptionPane.WARNING_MESSAGE);
-            }
-        } catch (Exception e) {
-            System.out.println("Upload error: " + e);
-            JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void HapusPDF() {
-        File file = new File("tmpPDF");
-        String[] myFiles;
-        if (file.isDirectory()) {
-            myFiles = file.list();
-            for (int i = 0; i < myFiles.length; i++) {
-                File myFile = new File(file, myFiles[i]);
-                myFile.delete();
-            }
-        }
     }
 }
