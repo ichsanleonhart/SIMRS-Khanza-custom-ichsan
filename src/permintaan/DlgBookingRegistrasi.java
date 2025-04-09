@@ -1383,7 +1383,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         formattedTanggal = outputFormat.format(date); // Format the date into the desired Indonesian format                 
         /////////format tanggal dan jam kontrol 
         
-        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
+        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_tlp IS NOT NULL and no_rkm_medis = ?");
         ps.setString(1, TNoRM.getText());
         ResultSet rs = ps.executeQuery();
 
@@ -1391,8 +1391,10 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
             nohppasien = rs.getString("no_tlp");
             jk = rs.getString("jk");
             
-            // Validation: Check if phone number is at least 10 digits and contains only numbers
-                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.matches("\\d+")) {
+            // Validation: Ensure the phone number is valid
+                nohppasien = nohppasien.replaceAll("\\s+", ""); // remove all whitespace
+            // Validation: Check if phone number is at least 9 digits and contains only numbers
+                 if (nohppasien == null || nohppasien.length() < 9 || !nohppasien.matches("\\d+")) {
                     JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
                     return; // Stop execution if phone number is invalid
                     }
@@ -1841,7 +1843,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         formattedTanggal = outputFormat.format(date); // memformat tanggal menjadi format indonesia 
         ///////// end - format tanggal dan jam kontrol ke dalam isi pesan WA        
         
-        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
+        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_tlp IS NOT NULL and no_rkm_medis = ?");
         ps.setString(1, TNoRM.getText());
         ResultSet rs = ps.executeQuery();
 
@@ -1849,8 +1851,10 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
             nohppasien = rs.getString("no_tlp");
             jk = rs.getString("jk");
             
-            // Validation: Check if phone number is at least 10 digits and contains only numbers
-                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.trim().matches("\\d+")) {
+            // Validation: Ensure the phone number is valid
+                nohppasien = nohppasien.replaceAll("\\s+", ""); // remove all whitespace
+            // Validation: Check if phone number is at least 9 digits and contains only numbers
+                 if (nohppasien == null || nohppasien.length() < 9 || !nohppasien.trim().matches("\\d+")) {
                     JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
                     return; // Stop execution if phone number is invalid
                     }

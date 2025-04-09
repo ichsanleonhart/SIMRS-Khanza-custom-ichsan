@@ -7287,9 +7287,9 @@ public final class DlgReg extends javax.swing.JDialog {
         formattedTanggal = outputFormat.format(date); // Format the date into the desired Indonesian format                 
         /////////format tanggal dan jam kontrol         
         
-        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
+        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_tlp IS NOT NULL and no_rkm_medis = ?");
         ps.setString(1, TNoRM.getText());    
-        System.out.println("Menjalankan query: SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = '" + TNoRM.getText() + "'");
+        //System.out.println("Menjalankan query: SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = '" + TNoRM.getText() + "'");  //debug
         ResultSet rs = ps.executeQuery();
         if (rs.next()) {
         nohppasien = rs.getString("no_tlp");
@@ -7297,8 +7297,10 @@ public final class DlgReg extends javax.swing.JDialog {
         System.out.println("Nomor HP ditemukan: " + nohppasien);
         System.out.println("Jenis Kelamin ditemukan: " + jk);
         
+        // Validation: Ensure the phone number is valid
+        nohppasien = nohppasien.replaceAll("\\s+", ""); // remove all whitespace
         // **Validation: Ensure the phone number is valid**
-        if (nohppasien == null || nohppasien.trim().isEmpty() || nohppasien.length() < 10 || !nohppasien.trim().matches("\\d+")) {
+        if (nohppasien == null || nohppasien.trim().isEmpty() || nohppasien.length() < 9 || !nohppasien.trim().matches("\\d+")) {
         JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
         return; // Stop execution if phone number is invalid
         }
@@ -7404,9 +7406,9 @@ public final class DlgReg extends javax.swing.JDialog {
         formattedTanggal = outputFormat.format(date); // Format the date into the desired Indonesian format                 
         /////////format tanggal dan jam kontrol
         
-        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
+        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_tlp IS NOT NULL and no_rkm_medis = ?");
         ps.setString(1, TNoRM.getText());    
-        System.out.println("Menjalankan query: SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = '" + TNoRM.getText() + "'");
+        //System.out.println("Menjalankan query: SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = '" + TNoRM.getText() + "'");  //debug
         ResultSet rs = ps.executeQuery();
         if (rs.next()) {
         nohppasien = rs.getString("no_tlp");
@@ -7415,11 +7417,12 @@ public final class DlgReg extends javax.swing.JDialog {
         System.out.println("Jenis Kelamin ditemukan: " + jk);
         
         // **Validation: Ensure the phone number is valid**
-        if (nohppasien == null || nohppasien.trim().isEmpty() || nohppasien.length() < 10 || !nohppasien.trim().matches("\\d+")) {
+        if (nohppasien == null || nohppasien.trim().isEmpty() || nohppasien.length() < 9 || !nohppasien.trim().matches("\\d+")) {
         JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
         return; // Stop execution if phone number is invalid
         }
-
+        // Validation: Ensure the phone number is valid
+           nohppasien = nohppasien.replaceAll("\\s+", ""); // remove all whitespace
         // Pastikan nomor telepon memiliki format yang benar
         if (nohppasien == null || nohppasien.trim().isEmpty()) {
             System.out.println("Nomor telepon pasien kosong!");

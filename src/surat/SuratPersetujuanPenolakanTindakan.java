@@ -2973,7 +2973,7 @@ private void ppBerkasDigitalBtnPrintActionPerformed(java.awt.event.ActionEvent e
                 "SELECT pasien.no_rkm_medis, pasien.nm_pasien, pasien.no_tlp, pasien.jk " +
                 "FROM reg_periksa " +
                 "INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis " +
-                "WHERE reg_periksa.no_rawat = ?"
+                "WHERE no_tlp IS NOT NULL and reg_periksa.no_rawat = ?"
             );
             ps1.setString(1, noRawat);
             ResultSet rs1 = ps1.executeQuery();
@@ -2983,9 +2983,10 @@ private void ppBerkasDigitalBtnPrintActionPerformed(java.awt.event.ActionEvent e
                 nmPasien = rs1.getString("nm_pasien");
                 nohppasien = rs1.getString("no_tlp");
                 jk = rs1.getString("jk");
-                
-                // Validation: Check if phone number is at least 10 digits and contains only numbers
-                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.trim().matches("\\d+")) {
+                // Validation: Ensure the phone number is valid
+                nohppasien = nohppasien.replaceAll("\\s+", ""); // remove all whitespace
+                // Validation: Check if phone number is at least 9 digits and contains only numbers
+                 if (nohppasien == null || nohppasien.length() < 9 || !nohppasien.trim().matches("\\d+")) {
                     JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
                     return; // Stop execution if phone number is invalid
                     }

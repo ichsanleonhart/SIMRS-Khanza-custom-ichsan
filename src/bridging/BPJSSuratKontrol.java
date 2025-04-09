@@ -997,14 +997,21 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         formattedTanggal = outputFormat.format(date); // Format the date into the desired Indonesian format                 
         /////////format tanggal dan jam kontrol        
         
-        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
+        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_tlp IS NOT NULL and no_rkm_medis = ?");
         ps.setString(1, NoRM.getText());
         ResultSet rs = ps.executeQuery();
 
         if (rs.next()) {
             nohppasien = rs.getString("no_tlp");
             jk = rs.getString("jk");
-
+            
+            // Validation: Ensure the phone number is valid
+                nohppasien = nohppasien.replaceAll("\\s+", ""); // remove all whitespace
+            // Validation: Check if phone number is at least 10 digits and contains only numbers
+                if (nohppasien == null || nohppasien.length() < 9 || !nohppasien.trim().matches("\\d+")) {
+                    JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
+                    return; // Stop execution if phone number is invalid
+                    }
             // Convert phone number from 08xxxxxx to 628xxxxxx
             if (nohppasien.startsWith("0")) {
                 nohppasien = "62" + nohppasien.substring(1);
@@ -1095,14 +1102,22 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         System.out.println("Waktu Kirim (24 hours before): " + waktukirim);
         
         //fecth data dari table pasien
-        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_rkm_medis = ?");
+        PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_tlp IS NOT NULL and no_rkm_medis = ?");
         ps.setString(1, NoRM.getText());
         ResultSet rs = ps.executeQuery();
 
         if (rs.next()) {
             nohppasien = rs.getString("no_tlp");
             jk = rs.getString("jk");
-
+            
+            // Validation: Ensure the phone number is valid
+                nohppasien = nohppasien.replaceAll("\\s+", ""); // remove all whitespace
+            // Validation: Check if phone number is at least 10 digits and contains only numbers
+                 if (nohppasien == null || nohppasien.length() < 9 || !nohppasien.trim().matches("\\d+")) {
+                    JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
+                    return; // Stop execution if phone number is invalid
+                    }
+                 
             // Convert phone number from 08xxxxxx to 628xxxxxx
             if (nohppasien.startsWith("0")) {
                 nohppasien = "62" + nohppasien.substring(1);

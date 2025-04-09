@@ -35,7 +35,7 @@ public class frmUtama extends javax.swing.JFrame {
     private  sekuel Sequel=new sekuel();
     private  String requestJson,URL="",utc="",link="",datajam="",
               nol_jam = "",nol_menit = "",nol_detik = "",jam="",menit="",detik="",hari="",noresep="",task3="",task4="",task5="",task6="",task7="",task99="",
-              kodepoli="",kodedokter="",kodebpjs=Sequel.cariIsi("select password_asuransi.kd_pj from password_asuransi");        
+              kodepoli="",kodedokter="",kodebpjs=Sequel.cariIsi("select password_asuransi.kd_pj from password_asuransi"), namapasien="";        
     private  HttpHeaders headers;
     private  HttpEntity requestEntity;
     private  ObjectMapper mapper= new ObjectMapper();
@@ -84,7 +84,7 @@ public class frmUtama extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("SIMKES Khanza Service Mobile JKN");
+        setTitle("Aplikasi Pengirim Ultah Pasien via whatsapp");
 
         TeksArea.setColumns(20);
         TeksArea.setRows(5);
@@ -173,6 +173,54 @@ public class frmUtama extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
+     
+    
+    public String getGoogleMapUrl() { ///////// START - kode untuk mengambil URL google di table setting_url pada kolom google_map
+    String googleMapUrl = ""; 
+    try {
+        PreparedStatement psMap = koneksi.prepareStatement("SELECT google_map FROM setting_url LIMIT 1");
+        ResultSet rsMap = psMap.executeQuery(); 
+        if (rsMap.next()) { 
+            googleMapUrl = rsMap.getString("google_map"); 
+        }
+        rsMap.close(); 
+        psMap.close(); 
+    } catch (Exception e) { 
+        System.out.println("gagal mengambil Google Maps URL: " + e); 
+    }
+
+    // Fallback to a default URL if nothing is found
+    if (googleMapUrl == null || googleMapUrl.trim().isEmpty()) { 
+        googleMapUrl = "";  //kalau belum ada, diisi kosong saja
+    }
+
+    //System.out.println("Fetched Google Map URL: " + googleMapUrl);  //aktifkan line ini kalau mau debug print ke kotak hitam
+    return googleMapUrl; 
+    }   //////////////////////////  END - kode untuk mengambil URL google di table setting_url pada kolom google_map   
+    
+    public String getnamafaskes() { ///////// START - kode untuk mengambil nama fasyankes
+    String namafaskes = ""; 
+    try {
+        PreparedStatement psfaskes = koneksi.prepareStatement("SELECT nama_instansi FROM setting LIMIT 1");
+        ResultSet rsfaskes = psfaskes.executeQuery(); 
+        if (rsfaskes.next()) { 
+            namafaskes = rsfaskes.getString("nama_instansi"); 
+        }
+        rsfaskes.close(); 
+        psfaskes.close(); 
+    } catch (Exception es) { 
+        System.out.println("gagal mengambil nama instansi: " + es); 
+    }
+
+    // Fallback to a default URL if nothing is found
+    if (namafaskes == null || namafaskes.trim().isEmpty()) { 
+        namafaskes = "";  //kalau belum ada, diisi kosong saja
+    }
+
+    //System.out.println("Fetched Google Map URL: " + googleMapUrl);  //aktifkan line ini kalau mau debug print ke kotak hitam
+    return namafaskes; 
+    }   //////////////////////////  END - kode untuk mengambil URL google di table setting_url pada kolom google_map
+    
     private void jam(){
         ActionListener taskPerformer = new ActionListener(){
             private int nilai_jam;
@@ -246,35 +294,62 @@ public class frmUtama extends javax.swing.JFrame {
                         String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                         String nohppasien = "";  //ubah format nomor hp pasien
                         String jk = "";  //ubah format jenis kelamin
+                        String namafaskes = getnamafaskes();
+                        String googleMapUrl = getGoogleMapUrl(); // Ambil url googlemap dari kode di atas        
+                        // 🆕 Counters for summary
+                        int totalPasien = 0;         // 🆕
+                        int validDikirim = 0;        // 🆕
+                        int duplikatDilewati = 0;    // 🆕
+                        int nomorTidakValid = 0;     // 🆕                        
                         
                         Connection connPasien = koneksiDB.condb();
                         PreparedStatement ps = connPasien.prepareStatement(
-                        "SELECT no_rkm_medis, nm_pasien, no_tlp, jk, DATE_FORMAT(tgl_lahir, '%d-%m') AS tgl_lahir, " +
-                        "TIMESTAMPDIFF(YEAR, tgl_lahir, CURDATE()) AS usia " +
-                        "FROM pasien " +
-                        "WHERE DATE_FORMAT(tgl_lahir, '%m-%d') = DATE_FORMAT(CURDATE(), '%m-%d')"
+                            "SELECT p.no_rkm_medis, p.nm_pasien, p.no_tlp, p.jk, DATE_FORMAT(p.tgl_lahir, '%d-%m') AS tgl_lahir, " +
+                            "TIMESTAMPDIFF(YEAR, p.tgl_lahir, CURDATE()) AS usia " +
+                            "FROM pasien p " +
+                            "LEFT JOIN pasien_mati pm ON p.no_rkm_medis = pm.no_rkm_medis " +
+                            "LEFT JOIN catatan_pasien cp ON p.no_rkm_medis = cp.no_rkm_medis " +
+                            "WHERE DATE_FORMAT(p.tgl_lahir, '%m-%d') = DATE_FORMAT(CURDATE(), '%m-%d') " +
+                            "AND pm.no_rkm_medis IS NULL " +  // Filter buat exclude kalo nomor rm ada di data pasien_mati
+                            "AND (cp.catatan IS NULL OR LOWER(cp.catatan) NOT LIKE '%meninggal%') "+ // Filter buat exclude kalo nomor rm memiliki kolom catatan berisi kata : 'meninggal'
+                            "AND p.no_tlp IS NOT NULL " + // Filter buat exclude kalo gak punya nomor hp
+                            "AND LENGTH(TRIM(p.no_tlp)) > 0 " + // Filter buat exclude kalo gak ada nomor sama sekali
+                            "AND p.no_tlp REGEXP '^[0-9]{9,15}$'" // Filter buat exclude kalo nomor HP 0000000
                         );
                         ResultSet rs = ps.executeQuery();
-
+                        
+                        
+                        
                         while(rs.next()){
+                            totalPasien++;  // 🆕
+
                             nohppasien = rs.getString("no_tlp");
+                            namapasien = rs.getString("nm_pasien");
                             jk = rs.getString("jk");
                             System.out.println("Nomor HP ditemukan: " + nohppasien);
+                            TeksArea.append("Nomor HP ditemukan: " + nohppasien + "\n");
                             System.out.println("Jenis Kelamin ditemukan: " + jk);
+                            TeksArea.append("Jenis Kelamin ditemukan: " + jk + "\n");
                             
-                            // **Validation: Ensure the phone number is valid**
-                            if (nohppasien == null || nohppasien.trim().isEmpty() || nohppasien.length() < 10 || !nohppasien.trim().matches("\\d+")) {                            
-                            System.out.println("Nomor HP tidak valid untuk pasien: " + rs.getString("nm_pasien"));
-                            continue; // 
+                            // Validasi: memastikan nomor HP valid
+                            nohppasien = nohppasien.replaceAll("\\s+", ""); // hilangkan semua whitespace
+                            
+                            if (!nohppasien.matches("\\d{9,15}")) { // allow 9 to 15 digits
+                                nomorTidakValid++;  // 🆕
+                                System.out.println("❌ Format nomor HP tidak valid untuk pasien: " + rs.getString("nm_pasien") + " -> " + nohppasien);
+                                TeksArea.append("❌ Format nomor HP tidak valid: " + nohppasien + " (" + rs.getString("nm_pasien") + ")\n");
+                                continue;
                             }
-                            
-                        // Pastikan nomor telepon memiliki format yang benar
                             if (nohppasien == null || nohppasien.trim().isEmpty()) {
-                             System.out.println("Nomor telepon pasien kosong!");
-                            } else if (nohppasien.startsWith("0")) {
+                                nomorTidakValid++;  // 🆕
+                                System.out.println("❌ Nomor HP kosong untuk pasien: " + rs.getString("nm_pasien"));
+                                TeksArea.append("❌ Nomor HP kosong untuk pasien: " + rs.getString("nm_pasien") + "\n");
+                                continue;
+                            }                            
+                            else if (nohppasien.startsWith("0")) {
                               nohppasien = "62" + nohppasien.substring(1);
                              System.out.println("Nomor telepon setelah konversi: " + nohppasien);
-                         }                               
+                        }                               
                            
                             
                             // ========== 🆕 Tambahkan greeting berdasarkan waktu saat ini ==========
@@ -290,59 +365,97 @@ public class frmUtama extends javax.swing.JFrame {
                             } else {
                             greeting = "Selamat Malam"; // 🆕 Malam (18.01 - 03.59)
                         }
-    
+                       
                         // ========== 🆕 Gunakan greeting ini ke dalam salam pembuka ==========
-                        String salampembuka;
-                        if ("L".equalsIgnoreCase(jk)) {
-                            salampembuka = greeting + ", Bpk " + rs.getString("nm_pasien") + "\n"; // 🆕 Tambahkan greeting sebelum Bpk
-                        } else if ("P".equalsIgnoreCase(jk)) {
-                            salampembuka = greeting + ", Ibu " + rs.getString("nm_pasien") + "\n"; // 🆕 Tambahkan greeting sebelum Ibu
-                        } else {
-                            salampembuka = greeting + ", Bpk / Ibu " + rs.getString("nm_pasien") + "\n"; // 🆕 Jika gender tidak diketahui
+                            int usia = rs.getInt("usia");  // Convert usia to int
+                            String salampembuka;
+                            if (usia >= 16) {
+                                if ("L".equalsIgnoreCase(jk)) {
+                                    salampembuka = greeting + ", Bpk " + rs.getString("nm_pasien") + "\n"; // 🆕 Tambahkan greeting sebelum Bpk
+                                } else if ("P".equalsIgnoreCase(jk)) {
+                                    salampembuka = greeting + ", Ibu " + rs.getString("nm_pasien") + "\n"; // 🆕 Tambahkan greeting sebelum Ibu
+                                } else {
+                                    salampembuka = greeting + ", Bpk/Ibu " + rs.getString("nm_pasien") + "\n"; // 🆕 Jika gender tidak diketahui
+                                }
+                            } else {
+                                salampembuka = greeting + ", " + rs.getString("nm_pasien") + "\n"; // 🆕 Jika usia di bawah 16 tahun
+                            }                          
+
+                        String pesan = salampembuka + ". Selamat ulang tahun yang ke " + rs.getString("usia") + " \n 0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
+                           "Semoga panjang umur, sehat selalu dan mendapatkan keberkahan serta kebahagiaan luar biasa dalam hidupnya. \n"+
+                           "Mohon maaf mengganggu waktu Anda 0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n" +
+                           "Kami berharap pesan ini memberikan semangat positif untuk Anda \n\n" +
+                           "Salam sehat - " + namafaskes +
+                           " \n 0xF0 0x9F 0x8C 0x8F :" + googleMapUrl ;
+            
+                            // Insert ke table wa_outbox                                
+                            try {
+                                 // Cek apakah pesan yang sama sudah ada
+                                     String cekSQL = "SELECT COUNT(*) FROM wa_outbox WHERE NOWA = ? AND DATE(TANGGAL_JAM) = CURDATE()";
+                                     PreparedStatement cekStmt = koneksiwa.prepareStatement(cekSQL);
+                                     cekStmt.setString(1, nohppasien + "@c.us");
+                                     ResultSet cekRs = cekStmt.executeQuery();
+
+                                     if (cekRs.next() && cekRs.getInt(1) > 0) {
+                                         duplikatDilewati++;  // 🆕
+                                         System.out.println("❗ Pesan sudah pernah dikirim ke " + namapasien + " dengan nomor: " + nohppasien);
+                                         TeksArea.append("❗ Pesan sudah pernah dikirim ke " + namapasien + "\n");
+                                     } else {
+                                         // Insert jika belum ada
+                                         String sql = "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, SUCCESS, RESPONSE, REQUEST, TYPE, FILE) "
+                                                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+                                         PreparedStatement psWa = koneksiwa.prepareStatement(sql);
+                                         psWa.setLong(1, 0);
+                                         psWa.setString(2, nohppasien + "@c.us");
+                                         psWa.setString(3, pesan);
+                                         psWa.setString(4, waktukirim);
+                                         psWa.setString(5, "ANTRIAN");
+                                         psWa.setString(6, "KHANZA");
+                                         psWa.setString(7, "NODEJS");
+                                         psWa.setString(8, "");
+                                         psWa.setString(9, "");
+                                         psWa.setString(10, "");
+                                         psWa.setString(11, "TEXT");
+                                         psWa.setString(12, "");
+                                         psWa.executeUpdate();
+
+                                         validDikirim++;  // 🆕
+                                         System.out.println("✅ Pesan ulang tahun untuk " + namapasien + " telah dimasukkan ke wa_outbox.");
+                                         TeksArea.append("✅ Pesan ulang tahun untuk " + namapasien + " telah dimasukkan ke wa_outbox.\nIsi pesan:\n" + pesan + "\n");
+                                     }
+
+                                     cekRs.close();
+                                     cekStmt.close();
+                                 } catch (Exception et) {
+                                     System.out.println("❌ Gagal mengirim pesan WA ke Pasien: " + et);
+                                     TeksArea.append("❌ Gagal mengirim pesan ke " + namapasien + ": " + et.getMessage() + "\n");
+                                 }
+                                    System.out.println("Pesan ulang tahun untuk " + rs.getString("nm_pasien") + " telah dimasukkan ke wa_outbox.");
+                                    TeksArea.append("Pesan ulang tahun untuk " + rs.getString("nm_pasien") + " telah dimasukkan ke wa_outbox."+ 
+                                                    "dengan isi pesan : \n "+ pesan + "\n");
                         }
-                        
-                          
 
-                        String pesan = salampembuka + " - Selamat ulang tahun yang ke " + rs.getString("usia") + " Tahun  \n 0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
-                           "Semoga selalu sehat dan bahagia.";
+                                    rs.close();
+                                    ps.close();
+                                    
+                                    // 🆕 Summary section
+                                        TeksArea.append("\n=== Rangkuman Hari Ini ===\n");
+                                        TeksArea.append("Total pasien yang berulang tahun: " + totalPasien + "\n");
+                                        TeksArea.append("✅ Dikirim ke: " + validDikirim + " pasien\n");
+                                        TeksArea.append("❗ Duplikat (sudah pernah dikirim hari ini): " + duplikatDilewati + "\n");
+                                        TeksArea.append("❌ Dilewati karena nomor tidak valid: " + nomorTidakValid + "\n");
 
-                       // rs.close();
-                       // ps.close();
-            
-// Insert into wa_outbox
-    try {
-        String sql = "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, SUCCESS, RESPONSE, REQUEST, TYPE, FILE) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                                        System.out.println("=== Rangkuman Hari Ini ===");
+                                        System.out.println("Total pasien: " + totalPasien);
+                                        System.out.println("Dikirim: " + validDikirim);
+                                        System.out.println("Duplikat: " + duplikatDilewati);
+                                        System.out.println("Nomor tidak valid: " + nomorTidakValid);
 
-        PreparedStatement psWa = koneksiwa.prepareStatement(sql);
-        psWa.setLong(1, 0);
-        psWa.setString(2, nohppasien + "@c.us");
-        psWa.setString(3, pesan);
-        psWa.setString(4, waktukirim);
-        psWa.setString(5, "ANTRIAN");
-        psWa.setString(6, "KHANZA");
-        psWa.setString(7, "NODEJS");
-        psWa.setString(8, "");
-        psWa.setString(9, "");
-        psWa.setString(10, "");
-        psWa.setString(11, "TEXT");
-        psWa.setString(12, "");
-        psWa.executeUpdate();
-        
-    } catch (Exception et) {
-        System.out.println("Gagal mengirim pesan WA ke Pasien: " + et);
-    }
-            
-            
-            System.out.println("Pesan ulang tahun untuk " + rs.getString("nm_pasien") + " telah dimasukkan ke wa_outbox.");
-        }
-
-        rs.close();
-        ps.close();
-
-} catch (Exception es) {
-    System.out.println("Error kirim ulang tahun: " + es.getMessage());
-}
+                    } catch (Exception es) {
+                             System.out.println("Error kirim ulang tahun: " + es.getMessage());
+                             TeksArea.append("Error kirim ulang tahun"+ es.getMessage() + "\n");
+                    }
 
                 }
             }

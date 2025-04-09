@@ -3553,8 +3553,10 @@ private void UploadPDF(String FileName, String docpath) {
                 nohppasien = rs1.getString("no_tlp");
                 jk = rs1.getString("jk");
                 
-                // Validation: Check if phone number is at least 10 digits and contains only numbers
-                 if (nohppasien == null || nohppasien.length() < 10 || !nohppasien.trim().matches("\\d+")) {
+                // Validation: Ensure the phone number is valid
+                nohppasien = nohppasien.replaceAll("\\s+", ""); // remove all whitespace
+                // Validation: Check if phone number is at least 9 digits and contains only numbers
+                 if (nohppasien == null || nohppasien.length() < 9 || !nohppasien.trim().matches("\\d+")) {
                     JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
                     return; // Stop execution if phone number is invalid
                     }
