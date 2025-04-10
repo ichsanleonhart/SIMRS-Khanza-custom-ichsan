@@ -1215,12 +1215,12 @@ public class SuratKontrol extends javax.swing.JDialog {
         "0xF0 0x9F 0x94 0xA2 *Nomor Antrian Poli : " + NoReg.getText() + "* \n" +
         "0xF0 0x9F 0x8F 0xA0 *Alamat* : " + akses.getalamatrs() + "\n" +
         "0xF0 0x9F 0x8C 0x8F Lokasi map :" + googleMapUrl + " \n\n" +            
-        "Apabila Anda menggunakan BPJS, silakan ambil antrian menggunakan aplikasi MJKN. \n "+
-        "Atau hubungi kami di: "+ akses.getkontakrs()+ "\n" +
-        "Email ke:" + akses.getemailrs() + "\n" +
+        //"Apabila Anda menggunakan BPJS, silakan ambil antrian menggunakan aplikasi MJKN. \n "+
+        "Hubungi kami di: "+ akses.getkontakrs()+ "\n" +
+        "Email :" + akses.getemailrs() + "\n" +
         "0xF0 0x9F 0x93 0x84 Apabila ada perubahan jadwal atau kendala, silakan balas pesan ini.\n\n" +
         "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F"+
-        "\n \n ---\n"+
+        "\n \n ====\n"+
         "_Ini adalah pesan otomatis berdasarkan nomor pasien yang terdaftar di " + akses.getnamars() + ". Anda bisa membalas pesan ini untuk konfirmasi apabila terdapat kekeliruan._";
 
     // Insert into wa_outbox

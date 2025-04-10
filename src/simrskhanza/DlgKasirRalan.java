@@ -231,6 +231,17 @@ import surat.SuratSakit;
 import surat.SuratSakitPihak2;
 import surat.SuratTidakHamil;
 
+
+
+
+
+
+
+
+
+
+import java.text.SimpleDateFormat;  //tambahan ichsan
+
 /**
  *
  * @author dosen
@@ -1039,6 +1050,9 @@ public final class DlgKasirRalan extends javax.swing.JDialog {
         LCount = new widget.Label();
         BtnPrint = new widget.Button();
         BtnKeluar = new widget.Button();
+        jLabel11 = new widget.Label(); //tambahan by ichsan
+        BtnPanggil = new widget.Button();  //tambahan by ichsan
+        TLoket = new widget.TextBox();  //tambahan by ichsan
         panelGlass7 = new widget.panelisi();
         jLabel14 = new widget.Label();
         CrPtg = new widget.TextBox();
@@ -1046,6 +1060,7 @@ public final class DlgKasirRalan extends javax.swing.JDialog {
         jLabel16 = new widget.Label();
         CrPoli = new widget.TextBox();
         BtnSeek4 = new widget.Button();
+        BtnKasir = new widget.Button();  //tambahan by ichsan
         panelGlass8 = new widget.panelisi();
         jLabel15 = new widget.Label();
         DTPCari1 = new widget.Tanggal();
@@ -6484,6 +6499,45 @@ public final class DlgKasirRalan extends javax.swing.JDialog {
             }
         });
         panelGlass6.add(BtnKeluar);
+        
+        //tambahan button panggil poli by ichsan
+        BtnPanggil.setBorder(null);
+        BtnPanggil.setForeground(new java.awt.Color(51, 0, 204));
+        BtnPanggil.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/speaker.png"))); // NOI18N
+        BtnPanggil.setMnemonic('P');
+        BtnPanggil.setText("Loket");
+        BtnPanggil.setToolTipText("Alt+P");
+        BtnPanggil.setGlassColor(new java.awt.Color(0, 255, 102));
+        BtnPanggil.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+        BtnPanggil.setName("BtnPanggil"); // NOI18N
+        BtnPanggil.setPreferredSize(new java.awt.Dimension(100, 30));
+        BtnPanggil.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BtnPanggilActionPerformed(evt);
+            }
+        });
+        BtnPanggil.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                BtnPanggilKeyPressed(evt);
+            }
+        });
+        panelGlass6.add(BtnPanggil);
+        BtnPanggil.getAccessibleContext().setAccessibleDescription("");
+        ////////////////
+        jLabel11.setText("Loket :");
+        jLabel11.setName("jLabel11"); // NOI18N
+        jLabel11.setPreferredSize(new java.awt.Dimension(35, 30));
+        panelGlass6.add(jLabel11);
+        ////////
+        TLoket.setName("TLoket"); // NOI18N
+        TLoket.setPreferredSize(new java.awt.Dimension(35, 23));
+        TLoket.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                TLoketKeyPressed(evt);
+            }
+        });
+        panelGlass6.add(TLoket);
+        //tambahan button panggil poli by ichsan
 
         jPanel2.add(panelGlass6, java.awt.BorderLayout.PAGE_END);
 
@@ -6534,6 +6588,30 @@ public final class DlgKasirRalan extends javax.swing.JDialog {
             }
         });
         panelGlass7.add(BtnSeek4);
+        
+        ////// add button kasir by ichsan
+        BtnKasir.setBorder(null);
+        BtnKasir.setForeground(new java.awt.Color(51, 0, 204));
+        BtnKasir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/sound.png"))); // NOI18N
+        BtnKasir.setMnemonic('P');
+        BtnKasir.setText("Kasir");
+        BtnKasir.setToolTipText("Alt+P");
+        BtnKasir.setGlassColor(new java.awt.Color(0, 204, 255));
+        BtnKasir.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+        BtnKasir.setName("BtnKasir"); // NOI18N
+        BtnKasir.setPreferredSize(new java.awt.Dimension(100, 30));
+        BtnKasir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BtnKasirActionPerformed(evt);
+            }
+        });
+        BtnKasir.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                BtnKasirKeyPressed(evt);
+            }
+        });
+        panelGlass7.add(BtnKasir);
+        /////////
 
         jPanel2.add(panelGlass7, java.awt.BorderLayout.CENTER);
 
@@ -13664,6 +13742,65 @@ private void MnDataPemberianObatActionPerformed(java.awt.event.ActionEvent evt) 
         }
     }//GEN-LAST:event_MnPenilaianUlangNyeriActionPerformed
 
+    //button panggil poli by ichsan
+    private void BtnPanggilActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPanggilActionPerformed
+        // TODO add your handling code here:
+         if(tabModekasir.getRowCount()==0){
+            JOptionPane.showMessageDialog(null,"Maaf, table masih kosong...!!!!");
+            TCari.requestFocus();
+        }else if(TNoRw.getText().trim().equals("")){
+            JOptionPane.showMessageDialog(null,"Maaf, Silahkan anda pilih dulu dengan menklik data pada table...!!!");
+            tbKasirRalan.requestFocus();
+        }else if(TLoket.getText().trim().equals("")){
+            JOptionPane.showMessageDialog(null,"Maaf, Silahkan isi nomor Loket terlebih dahulu...!!!");
+            TLoket.requestFocus();
+        }else{
+             if(tbKasirRalan.getSelectedRow()!= -1){
+                Date tanggalSekarang = new Date();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String tanggalFormatted = dateFormat.format(tanggalSekarang);
+                Sequel.queryu("delete from antriadmisi where kd_loket='"+TLoket.getText()+"'");
+                Sequel.queryu("insert into antriadmisi values('"+TLoket.getText()+"','loket','1','"+TNoRMCari.getText()+"','"+ tanggalFormatted +"')");
+            
+             }
+        }
+    }//GEN-LAST:event_BtnPanggilActionPerformed
+    
+    private void BtnPanggilKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnPanggilKeyPressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_BtnPanggilKeyPressed
+
+    private void TLoketKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TLoketKeyPressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_TLoketKeyPressed
+    
+    private void BtnKasirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnKasirActionPerformed
+        // TODO add your handling code here:
+         if(tabModekasir.getRowCount()==0){
+            JOptionPane.showMessageDialog(null,"Maaf, table masih kosong...!!!!");
+            TCari.requestFocus();
+        }else if(TNoRw.getText().trim().equals("")){
+            JOptionPane.showMessageDialog(null,"Maaf, Silahkan anda pilih dulu dengan menklik data pada table...!!!");
+            tbKasirRalan.requestFocus();
+        }else{
+             if(tbKasirRalan.getSelectedRow()!= -1){
+                Date tanggalSekarang = new Date();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String tanggalFormatted = dateFormat.format(tanggalSekarang);
+                Sequel.queryu("delete from antriadmisi where kd_loket='"+TLoket.getText()+"'");
+                Sequel.queryu("insert into antriadmisi values('99','kasir','1','"+TNoRMCari.getText()+"','"+ tanggalFormatted +"')");
+            
+             }
+        }
+    }//GEN-LAST:event_BtnKasirActionPerformed
+    
+    private void BtnKasirKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnKasirKeyPressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_BtnKasirKeyPressed
+    
+    
+    //button panggil poli by ichsan
+    
     private void MnPenilaianTerapiWicaraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MnPenilaianTerapiWicaraActionPerformed
         if(tabModekasir.getRowCount()==0){
             JOptionPane.showMessageDialog(null,"Maaf, table masih kosong...!!!!");
@@ -15015,9 +15152,11 @@ private void MnDataPemberianObatActionPerformed(java.awt.event.ActionEvent evt) 
     private widget.Button BtnCloseIn1;
     private widget.Button BtnCloseIn4;
     private widget.Button BtnCloseIn5;
+    private widget.Button BtnKasir;  //tambahan by ichsan
     private widget.Button BtnKeluar;
     private widget.Button BtnKeluar2;
     private widget.Button BtnKeluar4;
+    private widget.Button BtnPanggil;  //tambahan by ichsan
     private widget.Button BtnPrint;
     private widget.Button BtnPrint2;
     private widget.Button BtnPrint5;
@@ -15329,6 +15468,7 @@ private void MnDataPemberianObatActionPerformed(java.awt.event.ActionEvent evt) 
     private widget.TextBox TCari;
     private widget.TextBox TDokter;
     private widget.TextBox TKdPny;
+    private widget.TextBox TLoket; //tambahan by ichsan
     private widget.TextBox TNoRMCari;
     private widget.TextBox TNoReg;
     private widget.TextBox TNoRw;
@@ -15357,6 +15497,7 @@ private void MnDataPemberianObatActionPerformed(java.awt.event.ActionEvent evt) 
     private widget.InternalFrame internalFrame7;
     private widget.InternalFrame internalFrame8;
     private widget.Label jLabel10;
+    private widget.Label jLabel11;  //tambahan ichsan
     private widget.Label jLabel12;
     private widget.Label jLabel13;
     private widget.Label jLabel14;

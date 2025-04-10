@@ -5,13 +5,13 @@
  */
 package serviceultahpasien;
 
-import AESsecurity.EnkripsiAES;
+//import AESsecurity.EnkripsiAES;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fungsi.koneksiDB;
 import fungsi.koneksiDBWa;
 import fungsi.sekuel;
-import fungsi.akses;
+//import fungsi.akses;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -23,6 +23,10 @@ import java.util.Date;
 import javax.swing.Timer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import java.time.LocalDateTime;           // Make sure these imports exist
+import java.time.format.DateTimeFormatter;
+import java.util.Random;
+
 
 
 /**
@@ -318,7 +322,10 @@ public class frmUtama extends javax.swing.JFrame {
                         );
                         ResultSet rs = ps.executeQuery();
                         
-                        
+                        LocalDateTime waktuKirimBerikut = LocalDateTime.now(); // 🆕 Mulai dari sekarang
+                        Random rand = new Random(); // 🆕 Generator angka random
+                        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); // 🆕 Formatter tanggal
+
                         
                         while(rs.next()){
                             totalPasien++;  // 🆕
@@ -385,8 +392,8 @@ public class frmUtama extends javax.swing.JFrame {
                            "Semoga panjang umur, sehat selalu dan mendapatkan keberkahan serta kebahagiaan luar biasa dalam hidupnya. \n"+
                            "Mohon maaf mengganggu waktu Anda 0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n" +
                            "Kami berharap pesan ini memberikan semangat positif untuk Anda \n\n" +
-                           "Salam sehat - " + namafaskes +
-                           " \n 0xF0 0x9F 0x8C 0x8F :" + googleMapUrl ;
+                           "Salam sehat \n" + namafaskes +
+                           " \n 0xF0 0x9F 0x8C 0x8F : " + googleMapUrl ;
             
                             // Insert ke table wa_outbox                                
                             try {
@@ -409,7 +416,8 @@ public class frmUtama extends javax.swing.JFrame {
                                          psWa.setLong(1, 0);
                                          psWa.setString(2, nohppasien + "@c.us");
                                          psWa.setString(3, pesan);
-                                         psWa.setString(4, waktukirim);
+                                       //psWa.setString(4, waktukirim);
+                                         psWa.setString(4, dtf.format(waktuKirimBerikut)); // 🆕 Set waktu kirim yang diacak
                                          psWa.setString(5, "ANTRIAN");
                                          psWa.setString(6, "KHANZA");
                                          psWa.setString(7, "NODEJS");
@@ -419,6 +427,11 @@ public class frmUtama extends javax.swing.JFrame {
                                          psWa.setString(11, "TEXT");
                                          psWa.setString(12, "");
                                          psWa.executeUpdate();
+                                         
+                                         // 🆕 Tambahkan delay acak antara 10–30 detik ke waktuKirimBerikut
+                                         int delayInSeconds = 216 + rand.nextInt(217); // (216–432 seconds) = 3.6 to 7.2 minutes
+                                         waktuKirimBerikut = waktuKirimBerikut.plusSeconds(delayInSeconds);
+
 
                                          validDikirim++;  // 🆕
                                          System.out.println("✅ Pesan ulang tahun untuk " + namapasien + " telah dimasukkan ke wa_outbox.");
@@ -461,6 +474,6 @@ public class frmUtama extends javax.swing.JFrame {
             }
         };
         // Timer
-        new Timer(10, taskPerformer).start();
+        new Timer(7200, taskPerformer).start();
     }
 }
