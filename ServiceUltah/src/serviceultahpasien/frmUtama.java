@@ -360,7 +360,8 @@ public class frmUtama extends javax.swing.JFrame {
                            
                             
                             // ========== 🆕 Tambahkan greeting berdasarkan waktu saat ini ==========
-                            int currentHour = java.time.LocalTime.now().getHour(); // 🆕 Ambil jam saat ini
+                            //int currentHour = java.time.LocalTime.now().getHour(); // 🆕 Ambil jam saat ini
+                            int currentHour = waktuKirimBerikut.getHour(); // ✅ Ambil jam dari waktuKirim yang di'generate secara random
 
                             String greeting; // 🆕 Variabel untuk menyimpan greeting
                             if (currentHour >= 4 && currentHour <= 10) {
