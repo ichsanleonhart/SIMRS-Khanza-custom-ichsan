@@ -35,7 +35,6 @@
     <script src="assets/vendor/js/jquery.js"></script>
     <style>
         .layout-wrapper {
-			height: 100%; /* assuming this wraps the page */
             background-image: url('assets/img/background.jpg');
             /* Ganti dengan path gambar Anda */
             background-size: cover;
@@ -43,25 +42,6 @@
             background-attachment: fixed;
             overflow-x: hidden;
         }
-		
-		html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-		}
-		
-		.container-xxl,
-		.row {
-        height: 100% !important;
-		}
-
-		.full-height {
-		height: 100% !important;
-		}
-		
-		iframe {
-        display: block;
-		}
     </style>
 
 
@@ -85,7 +65,8 @@
                             <span class="app-brand-logo demo">
                                 <!-- <img src=""> -->
                             </span>
-                            <span class="app-brand-text demo menu-text fw-bold">                                
+                            <span class="app-brand-text demo menu-text fw-bold">
+                                <!--<h3 style="color:#fff;">  <i class="fa far fas fa-hospital-symbol "></b> </i> -->
 								<h3 style="color:#fff;">      <i class="fa far fas"> <img src="fetch_logo.php" alt="Logo" style="height:40px; vertical-align:middle;"> </b> </i>
 									<b style="color:#fff;" id="namars"></b>
                                 </h3>
@@ -119,7 +100,7 @@
                     <div class="container-xxl flex-grow-1 container-p-y">
                         <div class="row">
                             <!-- Nomor yang tampil besar -->
-                            <div class="col-lg-6 mb-1 text-center">
+                            <div class="col-lg-6 mb-1 text-center ">
                                 <div class="card h-70 border border-primary mb-2">
                                     <div class="card">
                                         <h3>ANTRIAN POLI</h3>
@@ -130,16 +111,20 @@
                                 </div>
                             </div>
                             <!--/ Nomor yang tampil besar -->
-							
-							<div  class="col-6 mb-1 text-center" id="jadwal-container" style="flex: 1;">
-								<div class="card h-70 border border-primary mb-2 " id="jadwal-wrapper" style="overflow: hidden; height: 97%; position: relative;">
-									<iframe id="jadwal-main" src="data_jadwal_kamar.php" style="width: 100%; height: 100%;"></iframe>
-									<iframe id="jadwal-clone" src="data_jadwal_kamar.php" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none;"></iframe>
-								
-							   </div>
+
+
+                            <!-- Video -->
+                            <div class="col-6 mb-1">
+                                <div class="card h-70">
+                                    <video id="myVideo" class="w-100" id="plyr-video-player" playsinline autoplay loop>
+                                    </video>
+                                </div>
                             </div>
-							
-							
+                            <!-- video -->
+                            <!-- Video -->
+
+                            <!-- video -->
+
                             <!-- data poli -->
                             <div class="container-xxl flex-grow-1 container-p-y">
                                 <div class="row" id="datapoli"> </div>
@@ -205,39 +190,6 @@
 	ghostAnchor.style.display = 'none';
 	document.body.appendChild(ghostAnchor);
 	</script>
-	
-	<script>
-	setInterval(function () {
-    const mainIframe = document.getElementById('jadwal-main');
-    const cloneIframe = document.getElementById('jadwal-clone');
-
-    if (mainIframe && cloneIframe) {
-        // Reload clone iframe with fresh content
-        cloneIframe.src = 'data_jadwal_kamar.php';
-
-        cloneIframe.onload = function () {
-            // Fade out main, fade in clone
-            mainIframe.style.transition = 'opacity 0.5s ease';
-            cloneIframe.style.transition = 'opacity 0.5s ease';
-
-            mainIframe.style.opacity = '0';
-            cloneIframe.style.opacity = '1';
-
-            // After transition, swap roles
-            setTimeout(() => {
-                // Swap the IDs
-                mainIframe.id = 'jadwal-clone';
-                cloneIframe.id = 'jadwal-main';
-
-                // Update z-index to ensure the main is always visible
-                mainIframe.style.zIndex = '1';
-                cloneIframe.style.zIndex = '2';
-            }, 600);
-        };
-    }
-}, 40000); // Every 40 secs
-</script>
-
 	<script src="assets/vendor/js/theme.js"></script>
 </body>
 

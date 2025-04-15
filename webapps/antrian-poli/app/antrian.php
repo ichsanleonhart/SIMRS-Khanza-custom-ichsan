@@ -88,8 +88,8 @@ switch($_GET['p']){
 		$awalnama = array("Tn.", "BY.", "Ny.", ", NY",", TN");
         $replacenama = array("Tuan ", "Bayi ", "Nyonya ","..","..");
   
-        $awalpoli= array("THT", "Obgyn");
-        $replacepoli= array("T H T", "Objin");
+        $awalpoli= array("THT");
+        $replacepoli= array("T H T");
         
         $r['nm_poli']=str_replace($awalpoli,$replacepoli,$r['nm_poli']);      
         $r['nm_pasien']=str_replace($awalnama,$replacenama,$r['nm_pasien']);      

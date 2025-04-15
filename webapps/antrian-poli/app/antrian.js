@@ -13,6 +13,9 @@ function pengaturan() {
 
         var namars = $('#namars');
         namars.html(data.nama_instansi);
+		
+		var logors = $('#logors');
+        logors.html(data.logo);
 
         var text = $('#text');
         text.html(data.text);
