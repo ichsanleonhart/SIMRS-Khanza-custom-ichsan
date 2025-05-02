@@ -15338,58 +15338,67 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                 }
             }
 
-            //menampilkan catatan observasi rawat inap
-            if(chkCatatanObservasiRanap.isSelected()==true){
-                try {
-                    rs2=koneksi.prepareStatement(
-                            "select catatan_observasi_ranap.tgl_perawatan,catatan_observasi_ranap.jam_rawat,catatan_observasi_ranap.gcs,"+
-                            "catatan_observasi_ranap.td,catatan_observasi_ranap.hr,catatan_observasi_ranap.rr,catatan_observasi_ranap.suhu,catatan_observasi_ranap.spo2,"+
+            //menampilkan catatan observasi rawat inap  tambahan 6 kolom IVFD,BAK,BAB,Intake,Muntah,Keterangan by ichsan
+            if(chkCatatanObservasiRanap.isSelected()==true){ 
+                try { 
+                    rs2 = koneksi.prepareStatement( 
+                            "select catatan_observasi_ranap.tgl_perawatan,catatan_observasi_ranap.jam_rawat,catatan_observasi_ranap.gcs,"+ 
+                            "catatan_observasi_ranap.td,catatan_observasi_ranap.hr,catatan_observasi_ranap.rr,catatan_observasi_ranap.suhu,catatan_observasi_ranap.spo2,"+ 
+                            "catatan_observasi_ranap.ivfd,catatan_observasi_ranap.bak,catatan_observasi_ranap.bab,catatan_observasi_ranap.intake,catatan_observasi_ranap.muntah,catatan_observasi_ranap.keterangan,"+ 
                             "catatan_observasi_ranap.nip,petugas.nama from catatan_observasi_ranap inner join petugas on catatan_observasi_ranap.nip=petugas.nip "+
-                            "where catatan_observasi_ranap.no_rawat='"+norawat+"' order by catatan_observasi_ranap.tgl_perawatan,catatan_observasi_ranap.jam_rawat").executeQuery();
-                    if(rs2.next()){
-                        htmlContent.append(
-                          "<tr class='isi'>").append( 
-                            "<td valign='top' width='2%'></td>").append(        
-                            "<td valign='top' width='18%'>Catatan Observasi Rawat Inap</td>").append(
-                            "<td valign='top' width='1%' align='center'>:</td>").append(
-                            "<td valign='top' width='79%'>").append(
-                              "<table width='100%' border='0' align='center' cellpadding='3px' cellspacing='0' class='tbl_form'>").append(
-                                 "<tr align='center'>").append(
-                                    "<td valign='middle' width='4%' bgcolor='#FFFAF8' rowspan='2'>No.</td>").append(
-                                    "<td valign='middle' width='15%' bgcolor='#FFFAF8' rowspan='2'>Tanggal</td>").append(
-                                    "<td valign='top' width='58%' bgcolor='#FFFAF8' colspan='6'>Monitoring</td>").append(
-                                    "<td valign='middle' width='23%' bgcolor='#FFFAF8' rowspan='2'>Perawat/Paramedis</td>").append(
-                                 "</tr>").append(
-                                 "<tr align='center'>").append(
-                                    "<td valign='top' width='11%' bgcolor='#FFFAF8'>GCS(E,V,M)</td>").append(
-                                    "<td valign='top' width='10%' bgcolor='#FFFAF8'>TD</td>").append(
-                                    "<td valign='top' width='9%' bgcolor='#FFFAF8'>HR (/menit)</td>").append(
-                                    "<td valign='top' width='9%' bgcolor='#FFFAF8'>RR (/menit)</td>").append(
-                                    "<td valign='top' width='9%' bgcolor='#FFFAF8'>Suhu(C)</td>").append(
-                                    "<td valign='top' width='9%' bgcolor='#FFFAF8'>SpO2(%)</td>").append(
-                                 "</tr>"
-                        );
-                        w=1;
-                        do{
-                            htmlContent.append(
-                                 "<tr>").append(
-                                    "<td valign='top' align='center'>").append(w).append("</td>").append(
-                                    "<td valign='top'>").append(rs2.getString("tgl_perawatan")).append(" ").append(rs2.getString("jam_rawat")).append("</td>").append(
-                                    "<td valign='top' align='center'>").append(rs2.getString("gcs")).append("</td>").append(
-                                    "<td valign='top' align='center'>").append(rs2.getString("td")).append("</td>").append(
-                                    "<td valign='top' align='center'>").append(rs2.getString("hr")).append("</td>").append(
-                                    "<td valign='top' align='center'>").append(rs2.getString("rr")).append("</td>").append(
-                                    "<td valign='top' align='center'>").append(rs2.getString("suhu")).append("</td>").append(
-                                    "<td valign='top' align='center'>").append(rs2.getString("spo2")).append("</td>").append(
-                                    "<td valign='top'>").append(rs2.getString("nip")).append(" ").append(rs2.getString("nama")).append("</td>").append(
-                                 "</tr>");                                        
-                            w++;
-                        }while(rs2.next());
-                        htmlContent.append(
-                              "</table>").append(
-                            "</td>").append(
-                          "</tr>");
-                    }
+                            "where catatan_observasi_ranap.no_rawat='"+norawat+"' order by catatan_observasi_ranap.tgl_perawatan,catatan_observasi_ranap.jam_rawat" ).executeQuery(); 
+                    if(rs2.next()){ 
+                        htmlContent.append( 
+                                "<tr class='isi'>"+ 
+                                "<td valign='top' width='2%'></td>"+
+                                "<td valign='top' width='18%'>Catatan Observasi Rawat Inap</td>"+
+                                "<td valign='top' width='1%' align='center'>:</td>"+
+                                "<td valign='top' width='79%'>"+ "<table width='100%' border='0' align='center' cellpadding='3px' cellspacing='0' class='tbl_form'>"+ 
+                                "<tr align='center'>"+ "<td valign='middle' width='4%' bgcolor='#FFFAF8' rowspan='2'>No.</td>"+ 
+                                "<td valign='middle' width='15%' bgcolor='#FFFAF8' rowspan='2'>Tanggal</td>"+ 
+                                "<td valign='top' width='58%' bgcolor='#FFFAF8' colspan='12'>Monitoring</td>"+ 
+                                "<td valign='middle' width='23%' bgcolor='#FFFAF8' rowspan='2'>Perawat/Paramedis</td>"+ 
+                                "</tr>"+ "<tr align='center'>"+ 
+                                "<td valign='top' width='6%' bgcolor='#FFFAF8'>GCS(E,V,M)</td>"+ 
+                                "<td valign='top' width='6%' bgcolor='#FFFAF8'>TD</td>"+ 
+                                "<td valign='top' width='6%' bgcolor='#FFFAF8'>HR(/menit)</td>"+ 
+                                "<td valign='top' width='6%' bgcolor='#FFFAF8'>RR(/menit)</td>"+ 
+                                "<td valign='top' width='6%' bgcolor='#FFFAF8'>Suhu(C)</td>"+ 
+                                "<td valign='top' width='6%' bgcolor='#FFFAF8'>SpO2(%)</td>"+ 
+                                "<td valign='top' width='6%' bgcolor='#FFFAF8'>IVFD</td>"+ 
+                                "<td valign='top' width='6%' bgcolor='#FFFAF8'>BAK</td>"+ 
+                                "<td valign='top' width='6%' bgcolor='#FFFAF8'>BAB</td>"+ 
+                                "<td valign='top' width='6%' bgcolor='#FFFAF8'>Intake</td>"+ 
+                                "<td valign='top' width='6%' bgcolor='#FFFAF8'>Muntah</td>"+
+                                "<td valign='top' width='28%' bgcolor='#FFFAF8'>Keterangan</td>"+ 
+                                "</tr>" 
+                        ); 
+                        rs2.beforeFirst(); 
+                        w = 1; 
+                        while(rs2.next()){ 
+                            htmlContent.append( 
+                                    "<tr>"+ 
+                                            "<td valign='top' align='center'>"+w+"</td>"+ 
+                                            "<td valign='top'>"+rs2.getString("tgl_perawatan")+" "+rs2.getString("jam_rawat")+"</td>"+ 
+                                            "<td valign='top' align='center'>"+rs2.getString("gcs")+"</td>"+ 
+                                            "<td valign='top' align='center'>"+rs2.getString("td")+"</td>"+ 
+                                            "<td valign='top' align='center'>"+rs2.getString("hr")+"</td>"+ 
+                                            "<td valign='top' align='center'>"+rs2.getString("rr")+"</td>"+ 
+                                            "<td valign='top' align='center'>"+rs2.getString("suhu")+"</td>"+ 
+                                            "<td valign='top' align='center'>"+rs2.getString("spo2")+"</td>"+ 
+                                            "<td valign='top' align='center'>"+rs2.getString("ivfd")+"</td>"+ 
+                                            "<td valign='top' align='center'>"+rs2.getString("bak")+"</td>"+ 
+                                            "<td valign='top' align='center'>"+rs2.getString("bab")+"</td>"+ 
+                                            "<td valign='top' align='center'>"+rs2.getString("intake")+"</td>"+ 
+                                            "<td valign='top' align='center'>"+rs2.getString("muntah")+"</td>"+ 
+                                            "<td valign='top' align='center'>"+rs2.getString("keterangan")+"</td>"+ 
+                                            "<td valign='top'>"+rs2.getString("nip")+" "+rs2.getString("nama")+"</td>"+ 
+                                    "</tr>" );
+                                w++; 
+                        } 
+                        htmlContent.append( 
+                                "</table>"+ "</td>"+ "</tr>" ); 
+                    } 
                 } catch (Exception e) {
                     System.out.println("Notifikasi : "+e);
                 } finally{
