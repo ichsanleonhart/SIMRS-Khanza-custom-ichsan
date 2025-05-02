@@ -492,7 +492,8 @@
                     $obat_kronis="0";
                 }
                 $bmhp=(getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where no_rawat='".$norawat."' and status='Tambahan'")+
-					   getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(BMHP)%' and no_rawat='".$norawat."' and status='Obat'")
+					   getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(BMHP)%' and no_rawat='".$norawat."' and status='Obat'")+
+					   getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%Paket BMHP%' and no_rawat='".$norawat."' ")  //update 24 April 2025, ngitung tindakan yang memiliki kata "Paket BMHP"
 					   );				
                 if($bmhp==""){
                     $bmhp="0";
