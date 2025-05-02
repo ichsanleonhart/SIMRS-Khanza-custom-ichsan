@@ -52,7 +52,7 @@ public final class DlgRl36 extends javax.swing.JDialog {
         this.setLocation(8,1);
         setSize(885,674);
 
-        Object[] rowRwJlDr={"No.","Spesialisasi","Total","Khusus","Besar","Sedang","Kecil"};
+        Object[] rowRwJlDr={"No.","Spesialisasi","Khusus","Besar","Sedang","Kecil","Total"};
         tabMode=new DefaultTableModel(null,rowRwJlDr){
               @Override public boolean isCellEditable(int rowIndex, int colIndex){return false;}
         };
@@ -122,7 +122,7 @@ public final class DlgRl36 extends javax.swing.JDialog {
             }
         });
 
-        internalFrame1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ RL 3.6 Kegiatan Pembedahan ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50,50,50))); // NOI18N
+        internalFrame1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ Formulir RL 3.12 Rekapitulasi Kegiatan Pelayanan Pembedahan ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50, 50, 50))); // NOI18N
         internalFrame1.setName("internalFrame1"); // NOI18N
         internalFrame1.setLayout(new java.awt.BorderLayout(1, 1));
 
@@ -436,7 +436,7 @@ private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
                 }
                 
                 tabMode.addRow(new Object[]{
-                    i,rs.getString("nm_perawatan"),(khusus+besar+sedang+kecil),khusus,besar,sedang,kecil
+                    i,rs.getString("nm_perawatan"),khusus,besar,sedang,kecil,(khusus+besar+sedang+kecil)
                 });
                 i++;
             }

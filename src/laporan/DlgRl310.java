@@ -33,20 +33,22 @@ import javax.swing.table.TableColumn;
  *
  * @author perpustakaan
  */
-public final class DlgRl34 extends javax.swing.JDialog {
+public final class DlgRl310 extends javax.swing.JDialog {
 
     private final DefaultTableModel tabMode;
     private Connection koneksi = koneksiDB.condb();
     private sekuel Sequel = new sekuel();
     private validasi Valid = new validasi();
-    private PreparedStatement ps, psrujukanrs, psrujukanbidan, psrujukanpuskesmas, psrujukanfaskeslain,
-            psrujukansemua, psrujukanmati, psrujukannonmedishidup, psrujukannonmedissemua, psrujukannonmedismati, psrujukanhidup, psnonrujukhidup, psnonrujukmati,
-            psnonrujuktotal, psdirujuk;
-    private ResultSet rs, rsrujukanrs, rsrujukanbidan, rsrujukanpuskesmas, rsrujukanfaskeslain,
-            rsrujukansemua, rsrujukanmati, rsrujukanhidup, rsrujukannonmedismati, rsrujukannonmedishidup, rsnonrujukhidup, rsnonrujukmati,
-            rsnonrujuktotal, rsdirujuk;
-    private int i = 0, rujukrs = 0, rujukbidan = 0, rujukpuskesmas = 0, rujukfaskeslain = 0, rujuksemua = 0, rujukhidup = 0,
-            rujukmati = 0, rujuknonmedishidup = 0, rujuknonmedismati = 0, nonrujukhidup = 0, nonrujukmati = 0, nonrujuktotal = 0, dirujuk = 0;
+    private PreparedStatement ps, psrujukanrs, psrujukanpuskesmas, psrujukanfaskeslain,psrujukansemua,psrujukanbalikpuskesmas,
+            psrujukanbalikrs,psrujukanbalikfaskeslain,psrujukanbaliksemua,psdirujukrujukan,psdirujukdatangsendiri, psdirujuksemua,psdirujukditerima;
+    private ResultSet rs, rsrujukanrs, rsrujukanpuskesmas, rsrujukanfaskeslain,
+            rsrujukansemua,rsrujukanbalikpuskesmas,rsrujukanbalikrs,rsrujukanbalikfaskeslain,rsrujukanbaliksemua, rsdirujukrujukan,rsdirujukdatangsendiri, 
+            rsdirujuksemua,rsdirujukditerima;
+    private int i = 0, rujukrs = 0, rujukpuskesmas = 0, rujukfaskeslain = 0, rujuksemua = 0,rujukbalikrs = 0, rujukbalikpuskesmas = 0, 
+            rujukbalikfaskeslain = 0, rujukbaliksemua = 0, dirujukrujukan = 0,dirujukdatangsendiri = 0,dirujuksemua = 0,dirujukditerima =0,
+            ttlrujukpuskesmas= 0,ttlrujukrs= 0, ttlrujukfaskeslain= 0,ttlrujuksemua= 0,ttlrujukbalikpuskesmas= 0,ttlrujukbalikrs= 0, ttlrujukbalikfaskeslain= 0,
+            ttlrujukbaliksemua= 0,ttldirujukrujukan= 0,ttldirujukdatangsendiri= 0,ttldirujuksemua= 0,ttldirujukditerima= 0           
+            ;
 
     /**
      * Creates new form DlgLhtBiaya
@@ -54,15 +56,17 @@ public final class DlgRl34 extends javax.swing.JDialog {
      * @param parent
      * @param modal
      */
-    public DlgRl34(java.awt.Frame parent, boolean modal) {
+    public DlgRl310(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         this.setLocation(8, 1);
         setSize(885, 674);
 
-        Object[] rowRwJlDr = {"No.", "Jenis Kegiatan", "Rujukan RS", "Rujukan Bidan", "Rujukan Puskesmas",
-            "Rujukan Faskes Lain", "Rujukan Jml Hidup", "Rujukan Jml Mati", "Rujukan Jml Total", "Rujukan Non Medis Jumlah Hidup",
-            "Rujukan Non Medis Jumlah Mati", "Total Rujukan Non Medis", "Non Rjk Jml Hidup", "Non Rjk Jml Mati", "Non Rjk Jml Ttl", "Dirujuk"};
+        Object[] rowRwJlDr = {
+            "No.", "Jenis Spesialisasi", "Rujukan Masuk Puskesmas", "Rujukan Masuk Rs Lain", "Rujukan Masuk Faskes Lain", "Total Rujukan Masuk",
+            "Rujukan Balik Puskesmas", "Rujukan Balik Rs Asal", "Rujukan Balik Puskesmas", "Rujukan Balik Faskes Lain", "Total Rujukan Balik",
+            "Rujuk Keluar Pasien Rujukan", "Rujuk Keluar Pasien Datang Sendiri", "Total Dirujuk Keluar", "Diterima Kembali"
+        };
         tabMode = new DefaultTableModel(null, rowRwJlDr) {
             @Override
             public boolean isCellEditable(int rowIndex, int colIndex) {
@@ -79,9 +83,9 @@ public final class DlgRl34 extends javax.swing.JDialog {
             if (i == 0) {
                 column.setPreferredWidth(25);
             } else if (i == 1) {
-                column.setPreferredWidth(250);
+                column.setPreferredWidth(300);
             } else {
-                column.setPreferredWidth(110);
+                column.setPreferredWidth(150);
             }
         }
         tbBangsal.setDefaultRenderer(Object.class, new WarnaTable());
@@ -89,82 +93,65 @@ public final class DlgRl34 extends javax.swing.JDialog {
         TCari.setDocument(new batasInput((byte) 100).getKata(TCari));
 
         try {
-            ps = koneksi.prepareStatement(
-                    "select kode_paket,nm_perawatan from paket_operasi where kategori='Kebidanan' order by nm_perawatan");
-            psrujukanrs = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "where operasi.kode_paket=? and rujuk_masuk.perujuk like '%rs%' and operasi.tgl_operasi between ? and ? "
-                    + "or operasi.kode_paket=? and rujuk_masuk.perujuk like '%rumah sakit%' and operasi.tgl_operasi between ? and ?");
-
-            psrujukanbidan = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "where operasi.kode_paket=? and rujuk_masuk.perujuk like '%bidan%' and operasi.tgl_operasi between ? and ? "
-                    + "or operasi.kode_paket=? and rujuk_masuk.perujuk like '%Amd.Keb%' and operasi.tgl_operasi between ? and ?");
+            ps = koneksi.prepareStatement("SELECT kd_poli,nm_poli from poliklinik where status ='1' order by nm_poli ");
 
             psrujukanpuskesmas = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "where operasi.kode_paket=? and rujuk_masuk.perujuk like '%puskesmas%' and operasi.tgl_operasi between ? and ? "
-                    + "or operasi.kode_paket=? and rujuk_masuk.perujuk like '%pkm%' and operasi.tgl_operasi between ? and ?");
+                    "select count(reg_periksa.no_rawat) from reg_periksa inner join rujuk_masuk on rujuk_masuk.no_rawat=reg_periksa.no_rawat "
+                    + "where reg_periksa.kd_poli=? and rujuk_masuk.perujuk like '%pkm%' and reg_periksa.tgl_registrasi between ? and ? "
+                    + "or reg_periksa.kd_poli=? and rujuk_masuk.perujuk like '%puskesmas%' and reg_periksa.tgl_registrasi between ? and ?");
+            
+
+            psrujukanrs = koneksi.prepareStatement(
+                    "select count(reg_periksa.no_rawat) from reg_periksa inner join rujuk_masuk on rujuk_masuk.no_rawat=reg_periksa.no_rawat "
+                    + "where reg_periksa.kd_poli=? and rujuk_masuk.perujuk like '%rs%' and reg_periksa.tgl_registrasi between ? and ? "
+                    + "or reg_periksa.kd_poli=? and rujuk_masuk.perujuk like '%rumah sakit%' and reg_periksa.tgl_registrasi between ? and ?");
 
             psrujukanfaskeslain = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "where operasi.kode_paket=? and rujuk_masuk.perujuk like '%klinik%' and operasi.tgl_operasi between ? and ? "
-                    + "or operasi.kode_paket=? and rujuk_masuk.perujuk like '%dr%' and operasi.tgl_operasi between ? and ?");
+                    "select count(reg_periksa.no_rawat) from reg_periksa inner join rujuk_masuk on rujuk_masuk.no_rawat=reg_periksa.no_rawat "
+                    + "where reg_periksa.kd_poli=? and rujuk_masuk.perujuk like '%klinik%' and reg_periksa.tgl_registrasi between ? and ? "
+                    + "or reg_periksa.kd_poli=? and rujuk_masuk.perujuk like '%dr%' and reg_periksa.tgl_registrasi between ? and ?");
 
             psrujukansemua = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "where operasi.kode_paket=? and operasi.tgl_operasi between ? and ? ");
+                    "select count(reg_periksa.no_rawat) from reg_periksa inner join rujuk_masuk on rujuk_masuk.no_rawat=reg_periksa.no_rawat "
+                    + "where reg_periksa.kd_poli=? and reg_periksa.tgl_registrasi between ? and ? ");
+            
+            //surat_rujukan_balik
+            
+            psrujukanbalikpuskesmas = koneksi.prepareStatement(
+                    "select count(reg_periksa.no_rawat) from reg_periksa inner join surat_rujukan_balik on surat_rujukan_balik.no_rawat=reg_periksa.no_rawat "
+                    + "where reg_periksa.kd_poli=? and surat_rujukan_balik.ppk1 like '%pkm%' and reg_periksa.tgl_registrasi between ? and ? "
+                    + "or reg_periksa.kd_poli=? and surat_rujukan_balik.ppk1 like '%puskesmas%' and reg_periksa.tgl_registrasi between ? and ?");
 
-            psrujukanhidup = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk "
-                    + "inner join reg_periksa inner join pasien on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "and rujuk_masuk.no_rawat=reg_periksa.no_rawat and reg_periksa.no_rkm_medis=pasien.no_rkm_medis "
-                    + "where rujuk_masuk.perujuk in ('puskesmas', 'klinik', 'bidan', 'rs','dr','pkm','bdn') and pasien.no_rkm_medis not in (select no_rkm_medis from pasien_mati) and operasi.kode_paket=? and operasi.tgl_operasi between ? and ?");
+            psrujukanbalikrs = koneksi.prepareStatement(
+                    "select count(reg_periksa.no_rawat) from reg_periksa inner join surat_rujukan_balik on surat_rujukan_balik.no_rawat=reg_periksa.no_rawat "
+                    + "where reg_periksa.kd_poli=? and surat_rujukan_balik.ppk1 like '%rs%' and reg_periksa.tgl_registrasi between ? and ? "
+                    + "or reg_periksa.kd_poli=? and surat_rujukan_balik.ppk1 like '%rumah sakit%' and reg_periksa.tgl_registrasi between ? and ?");
 
-            psrujukanmati = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk "
-                    + "inner join reg_periksa inner join pasien_mati on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "and rujuk_masuk.no_rawat=reg_periksa.no_rawat and reg_periksa.no_rkm_medis=pasien_mati.no_rkm_medis "
-                    + "where rujuk_masuk.perujuk in ('puskesmas', 'klinik', 'bidan', 'rs','dr','pkm','bdn') and operasi.kode_paket=? and operasi.tgl_operasi between ? and ?");
+            psrujukanbalikfaskeslain = koneksi.prepareStatement(
+                    "select count(reg_periksa.no_rawat) from reg_periksa inner join surat_rujukan_balik on surat_rujukan_balik.no_rawat=reg_periksa.no_rawat "
+                    + "where reg_periksa.kd_poli=? and surat_rujukan_balik.ppk1 like '%klinik%' and reg_periksa.tgl_registrasi between ? and ? "
+                    + "or reg_periksa.kd_poli=? and surat_rujukan_balik.ppk1 like '%dr%' and reg_periksa.tgl_registrasi between ? and ?");
 
-            psrujukannonmedissemua = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "where operasi.kode_paket=? and operasi.tgl_operasi between ? and ? ");
+            psrujukanbaliksemua = koneksi.prepareStatement(
+                    "select count(reg_periksa.no_rawat) from reg_periksa inner join surat_rujukan_balik on surat_rujukan_balik.no_rawat=reg_periksa.no_rawat "
+                    + "where reg_periksa.kd_poli=? and reg_periksa.tgl_registrasi between ? and ? ");
 
-            psrujukannonmedishidup = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk "
-                    + "inner join reg_periksa inner join pasien on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "and rujuk_masuk.no_rawat=reg_periksa.no_rawat and reg_periksa.no_rkm_medis=pasien.no_rkm_medis "
-                    + "where rujuk_masuk.perujuk not in ('puskesmas', 'klinik', 'bidan', 'rs','dr','pkm','bdn') and pasien.no_rkm_medis not in (select no_rkm_medis from pasien_mati) and operasi.kode_paket=? and operasi.tgl_operasi between ? and ?");
+            psdirujukrujukan = koneksi.prepareStatement(
+                    "select count(reg_periksa.no_rawat) from reg_periksa inner join rujuk on rujuk.no_rawat=reg_periksa.no_rawat inner join rujuk_masuk on rujuk_masuk.no_rawat = rujuk.no_rawat "
+                    + "where reg_periksa.kd_poli=? and reg_periksa.tgl_registrasi between ? and ? ");
+            
+            psdirujukdatangsendiri = koneksi.prepareStatement(
+                    "select count(reg_periksa.no_rawat) from reg_periksa inner join rujuk on rujuk.no_rawat=reg_periksa.no_rawat "
+                    + "where reg_periksa.no_rawat not in (select no_rawat from rujuk_masuk) and reg_periksa.kd_poli=? and reg_periksa.tgl_registrasi between ? and ? ");
+            
+            psdirujuksemua = koneksi.prepareStatement(
+                    "select count(reg_periksa.no_rawat) from reg_periksa inner join rujuk on rujuk.no_rawat=reg_periksa.no_rawat "
+                    + "where reg_periksa.kd_poli=? and reg_periksa.tgl_registrasi between ? and ? ");
+            
+            psdirujukditerima = koneksi.prepareStatement(
+                    "select count(reg_periksa.no_rawat) from reg_periksa inner join rujuk on rujuk.no_rawat=reg_periksa.no_rawat "
+                    + "where rujuk.keterangan like '%terima%' and reg_periksa.kd_poli=? and reg_periksa.tgl_registrasi between ? and ? ");
 
-            psrujukannonmedismati = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk "
-                    + "inner join reg_periksa inner join pasien_mati on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "and rujuk_masuk.no_rawat=reg_periksa.no_rawat and reg_periksa.no_rkm_medis=pasien_mati.no_rkm_medis "
-                    + "where rujuk_masuk.perujuk not in ('puskesmas', 'klinik', 'bidan', 'rs','dr','pkm','bdn') and operasi.kode_paket=? and operasi.tgl_operasi between ? and ?");
-
-            psnonrujuktotal = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi where operasi.no_rawat not in(select rujuk_masuk.no_rawat from rujuk_masuk) "
-                    + "and operasi.kode_paket=? and operasi.tgl_operasi between ? and ? ");
-
-            psnonrujukmati = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi,reg_periksa,pasien_mati "
-                    + "where operasi.no_rawat not in(select rujuk_masuk.no_rawat from rujuk_masuk) "
-                    + "and reg_periksa.no_rkm_medis=pasien_mati.no_rkm_medis "
-                    + "and operasi.kode_paket=? and operasi.tgl_operasi between ? and ? ");
-
-            psnonrujukhidup = koneksi.prepareStatement(
-                    "SELECT count(operasi.kode_paket) FROM operasi INNER JOIN reg_periksa ON operasi.no_rawat = reg_periksa.no_rawat INNER JOIN "
-                    + "pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis where operasi.no_rawat not in(select rujuk_masuk.no_rawat from rujuk_masuk) "
-                    + "and pasien.no_rkm_medis not in (select no_rkm_medis from pasien_mati) and operasi.kode_paket=? and operasi.tgl_operasi between ? and ?");
-            /*   "select count(operasi.kode_paket) from operasi,reg_periksa,pasien "
-                    + "where operasi.no_rawat not in(select rujuk_masuk.no_rawat from rujuk_masuk) and pasien.no_rkm_medis not in (select no_rkm_medis from pasien_mati) "
-                    + "and reg_periksa.no_rkm_medis=pasien.no_rkm_medis "
-                    + "and operasi.kode_paket=? and operasi.tgl_operasi between ? and ? "
-            );   */
-                     psdirujuk = koneksi.prepareStatement(
-                            "select count(operasi.kode_paket) from operasi inner join rujuk on rujuk.no_rawat=operasi.no_rawat "
-                            + "where operasi.kode_paket=? and operasi.tgl_operasi between ? and ? ");
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -207,7 +194,7 @@ public final class DlgRl34 extends javax.swing.JDialog {
             }
         });
 
-        internalFrame1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ RL 3.6 Rekapitulasi Kegiatan Pelayanan Kebidanan ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50, 50, 50))); // NOI18N
+        internalFrame1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ RL 3.10 Rekapitulasi Kegiatan Pelayanan Rujukan ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50, 50, 50))); // NOI18N
         internalFrame1.setName("internalFrame1"); // NOI18N
         internalFrame1.setLayout(new java.awt.BorderLayout(1, 1));
 
@@ -372,14 +359,12 @@ public final class DlgRl34 extends javax.swing.JDialog {
                             + tabMode.getValueAt(r, 9).toString() + "','"
                             + tabMode.getValueAt(r, 10).toString() + "','"
                             + tabMode.getValueAt(r, 11).toString() + "','"
-                            + tabMode.getValueAt(r, 12).toString() + "','"
-                            + tabMode.getValueAt(r, 13).toString() + "','"
-                            + tabMode.getValueAt(r, 14).toString() + "','"
-                            + tabMode.getValueAt(r, 15).toString() + "','','','','','','','','','','','','','','','','','','" + akses.getalamatip() + "'", "Rekap Nota Pembayaran");
+                            + tabMode.getValueAt(r, 12).toString() + "','"                                                     
+                            + tabMode.getValueAt(r, 13).toString() + "','','','','','','','','','','','','','','','','','','','','" + akses.getalamatip() + "'", "Rekap Nota Pembayaran");
                 }
             }
 
-            Valid.MyReportqry("rptRl34.jasper", "report", "::[ Formulir RL 3.4 ]::", "select * from temporary where temporary.temp37='" + akses.getalamatip() + "' order by temporary.no", param);
+            Valid.MyReportqry("rptRl310.jasper", "report", "::[ Formulir RL 3.10 ]::", "select * from temporary where temporary.temp37='" + akses.getalamatip() + "' order by temporary.no", param);
         }
         this.setCursor(Cursor.getDefaultCursor());
 }//GEN-LAST:event_BtnPrintActionPerformed
@@ -455,7 +440,7 @@ private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
      */
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(() -> {
-            DlgRl34 dialog = new DlgRl34(new javax.swing.JFrame(), true);
+            DlgRl310 dialog = new DlgRl310(new javax.swing.JFrame(), true);
             dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosing(java.awt.event.WindowEvent e) {
@@ -491,10 +476,10 @@ private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
             rs = ps.executeQuery();
             i = 1;
             while (rs.next()) {
-                psrujukanrs.setString(1, rs.getString("kode_paket"));
+                psrujukanrs.setString(1, rs.getString("kd_poli"));
                 psrujukanrs.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
                 psrujukanrs.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                psrujukanrs.setString(4, rs.getString("kode_paket"));
+                psrujukanrs.setString(4, rs.getString("kd_poli"));
                 psrujukanrs.setString(5, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
                 psrujukanrs.setString(6, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
                 rsrujukanrs = psrujukanrs.executeQuery();
@@ -502,23 +487,12 @@ private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
                 if (rsrujukanrs.next()) {
                     rujukrs = rsrujukanrs.getInt(1);
                 }
+                ttlrujukrs = ttlrujukrs + rujukrs;
 
-                psrujukanbidan.setString(1, rs.getString("kode_paket"));
-                psrujukanbidan.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukanbidan.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                psrujukanbidan.setString(4, rs.getString("kode_paket"));
-                psrujukanbidan.setString(5, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukanbidan.setString(6, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsrujukanbidan = psrujukanbidan.executeQuery();
-                rujukbidan = 0;
-                if (rsrujukanbidan.next()) {
-                    rujukbidan = rsrujukanbidan.getInt(1);
-                }
-
-                psrujukanpuskesmas.setString(1, rs.getString("kode_paket"));
+                psrujukanpuskesmas.setString(1, rs.getString("kd_poli"));
                 psrujukanpuskesmas.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
                 psrujukanpuskesmas.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                psrujukanpuskesmas.setString(4, rs.getString("kode_paket"));
+                psrujukanpuskesmas.setString(4, rs.getString("kd_poli"));
                 psrujukanpuskesmas.setString(5, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
                 psrujukanpuskesmas.setString(6, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
                 rsrujukanpuskesmas = psrujukanpuskesmas.executeQuery();
@@ -526,11 +500,12 @@ private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
                 if (rsrujukanpuskesmas.next()) {
                     rujukpuskesmas = rsrujukanpuskesmas.getInt(1);
                 }
+                ttlrujukpuskesmas = ttlrujukpuskesmas + rujukpuskesmas;
 
-                psrujukanfaskeslain.setString(1, rs.getString("kode_paket"));
+                psrujukanfaskeslain.setString(1, rs.getString("kd_poli"));
                 psrujukanfaskeslain.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
                 psrujukanfaskeslain.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                psrujukanfaskeslain.setString(4, rs.getString("kode_paket"));
+                psrujukanfaskeslain.setString(4, rs.getString("kd_poli"));
                 psrujukanfaskeslain.setString(5, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
                 psrujukanfaskeslain.setString(6, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
                 rsrujukanfaskeslain = psrujukanfaskeslain.executeQuery();
@@ -538,8 +513,9 @@ private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
                 if (rsrujukanfaskeslain.next()) {
                     rujukfaskeslain = rsrujukanfaskeslain.getInt(1);
                 }
+                ttlrujukfaskeslain=ttlrujukfaskeslain+rujukfaskeslain;
 
-                psrujukansemua.setString(1, rs.getString("kode_paket"));
+                psrujukansemua.setString(1, rs.getString("kd_poli"));
                 psrujukansemua.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
                 psrujukansemua.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
                 rsrujukansemua = psrujukansemua.executeQuery();
@@ -547,86 +523,110 @@ private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
                 if (rsrujukansemua.next()) {
                     rujuksemua = rsrujukansemua.getInt(1);
                 }
-
-                psrujukanhidup.setString(1, rs.getString("kode_paket"));
-                psrujukanhidup.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukanhidup.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsrujukanhidup = psrujukanhidup.executeQuery();
-                rujukhidup = 0;
-                if (rsrujukanhidup.next()) {
-                    rujukhidup = rsrujukanhidup.getInt(1);
+                ttlrujuksemua=ttlrujuksemua+rujuksemua;
+                
+                psrujukanbalikrs.setString(1, rs.getString("kd_poli"));
+                psrujukanbalikrs.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
+                psrujukanbalikrs.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
+                psrujukanbalikrs.setString(4, rs.getString("kd_poli"));
+                psrujukanbalikrs.setString(5, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
+                psrujukanbalikrs.setString(6, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
+                rsrujukanbalikrs = psrujukanbalikrs.executeQuery();
+                rujukbalikrs = 0;
+                if (rsrujukanbalikrs.next()) {
+                    rujukbalikrs = rsrujukanbalikrs.getInt(1);
                 }
+                
+                ttlrujukbalikrs=ttlrujukbalikrs + rujukbalikrs;
 
-                psrujukanmati.setString(1, rs.getString("kode_paket"));
-                psrujukanmati.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukanmati.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsrujukanmati = psrujukanmati.executeQuery();
-                rujukmati = 0;
-                if (rsrujukanmati.next()) {
-                    rujukmati = rsrujukanmati.getInt(1);
+                psrujukanbalikpuskesmas.setString(1, rs.getString("kd_poli"));
+                psrujukanbalikpuskesmas.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
+                psrujukanbalikpuskesmas.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
+                psrujukanbalikpuskesmas.setString(4, rs.getString("kd_poli"));
+                psrujukanbalikpuskesmas.setString(5, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
+                psrujukanbalikpuskesmas.setString(6, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
+                rsrujukanbalikpuskesmas = psrujukanbalikpuskesmas.executeQuery();
+                rujukbalikpuskesmas = 0;
+                if (rsrujukanbalikpuskesmas.next()) {
+                    rujukbalikpuskesmas = rsrujukanbalikpuskesmas.getInt(1);
                 }
+                ttlrujukbalikpuskesmas = ttlrujukbalikpuskesmas + rujukbalikpuskesmas;
 
-                psrujukannonmedishidup.setString(1, rs.getString("kode_paket"));
-                psrujukannonmedishidup.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukannonmedishidup.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsrujukannonmedishidup = psrujukannonmedishidup.executeQuery();
-                rujuknonmedishidup = 0;
-                if (rsrujukannonmedishidup.next()) {
-                    rujuknonmedishidup = rsrujukannonmedishidup.getInt(1);
+                psrujukanbalikfaskeslain.setString(1, rs.getString("kd_poli"));
+                psrujukanbalikfaskeslain.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
+                psrujukanbalikfaskeslain.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
+                psrujukanbalikfaskeslain.setString(4, rs.getString("kd_poli"));
+                psrujukanbalikfaskeslain.setString(5, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
+                psrujukanbalikfaskeslain.setString(6, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
+                rsrujukanbalikfaskeslain = psrujukanbalikfaskeslain.executeQuery();
+                rujukbalikfaskeslain = 0;
+                if (rsrujukanbalikfaskeslain.next()) {
+                    rujukbalikfaskeslain = rsrujukanbalikfaskeslain.getInt(1);
                 }
+                ttlrujukbalikfaskeslain = ttlrujukbalikfaskeslain + rujukbalikfaskeslain;
 
-                psrujukannonmedismati.setString(1, rs.getString("kode_paket"));
-                psrujukannonmedismati.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukannonmedismati.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsrujukannonmedismati = psrujukanmati.executeQuery();
-                rujuknonmedismati = 0;
-                if (rsrujukannonmedismati.next()) {
-                    rujuknonmedismati = rsrujukannonmedismati.getInt(1);
+                psrujukanbaliksemua.setString(1, rs.getString("kd_poli"));
+                psrujukanbaliksemua.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
+                psrujukanbaliksemua.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
+                rsrujukanbaliksemua = psrujukanbaliksemua.executeQuery();
+                rujukbaliksemua = 0;
+                if (rsrujukanbaliksemua.next()) {
+                    rujukbaliksemua = rsrujukanbaliksemua.getInt(1);
                 }
+                ttlrujukbaliksemua = ttlrujukbaliksemua + rujukbaliksemua;
 
-                psnonrujuktotal.setString(1, rs.getString("kode_paket"));
-                psnonrujuktotal.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psnonrujuktotal.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsnonrujuktotal = psnonrujuktotal.executeQuery();
-                nonrujuktotal = 0;
-                if (rsnonrujuktotal.next()) {
-                    nonrujuktotal = rsnonrujuktotal.getInt(1);
+                psdirujukrujukan.setString(1, rs.getString("kd_poli"));
+                psdirujukrujukan.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
+                psdirujukrujukan.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
+                rsdirujukrujukan = psdirujukrujukan.executeQuery();
+                dirujukrujukan = 0;
+                if (rsdirujukrujukan.next()) {
+                    dirujukrujukan = rsdirujukrujukan.getInt(1);
                 }
-
-                psnonrujukmati.setString(1, rs.getString("kode_paket"));
-                psnonrujukmati.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psnonrujukmati.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsnonrujukmati = psnonrujukmati.executeQuery();
-                nonrujukmati = 0;
-                if (rsnonrujukmati.next()) {
-                    nonrujukmati = rsnonrujukmati.getInt(1);
+                ttldirujukrujukan = ttldirujukrujukan+dirujukrujukan;
+                
+                psdirujukdatangsendiri.setString(1, rs.getString("kd_poli"));
+                psdirujukdatangsendiri.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
+                psdirujukdatangsendiri.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
+                rsdirujukdatangsendiri = psdirujukdatangsendiri.executeQuery();
+                dirujukdatangsendiri = 0;
+                if (rsdirujukdatangsendiri.next()) {
+                    dirujukdatangsendiri = rsdirujukdatangsendiri.getInt(1);
                 }
-
-                psnonrujukhidup.setString(1, rs.getString("kode_paket"));
-                psnonrujukhidup.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psnonrujukhidup.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsnonrujukhidup = psnonrujukhidup.executeQuery();
-                nonrujukhidup = 0;
-                if (rsnonrujukhidup.next()) {
-                    nonrujukhidup = rsnonrujukhidup.getInt(1);
+                ttldirujukdatangsendiri = ttldirujukdatangsendiri+dirujukdatangsendiri;
+                
+                psdirujuksemua.setString(1, rs.getString("kd_poli"));
+                psdirujuksemua.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
+                psdirujuksemua.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
+                rsdirujuksemua = psdirujuksemua.executeQuery();
+                dirujuksemua = 0;
+                if (rsdirujuksemua.next()) {
+                    dirujuksemua = rsdirujuksemua.getInt(1);
                 }
-
-                psdirujuk.setString(1, rs.getString("kode_paket"));
-                psdirujuk.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psdirujuk.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsdirujuk = psdirujuk.executeQuery();
-                dirujuk = 0;
-                if (rsdirujuk.next()) {
-                    dirujuk = rsdirujuk.getInt(1);
+                ttldirujuksemua = ttldirujuksemua + dirujuksemua;
+                
+                psdirujukditerima.setString(1, rs.getString("kd_poli"));
+                psdirujukditerima.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
+                psdirujukditerima.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
+                rsdirujukditerima = psdirujukditerima.executeQuery();
+                dirujukditerima = 0;
+                if (rsdirujukditerima.next()) {
+                    dirujukditerima = rsdirujukditerima.getInt(1);
                 }
+                ttldirujukditerima = ttldirujukditerima + dirujukditerima;
+                
 
                 tabMode.addRow(new Object[]{
-                    i, rs.getString("nm_perawatan"), rujukrs, rujukbidan, rujukpuskesmas, rujukfaskeslain,
-                    rujukhidup, rujukmati, (rujukrs + rujukbidan + rujukpuskesmas + rujukfaskeslain),
-                    rujuknonmedishidup, rujuknonmedismati, (rujuksemua - (rujukrs + rujukbidan + rujukpuskesmas + rujukfaskeslain)),
-                    nonrujukhidup, nonrujukmati, nonrujuktotal, dirujuk
+                    i, rs.getString("nm_poli"), rujukpuskesmas,rujukrs, rujukfaskeslain,rujuksemua,rujukbalikpuskesmas,rujukbalikrs, rujukbalikfaskeslain,rujukbaliksemua,
+                    dirujukrujukan,dirujukdatangsendiri,dirujuksemua,dirujukditerima
                 });
                 i++;
+            }
+            if (i > 1) {
+                tabMode.addRow(new Object[]{
+                    "", "TOTAL", ttlrujukpuskesmas,ttlrujukrs, ttlrujukfaskeslain,ttlrujuksemua,ttlrujukbalikpuskesmas,ttlrujukbalikrs, ttlrujukbalikfaskeslain,
+                    ttlrujukbaliksemua,ttldirujukrujukan,ttldirujukdatangsendiri,ttldirujuksemua,ttldirujukditerima
+                });
             }
             this.setCursor(Cursor.getDefaultCursor());
         } catch (Exception e) {

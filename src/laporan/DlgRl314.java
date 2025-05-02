@@ -34,7 +34,7 @@ import javax.swing.table.TableColumn;
  *
  * @author perpustakaan
  */
-public final class DlgRl33 extends javax.swing.JDialog {
+public final class DlgRl314 extends javax.swing.JDialog {
     private final DefaultTableModel tabMode;
     private Connection koneksi=koneksiDB.condb();
     private sekuel Sequel=new sekuel();
@@ -45,7 +45,7 @@ public final class DlgRl33 extends javax.swing.JDialog {
     /** Creates new form DlgLhtBiaya
      * @param parent
      * @param modal */
-    public DlgRl33(java.awt.Frame parent, boolean modal) {
+    public DlgRl314(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         this.setLocation(8,1);
@@ -112,7 +112,7 @@ public final class DlgRl33 extends javax.swing.JDialog {
             }
         });
 
-        internalFrame1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ RL 3.11 Rekapitulasi Kegiatan Pelayanan Gigi dan Mulut ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50, 50, 50))); // NOI18N
+        internalFrame1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ RL 3.14 Rekapitulasi Kegiatan Pelayanan Khusus ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50, 50, 50))); // NOI18N
         internalFrame1.setName("internalFrame1"); // NOI18N
         internalFrame1.setLayout(new java.awt.BorderLayout(1, 1));
 
@@ -271,7 +271,7 @@ public final class DlgRl33 extends javax.swing.JDialog {
                 }                    
             }
                
-            Valid.MyReportqry("rptRl33.jasper","report","::[ Formulir RL 3.3 ]::","select * from temporary where temporary.temp37='"+akses.getalamatip()+"' order by temporary.no",param);
+            Valid.MyReportqry("rptRl314.jasper","report","::[ Formulir RL 3.14 ]::","select * from temporary where temporary.temp37='"+akses.getalamatip()+"' order by temporary.no",param);
         }
         this.setCursor(Cursor.getDefaultCursor());
 }//GEN-LAST:event_BtnPrintActionPerformed
@@ -345,7 +345,7 @@ private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
     */
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(() -> {
-            DlgRl33 dialog = new DlgRl33(new javax.swing.JFrame(), true);
+            DlgRl314 dialog = new DlgRl314(new javax.swing.JFrame(), true);
             dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosing(java.awt.event.WindowEvent e) {
@@ -379,18 +379,20 @@ private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
             Valid.tabelKosong(tabMode);  
             ps=koneksi.prepareStatement(
-                    "select poliklinik.kd_poli,poliklinik.nm_poli from poliklinik " +
-                    "where poliklinik.nm_poli like '%gigi%' order by poliklinik.nm_poli");
+                /*    "select poliklinik.kd_poli,poliklinik.nm_poli from poliklinik " +
+                    "where poliklinik.nm_poli like '%rehab%' or poliklinik.nm_poli like '%fisio%' order by poliklinik.nm_poli"*/
+                    "select kategori_perawatan.kd_kategori from kategori_perawatan where kategori_perawatan.nm_kategori like '%khusus%'"
+);
             try {
                 rs=ps.executeQuery();
                 i=1;
                 ttl=0;
                 while(rs.next()){
-                    pstindakan=koneksi.prepareStatement("select jns_perawatan.nm_perawatan,count(jns_perawatan.nm_perawatan) from rawat_jl_dr inner join reg_periksa "+
-                        "inner join jns_perawatan on rawat_jl_dr.no_rawat=reg_periksa.no_rawat and rawat_jl_dr.kd_jenis_prw=jns_perawatan.kd_jenis_prw "+
-                        "where reg_periksa.kd_poli=? and reg_periksa.tgl_registrasi between ? and ? and jns_perawatan.nm_perawatan like ? group by jns_perawatan.nm_perawatan ");
+                    pstindakan=koneksi.prepareStatement("select jns_perawatan.nm_perawatan,count(jns_perawatan.nm_perawatan) from rawat_jl_pr inner join reg_periksa "+
+                        "inner join jns_perawatan on rawat_jl_pr.no_rawat=reg_periksa.no_rawat and rawat_jl_pr.kd_jenis_prw=jns_perawatan.kd_jenis_prw "+
+                        "where jns_perawatan.kd_kategori=? and reg_periksa.tgl_registrasi between ? and ? and jns_perawatan.nm_perawatan like ? group by jns_perawatan.nm_perawatan ");
                     try{
-                        pstindakan.setString(1,rs.getString("kd_poli"));
+                        pstindakan.setString(1,rs.getString("kd_kategori"));
                         pstindakan.setString(2,Valid.SetTgl(Tgl1.getSelectedItem()+""));
                         pstindakan.setString(3,Valid.SetTgl(Tgl2.getSelectedItem()+""));
                         pstindakan.setString(4,"%"+TCari.getText().trim()+"%");
