@@ -244,7 +244,8 @@ public final class akses {
             laporan_tindakan=false,pelaksanaan_informasi_edukasi=false,layanan_kedokteran_fisik_rehabilitasi=false,skrining_kesehatan_gigi_mulut_balita=false,skrining_anemia=false,
             layanan_program_kfr=false,skrining_hipertensi=false,skrining_kesehatan_penglihatan=false,catatan_observasi_hemodialisa=false,skrining_kesehatan_gigi_mulut_dewasa=false,
             skrining_risiko_kanker_serviks=false,catatan_cairan_hemodialisa=false,skrining_kesehatan_gigi_mulut_lansia=false,skrining_indra_pendengaran=false,
-            catatan_pengkajian_paska_operasi=false,skrining_frailty_syndrome=false,sirkulasi_cssd=false;
+            catatan_pengkajian_paska_operasi=false,skrining_frailty_syndrome=false,sirkulasi_cssd=false,lama_pelayanan_cssd=false,catatan_observasi_bayi=false,
+            riwayat_surat_peringatan=false,master_kesimpulan_anjuran_mcu=false,kategori_piutang_jasa_perusahaan=false,piutang_jasa_perusahaan=false;
     
     public static void setData(String user, String pass) {
         try {        
@@ -1387,6 +1388,12 @@ public final class akses {
                         akses.catatan_pengkajian_paska_operasi=true;
                         akses.skrining_frailty_syndrome=true;
                         akses.sirkulasi_cssd=true;
+                        akses.lama_pelayanan_cssd=true;
+                        akses.catatan_observasi_bayi=true;
+                        akses.riwayat_surat_peringatan=true;
+                        akses.master_kesimpulan_anjuran_mcu=true;
+                        akses.kategori_piutang_jasa_perusahaan=true;
+                        akses.piutang_jasa_perusahaan=true;
                     }else if(rs2.getRow()>=1){   
                         rs2.beforeFirst();
                         rs2.next();
@@ -2513,6 +2520,12 @@ public final class akses {
                         akses.catatan_pengkajian_paska_operasi=rs2.getBoolean("catatan_pengkajian_paska_operasi");
                         akses.skrining_frailty_syndrome=rs2.getBoolean("skrining_frailty_syndrome");
                         akses.sirkulasi_cssd=rs2.getBoolean("sirkulasi_cssd");
+                        akses.lama_pelayanan_cssd=rs2.getBoolean("lama_pelayanan_cssd");
+                        akses.catatan_observasi_bayi=rs2.getBoolean("catatan_observasi_bayi");
+                        akses.riwayat_surat_peringatan=rs2.getBoolean("riwayat_surat_peringatan");
+                        akses.master_kesimpulan_anjuran_mcu=rs2.getBoolean("master_kesimpulan_anjuran_mcu");
+                        akses.kategori_piutang_jasa_perusahaan=rs2.getBoolean("kategori_piutang_jasa_perusahaan");
+                        akses.piutang_jasa_perusahaan=rs2.getBoolean("piutang_jasa_perusahaan");
                     }else if((rs.getRow()==0)&&(rs2.getRow()==0)){
                         akses.kode="";                  
                         akses.penyakit= false;
@@ -3637,6 +3650,12 @@ public final class akses {
                         akses.catatan_pengkajian_paska_operasi=false;
                         akses.skrining_frailty_syndrome=false;
                         akses.sirkulasi_cssd=false;
+                        akses.lama_pelayanan_cssd=false;
+                        akses.catatan_observasi_bayi=false;
+                        akses.riwayat_surat_peringatan=false;
+                        akses.master_kesimpulan_anjuran_mcu=false;
+                        akses.kategori_piutang_jasa_perusahaan=false;
+                        akses.piutang_jasa_perusahaan=false;
                     }
                 } catch (Exception e) {
                     System.out.println("Notifikasi : "+e);
@@ -4784,6 +4803,12 @@ public final class akses {
         akses.catatan_pengkajian_paska_operasi=false;
         akses.skrining_frailty_syndrome=false;
         akses.sirkulasi_cssd=false;
+        akses.lama_pelayanan_cssd=false;
+        akses.catatan_observasi_bayi=false;
+        akses.riwayat_surat_peringatan=false;
+        akses.master_kesimpulan_anjuran_mcu=false;
+        akses.kategori_piutang_jasa_perusahaan=false;
+        akses.piutang_jasa_perusahaan=false;
     }
     
     public static int getjml1() {return akses.jml1;}    
@@ -5947,4 +5972,10 @@ public final class akses {
     public static boolean getcatatan_pengkajian_paska_operasi(){return akses.catatan_pengkajian_paska_operasi;}
     public static boolean getskrining_frailty_syndrome(){return akses.skrining_frailty_syndrome;}
     public static boolean getsirkulasi_cssd(){return akses.sirkulasi_cssd;}
+    public static boolean getlama_pelayanan_cssd(){return akses.lama_pelayanan_cssd;}
+    public static boolean getcatatan_observasi_bayi(){return akses.catatan_observasi_bayi;}
+    public static boolean getriwayat_surat_peringatan(){return akses.riwayat_surat_peringatan;}
+    public static boolean getmaster_kesimpulan_anjuran_mcu(){return akses.master_kesimpulan_anjuran_mcu;}
+    public static boolean getkategori_piutang_jasa_perusahaan(){return akses.kategori_piutang_jasa_perusahaan;}
+    public static boolean getpiutang_jasa_perusahaan(){return akses.piutang_jasa_perusahaan;}
 }   
