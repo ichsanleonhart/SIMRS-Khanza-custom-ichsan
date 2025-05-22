@@ -936,8 +936,25 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
                     if(Sequel.menyimpantf("bridging_surat_kontrol_bpjs","?,?,?,?,?,?,?,?","No.Surat",8,new String[]{
                             NoSEP.getText(),Valid.SetTgl(TanggalSurat.getSelectedItem()+""),response.asText(),Valid.SetTgl(TanggalKontrol.getSelectedItem()+""),KdDokter.getText(),NmDokter.getText(),KdPoli.getText(),NmPoli.getText()
                         })==true){
-                        emptTeks();
-                        tampil();
+                        
+                        // Panggil fungsi kirim WA SEBELUM emptTeks()
+                          try {
+                              if(koneksiDB.WANOTIFPASIEN().equals("yes")){
+                                 System.out.println("BtnSimpan: Memanggil kirimWhatsAppMessage untuk NoRM: " + NoRM.getText());
+                                 kirimWhatsAppMessage();  //kirim pesan WA by ichsan
+                                 System.out.println("BtnSimpan: Memanggil kirimWhatsAppMessageReminderKontrol untuk NoRM: " + NoRM.getText());
+                                 kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol
+                                 JOptionPane.showMessageDialog(null, "Surat kontrol berhasil dibuat. \n "
+                                    + "WA reminder akan otomatis terkirim sekarang dan pada H-1 sebelum tanggal kontrol  ;-)");
+                               }
+                         } catch (Exception e_wa) {
+                                System.out.println("Gagal mengirim WA setelah simpan SK BPJS: " + e_wa);
+                              // Anda bisa menambahkan JOptionPane di sini jika ingin memberitahu user bahwa pengiriman WA mungkin gagal
+                              // JOptionPane.showMessageDialog(null, "Surat Kontrol berhasil dibuat, namun pengiriman notifikasi WhatsApp mungkin gagal.");
+                            }                        
+                        
+                        emptTeks();  //kosongkan form
+                        tampil();  //kosongkan form
                         if(JADIKANBOOKINGSURATKONTROLAPIBPJS.equals("yes")){
                             if(isBooking()==false){
                                 JOptionPane.showMessageDialog(null,"Gagal menyimpan booking, silahkan hubungi administrator...!!!!");
@@ -953,25 +970,6 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
                     JOptionPane.showMessageDialog(null,"Koneksi ke server BPJS terputus...!");
                 }
             }
-            
-            
-            ////////////////kirim WA ke pasien
-            //////////////// fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
-        try {
-            if(koneksiDB.WANOTIFPASIEN().equals("yes")){   
-                kirimWhatsAppMessage();  //kirim pesan WA by ichsan
-                kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol
-                JOptionPane.showMessageDialog(null, "Surat kontrol berhasil dibuat. \n "
-                + "WA reminder akan otomatis terkirim sekarang dan pada H-1 sebelum tanggal kontrol  ;-)");
-                emptTeks();  //kosongkan isi form setelah tekan simpan
-            }else{
-                emptTeks();  //kosongkan isi form setelah tekan simpan
-            }
-        } catch (Exception e) {
-            emptTeks();  //kosongkan isi form setelah tekan simpan
-        }
-            
-            
         }
 }//GEN-LAST:event_BtnSimpanActionPerformed
 
@@ -986,6 +984,18 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
     String nohppasien = "";  //ubah format nomor hp pasien
     String jk = "";  //ubah format jenis kelamin
     String formattedTanggal = "";  //ubah format tanggal kontrol
+    
+    String noRMValue = NoRM.getText();
+    String nmPasienValue = NmPasien.getText();
+    String nmDokterValue = NmDokter.getText();
+    String nmPoliValue = NmPoli.getText();
+    String tanggalKontrolValue = TanggalKontrol.getSelectedItem().toString().trim();
+    
+    if (noRMValue.isEmpty()) {
+        System.out.println("kirimWhatsAppMessage: NoRM kosong, tidak mengirim WA.");
+        // JOptionPane.showMessageDialog(null, "No. Rekam Medis belum terisi untuk pengiriman WhatsApp."); // Opsional
+        return;
+    }
     
     try {
         /////////format tanggal dan jam kontrol        
@@ -1011,44 +1021,71 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
                 if (nohppasien == null || nohppasien.length() < 9 || !nohppasien.trim().matches("\\d+")) {
                     JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
                     return; // Stop execution if phone number is invalid
-                    }
+                }
             // Convert phone number from 08xxxxxx to 628xxxxxx
-            if (nohppasien.startsWith("0")) {
-                nohppasien = "62" + nohppasien.substring(1);
-            }
+                if (nohppasien.startsWith("0")) {
+                    nohppasien = "62" + nohppasien.substring(1);
+                }
+        }
+        
+        else {
+            System.out.println("kirimWhatsAppMessage: Pasien dengan No.RM " + noRMValue + " tidak ditemukan atau tidak memiliki No. HP.");
+             // JOptionPane.showMessageDialog(null, "Pasien dengan No.RM " + noRMValue + " tidak ditemukan atau tidak memiliki No. HP."); // Opsional
+            return;
         }
 
         rs.close();
         ps.close();
-    } catch (Exception e) {
-        System.out.println("Error fetching phone number: " + e);
-        System.out.println("Error formatting date: " + e);
-        System.out.println("Error formatting date: " + e);
-        formattedTanggal = TanggalKontrol.getSelectedItem().toString(); // Fallback to original format
+        } catch (Exception e) {
+            System.out.println("Error fetching phone number: " + e);
+            System.out.println("Error formatting date: " + e);
+            System.out.println("Error formatting date: " + e);
+            formattedTanggal = TanggalKontrol.getSelectedItem().toString(); // Fallback to original format
+        }
+
+    int currentHour = java.time.LocalTime.now().getHour();
+    String greeting;
+    if (currentHour >= 4 && currentHour <= 10) {
+        greeting = "Selamat Pagi";
+    } else if (currentHour >= 10 && currentHour <= 15) {
+        greeting = "Selamat Siang";
+    } else if (currentHour >= 15 && currentHour <= 18) {
+        greeting = "Selamat Sore";
+    } else {
+        greeting = "Selamat Malam";
     }
 
-    // Set greeting based on gender
     String salampembuka;
+    // Menggunakan nmPasienValue untuk salam pembuka
     if ("L".equalsIgnoreCase(jk)) {
-        salampembuka = "Assalamualaikum, Bpk " + NoRM.getText() + "\n";
+        salampembuka = greeting + ", Bpk " + nmPasienValue + "\n";
     } else if ("P".equalsIgnoreCase(jk)) {
-        salampembuka = "Assalamualaikum, Ibu " + NoRM.getText() + "\n";
+        salampembuka = greeting + ", Ibu " + nmPasienValue + "\n";
     } else {
-        salampembuka = "Assalamualaikum, Bpk / Ibu " + NoRM.getText() + "\n";
+        salampembuka = greeting + ", Bpk / Ibu " + nmPasienValue + "\n";
     }
 
     // Membuat isi pesan ke dalam whatsapp
-    String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
+    String pesan = salampembuka + " - (" + noRMValue + ") \n 0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
         "Kami dari " + akses.getnamars() + " ingin mengingatkan bahwa Anda memiliki jadwal kontrol/tindak lanjut pada: \n\n" +       
         "0xF0 0x9F 0x93 0x85 Tanggal: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
-        "0xF0 0x9F 0x91 0xA8 Dokter : " + NmDokter.getText() + "\n" +
-        "0xF0 0x9F 0x8F 0xA5 Spesialis : " + NmPoli.getText() + "\n" +
+        "0xF0 0x9F 0x91 0xA8 *Dokter* : " + nmDokterValue + "\n" + // Menggunakan variabel lokal
+        "0xF0 0x9F 0x8F 0xA5 *Spesialis* : " + nmPoliValue + "\n" + // Menggunakan variabel lokal
         "0xF0 0x9F 0x8F 0xA0 Alamat : " + akses.getalamatrs() + "\n\n" +
         "0xF0 0x9F 0x93 0x84 Mohon untuk mengambil antrean pada aplikasi MJKN BPJS. Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
-        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
+        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F" +
+        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F"+
+        "\n \n ====\n"+
+        "_Ini adalah pesan otomatis berdasarkan nomor pasien yang terdaftar di " + akses.getnamars() + ". Anda bisa membalas pesan ini untuk konfirmasi apabila terdapat kekeliruan._";              
 
+        
     // Insert into wa_outbox
     try {
+            if (nohppasien.isEmpty() || nohppasien.equals("62") || nohppasien.equals("@c.us") ) {
+                System.out.println("kirimWhatsAppMessage: Nomor HP kosong atau tidak valid setelah proses ("+nohppasien+"), tidak memasukkan ke wa_outbox.");
+                return;
+            }
+    //try {
         String sql = "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, SUCCESS, RESPONSE, REQUEST, TYPE, FILE) "
                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -1074,89 +1111,102 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
     }
 }
     
-    private void kirimWhatsAppMessageReminderKontrol() {
+    private void kirimWhatsAppMessageReminderKontrol() {    
+    String nohppasien = "";
+    String jk = "";
+    String formattedTanggalKontrol = "";
+    String waktuKirimReminder = "";
+    // Pastikan NoRM, NmPasien, NmDokter, NmPoli, TanggalKontrol memiliki nilai yang benar saat ini
+    String noRMValue = NoRM.getText();
+    String nmPasienValue = NmPasien.getText();
+    String nmDokterValue = NmDokter.getText();
+    String nmPoliValue = NmPoli.getText();
+    String tanggalKontrolValue = TanggalKontrol.getSelectedItem().toString().trim();
 
-    // Fetch nomor hp pasien, gender, serta tanggal kontrol
-    String nohppasien = "";  //ubah format nomor hp pasien
-    String jk = "";  //ubah format jenis kelamin
-    String formattedTanggal = "";  //ubah format tanggal kontrol
-    String waktukirim = ""; // format waktu pengiriman WA (delayed message)
-    
+    if (noRMValue.isEmpty()) {
+        System.out.println("kirimWhatsAppMessageReminderKontrol: NoRM kosong, tidak mengirim WA reminder.");
+        return;
+    }
+
     try {
-        /////////format tanggal dan jam kontrol, agar tanggal terkirim adalah 24 jam sebelum tanggal kontrol                
-        String rawDate = TanggalKontrol.getSelectedItem().toString().trim();   // Convert to string properly      
-        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);        
-        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); 
-        
-        // Convert to LocalDateTime
-        LocalDateTime tanggalPeriksa = LocalDateTime.parse(rawDate, inputFormatter);
-        
-        // Subtract 24 hours
-        LocalDateTime waktuKirim = tanggalPeriksa.minusHours(24);
-        
-         // Format the new waktukirim
-        waktukirim = waktuKirim.format(outputFormatter);
-        
-        // Debugging output
-        System.out.println("Raw value of TanggalPeriksa: " + rawDate);
-        System.out.println("Waktu Kirim (24 hours before): " + waktukirim);
-        
-        //fecth data dari table pasien
+        String rawDate = tanggalKontrolValue; // Menggunakan variabel lokal
+        SimpleDateFormat inputFormatToDate = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);
+        SimpleDateFormat outputFormatDisplay = new SimpleDateFormat("dd MMMM yyyy 'jam' HH:mm", new Locale("id", "ID"));
+        Date dateKontrol = inputFormatToDate.parse(rawDate);
+        formattedTanggalKontrol = outputFormatDisplay.format(dateKontrol);
+
+        DateTimeFormatter inputFormatterForCalc = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);
+        DateTimeFormatter outputFormatterForDB = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime ldtTanggalKontrol = LocalDateTime.parse(rawDate, inputFormatterForCalc);
+        LocalDateTime ldtWaktuKirimReminder = ldtTanggalKontrol.minusHours(24);
+        waktuKirimReminder = ldtWaktuKirimReminder.format(outputFormatterForDB);
+
         PreparedStatement ps = koneksi.prepareStatement("SELECT no_tlp, jk FROM pasien WHERE no_tlp IS NOT NULL and no_rkm_medis = ?");
-        ps.setString(1, NoRM.getText());
+        ps.setString(1, noRMValue); // Menggunakan variabel lokal
         ResultSet rs = ps.executeQuery();
 
         if (rs.next()) {
             nohppasien = rs.getString("no_tlp");
             jk = rs.getString("jk");
-            
-            // Validation: Ensure the phone number is valid
-                nohppasien = nohppasien.replaceAll("\\s+", ""); // remove all whitespace
-            // Validation: Check if phone number is at least 10 digits and contains only numbers
-                 if (nohppasien == null || nohppasien.length() < 9 || !nohppasien.trim().matches("\\d+")) {
-                    JOptionPane.showMessageDialog(null, "Nomor HP tidak sesuai! (" + nohppasien + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
-                    return; // Stop execution if phone number is invalid
-                    }
-                 
-            // Convert phone number from 08xxxxxx to 628xxxxxx
+            nohppasien = nohppasien.replaceAll("\\s+", "");
+            if (nohppasien == null || nohppasien.length() < 9 || !nohppasien.trim().matches("\\d+")) {
+                System.out.println("kirimWhatsAppMessageReminderKontrol: Nomor HP tidak sesuai! (" + nohppasien + ")");
+                return;
+            }
             if (nohppasien.startsWith("0")) {
                 nohppasien = "62" + nohppasien.substring(1);
             }
+        } else {
+            System.out.println("kirimWhatsAppMessageReminderKontrol: Pasien dengan No.RM " + noRMValue + " tidak ditemukan atau tidak memiliki No. HP.");
+            return;
         }
-
         rs.close();
         ps.close();
     } catch (Exception e) {
-        System.out.println("Error fetching phone number: " + e);
-        System.out.println("Error formatting date: " + e);
-        System.out.println("Error formatting date: " + e);
-        formattedTanggal = TanggalKontrol.getSelectedItem().toString(); // Fallback to original format
+        System.out.println("Error fetching phone number or formatting date in kirimWhatsAppMessageReminderKontrol: " + e);
+        formattedTanggalKontrol = tanggalKontrolValue; // Fallback
+        return; // Jika ada error, jangan lanjutkan kirim WA
     }
 
-    // Set greeting based on gender
+    int currentHour = java.time.LocalTime.now().getHour();
+    String greeting;
+     if (currentHour >= 4 && currentHour <= 10) {
+        greeting = "Selamat Pagi";
+    } else if (currentHour >= 10 && currentHour <= 15) {
+        greeting = "Selamat Siang";
+    } else if (currentHour >= 15 && currentHour <= 18) {
+        greeting = "Selamat Sore";
+    } else {
+        greeting = "Selamat Malam";
+    }
+
     String salampembuka;
     if ("L".equalsIgnoreCase(jk)) {
-        salampembuka = "Assalamualaikum, Bpk " + NoRM.getText() + "\n";
+        salampembuka = greeting + ", Bpk " + nmPasienValue + "\n"; // Menggunakan variabel lokal
     } else if ("P".equalsIgnoreCase(jk)) {
-        salampembuka = "Assalamualaikum, Ibu " + NoRM.getText() + "\n";
+        salampembuka = greeting + ", Ibu " + nmPasienValue + "\n"; // Menggunakan variabel lokal
     } else {
-        salampembuka = "Assalamualaikum, Bpk / Ibu " + NoRM.getText() + "\n";
+        salampembuka = greeting + ", Bpk / Ibu " + nmPasienValue + "\n"; // Menggunakan variabel lokal
     }
 
-    // Membuat isi pesan ke dalam whatsapp
     String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
-        "Kami dari " + akses.getnamars() + " izin reminder / mengingatkan bahwa Anda besok memiliki jadwal kontrol/tindak lanjut pada: \n\n" +        
-        "0xF0 0x9F 0x93 0x85 Tanggal: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
-        "0xF0 0x9F 0x91 0xA8 Dokter : " + NmDokter.getText() + "\n" +
-        "0xF0 0x9F 0x8F 0xA5 Spesialis : " + NmPoli.getText() + "\n" +
-        "0xF0 0x9F 0x8F 0xA0 Alamat : " + akses.getalamatrs() + "\n\n" +
-        "0xF0 0x9F 0x8F 0xA0 Lokasi map : https://maps.app.goo.gl/hYx9zEgC4fnN2xE2A \n\n" +            
-        "0xF0 0x9F 0x93 0x84 Mohon untuk mengecek kembali aplikasi MJKN BPJS dan memastikan antrean sudah diambil untuk tanggal " + formattedTanggal + ". /n" +
-        " Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
-        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
+        "Kami dari " + akses.getnamars() + " izin reminder / mengingatkan bahwa Anda besok memiliki jadwal kontrol/tindak lanjut pada: \n\n" +
+        "0xF0 0x9F 0x93 0x85 *Tanggal* : " + formattedTanggalKontrol +  "\n" +
+        "0xF0 0x9F 0x91 0xA8 *Dokter* : " + nmDokterValue + "\n" + // Menggunakan variabel lokal
+        "0xF0 0x9F 0x8F 0xA5 *Spesialis* : " + nmPoliValue + "\n" + // Menggunakan variabel lokal        
+        "0xF0 0x9F 0x8F 0xA0 *Alamat* : " + akses.getalamatrs() + "\n" +        
+        "0xF0 0x9F 0x93 0x84 Mohon untuk mengecek kembali aplikasi MJKN BPJS dan memastikan antrean sudah diambil untuk tanggal " + formattedTanggalKontrol + ". \n" +
+        "Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
+        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F"+
+        "\n \n ====\n"+
+        "_Ini adalah pesan otomatis berdasarkan nomor pasien yang terdaftar di " + akses.getnamars() + ". Anda bisa membalas pesan ini untuk konfirmasi apabila terdapat kekeliruan._";
 
-    // Insert into wa_outbox
+
     try {
+        if (nohppasien.isEmpty() || nohppasien.equals("62") || nohppasien.equals("@c.us")) {
+             System.out.println("kirimWhatsAppMessageReminderKontrol: Nomor HP kosong atau tidak valid setelah proses ("+nohppasien+"), tidak memasukkan ke wa_outbox.");
+            return;
+        }
         String sql = "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, SUCCESS, RESPONSE, REQUEST, TYPE, FILE) "
                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -1164,7 +1214,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         psWa.setLong(1, 0);
         psWa.setString(2, nohppasien + "@c.us");
         psWa.setString(3, pesan);
-        psWa.setString(4, waktukirim);
+        psWa.setString(4, waktuKirimReminder); // Menggunakan waktu kirim H-1
         psWa.setString(5, "ANTRIAN");
         psWa.setString(6, "KHANZA");
         psWa.setString(7, "NODEJS");
@@ -1174,12 +1224,11 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         psWa.setString(11, "TEXT");
         psWa.setString(12, "");
         psWa.executeUpdate();
+        psWa.close();
 
-        
-        System.out.println("Waktu Kirim (24 hours before): " + waktukirim);
-        System.out.println("Pesan Whatsapp dalam antrian untuk dikirim ke pasien.");
+        System.out.println("kirimWhatsAppMessageReminderKontrol: Pesan Reminder WhatsApp untuk " + noRMValue + " ke " + nohppasien + " masuk antrian, akan dikirim pada " + waktuKirimReminder);
     } catch (Exception e) {
-        System.out.println("Gagal mengirim pesan WA ke Pasien: " + e);
+        System.out.println("Gagal memasukkan pesan WA Reminder ke wa_outbox untuk " + noRMValue + ": " + e);
     }
 }
 ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA SETELAH SIMPAN SURAT KONTROL BY ICHSAN

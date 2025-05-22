@@ -641,7 +641,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         R2.setPreferredSize(new java.awt.Dimension(90, 23));
         panelCari.add(R2);
 
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-03-2025" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-04-2025" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -663,7 +663,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         jLabel22.setPreferredSize(new java.awt.Dimension(25, 23));
         panelCari.add(jLabel22);
 
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-03-2025" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-04-2025" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -683,7 +683,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         R3.setPreferredSize(new java.awt.Dimension(85, 23));
         panelCari.add(R3);
 
-        DTPCari3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-03-2025" }));
+        DTPCari3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-04-2025" }));
         DTPCari3.setDisplayFormat("dd-MM-yyyy");
         DTPCari3.setName("DTPCari3"); // NOI18N
         DTPCari3.setOpaque(false);
@@ -705,7 +705,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         jLabel25.setPreferredSize(new java.awt.Dimension(25, 23));
         panelCari.add(jLabel25);
 
-        DTPCari4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-03-2025" }));
+        DTPCari4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-04-2025" }));
         DTPCari4.setDisplayFormat("dd-MM-yyyy");
         DTPCari4.setName("DTPCari4"); // NOI18N
         DTPCari4.setOpaque(false);
@@ -788,7 +788,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         TPasien.setBounds(185, 10, 190, 23);
 
         TanggalSurat.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalSurat.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-03-2025 12:25:15" }));
+        TanggalSurat.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-04-2025 09:11:53" }));
         TanggalSurat.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         TanggalSurat.setName("TanggalSurat"); // NOI18N
         TanggalSurat.setOpaque(false);
@@ -933,7 +933,7 @@ public class SuratKontrol extends javax.swing.JDialog {
         jLabel14.setBounds(0, 160, 92, 23);
 
         TanggalPeriksa.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalPeriksa.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-03-2025 12:25:15" }));
+        TanggalPeriksa.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-04-2025 09:11:53" }));
         TanggalPeriksa.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         TanggalPeriksa.setName("TanggalPeriksa"); // NOI18N
         TanggalPeriksa.setOpaque(false);
@@ -1044,7 +1044,7 @@ public class SuratKontrol extends javax.swing.JDialog {
 
         TombolWA.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/wa.png"))); // NOI18N
         TombolWA.setMnemonic('T');
-        TombolWA.setText("Kirim Surkon ke Pasien");
+        TombolWA.setText("Kirim PDF Surkon ke Pasien");
         TombolWA.setToolTipText("Alt+T");
         TombolWA.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         TombolWA.setName("TombolWA"); // NOI18N
@@ -1056,7 +1056,7 @@ public class SuratKontrol extends javax.swing.JDialog {
             }
         });
         FormInput.add(TombolWA);
-        TombolWA.setBounds(610, 10, 260, 30);
+        TombolWA.setBounds(610, 10, 330, 30);
 
         PanelInput.add(FormInput, java.awt.BorderLayout.CENTER);
 
@@ -1110,6 +1110,41 @@ public class SuratKontrol extends javax.swing.JDialog {
 }//GEN-LAST:event_BtnSimpanActionPerformed
 ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA SETELAH SIMPAN SURAT KONTROL BY ICHSAN
    
+    // Fungsi bantuan untuk mendapatkan jenis penjamin terakhir
+    private String getJenisPenjaminTerakhir(String noRM) {
+        String jenisPenjamin = "";
+        String kdPj = ""; // Kode Penjamin dari reg_periksa
+        try {
+            // Ambil kd_pj dari registrasi terakhir pasien
+            PreparedStatement psReg = koneksi.prepareStatement(
+                "SELECT kd_pj FROM reg_periksa WHERE no_rkm_medis = ? ORDER BY tgl_registrasi DESC, jam_reg DESC LIMIT 1");
+            psReg.setString(1, noRM);
+            ResultSet rsReg = psReg.executeQuery();
+            if (rsReg.next()) {
+                kdPj = rsReg.getString("kd_pj");
+            }
+            rsReg.close();
+            psReg.close();
+            
+            // Jika kd_pj ditemukan, ambil nama penjamin
+            if (kdPj != null && !kdPj.isEmpty()) {
+                PreparedStatement psPenjab = koneksi.prepareStatement(
+                    "SELECT png_jawab FROM penjab WHERE kd_pj = ?");
+                psPenjab.setString(1, kdPj);
+                ResultSet rsPenjab = psPenjab.executeQuery();
+                if (rsPenjab.next()) {
+                    jenisPenjamin = rsPenjab.getString("png_jawab");
+                }
+                rsPenjab.close();
+                psPenjab.close();
+            }
+        } catch (Exception ers) {
+            System.out.println("Error fetching jenis penjamin: " + ers);
+        }
+        return jenisPenjamin;
+    }
+    
+    
     private String getGoogleMapUrl() { ///////// START - kode untuk mengambil URL google di table setting_url pada kolom google_map
     String googleMapUrl = ""; 
     try {
@@ -1141,6 +1176,8 @@ public class SuratKontrol extends javax.swing.JDialog {
     String nohppasien = "";  //ubah format nomor hp pasien
     String jk = "";  //ubah format jenis kelamin
     String formattedTanggal = "";  //ubah format tanggal kontrol
+    String noRM = TNoRM.getText(); // Ambil No RM
+
     
     try {
         /////////format tanggal dan jam kontrol        
@@ -1205,19 +1242,31 @@ public class SuratKontrol extends javax.swing.JDialog {
     } else {
         salampembuka = greeting + ", Bpk / Ibu " + TPasien.getText() + "\n"; // 🆕 Jika gender tidak diketahui
     }
+    
+    // --- MODIFIKASI PESAN BERDASARKAN PENJAMIN ---
+    String jenisPenjaminPasien = getJenisPenjaminTerakhir(noRM);
+    String infoAntrian;
+    String infoTambahanBPJS = "";
+     if (jenisPenjaminPasien.toLowerCase().contains("bpjs")) {
+        infoAntrian = "0xF0 0x9F 0x94 0xA2 *Note : [Untuk peserta BPJS Nomor Antrian booking dapat di ambil melalui Aplikasi Mobile JKN]* \n";
+        infoTambahanBPJS = "Jangan lupa untuk ambil antrean di aplikasi MJKN. \n ";
+    } else {
+        infoAntrian = "0xF0 0x9F 0x94 0xA2 *Nomor Antrian Poli : " + NoReg.getText() + "* \n";
+    }
 
     // Membuat isi pesan ke dalam whatsapp
     String pesan = salampembuka + " - (" + TNoRM.getText() + ") \n 0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
         "Kami dari " + akses.getnamars() + " izin mengingatkan bahwa Anda memiliki jadwal sudah terdaftar booking untuk pemeriksaan pada: \n\n" +        
         "0xF0 0x9F 0x93 0x85 *Tanggal*: " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
         "0xF0 0x9F 0x91 0xA8 *Dokter* : " + NmDokter.getText() + "\n" +
-        "0xF0 0x9F 0x8F 0xA5 *Spesialis* : " + NmPoli.getText() + "\n" +
-        "0xF0 0x9F 0x94 0xA2 *Nomor Antrian Poli : " + NoReg.getText() + "* \n" +
+        "0xF0 0x9F 0x8F 0xA5 *Spesialis* : " + NmPoli.getText() + "\n" +                
         "0xF0 0x9F 0x8F 0xA0 *Alamat* : " + akses.getalamatrs() + "\n" +
-        "0xF0 0x9F 0x8C 0x8F Lokasi map :" + googleMapUrl + " \n\n" +            
-        //"Apabila Anda menggunakan BPJS, silakan ambil antrian menggunakan aplikasi MJKN. \n "+
+        "0xF0 0x9F 0x8C 0x8F Lokasi map :" + googleMapUrl + " \n\n" +
+        infoAntrian + // Menggunakan variabel infoAntrian yang sudah disesuaikan            
+        //"Apabila Anda menggunakan BPJS, silakan ambil antrian menggunakan aplikasi MJKN. \n "+        
         "Hubungi kami di: "+ akses.getkontakrs()+ "\n" +
         "Email :" + akses.getemailrs() + "\n" +
+        infoTambahanBPJS + // Info tambahan jika pasien BPJS
         "0xF0 0x9F 0x93 0x84 Apabila ada perubahan jadwal atau kendala, silakan balas pesan ini.\n\n" +
         "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F"+
         "\n \n ====\n"+
@@ -1257,6 +1306,7 @@ public class SuratKontrol extends javax.swing.JDialog {
     String jk = "";  //ubah format jenis kelamin
     String formattedTanggal = "";  //ubah format tanggal kontrol
     String waktukirim = ""; // format waktu pengiriman WA (delayed message)
+    String noRM = TNoRM.getText(); // Ambil No RM
     
     try {
         /////////format tanggal dan jam kontrol        
@@ -1339,6 +1389,17 @@ public class SuratKontrol extends javax.swing.JDialog {
     } else {
         salampembuka = greeting + ", Bpk / Ibu " + TPasien.getText() + "\n"; // 🆕 Jika gender tidak diketahui
     }
+    
+    // --- MODIFIKASI PESAN BERDASARKAN PENJAMIN (SAMA SEPERTI kirimWhatsAppMessage) ---
+    String jenisPenjaminPasien = getJenisPenjaminTerakhir(noRM);
+    String infoAntrian;
+
+    if (jenisPenjaminPasien.toLowerCase().contains("bpjs")) {
+        infoAntrian = "0xF0 0x9F 0x94 0xA2 *Note : [Untuk peserta BPJS Nomor Antrian booking dapat di ambil melalui Aplikasi Mobile JKN]* \n";
+    } else {
+        infoAntrian = "0xF0 0x9F 0x94 0xA2 *Nomor Antrian Poli : " + NoReg.getText() + "* \n";
+    }
+    // --- AKHIR MODIFIKASI ---
 
     // Membuat isi pesan ke dalam whatsapp
     String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
@@ -1346,10 +1407,11 @@ public class SuratKontrol extends javax.swing.JDialog {
         "0xF0 0x9F 0x93 0x85 *Tanggal* : " + formattedTanggal +  "\n" +//format tanggal kirim yang sudah di-breakdown menjadi bahasa indonesia
         "0xF0 0x9F 0x91 0xA8 *Dokter* : " + NmDokter.getText() + "\n" +
         "0xF0 0x9F 0x8F 0xA5 *Spesialis* : " + NmPoli.getText() + "\n" +
-        "0xF0 0x9F 0x94 0xA2 *Nomor Antrian Poli : " + NoReg.getText() + "* \n" +
+        //"0xF0 0x9F 0x94 0xA2 *Nomor Antrian Poli : " + NoReg.getText() + "* \n" +        
         "0xF0 0x9F 0x8F 0xA0 *Alamat* : " + akses.getalamatrs() + "\n" +
-        "0xF0 0x9F 0x8F 0xA0 *Lokasi map* :" + googleMapUrl + " \n\n" +            
-        "0xF0 0x9F 0x93 0x84 Jangan lupa untuk membawa surat kontrol yang telah diisi oleh dokter. Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
+        "0xF0 0x9F 0x8F 0xA0 *Lokasi map* :" + googleMapUrl + " \n\n" +
+        infoAntrian + // Menggunakan variabel infoAntrian yang sudah disesuaikan            
+        "0xF0 0x9F 0x93 0x84 Jangan lupa untuk menunjukkan surat kontrol yang telah diisi oleh dokter. Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
         "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
 
     // Insert into wa_outbox
@@ -2176,14 +2238,14 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         return tbObat;
     }
 //////// start - mengecek sudah ada atau belum di reg_periksa, untuk menghindari bentrok dengan registasi dari MJKN by ichsan
-    private boolean isSudahTerdaftar(String noRM, String tanggalSurat) {
+    private boolean isSudahTerdaftar(String noRM, String TanggalPeriksa) {
     boolean sudahTerdaftar = false;
     try {
         // ✅ Ensure tanggalSurat is manually formatted as YYYY-MM-DD
-        String formattedDate = tanggalSurat; // Assume it's already correct
+        String formattedDate = TanggalPeriksa; // Assume it's already correct
 
         // Debugging: Print the input date
-        System.out.println("Raw input tanggalSurat: " + tanggalSurat);
+        System.out.println("Raw input tanggalSurat: " + TanggalPeriksa);
         System.out.println("Formatted date used for SQL: " + formattedDate);
 
         String query = "SELECT ( " +
@@ -2215,12 +2277,6 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     return sudahTerdaftar;
 }
 
-
-
-
-
-
-
  //////// start - mengecek sudah ada atau belum di reg_periksa, untuk menghindari bentrok dengan registasi dari MJKN by ichsan
     private void isBooking() {
     if (Sequel.menyimpantf("skdp_bpjs", "?,?,?,?,?,?,?,?,?,?,?,?,?", "Tahun dan nomor surat", 13, new String[]{
@@ -2241,10 +2297,10 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
             String kdPj = Sequel.cariIsi("SELECT pasien.kd_pj FROM pasien WHERE pasien.no_rkm_medis=?", noRM);            
             
             System.out.println("Checking if patient is already registered...");  //debug ke console
-            System.out.println("noRM: " + noRM + ", tglSurat: " + tglSurat);        //debug ke console
-            System.out.println("isSudahTerdaftar result: " + isSudahTerdaftar(noRM, tglSurat)); //debug ke console
+            System.out.println("noRM: " + noRM + ", tglSurat: " + tglSurat);        //debug ke console            
+            System.out.println("isSudahTerdaftar result for tglPeriksa (" + tglPeriksa + "): " + isSudahTerdaftar(noRM, tglPeriksa)); //DEBUG BARU
             
-            if (!isSudahTerdaftar(noRM, tglSurat)) {
+            if (!isSudahTerdaftar(noRM, tglPeriksa)) { //DIUBAH KE tglPeriksa
                 Sequel.menyimpan2("booking_registrasi", "?,?,?,?,?,?,?,?,?,?,?", "Pasien dan Tanggal", 11, new String[]{
                         tglSurat, waktuSurat, noRM, 
                         tglPeriksa, KdDokter.getText(),
@@ -2265,10 +2321,11 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                 return; // Stop execution here to prevent sending WhatsApp message
             }
             emptTeks();  //kosongkan isi form setelah tekan simpan
+            tampil(); // PANGGIL tampil() UNTUK REFRESH TABLE
         }
         
         // Menambahkan data ke dalam tabel tampilan
-        tabMode.addRow(new String[]{
+       /* tabMode.addRow(new String[]{
                 TanggalPeriksa.getSelectedItem().toString().substring(6, 10), TNoRM.getText(), TPasien.getText(), Diagnosa.getText(),
                 Terapi.getText(), Alasan1.getText(), Alasan2.getText(),
                 Rtl1.getText(), Rtl2.getText(),
@@ -2276,9 +2333,8 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                 tglSurat + " " + waktuSurat,
                 NoSurat.getText(), NoReg.getText(),
                 KdDokter.getText(), NmDokter.getText(), KdPoli.getText(), NmPoli.getText(), Status.getSelectedItem().toString()
-        });
-
-        LCount.setText("" + tabMode.getRowCount());
+        });  
+        LCount.setText("" + tabMode.getRowCount()); */
     }
 }
 
