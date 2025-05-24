@@ -3449,6 +3449,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                         "\"tglDaftar\": \""+TanggalDaftar.getSelectedItem()+"\"," +
                                         "\"noKartu\": \""+NoKartu.getText()+"\"," +
                                         "\"kdPoli\": \""+KdPoliTujuan.getText()+"\"," +
+                                        "\"keluhan\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                         "\"kunjSakit\": "+kunjungansakit+"," +
                                         "\"sistole\": "+Sistole.getText()+"," +
                                         "\"diastole\": "+Diastole.getText()+"," +
@@ -3570,6 +3571,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                         "\"noKartu\": \""+NoKartu.getText()+"\"," +
                                         "\"tglDaftar\": \""+TanggalDaftar.getSelectedItem()+"\"," +
                                         "\"kdPoli\": \""+KdPoliTujuan.getText()+"\"," +
+                                        "\"keluhan\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                         "\"kdSadar\": \""+KdSadar.getText()+"\"," +
                                         "\"sistole\": "+Sistole.getText()+"," +
                                         "\"diastole\": "+Diastole.getText()+"," +
@@ -3588,10 +3590,14 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                         "\"rujukLanjut\": null," +
                                         "\"kdTacc\": -1," +
                                         "\"alasanTacc\": null," +
+                                        "\"anamnesa\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                         "\"alergiMakan\": \""+KdAlergiMakanan.getText()+"\"," +
                                         "\"alergiUdara\": \""+KdAlergiUdara.getText()+"\"," +
                                         "\"alergiObat\": \""+KdAlergiObat.getText()+"\"," +
                                         "\"kdPrognosa\": \""+KdPrognosa.getText()+"\"," +
+                                        "\"terapiObat\": \""+(TerapiObat.getText().equals("")?"Tidak Ada":TerapiObat.getText())+"\"," +
+                                        "\"terapiNonObat\": \""+(TerapiNonObat.getText().equals("")?"Tidak Ada":TerapiNonObat.getText())+"\"," +
+                                        "\"bmhp\": \""+(BMHP.getText().equals("")?"Tidak Ada":BMHP.getText())+"\"," +
                                         "\"suhu\": \""+TSuhu.getText()+"\"" +
                                       "}";
                         System.out.println(requestJson);
@@ -3692,6 +3698,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                         requestJson ="{" +
                                         "\"noKunjungan\": \""+tbSpesialis.getValueAt(tbSpesialis.getSelectedRow(),1).toString()+"\",," +
                                         "\"noKartu\": \""+NoKartu.getText()+"\"," +
+                                        "\"keluhan\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                         "\"kdSadar\": \""+KdSadar.getText()+"\"," +
                                         "\"sistole\": "+Sistole.getText()+"," +
                                         "\"diastole\": "+Diastole.getText()+"," +
@@ -3718,10 +3725,14 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                         "},"+
                                         "\"kdTacc\": "+kdtacc+"," +
                                         "\"alasanTacc\": "+alasantacc +"," +
+                                        "\"anamnesa\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                         "\"alergiMakan\": \""+KdAlergiMakanan.getText()+"\"," +
                                         "\"alergiUdara\": \""+KdAlergiUdara.getText()+"\"," +
                                         "\"alergiObat\": \""+KdAlergiObat.getText()+"\"," +
                                         "\"kdPrognosa\": \""+KdPrognosa.getText()+"\"," +
+                                        "\"terapiObat\": \""+(TerapiObat.getText().equals("")?"Tidak Ada":TerapiObat.getText())+"\"," +
+                                        "\"terapiNonObat\": \""+(TerapiNonObat.getText().equals("")?"Tidak Ada":TerapiNonObat.getText())+"\"," +
+                                        "\"bmhp\": \""+(BMHP.getText().equals("")?"Tidak Ada":BMHP.getText())+"\"," +
                                         "\"suhu\": \""+TSuhu.getText()+"\"" +
                                       "}";
                         System.out.println(requestJson);
@@ -6437,6 +6448,9 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                         terapinonobat=rs.getString("nama_brng")+" "+rs.getString("jml")+", "+terapinonobat;
                     }
                 }
+                TerapiObat.setText(terapiobat.equals("")?"Tidak Ada Obat":terapiobat);
+                TerapiNonObat.setText(terapinonobat);
+                BMHP.setText(bmhp.equals("")?"Tidak Ada BHP":bmhp);
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
             } finally{
@@ -6480,6 +6494,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                         TinggiBadan.setText(rs.getString("tinggi"));
                         LingkarPerut.setText(rs.getString("lingkar_perut"));
                         BeratBadan.setText(rs.getString("berat"));
+                        Keluhan.setText(rs.getString("keluhan")+(rs.getString("pemeriksaan").equals("")?"":", "+rs.getString("pemeriksaan")));
                         NmSadar.setText(rs.getString("kesadaran"));
                         TSuhu.setText(rs.getString("suhu_tubuh"));
                         if(rs.getString("kesadaran").equals("Compos Mentis")){
@@ -6576,6 +6591,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                         TinggiBadan.setText("0");
                         BeratBadan.setText("0");
                         LingkarPerut.setText("0");
+                        Keluhan.setText("Tidak Ada Keluhan");
                         KdSadar.setText("");
                         NmSadar.setText("");
                         KdPrognosa.setText("02");
@@ -6662,6 +6678,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                         TinggiBadan.setText(rs.getString("tinggi"));
                         BeratBadan.setText(rs.getString("berat"));
                         LingkarPerut.setText("40");
+                        Keluhan.setText(rs.getString("keluhan")+(rs.getString("pemeriksaan").equals("")?"":", "+rs.getString("pemeriksaan")));
                         NmSadar.setText(rs.getString("kesadaran"));
                         TSuhu.setText(rs.getString("suhu_tubuh"));
                         if(rs.getString("kesadaran").equals("Compos Mentis")){
@@ -6758,6 +6775,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                         TinggiBadan.setText("0");
                         BeratBadan.setText("0");
                         LingkarPerut.setText("0");
+                        Keluhan.setText("Tidak Ada Keluhan");
                         KdSadar.setText("");
                         NmSadar.setText("");
                         KdPrognosa.setText("02");
@@ -6932,9 +6950,9 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                         terapinonobat=rs.getString("nama_brng")+" "+rs.getString("jml")+", "+terapinonobat;
                     }
                 }
-                TerapiObat.setText(terapiobat);
+                TerapiObat.setText(terapiobat.equals("")?"Tidak Ada Obat":terapiobat);
                 TerapiNonObat.setText(terapinonobat);
-                BMHP.setText(bmhp);
+                BMHP.setText(bmhp.equals("")?"Tidak Ada BHP":bmhp);
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
             } finally{
@@ -6978,7 +6996,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                         TinggiBadan.setText(rs.getString("tinggi"));
                         BeratBadan.setText(rs.getString("berat"));
                         LingkarPerut.setText(rs.getString("lingkar_perut"));
-                        Keluhan.setText(rs.getString("keluhan"));
+                        Keluhan.setText(rs.getString("keluhan")+(rs.getString("pemeriksaan").equals("")?"":", "+rs.getString("pemeriksaan")));
                         NmSadar.setText(rs.getString("kesadaran"));
                         TSuhu.setText(rs.getString("suhu_tubuh"));
                         if(rs.getString("kesadaran").equals("Compos Mentis")){
@@ -7166,9 +7184,9 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                         TinggiBadan.setText(rs.getString("tinggi"));
                         BeratBadan.setText(rs.getString("berat"));
                         LingkarPerut.setText("40");
-                        Keluhan.setText(rs.getString("keluhan"));
+                        Keluhan.setText(rs.getString("keluhan")+(rs.getString("pemeriksaan").equals("")?"":", "+rs.getString("pemeriksaan")));
                         NmSadar.setText(rs.getString("kesadaran"));
-                        TSuhu.setText("suhu_tubuh");
+                        TSuhu.setText(rs.getString("suhu_tubuh"));
                         if(rs.getString("kesadaran").equals("Compos Mentis")){
                             KdSadar.setText("01");
                         }else if(rs.getString("kesadaran").equals("Somnolence")){
@@ -7495,7 +7513,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                         "\"noKartu\": \""+NoKartu.getText()+"\"," +
                                         "\"tglDaftar\": \""+TanggalKunjungan.getSelectedItem()+"\"," +
                                         "\"kdPoli\": \""+KdPoliTujuan.getText()+"\"," +
-                                        "\"keluhan\": \""+Keluhan.getText()+"\"," +
+                                        "\"keluhan\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                         "\"kdSadar\": \""+KdSadar.getText()+"\"," +
                                         "\"sistole\": "+Sistole.getText()+"," +
                                         "\"diastole\": "+Diastole.getText()+"," +
@@ -7514,11 +7532,14 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                         "\"rujukLanjut\": null," +
                                         "\"kdTacc\": -1," +
                                         "\"alasanTacc\": null," +
-                                        "\"anamnesa\": \""+Keluhan.getText()+"\"," +
+                                        "\"anamnesa\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                         "\"alergiMakan\": \""+KdAlergiMakanan.getText()+"\"," +
                                         "\"alergiUdara\": \""+KdAlergiUdara.getText()+"\"," +
                                         "\"alergiObat\": \""+KdAlergiObat.getText()+"\"," +
                                         "\"kdPrognosa\": \""+KdPrognosa.getText()+"\"," +
+                                        "\"terapiObat\": \""+(TerapiObat.getText().equals("")?"Tidak Ada":TerapiObat.getText())+"\"," +
+                                        "\"terapiNonObat\": \""+(TerapiNonObat.getText().equals("")?"Tidak Ada":TerapiNonObat.getText())+"\"," +
+                                        "\"bmhp\": \""+(BMHP.getText().equals("")?"Tidak Ada":BMHP.getText())+"\"," +
                                         "\"suhu\": \""+TSuhu.getText()+"\"" +
                                       "}";
                         System.out.println(requestJson);
@@ -7577,7 +7598,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                                         "\"noKartu\": \""+NoKartu.getText()+"\"," +
                                                         "\"tglDaftar\": \""+TanggalKunjungan.getSelectedItem()+"\"," +
                                                         "\"kdPoli\": \""+KdPoliTujuan.getText()+"\"," +
-                                                        "\"keluhan\": \""+Keluhan.getText()+"\"," +
+                                                        "\"keluhan\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                                         "\"kdSadar\": \""+KdSadar.getText()+"\"," +
                                                         "\"sistole\": "+Sistole.getText()+"," +
                                                         "\"diastole\": "+Diastole.getText()+"," +
@@ -7596,10 +7617,14 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                                         "\"rujukLanjut\": null," +
                                                         "\"kdTacc\": "+kdtacc+"," +
                                                         "\"alasanTacc\": "+alasantacc+"," +
+                                                        "\"anamnesa\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                                         "\"alergiMakan\": \""+KdAlergiMakanan.getText()+"\"," +
                                                         "\"alergiUdara\": \""+KdAlergiUdara.getText()+"\"," +
                                                         "\"alergiObat\": \""+KdAlergiObat.getText()+"\"," +
                                                         "\"kdPrognosa\": \""+KdPrognosa.getText()+"\"," +
+                                                        "\"terapiObat\": \""+(TerapiObat.getText().equals("")?"Tidak Ada":TerapiObat.getText())+"\"," +
+                                                        "\"terapiNonObat\": \""+(TerapiNonObat.getText().equals("")?"Tidak Ada":TerapiNonObat.getText())+"\"," +
+                                                        "\"bmhp\": \""+(BMHP.getText().equals("")?"Tidak Ada":BMHP.getText())+"\"," +
                                                         "\"suhu\": \""+TSuhu.getText()+"\"" +
                                                       "}";
                                         System.out.println(requestJson);
@@ -7644,6 +7669,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                                         "\"noKartu\": \""+NoKartu.getText()+"\"," +
                                                         "\"tglDaftar\": \""+TanggalKunjungan.getSelectedItem()+"\"," +
                                                         "\"kdPoli\": \""+KdPoliTujuan.getText()+"\"," +
+                                                        "\"keluhan\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                                         "\"kdSadar\": \""+KdSadar.getText()+"\"," +
                                                         "\"sistole\": "+Sistole.getText()+"," +
                                                         "\"diastole\": "+Diastole.getText()+"," +
@@ -7670,10 +7696,14 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                                         "},"+
                                                         "\"kdTacc\": "+kdtacc+"," +
                                                         "\"alasanTacc\": "+alasantacc+"," +
+                                                        "\"anamnesa\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                                         "\"alergiMakan\": \""+KdAlergiMakanan.getText()+"\"," +
                                                         "\"alergiUdara\": \""+KdAlergiUdara.getText()+"\"," +
                                                         "\"alergiObat\": \""+KdAlergiObat.getText()+"\"," +
                                                         "\"kdPrognosa\": \""+KdPrognosa.getText()+"\"," +
+                                                        "\"terapiObat\": \""+(TerapiObat.getText().equals("")?"Tidak Ada":TerapiObat.getText())+"\"," +
+                                                        "\"terapiNonObat\": \""+(TerapiNonObat.getText().equals("")?"Tidak Ada":TerapiNonObat.getText())+"\"," +
+                                                        "\"bmhp\": \""+(BMHP.getText().equals("")?"Tidak Ada":BMHP.getText())+"\"," +
                                                         "\"suhu\": \""+TSuhu.getText()+"\"" +
                                                       "}";
                                         System.out.println(requestJson);
@@ -7718,6 +7748,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                                     "\"noKartu\": \""+NoKartu.getText()+"\"," +
                                                     "\"tglDaftar\": \""+TanggalKunjungan.getSelectedItem()+"\"," +
                                                     "\"kdPoli\": \""+KdPoliTujuan.getText()+"\"," +
+                                                    "\"keluhan\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                                     "\"kdSadar\": \""+KdSadar.getText()+"\"," +
                                                     "\"sistole\": "+Sistole.getText()+"," +
                                                     "\"diastole\": "+Diastole.getText()+"," +
@@ -7736,13 +7767,14 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                                     "\"rujukLanjut\": null," +
                                                     "\"kdTacc\": "+kdtacc+"," +
                                                     "\"alasanTacc\": "+alasantacc+"," +
+                                                    "\"anamnesa\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                                     "\"alergiMakan\": \""+KdAlergiMakanan.getText()+"\"," +
                                                     "\"alergiUdara\": \""+KdAlergiUdara.getText()+"\"," +
                                                     "\"alergiObat\": \""+KdAlergiObat.getText()+"\"," +
                                                     "\"kdPrognosa\": \""+KdPrognosa.getText()+"\"," +
-                                                    "\"terapiObat\": \""+TerapiObat.getText()+"\"," +
-                                                    "\"terapiNonObat\": \""+TerapiNonObat.getText()+"\"," +
-                                                    "\"bmhp\": \""+BMHP.getText()+"\"," +
+                                                    "\"terapiObat\": \""+(TerapiObat.getText().equals("")?"Tidak Ada":TerapiObat.getText())+"\"," +
+                                                    "\"terapiNonObat\": \""+(TerapiNonObat.getText().equals("")?"Tidak Ada":TerapiNonObat.getText())+"\"," +
+                                                    "\"bmhp\": \""+(BMHP.getText().equals("")?"Tidak Ada":BMHP.getText())+"\"," +
                                                     "\"suhu\": \""+TSuhu.getText()+"\"" +
                                                   "}";
                                     System.out.println(requestJson);
@@ -7787,6 +7819,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                                     "\"noKartu\": \""+NoKartu.getText()+"\"," +
                                                     "\"tglDaftar\": \""+TanggalKunjungan.getSelectedItem()+"\"," +
                                                     "\"kdPoli\": \""+KdPoliTujuan.getText()+"\"," +
+                                                    "\"keluhan\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                                     "\"kdSadar\": \""+KdSadar.getText()+"\"," +
                                                     "\"sistole\": "+Sistole.getText()+"," +
                                                     "\"diastole\": "+Diastole.getText()+"," +
@@ -7813,14 +7846,14 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                                     "},"+
                                                     "\"kdTacc\": "+kdtacc+"," +
                                                     "\"alasanTacc\": "+alasantacc+"," +
-                                                    "\"anamnesa\": \""+Keluhan.getText()+"\"," +
+                                                    "\"anamnesa\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                                     "\"alergiMakan\": \""+KdAlergiMakanan.getText()+"\"," +
                                                     "\"alergiUdara\": \""+KdAlergiUdara.getText()+"\"," +
                                                     "\"alergiObat\": \""+KdAlergiObat.getText()+"\"," +
                                                     "\"kdPrognosa\": \""+KdPrognosa.getText()+"\"," +
-                                                    "\"terapiObat\": \""+TerapiObat.getText()+"\"," +
-                                                    "\"terapiNonObat\": \""+TerapiNonObat.getText()+"\"," +
-                                                    "\"bmhp\": \""+BMHP.getText()+"\"," +
+                                                    "\"terapiObat\": \""+(TerapiObat.getText().equals("")?"Tidak Ada":TerapiObat.getText())+"\"," +
+                                                    "\"terapiNonObat\": \""+(TerapiNonObat.getText().equals("")?"Tidak Ada":TerapiNonObat.getText())+"\"," +
+                                                    "\"bmhp\": \""+(BMHP.getText().equals("")?"Tidak Ada":BMHP.getText())+"\"," +
                                                     "\"suhu\": \""+TSuhu.getText()+"\"" +
                                                   "}";
                                     System.out.println(requestJson);
@@ -7907,7 +7940,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                     "\"noKartu\": \""+NoKartu.getText()+"\"," +
                                     "\"tglDaftar\": \""+TanggalKunjungan.getSelectedItem()+"\"," +
                                     "\"kdPoli\": \""+KdPoliTujuan.getText()+"\"," +
-                                    "\"keluhan\": \""+Keluhan.getText()+"\"," +
+                                    "\"keluhan\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                     "\"kdSadar\": \""+KdSadar.getText()+"\"," +
                                     "\"sistole\": "+Sistole.getText()+"," +
                                     "\"diastole\": "+Diastole.getText()+"," +
@@ -7926,11 +7959,14 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                     "\"rujukLanjut\": null," +
                                     "\"kdTacc\": -1," +
                                     "\"alasanTacc\": null," +
-                                    "\"anamnesa\": \""+Keluhan.getText()+"\"," +
+                                    "\"anamnesa\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                     "\"alergiMakan\": \""+KdAlergiMakanan.getText()+"\"," +
                                     "\"alergiUdara\": \""+KdAlergiUdara.getText()+"\"," +
                                     "\"alergiObat\": \""+KdAlergiObat.getText()+"\"," +
                                     "\"kdPrognosa\": \""+KdPrognosa.getText()+"\"," +
+                                    "\"terapiObat\": \""+(TerapiObat.getText().equals("")?"Tidak Ada":TerapiObat.getText())+"\"," +
+                                    "\"terapiNonObat\": \""+(TerapiNonObat.getText().equals("")?"Tidak Ada":TerapiNonObat.getText())+"\"," +
+                                    "\"bmhp\": \""+(BMHP.getText().equals("")?"Tidak Ada":BMHP.getText())+"\"," +
                                     "\"suhu\": \""+TSuhu.getText()+"\"" +
                                   "}";
                     System.out.println(requestJson);
@@ -8489,6 +8525,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                                                             "\"noKartu\": \""+NoKartu.getText()+"\"," +
                                                                             "\"tglDaftar\": \""+TanggalDaftar.getSelectedItem()+"\"," +
                                                                             "\"kdPoli\": \""+KdPoliTujuan.getText()+"\"," +
+                                                                            "\"keluhan\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                                                             "\"kdSadar\": \""+KdSadar.getText()+"\"," +
                                                                             "\"sistole\": "+Sistole.getText()+"," +
                                                                             "\"diastole\": "+Diastole.getText()+"," +
@@ -8507,13 +8544,14 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                                                             "\"rujukLanjut\": null," +
                                                                             "\"kdTacc\": -1," +
                                                                             "\"alasanTacc\": null," +
+                                                                            "\"anamnesa\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                                                                             "\"alergiMakan\": \""+KdAlergiMakanan.getText()+"\"," +
                                                                             "\"alergiUdara\": \""+KdAlergiUdara.getText()+"\"," +
                                                                             "\"alergiObat\": \""+KdAlergiObat.getText()+"\"," +
                                                                             "\"kdPrognosa\": \""+KdPrognosa.getText()+"\"," +
-                                                                            "\"terapiObat\": \""+TerapiObat.getText()+"\"," +
-                                                                            "\"terapiNonObat\": \""+TerapiNonObat.getText()+"\"," +
-                                                                            "\"bmhp\": \""+BMHP.getText()+"\"," +
+                                                                            "\"terapiObat\": \""+(TerapiObat.getText().equals("")?"Tidak Ada":TerapiObat.getText())+"\"," +
+                                                                            "\"terapiNonObat\": \""+(TerapiNonObat.getText().equals("")?"Tidak Ada":TerapiNonObat.getText())+"\"," +
+                                                                            "\"bmhp\": \""+(BMHP.getText().equals("")?"Tidak Ada":BMHP.getText())+"\"," +
                                                                             "\"suhu\": \""+TSuhu.getText()+"\"" +
                                                                           "}";
                                                             PesanKirim.append(requestJson+"\n");
@@ -9205,6 +9243,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                             "\"tglDaftar\": \""+TanggalDaftar.getSelectedItem()+"\"," +
                             "\"noKartu\": \""+NoKartu.getText()+"\"," +
                             "\"kdPoli\": \""+KdPoliTujuan.getText()+"\"," +
+                            "\"keluhan\": \""+(Keluhan.getText().equals("")?"Tidak Ada":Keluhan.getText())+"\"," +
                             "\"kunjSakit\": "+kunjungansakit+"," +
                             "\"sistole\": "+Sistole.getText()+"," +
                             "\"diastole\": "+Diastole.getText()+"," +
