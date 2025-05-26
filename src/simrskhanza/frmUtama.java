@@ -765,11 +765,13 @@ import keuangan.DlgPendapatanPerAKun;
 import keuangan.DlgPendapatanPerAKunClosing;
 import keuangan.DlgRekapBiayaRegistrasi;
 import keuangan.KeuanganBayarPemesananDapur;
+import keuangan.KeuanganBayarPiutangJasaPerusahaan;
 import keuangan.KeuanganHutangDapurBelumLunas;
 import keuangan.KeuanganNilaiPiutangPerJenisBayarPerBulan;
 import keuangan.KeuanganPengajuanBiaya;
 import keuangan.KeuanganPersetujuanPengajuanBiaya;
 import keuangan.KeuanganPiutangJasaPerusahaan;
+import keuangan.KeuanganPiutangJasaPerusahaanBelumLunas;
 import keuangan.KeuanganRekapPengajuanBiaya;
 import keuangan.KeuanganRingkasanHutangVendorDapur;
 import keuangan.KeuanganRingkasanJasaTindakan;
@@ -1047,6 +1049,10 @@ import simrskhanza.DlgAbout;
 import simrskhanza.DlgAbout;
 import simrskhanza.DlgAbout;
 import simrskhanza.DlgAbout;
+import simrskhanza.DlgAbout;
+import simrskhanza.DlgAbout;
+import simrskhanza.DlgBahasa;
+import simrskhanza.DlgBahasa;
 import simrskhanza.DlgBahasa;
 import simrskhanza.DlgBahasa;
 import simrskhanza.DlgBahasa;
@@ -1055,6 +1061,10 @@ import simrskhanza.DlgCacatFisik;
 import simrskhanza.DlgCacatFisik;
 import simrskhanza.DlgCacatFisik;
 import simrskhanza.DlgCacatFisik;
+import simrskhanza.DlgCacatFisik;
+import simrskhanza.DlgCacatFisik;
+import simrskhanza.DlgCariPeriksaLab;
+import simrskhanza.DlgCariPeriksaLab;
 import simrskhanza.DlgCariPeriksaLab;
 import simrskhanza.DlgCariPeriksaLab;
 import simrskhanza.DlgCariPeriksaLab;
@@ -1063,6 +1073,10 @@ import simrskhanza.DlgCariPeriksaLabMB;
 import simrskhanza.DlgCariPeriksaLabMB;
 import simrskhanza.DlgCariPeriksaLabMB;
 import simrskhanza.DlgCariPeriksaLabMB;
+import simrskhanza.DlgCariPeriksaLabMB;
+import simrskhanza.DlgCariPeriksaLabMB;
+import simrskhanza.DlgCariPeriksaLabPA;
+import simrskhanza.DlgCariPeriksaLabPA;
 import simrskhanza.DlgCariPeriksaLabPA;
 import simrskhanza.DlgCariPeriksaLabPA;
 import simrskhanza.DlgCariPeriksaLabPA;
@@ -1071,6 +1085,10 @@ import simrskhanza.DlgCariPeriksaRadiologi;
 import simrskhanza.DlgCariPeriksaRadiologi;
 import simrskhanza.DlgCariPeriksaRadiologi;
 import simrskhanza.DlgCariPeriksaRadiologi;
+import simrskhanza.DlgCariPeriksaRadiologi;
+import simrskhanza.DlgCariPeriksaRadiologi;
+import simrskhanza.DlgCariTagihanOperasi;
+import simrskhanza.DlgCariTagihanOperasi;
 import simrskhanza.DlgCariTagihanOperasi;
 import simrskhanza.DlgCariTagihanOperasi;
 import simrskhanza.DlgCariTagihanOperasi;
@@ -1079,6 +1097,10 @@ import simrskhanza.DlgDpjp;
 import simrskhanza.DlgDpjp;
 import simrskhanza.DlgDpjp;
 import simrskhanza.DlgDpjp;
+import simrskhanza.DlgDpjp;
+import simrskhanza.DlgDpjp;
+import simrskhanza.DlgGolonganPolri;
+import simrskhanza.DlgGolonganPolri;
 import simrskhanza.DlgGolonganPolri;
 import simrskhanza.DlgGolonganPolri;
 import simrskhanza.DlgGolonganPolri;
@@ -1087,6 +1109,10 @@ import simrskhanza.DlgGolonganTNI;
 import simrskhanza.DlgGolonganTNI;
 import simrskhanza.DlgGolonganTNI;
 import simrskhanza.DlgGolonganTNI;
+import simrskhanza.DlgGolonganTNI;
+import simrskhanza.DlgGolonganTNI;
+import simrskhanza.DlgIGD;
+import simrskhanza.DlgIGD;
 import simrskhanza.DlgIGD;
 import simrskhanza.DlgIGD;
 import simrskhanza.DlgIGD;
@@ -1095,15 +1121,25 @@ import simrskhanza.DlgIKBBayi;
 import simrskhanza.DlgIKBBayi;
 import simrskhanza.DlgIKBBayi;
 import simrskhanza.DlgIKBBayi;
+import simrskhanza.DlgIKBBayi;
+import simrskhanza.DlgIKBBayi;
 import simrskhanza.DlgJabatanPolri;
 import simrskhanza.DlgJabatanPolri;
 import simrskhanza.DlgJabatanPolri;
 import simrskhanza.DlgJabatanPolri;
+import simrskhanza.DlgJabatanPolri;
+import simrskhanza.DlgJabatanPolri;
+import simrskhanza.DlgJabatanTNI;
+import simrskhanza.DlgJabatanTNI;
 import simrskhanza.DlgJabatanTNI;
 import simrskhanza.DlgJabatanTNI;
 import simrskhanza.DlgJabatanTNI;
 import simrskhanza.DlgJabatanTNI;
 import simrskhanza.DlgKasirRalan;
+import simrskhanza.DlgKasirRalan;
+import simrskhanza.DlgKasirRalan;
+import simrskhanza.DlgLhtCatatanPasien;
+import simrskhanza.DlgLhtCatatanPasien;
 import simrskhanza.DlgLhtCatatanPasien;
 import simrskhanza.DlgLhtCatatanPasien;
 import simrskhanza.DlgLhtCatatanPasien;
@@ -1112,6 +1148,10 @@ import simrskhanza.DlgPangkatPolri;
 import simrskhanza.DlgPangkatPolri;
 import simrskhanza.DlgPangkatPolri;
 import simrskhanza.DlgPangkatPolri;
+import simrskhanza.DlgPangkatPolri;
+import simrskhanza.DlgPangkatPolri;
+import simrskhanza.DlgPangkatTNI;
+import simrskhanza.DlgPangkatTNI;
 import simrskhanza.DlgPangkatTNI;
 import simrskhanza.DlgPangkatTNI;
 import simrskhanza.DlgPangkatTNI;
@@ -1120,6 +1160,10 @@ import simrskhanza.DlgPasienMati;
 import simrskhanza.DlgPasienMati;
 import simrskhanza.DlgPasienMati;
 import simrskhanza.DlgPasienMati;
+import simrskhanza.DlgPasienMati;
+import simrskhanza.DlgPasienMati;
+import simrskhanza.DlgPemberianDiet;
+import simrskhanza.DlgPemberianDiet;
 import simrskhanza.DlgPemberianDiet;
 import simrskhanza.DlgPemberianDiet;
 import simrskhanza.DlgPemberianDiet;
@@ -1128,16 +1172,28 @@ import simrskhanza.DlgPenanggungJawab;
 import simrskhanza.DlgPenanggungJawab;
 import simrskhanza.DlgPenanggungJawab;
 import simrskhanza.DlgPenanggungJawab;
+import simrskhanza.DlgPenanggungJawab;
+import simrskhanza.DlgPenanggungJawab;
+import simrskhanza.DlgPerusahaan;
+import simrskhanza.DlgPerusahaan;
 import simrskhanza.DlgPerusahaan;
 import simrskhanza.DlgPerusahaan;
 import simrskhanza.DlgPerusahaan;
 import simrskhanza.DlgPerusahaan;
 import simrskhanza.DlgRawatJalan;
+import simrskhanza.DlgRawatJalan;
+import simrskhanza.DlgRawatJalan;
+import simrskhanza.DlgReg;
+import simrskhanza.DlgReg;
 import simrskhanza.DlgReg;
 import simrskhanza.DlgRujuk;
 import simrskhanza.DlgRujuk;
 import simrskhanza.DlgRujuk;
 import simrskhanza.DlgRujuk;
+import simrskhanza.DlgRujuk;
+import simrskhanza.DlgRujuk;
+import simrskhanza.DlgRujukMasuk;
+import simrskhanza.DlgRujukMasuk;
 import simrskhanza.DlgRujukMasuk;
 import simrskhanza.DlgRujukMasuk;
 import simrskhanza.DlgRujukMasuk;
@@ -1146,10 +1202,16 @@ import simrskhanza.DlgSatuanPolri;
 import simrskhanza.DlgSatuanPolri;
 import simrskhanza.DlgSatuanPolri;
 import simrskhanza.DlgSatuanPolri;
+import simrskhanza.DlgSatuanPolri;
+import simrskhanza.DlgSatuanPolri;
 import simrskhanza.DlgSatuanTNI;
 import simrskhanza.DlgSatuanTNI;
 import simrskhanza.DlgSatuanTNI;
 import simrskhanza.DlgSatuanTNI;
+import simrskhanza.DlgSatuanTNI;
+import simrskhanza.DlgSatuanTNI;
+import simrskhanza.DlgSuku;
+import simrskhanza.DlgSuku;
 import simrskhanza.DlgSuku;
 import simrskhanza.DlgSuku;
 import simrskhanza.DlgSuku;
@@ -2150,7 +2212,7 @@ public class frmUtama extends javax.swing.JFrame {
 
         tanggal.setEditable(false);
         tanggal.setForeground(new java.awt.Color(50, 70, 50));
-        tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15/05/2025" }));
+        tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "24/05/2025" }));
         tanggal.setDisplayFormat("dd/MM/yyyy");
         tanggal.setName("tanggal"); // NOI18N
         tanggal.setOpaque(false);
@@ -22660,6 +22722,31 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
         aplikasi.setVisible(true);
         this.setCursor(Cursor.getDefaultCursor());
     }
+
+    private void btnBayarPiutangJasaPerusahaanActionPerformed(java.awt.event.ActionEvent evt) {                                                        
+        isTutup();
+        DlgHome.dispose();
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        KeuanganBayarPiutangJasaPerusahaan aplikasi=new KeuanganBayarPiutangJasaPerusahaan(this,false);
+        aplikasi.isCek();
+        aplikasi.setSize(PanelUtama.getWidth(), PanelUtama.getHeight());
+        aplikasi.setLocationRelativeTo(PanelUtama);
+        aplikasi.setVisible(true);
+        this.setCursor(Cursor.getDefaultCursor());
+    }
+    
+    private void btnPiutangJasaPerusahaanBelumLunasActionPerformed(java.awt.event.ActionEvent evt) {
+        isTutup();
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        KeuanganPiutangJasaPerusahaanBelumLunas form=new KeuanganPiutangJasaPerusahaanBelumLunas(this,false);
+        form.isCek();
+        form.setSize(PanelUtama.getWidth(),PanelUtama.getHeight());
+        form.setLocationRelativeTo(PanelUtama);
+        form.setVisible(true);
+        DlgHome.dispose();
+        this.setCursor(Cursor.getDefaultCursor());
+    }
+    
     
     /**
     * @param args the command line arguments
@@ -23365,7 +23452,7 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
             btnSkriningKesehatanGigiMulutBalita,btnSkriningAnemia,btnPermintaanLayananProgramKFR,btnLayananProgramKFR,btnSkriningHipertensi,btnSkriningKesehatanPenglihatan,
             btnCatatanObservasiHemodialisa,btnSkriningKesehatanGigiMulutDewasa,btnSkriningRisikoKankerServiks,btnCatatanCairanHemodialisa,btnSkriningKesehatanGigiMulutLansia,
             btnSkriningIndraPendengaran,btnCatatanPengkajianPaskaOperasi,btnSirkulasiInventarisCSSD,btnSkriningFrailtySyndrome,btnLamaPelayananCSSD,btnCatatanObservasiBayi,
-            btnRiwayatSuratPeringatan,btnMasterKesimpulanAnjuranMCU,btnKategoriPiutangJasaPerusahaan,btnPiutangJasaPerusahaan;
+            btnRiwayatSuratPeringatan,btnMasterKesimpulanAnjuranMCU,btnKategoriPiutangJasaPerusahaan,btnPiutangJasaPerusahaan,btnBayarPiutangJasaPerusahaan,btnPiutangJasaPerusahaanBelumLunas;
     
     public void isWall(){
         try{            
@@ -23436,6 +23523,7 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
             }else if(!TCari.getText().equals("")){
                 isCariIsi();
                 isCariIsi2();
+                isCariIsi3();
             }    
         }
             
@@ -25674,6 +25762,16 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
             
             if(akses.getpiutang_jasa_perusahaan()==true){
                 Panelmenu.add(btnPiutangJasaPerusahaan);
+                jmlmenu++;
+            }
+            
+            if(akses.getpiutang_jasa_perusahaan_belum_lunas()==true){
+                Panelmenu.add(btnPiutangJasaPerusahaanBelumLunas);
+                jmlmenu++;
+            }
+            
+            if(akses.getbayar_piutang_jasa_perusahaan()==true){
+                Panelmenu.add(btnBayarPiutangJasaPerusahaan);
                 jmlmenu++;
             }
 
@@ -31230,6 +31328,16 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
         
         if(akses.getpiutang_jasa_perusahaan()==true){
             Panelmenu.add(btnPiutangJasaPerusahaan);
+            jmlmenu++;
+        }
+        
+        if(akses.getpiutang_jasa_perusahaan_belum_lunas()==true){
+            Panelmenu.add(btnPiutangJasaPerusahaanBelumLunas);
+            jmlmenu++;
+        }
+        
+        if(akses.getbayar_piutang_jasa_perusahaan()==true){
+            Panelmenu.add(btnBayarPiutangJasaPerusahaan);
             jmlmenu++;
         }
 
@@ -37690,6 +37798,20 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
                 jmlmenu++;
             }                
         }
+        
+        if(akses.getpiutang_jasa_perusahaan_belum_lunas()==true){
+            if(btnPiutangJasaPerusahaanBelumLunas.getText().toLowerCase().trim().contains(TCari.getText().toLowerCase().trim())){
+                Panelmenu.add(btnPiutangJasaPerusahaanBelumLunas);
+                jmlmenu++;
+            } 
+        }
+        
+        if(akses.getbayar_piutang_jasa_perusahaan()==true){
+            if(btnBayarPiutangJasaPerusahaan.getText().toLowerCase().trim().contains(TCari.getText().toLowerCase().trim())){
+                Panelmenu.add(btnBayarPiutangJasaPerusahaan);
+                jmlmenu++;
+            }                
+        }
 
         if(akses.getdeposit_pasien()==true){   
             if(btnDeposit.getText().toLowerCase().trim().contains(TCari.getText().toLowerCase().trim())){
@@ -41288,7 +41410,9 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
                 jmlmenu++;
             }                
         }
-        
+    }
+    
+    private void isCariIsi2() {
         if(akses.getgrafik_kunjungan_ranaptanggal()==true){
             if(btnGrafikKunjunganRanapTanggal.getText().toLowerCase().trim().contains(TCari.getText().toLowerCase().trim())){
                 Panelmenu.add(btnGrafikKunjunganRanapTanggal);
@@ -42129,9 +42253,7 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
                 jmlmenu++;
             }                
         }
-    }
-    
-    private void isCariIsi2() {
+        
         if(akses.getzis_pengeluaran_penerima_dankes()==true){
             if(btnZISPengeluaranPenerimaDankes.getText().toLowerCase().trim().contains(TCari.getText().toLowerCase().trim())){
                 Panelmenu.add(btnZISPengeluaranPenerimaDankes);
@@ -42166,7 +42288,9 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
                 jmlmenu++;
             }                
         }
-        
+    }
+    
+    private void isCariIsi3() {
         if(akses.getzis_atap_rumah_penerima_dankes()==true){
             if(btnZISAtapRumahPenerimaDankes.getText().toLowerCase().trim().contains(TCari.getText().toLowerCase().trim())){
                 Panelmenu.add(btnZISAtapRumahPenerimaDankes);
@@ -47706,5 +47830,21 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
         btnPiutangJasaPerusahaan.setName("btnPiutangJasaPerusahaan");
         btnPiutangJasaPerusahaan.setPreferredSize(new java.awt.Dimension(200, 90));
         btnPiutangJasaPerusahaan.addActionListener(this::btnPiutangJasaPerusahaanActionPerformed);
+        
+        btnBayarPiutangJasaPerusahaan = new widget.ButtonBig();
+        btnBayarPiutangJasaPerusahaan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/48x48/2570316_business_company_economic_finance_get_icon.png"))); 
+        btnBayarPiutangJasaPerusahaan.setText("Bayar Piutang Jasa Perusahaan");
+        btnBayarPiutangJasaPerusahaan.setIconTextGap(0);
+        btnBayarPiutangJasaPerusahaan.setName("btnBayarPiutangJasaPerusahaan");
+        btnBayarPiutangJasaPerusahaan.setPreferredSize(new java.awt.Dimension(200, 90));
+        btnBayarPiutangJasaPerusahaan.addActionListener(this::btnBayarPiutangJasaPerusahaanActionPerformed);
+        
+        btnPiutangJasaPerusahaanBelumLunas = new widget.ButtonBig();
+        btnPiutangJasaPerusahaanBelumLunas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/48x48/9517544_cheque_banking_check_finance_payment_icon.png"))); 
+        btnPiutangJasaPerusahaanBelumLunas.setText("Piutang Jasa Perusahaan Belum Lunas");
+        btnPiutangJasaPerusahaanBelumLunas.setIconTextGap(0);
+        btnPiutangJasaPerusahaanBelumLunas.setName("btnPiutangJasaPerusahaanBelumLunas");
+        btnPiutangJasaPerusahaanBelumLunas.setPreferredSize(new java.awt.Dimension(200, 90));
+        btnPiutangJasaPerusahaanBelumLunas.addActionListener(this::btnPiutangJasaPerusahaanBelumLunasActionPerformed);
     }
 }
