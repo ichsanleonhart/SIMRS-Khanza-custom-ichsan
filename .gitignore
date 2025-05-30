@@ -13,3 +13,6 @@ api-bridgingradiologi/
 /ServiceUltah/build/
 /ServiceUltah/dist/
 /ServiceUltah/nbproject/private/
+/ServiceAbsensi/build/
+/ServiceAbsensi/nbproject/private/
+/ServiceAbsensi/dist/
