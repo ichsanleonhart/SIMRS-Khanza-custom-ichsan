@@ -1248,7 +1248,7 @@ public class SuratKontrol extends javax.swing.JDialog {
     String infoAntrian;
     String infoTambahanBPJS = "";
      if (jenisPenjaminPasien.toLowerCase().contains("bpjs")) {
-        infoAntrian = "0xF0 0x9F 0x94 0xA2 *Note : [Untuk peserta BPJS Nomor Antrian booking dapat di ambil melalui Aplikasi Mobile JKN]* \n";
+        infoAntrian = "0xF0 0x9F 0x94 0xA2 *Note : [Untuk peserta BPJS Nomor Antrian booking dapat diambil melalui Aplikasi Mobile JKN]* \n";
         infoTambahanBPJS = "Jangan lupa untuk ambil antrean di aplikasi MJKN. \n ";
     } else {
         infoAntrian = "0xF0 0x9F 0x94 0xA2 *Nomor Antrian Poli : " + NoReg.getText() + "* \n";
