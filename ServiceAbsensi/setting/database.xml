@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <comment>KhanzaHMS</comment> 
+    
+    <!-- WA GATEWAY -->
+    <entry key="WAGATEWAY">maskofa</entry>  <!--fonnte,maskofa-->
+    <entry key="HOSTWA">5k7+C7EnUw9nUv2Nix+DBA==</entry>
+    <entry key="DATABASEWA">prq/7kj/0nlvlzpcLCx3PQ==</entry>
+    <entry key="PORTWA">nioxtijcpDaKSUiUiP5FAg==</entry>
+    <entry key="USERWA">kMR3WfAwUK6MbhCyydxa0g==</entry>
+    <entry key="PASWA">pIDCqqPOXr2wbgHgkUMV8Q==</entry>
+    
+    
+</properties>
