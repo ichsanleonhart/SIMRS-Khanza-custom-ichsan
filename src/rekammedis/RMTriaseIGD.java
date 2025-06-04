@@ -44,6 +44,7 @@ import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import kepegawaian.DlgCariPegawai;
+import java.sql.Timestamp;  //tambahan dari ichsan
 
 
 /**
@@ -4780,7 +4781,74 @@ public final class RMTriaseIGD extends javax.swing.JDialog {
         TNoRw.setText(norwt);
         TNoRM.setText(norm);
         TPasien.setText(namapasien);
-        TCari.setText(norwt);   
+        TCari.setText(norwt);  
+        
+        // Logika untuk mengambil data CPPT dari pemeriksaan_ralan by ichsan
+        PreparedStatement psPemeriksaanRalan = null; // Deklarasikan PreparedStatement baru
+        ResultSet rsPemeriksaanRalan = null;         // Deklarasikan ResultSet baru
+        try {
+            psPemeriksaanRalan = koneksi.prepareStatement(
+                    "SELECT keluhan, suhu_tubuh, tensi, nadi, spo2, respirasi, alergi " + // Tambahkan 'alergi' juga
+                    "FROM pemeriksaan_ralan " +
+                    "WHERE no_rawat = ? " +
+                    "ORDER BY tgl_perawatan DESC, jam_rawat DESC LIMIT 1"); 
+            
+            psPemeriksaanRalan.setString(1, TNoRw.getText());
+            rsPemeriksaanRalan = psPemeriksaanRalan.executeQuery();
+            
+            if (rsPemeriksaanRalan.next()) {
+                // Mengisi TextBox untuk data Primer
+                PrimerKeluhanUtama.setText(rsPemeriksaanRalan.getString("keluhan"));
+                PrimerSuhu.setText(rsPemeriksaanRalan.getString("suhu_tubuh"));
+                PrimerTensi.setText(rsPemeriksaanRalan.getString("tensi"));
+                PrimerNadi.setText(rsPemeriksaanRalan.getString("nadi"));
+                PrimerSaturasi.setText(rsPemeriksaanRalan.getString("spo2"));
+                PrimerRespirasi.setText(rsPemeriksaanRalan.getString("respirasi"));                
+
+                // Mengisi TextBox untuk data Sekunder (duplikasi dari Primer sesuai permintaan sebelumnya)
+                SekunderAnamnesa.setText(rsPemeriksaanRalan.getString("keluhan")); 
+                SekunderSuhu.setText(rsPemeriksaanRalan.getString("suhu_tubuh"));
+                SekunderTensi.setText(rsPemeriksaanRalan.getString("tensi"));
+                SekunderNadi.setText(rsPemeriksaanRalan.getString("nadi"));
+                SekunderSaturasi.setText(rsPemeriksaanRalan.getString("spo2"));
+                SekunderRespirasi.setText(rsPemeriksaanRalan.getString("respirasi"));
+            } else {
+                // Jika tidak ada data di pemeriksaan_ralan, kosongkan field terkait
+                PrimerKeluhanUtama.setText("");
+                PrimerSuhu.setText("");
+                PrimerNyeri.setText("");
+                PrimerTensi.setText("");
+                PrimerNadi.setText("");
+                PrimerSaturasi.setText("");
+                PrimerRespirasi.setText("");
+                SekunderAnamnesa.setText("");
+                SekunderSuhu.setText("");
+                SekunderNyeri.setText("");
+                SekunderTensi.setText("");
+                SekunderNadi.setText("");
+                SekunderSaturasi.setText("");
+                SekunderRespirasi.setText("");
+            }
+        } catch (Exception e) {
+            System.out.println("Notif pengambilan data pemeriksaan_ralan di Triase IGD : " + e.getMessage());
+        } finally {
+            try {
+                if (rsPemeriksaanRalan != null) {
+                    rsPemeriksaanRalan.close();
+                }
+            } catch (Exception ex) {
+                // Handle exception
+            }
+            try {
+                if (psPemeriksaanRalan != null) {
+                    psPemeriksaanRalan.close();
+                }
+            } catch (Exception ex) {
+                // Handle exception
+            }
+        }
+        // === AKHIR DARI BAGIAN YANG PERLU ANDA TAMBAHKAN ===
+        
     }
     
     public void tampilPemeriksaan() {        

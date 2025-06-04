@@ -50,11 +50,8 @@ public final class DlgRujuk extends javax.swing.JDialog {
     private Connection koneksi=koneksiDB.condb();
     private sekuel Sequel=new sekuel();
     private validasi Valid=new validasi();
-<<<<<<< HEAD
     private String diagnosa="",diagnosa2="",keluar="",tgl="",sql="", finger="", kodedokter="",namadokter="";
-=======
-    private String diagnosa="",diagnosa2="",tgl="",sql="";
->>>>>>> upstream/master
+
     private PreparedStatement psobat,ps;
     private ResultSet rs;
     private DlgCariDokter dokter=new DlgCariDokter(null,false);

@@ -35,7 +35,7 @@ import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import kepegawaian.DlgCariDokter;
-
+import java.sql.Timestamp; //tambahan modif Ichsan
 
 /**
  *
@@ -994,7 +994,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
         label11.setBounds(380, 40, 52, 23);
 
         TglAsuhan.setForeground(new java.awt.Color(50, 70, 50));
-        TglAsuhan.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "07-08-2024 15:03:07" }));
+        TglAsuhan.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "04-06-2025 09:23:23" }));
         TglAsuhan.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         TglAsuhan.setName("TglAsuhan"); // NOI18N
         TglAsuhan.setOpaque(false);
@@ -1182,6 +1182,11 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
 
         Visuskanan.setFocusTraversalPolicyProvider(true);
         Visuskanan.setName("Visuskanan"); // NOI18N
+        Visuskanan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                VisuskananActionPerformed(evt);
+            }
+        });
         Visuskanan.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 VisuskananKeyPressed(evt);
@@ -1989,7 +1994,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "07-08-2024" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "04-06-2025" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -2003,7 +2008,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "07-08-2024" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "04-06-2025" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -2731,6 +2736,10 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
         Valid.pindah2(evt,Tindakan,BtnSimpan);
     }//GEN-LAST:event_EdukasiKeyPressed
 
+    private void VisuskananActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VisuskananActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_VisuskananActionPerformed
+
     /**
     * @param args the command line arguments
     */
@@ -3168,6 +3177,107 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
                     ps.close();
                 }
             }
+            
+            // MODIFIKASI DIMULAI by Ichsan
+            // Ambil data dari tabel pemeriksaan_ralan untuk mengisi textbox
+            ps = koneksi.prepareStatement(
+                    "SELECT tensi, berat, suhu_tubuh, nadi, respirasi, alergi, keluhan " +
+                    "FROM pemeriksaan_ralan " +
+                    "WHERE no_rawat = ? " +
+                    "ORDER BY tgl_perawatan DESC, jam_rawat DESC LIMIT 1"); // Ambil satu data terakhir
+            try {
+                ps.setString(1, TNoRw.getText());
+                rs = ps.executeQuery();
+                if (rs.next()) {
+                    TD.setText(rs.getString("tensi"));
+                    BB.setText(rs.getString("berat"));
+                    Suhu.setText(rs.getString("suhu_tubuh"));
+                    Nadi.setText(rs.getString("nadi"));
+                    RR.setText(rs.getString("respirasi"));
+                    Alergi.setText(rs.getString("alergi"));
+                    KeluhanUtama.setText(rs.getString("keluhan"));
+                    //default value
+                    Visuskanan.setText("");
+                    Visuskiri.setText("");
+                    CCkanan.setText("");
+                    CCkiri.setText("");
+                    Palkanan.setText("Tenang +");
+                    Palkiri.setText("Tenang +");
+                    Conkanan.setText("Tenang +");
+                    Conkiri.setText("Tenang +");
+                    Corneakanan.setText("Jernih +");
+                    Corneakiri.setText("Jernih +");
+                    COAkanan.setText("Dalam +, flare (-), Cell (-)");
+                    COAkiri.setText("Dalam +, flare (-), Cell (-)");
+                    Pupilkanan.setText("Radier, Bulat +, RC +, Diameter 3mm");
+                    Pupilkiri.setText("Radier, Bulat +, RC +, Diameter 3mm");
+                    Lensakanan.setText("Jernih");
+                    Lensakiri.setText("Jernih");
+                    Funduskanan.setText("FR +");
+                    Funduskiri.setText("FR +");
+                    Papilkanan.setText("Batas tegas +, Warna N, CD ratio 0,3");
+                    Papilkiri.setText("Batas tegas +, Warna N, CD ratio 0,3");
+                    Retinakanan.setText("Attach +");
+                    Retinakiri.setText("Attach +");
+                    Makulakanan.setText("Refleks +");
+                    Makulakiri.setText("Refleks +");
+                    TIOkanan.setText("");
+                    TIOkiri.setText("");
+                    MBOkanan.setText("");
+                    MBOkiri.setText("");                    
+                } else {
+                    // Jika tidak ada data di pemeriksaan_ralan, kosongkan field
+                    TD.setText("");
+                    BB.setText("");
+                    Suhu.setText("");
+                    Nadi.setText("");
+                    RR.setText("");
+                    Alergi.setText("");
+                    KeluhanUtama.setText("");
+                    //default value
+                    Visuskanan.setText("");
+                    Visuskiri.setText("");
+                    CCkanan.setText("");
+                    CCkiri.setText("");
+                    Palkanan.setText("Tenang +");
+                    Palkiri.setText("Tenang +");
+                    Conkanan.setText("Tenang +");
+                    Conkiri.setText("Tenang +");
+                    Corneakanan.setText("Jernih +");
+                    Corneakiri.setText("Jernih +");
+                    COAkanan.setText("Dalam +, flare (-), Cell (-)");
+                    COAkiri.setText("Dalam +, flare (-), Cell (-)");
+                    Pupilkanan.setText("Radier, Bulat +, RC +, Diameter 3mm");
+                    Pupilkiri.setText("Radier, Bulat +, RC +, Diameter 3mm");
+                    Lensakanan.setText("Jernih");
+                    Lensakiri.setText("Jernih");
+                    Funduskanan.setText("FR +");
+                    Funduskiri.setText("FR +");
+                    Papilkanan.setText("Batas tegas +, Warna N, CD ratio 0,3");
+                    Papilkiri.setText("Batas tegas +, Warna N, CD ratio 0,3");
+                    Retinakanan.setText("Attach +");
+                    Retinakiri.setText("Attach +");
+                    Makulakanan.setText("Refleks +");
+                    Makulakiri.setText("Refleks +");
+                    TIOkanan.setText("");
+                    TIOkiri.setText("");
+                    MBOkanan.setText("");
+                    MBOkiri.setText("");
+                }
+            } catch (Exception e) {
+                System.out.println("Notif pemeriksaan_ralan : " + e);
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+            }
+            // MODIFIKASI SELESAI by Ichsan
+            
+            
+            
         } catch (Exception e) {
             System.out.println("Notif : "+e);
         }

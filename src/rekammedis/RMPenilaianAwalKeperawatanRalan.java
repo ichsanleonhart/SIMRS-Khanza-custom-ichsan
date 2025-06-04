@@ -38,7 +38,7 @@ import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import kepegawaian.DlgCariPetugas;
-
+import java.sql.Timestamp; //tambahan modif Ichsan
 
 /**
  *
@@ -1804,7 +1804,7 @@ public final class RMPenilaianAwalKeperawatanRalan extends javax.swing.JDialog {
         TotalHasil.setBounds(774, 770, 80, 23);
 
         TglAsuhan.setForeground(new java.awt.Color(50, 70, 50));
-        TglAsuhan.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "28-04-2024 06:09:19" }));
+        TglAsuhan.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15-04-2025 19:53:33" }));
         TglAsuhan.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         TglAsuhan.setName("TglAsuhan"); // NOI18N
         TglAsuhan.setOpaque(false);
@@ -1823,6 +1823,11 @@ public final class RMPenilaianAwalKeperawatanRalan extends javax.swing.JDialog {
 
         GCS.setFocusTraversalPolicyProvider(true);
         GCS.setName("GCS"); // NOI18N
+        GCS.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                GCSActionPerformed(evt);
+            }
+        });
         GCS.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 GCSKeyPressed(evt);
@@ -2261,7 +2266,7 @@ public final class RMPenilaianAwalKeperawatanRalan extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "28-04-2024" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15-04-2025" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -2275,7 +2280,7 @@ public final class RMPenilaianAwalKeperawatanRalan extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "28-04-2024" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15-04-2025" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -3527,6 +3532,10 @@ public final class RMPenilaianAwalKeperawatanRalan extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_tbMasalahKeperawatanMouseClicked
 
+    private void GCSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GCSActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_GCSActionPerformed
+
     /**
     * @param args the command line arguments
     */
@@ -4023,6 +4032,55 @@ public final class RMPenilaianAwalKeperawatanRalan extends javax.swing.JDialog {
                     ps.close();
                 }
             }
+            
+            
+            // MODIFIKASI DIMULAI by Ichsan
+            // Ambil data dari tabel pemeriksaan_ralan untuk mengisi textbox
+            ps = koneksi.prepareStatement(
+                    "SELECT tensi, berat, suhu_tubuh, nadi, respirasi, alergi, keluhan, gcs, tinggi " +
+                    "FROM pemeriksaan_ralan " +
+                    "WHERE no_rawat = ? " +
+                    "ORDER BY tgl_perawatan DESC, jam_rawat DESC LIMIT 1"); // Ambil satu data terakhir
+            try {
+                ps.setString(1, TNoRw.getText());
+                rs = ps.executeQuery();
+                if (rs.next()) {
+                    TD.setText(rs.getString("tensi"));
+                    TB.setText(rs.getString("tinggi"));
+                    BB.setText(rs.getString("berat"));
+                    Suhu.setText(rs.getString("suhu_tubuh"));
+                    Nadi.setText(rs.getString("nadi"));
+                    RR.setText(rs.getString("respirasi"));
+                    Alergi.setText(rs.getString("alergi"));
+                    KeluhanUtama.setText(rs.getString("keluhan"));
+                    GCS.setText(rs.getString("gcs"));
+                                       
+                } else {
+                    // Jika tidak ada data di pemeriksaan_ralan, kosongkan field
+                    TD.setText("");
+                    TB.setText("");
+                    BB.setText("");
+                    Suhu.setText("");
+                    Nadi.setText("");
+                    RR.setText("");
+                    Alergi.setText("");
+                    KeluhanUtama.setText("");
+                    GCS.setText("");
+                   
+                }
+            } catch (Exception e) {
+                System.out.println("Notif pemeriksaan_ralan : " + e);
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+            }
+            // MODIFIKASI SELESAI by Ichsan
+            
+            
         } catch (Exception e) {
             System.out.println("Notif : "+e);
         }
