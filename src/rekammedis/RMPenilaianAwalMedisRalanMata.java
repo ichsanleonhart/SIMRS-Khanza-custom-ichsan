@@ -973,7 +973,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
         jSeparator14.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(239, 244, 234)));
         jSeparator14.setName("jSeparator14"); // NOI18N
         FormInput.add(jSeparator14);
-        jSeparator14.setBounds(45, 940, 780, 1);
+        jSeparator14.setBounds(40, 538, 780, 1);
 
         jLabel100.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel100.setText("III. STATUS OFTAMOLOGIS");
@@ -994,7 +994,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
         label11.setBounds(380, 40, 52, 23);
 
         TglAsuhan.setForeground(new java.awt.Color(50, 70, 50));
-        TglAsuhan.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "04-06-2025 09:23:23" }));
+        TglAsuhan.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-06-2025 10:38:23" }));
         TglAsuhan.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         TglAsuhan.setName("TglAsuhan"); // NOI18N
         TglAsuhan.setOpaque(false);
@@ -1017,7 +1017,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
         jSeparator18.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(239, 244, 234)));
         jSeparator18.setName("jSeparator18"); // NOI18N
         FormInput.add(jSeparator18);
-        jSeparator18.setBounds(45, 900, 780, 1);
+        jSeparator18.setBounds(40, 940, 780, 1);
 
         scrollPane19.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         scrollPane19.setName("scrollPane19"); // NOI18N
@@ -1088,7 +1088,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
         jSeparator19.setBounds(0, 300, 880, 1);
 
         jLabel35.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel35.setText("Visus SC");
+        jLabel35.setText("Visus");
         jLabel35.setName("jLabel35"); // NOI18N
         FormInput.add(jLabel35);
         jLabel35.setBounds(350, 430, 170, 23);
@@ -1112,63 +1112,63 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
         jSeparator22.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(239, 244, 234)));
         jSeparator22.setName("jSeparator22"); // NOI18N
         FormInput.add(jSeparator22);
-        jSeparator22.setBounds(45, 540, 780, 1);
+        jSeparator22.setBounds(40, 580, 780, 1);
 
         jSeparator23.setBackground(new java.awt.Color(239, 244, 234));
         jSeparator23.setForeground(new java.awt.Color(239, 244, 234));
         jSeparator23.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(239, 244, 234)));
         jSeparator23.setName("jSeparator23"); // NOI18N
         FormInput.add(jSeparator23);
-        jSeparator23.setBounds(45, 580, 780, 1);
+        jSeparator23.setBounds(40, 620, 780, 1);
 
         jSeparator24.setBackground(new java.awt.Color(239, 244, 234));
         jSeparator24.setForeground(new java.awt.Color(239, 244, 234));
         jSeparator24.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(239, 244, 234)));
         jSeparator24.setName("jSeparator24"); // NOI18N
         FormInput.add(jSeparator24);
-        jSeparator24.setBounds(45, 620, 780, 1);
+        jSeparator24.setBounds(40, 660, 780, 1);
 
         jSeparator25.setBackground(new java.awt.Color(239, 244, 234));
         jSeparator25.setForeground(new java.awt.Color(239, 244, 234));
         jSeparator25.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(239, 244, 234)));
         jSeparator25.setName("jSeparator25"); // NOI18N
         FormInput.add(jSeparator25);
-        jSeparator25.setBounds(45, 660, 780, 1);
+        jSeparator25.setBounds(40, 700, 780, 1);
 
         jSeparator26.setBackground(new java.awt.Color(239, 244, 234));
         jSeparator26.setForeground(new java.awt.Color(239, 244, 234));
         jSeparator26.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(239, 244, 234)));
         jSeparator26.setName("jSeparator26"); // NOI18N
         FormInput.add(jSeparator26);
-        jSeparator26.setBounds(45, 700, 780, 1);
+        jSeparator26.setBounds(40, 740, 780, 1);
 
         jSeparator27.setBackground(new java.awt.Color(239, 244, 234));
         jSeparator27.setForeground(new java.awt.Color(239, 244, 234));
         jSeparator27.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(239, 244, 234)));
         jSeparator27.setName("jSeparator27"); // NOI18N
         FormInput.add(jSeparator27);
-        jSeparator27.setBounds(45, 740, 780, 1);
+        jSeparator27.setBounds(40, 780, 780, 1);
 
         jSeparator28.setBackground(new java.awt.Color(239, 244, 234));
         jSeparator28.setForeground(new java.awt.Color(239, 244, 234));
         jSeparator28.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(239, 244, 234)));
         jSeparator28.setName("jSeparator28"); // NOI18N
         FormInput.add(jSeparator28);
-        jSeparator28.setBounds(45, 780, 780, 1);
+        jSeparator28.setBounds(40, 820, 780, 1);
 
         jSeparator29.setBackground(new java.awt.Color(239, 244, 234));
         jSeparator29.setForeground(new java.awt.Color(239, 244, 234));
         jSeparator29.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(239, 244, 234)));
         jSeparator29.setName("jSeparator29"); // NOI18N
         FormInput.add(jSeparator29);
-        jSeparator29.setBounds(45, 820, 780, 1);
+        jSeparator29.setBounds(40, 860, 780, 1);
 
         jSeparator30.setBackground(new java.awt.Color(239, 244, 234));
         jSeparator30.setForeground(new java.awt.Color(239, 244, 234));
         jSeparator30.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(239, 244, 234)));
         jSeparator30.setName("jSeparator30"); // NOI18N
         FormInput.add(jSeparator30);
-        jSeparator30.setBounds(45, 860, 780, 1);
+        jSeparator30.setBounds(40, 900, 780, 1);
 
         MBOkiri.setFocusTraversalPolicyProvider(true);
         MBOkiri.setName("MBOkiri"); // NOI18N
@@ -1178,7 +1178,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(MBOkiri);
-        MBOkiri.setBounds(520, 950, 300, 23);
+        MBOkiri.setBounds(520, 509, 300, 23);
 
         Visuskanan.setFocusTraversalPolicyProvider(true);
         Visuskanan.setName("Visuskanan"); // NOI18N
@@ -1233,7 +1233,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Palkanan);
-        Palkanan.setBounds(50, 510, 300, 23);
+        Palkanan.setBounds(50, 550, 300, 23);
 
         Palkiri.setFocusTraversalPolicyProvider(true);
         Palkiri.setName("Palkiri"); // NOI18N
@@ -1243,7 +1243,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Palkiri);
-        Palkiri.setBounds(520, 510, 300, 23);
+        Palkiri.setBounds(520, 550, 300, 23);
 
         Conkanan.setFocusTraversalPolicyProvider(true);
         Conkanan.setName("Conkanan"); // NOI18N
@@ -1253,7 +1253,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Conkanan);
-        Conkanan.setBounds(50, 550, 300, 23);
+        Conkanan.setBounds(50, 590, 300, 23);
 
         Conkiri.setFocusTraversalPolicyProvider(true);
         Conkiri.setName("Conkiri"); // NOI18N
@@ -1263,7 +1263,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Conkiri);
-        Conkiri.setBounds(520, 550, 300, 23);
+        Conkiri.setBounds(520, 590, 300, 23);
 
         Corneakanan.setFocusTraversalPolicyProvider(true);
         Corneakanan.setName("Corneakanan"); // NOI18N
@@ -1273,7 +1273,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Corneakanan);
-        Corneakanan.setBounds(50, 590, 300, 23);
+        Corneakanan.setBounds(50, 630, 300, 23);
 
         Corneakiri.setFocusTraversalPolicyProvider(true);
         Corneakiri.setName("Corneakiri"); // NOI18N
@@ -1283,7 +1283,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Corneakiri);
-        Corneakiri.setBounds(520, 590, 300, 23);
+        Corneakiri.setBounds(520, 630, 300, 23);
 
         COAkanan.setFocusTraversalPolicyProvider(true);
         COAkanan.setName("COAkanan"); // NOI18N
@@ -1293,7 +1293,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(COAkanan);
-        COAkanan.setBounds(50, 630, 300, 23);
+        COAkanan.setBounds(50, 670, 300, 23);
 
         COAkiri.setFocusTraversalPolicyProvider(true);
         COAkiri.setName("COAkiri"); // NOI18N
@@ -1303,7 +1303,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(COAkiri);
-        COAkiri.setBounds(520, 630, 300, 23);
+        COAkiri.setBounds(520, 670, 300, 23);
 
         Pupilkanan.setFocusTraversalPolicyProvider(true);
         Pupilkanan.setName("Pupilkanan"); // NOI18N
@@ -1313,7 +1313,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Pupilkanan);
-        Pupilkanan.setBounds(50, 670, 300, 23);
+        Pupilkanan.setBounds(50, 710, 300, 23);
 
         Pupilkiri.setFocusTraversalPolicyProvider(true);
         Pupilkiri.setName("Pupilkiri"); // NOI18N
@@ -1323,7 +1323,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Pupilkiri);
-        Pupilkiri.setBounds(520, 670, 300, 23);
+        Pupilkiri.setBounds(520, 710, 300, 23);
 
         Lensakanan.setFocusTraversalPolicyProvider(true);
         Lensakanan.setName("Lensakanan"); // NOI18N
@@ -1333,7 +1333,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Lensakanan);
-        Lensakanan.setBounds(50, 710, 300, 23);
+        Lensakanan.setBounds(50, 750, 300, 23);
 
         Lensakiri.setFocusTraversalPolicyProvider(true);
         Lensakiri.setName("Lensakiri"); // NOI18N
@@ -1343,7 +1343,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Lensakiri);
-        Lensakiri.setBounds(520, 710, 300, 23);
+        Lensakiri.setBounds(520, 750, 300, 23);
 
         Funduskanan.setFocusTraversalPolicyProvider(true);
         Funduskanan.setName("Funduskanan"); // NOI18N
@@ -1353,7 +1353,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Funduskanan);
-        Funduskanan.setBounds(50, 750, 300, 23);
+        Funduskanan.setBounds(50, 790, 300, 23);
 
         Funduskiri.setFocusTraversalPolicyProvider(true);
         Funduskiri.setName("Funduskiri"); // NOI18N
@@ -1363,7 +1363,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Funduskiri);
-        Funduskiri.setBounds(520, 750, 300, 23);
+        Funduskiri.setBounds(520, 790, 300, 23);
 
         Papilkanan.setFocusTraversalPolicyProvider(true);
         Papilkanan.setName("Papilkanan"); // NOI18N
@@ -1373,7 +1373,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Papilkanan);
-        Papilkanan.setBounds(50, 790, 300, 23);
+        Papilkanan.setBounds(50, 830, 300, 23);
 
         Papilkiri.setFocusTraversalPolicyProvider(true);
         Papilkiri.setName("Papilkiri"); // NOI18N
@@ -1388,7 +1388,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Papilkiri);
-        Papilkiri.setBounds(520, 790, 300, 24);
+        Papilkiri.setBounds(520, 830, 300, 24);
 
         Retinakanan.setFocusTraversalPolicyProvider(true);
         Retinakanan.setName("Retinakanan"); // NOI18N
@@ -1398,7 +1398,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Retinakanan);
-        Retinakanan.setBounds(50, 830, 300, 23);
+        Retinakanan.setBounds(50, 870, 300, 23);
 
         Retinakiri.setFocusTraversalPolicyProvider(true);
         Retinakiri.setName("Retinakiri"); // NOI18N
@@ -1408,7 +1408,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Retinakiri);
-        Retinakiri.setBounds(520, 830, 300, 23);
+        Retinakiri.setBounds(520, 870, 300, 23);
 
         Makulakanan.setFocusTraversalPolicyProvider(true);
         Makulakanan.setName("Makulakanan"); // NOI18N
@@ -1418,7 +1418,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Makulakanan);
-        Makulakanan.setBounds(50, 870, 300, 23);
+        Makulakanan.setBounds(50, 910, 300, 23);
 
         Makulakiri.setFocusTraversalPolicyProvider(true);
         Makulakiri.setName("Makulakiri"); // NOI18N
@@ -1428,7 +1428,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(Makulakiri);
-        Makulakiri.setBounds(520, 870, 300, 23);
+        Makulakiri.setBounds(520, 910, 300, 23);
 
         TIOkanan.setFocusTraversalPolicyProvider(true);
         TIOkanan.setName("TIOkanan"); // NOI18N
@@ -1438,7 +1438,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(TIOkanan);
-        TIOkanan.setBounds(50, 910, 300, 23);
+        TIOkanan.setBounds(50, 950, 300, 23);
 
         TIOkiri.setFocusTraversalPolicyProvider(true);
         TIOkiri.setName("TIOkiri"); // NOI18N
@@ -1448,7 +1448,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(TIOkiri);
-        TIOkiri.setBounds(520, 910, 300, 23);
+        TIOkiri.setBounds(520, 950, 300, 23);
 
         MBOkanan.setFocusTraversalPolicyProvider(true);
         MBOkanan.setName("MBOkanan"); // NOI18N
@@ -1458,7 +1458,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             }
         });
         FormInput.add(MBOkanan);
-        MBOkanan.setBounds(50, 950, 300, 23);
+        MBOkanan.setBounds(50, 509, 300, 23);
 
         jLabel44.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel44.setText("CC");
@@ -1470,73 +1470,73 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
         jLabel45.setText("Palpebra");
         jLabel45.setName("jLabel45"); // NOI18N
         FormInput.add(jLabel45);
-        jLabel45.setBounds(350, 510, 170, 23);
+        jLabel45.setBounds(350, 550, 170, 23);
 
         jLabel46.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel46.setText("Conjungtiva");
         jLabel46.setName("jLabel46"); // NOI18N
         FormInput.add(jLabel46);
-        jLabel46.setBounds(350, 550, 170, 23);
+        jLabel46.setBounds(350, 590, 170, 23);
 
         jLabel47.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel47.setText("Cornea");
         jLabel47.setName("jLabel47"); // NOI18N
         FormInput.add(jLabel47);
-        jLabel47.setBounds(350, 590, 170, 23);
+        jLabel47.setBounds(350, 630, 170, 23);
 
         jLabel48.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel48.setText("COA");
         jLabel48.setName("jLabel48"); // NOI18N
         FormInput.add(jLabel48);
-        jLabel48.setBounds(350, 630, 170, 23);
+        jLabel48.setBounds(350, 670, 170, 23);
 
         jLabel49.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel49.setText("Pupil");
         jLabel49.setName("jLabel49"); // NOI18N
         FormInput.add(jLabel49);
-        jLabel49.setBounds(350, 670, 170, 23);
+        jLabel49.setBounds(350, 710, 170, 23);
 
         jLabel50.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel50.setText("Lensa");
         jLabel50.setName("jLabel50"); // NOI18N
         FormInput.add(jLabel50);
-        jLabel50.setBounds(350, 710, 170, 23);
+        jLabel50.setBounds(350, 750, 170, 23);
 
         jLabel51.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel51.setText("Fundus Media");
         jLabel51.setName("jLabel51"); // NOI18N
         FormInput.add(jLabel51);
-        jLabel51.setBounds(350, 750, 170, 23);
+        jLabel51.setBounds(350, 790, 170, 23);
 
         jLabel52.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel52.setText("Papil");
         jLabel52.setName("jLabel52"); // NOI18N
         FormInput.add(jLabel52);
-        jLabel52.setBounds(350, 790, 170, 23);
+        jLabel52.setBounds(350, 830, 170, 23);
 
         jLabel53.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel53.setText("Retina");
         jLabel53.setName("jLabel53"); // NOI18N
         FormInput.add(jLabel53);
-        jLabel53.setBounds(350, 830, 170, 23);
+        jLabel53.setBounds(350, 870, 170, 23);
 
         jLabel54.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel54.setText("Makula");
         jLabel54.setName("jLabel54"); // NOI18N
         FormInput.add(jLabel54);
-        jLabel54.setBounds(350, 870, 170, 23);
+        jLabel54.setBounds(350, 910, 170, 23);
 
         jLabel55.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel55.setText("TIO");
         jLabel55.setName("jLabel55"); // NOI18N
         FormInput.add(jLabel55);
-        jLabel55.setBounds(350, 910, 170, 23);
+        jLabel55.setBounds(350, 950, 170, 23);
 
         jLabel56.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel56.setText("MBO");
+        jLabel56.setText("ADD");
         jLabel56.setName("jLabel56"); // NOI18N
         FormInput.add(jLabel56);
-        jLabel56.setBounds(350, 950, 170, 23);
+        jLabel56.setBounds(350, 509, 170, 23);
 
         jLabel12.setText("BB :");
         jLabel12.setName("jLabel12"); // NOI18N
@@ -1994,7 +1994,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "04-06-2025" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-06-2025" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -2008,7 +2008,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "04-06-2025" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-06-2025" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);

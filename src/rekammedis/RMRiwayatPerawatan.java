@@ -18258,7 +18258,7 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                                           "</tr>").append(
                                           "<tr align='center'>").append(
                                                "<td>").append(rs2.getString("mbokanan")).append("</td>").append(
-                                               "<td>MBO</td>").append(
+                                               "<td>ADD</td>").append(  //modifikasi ichsan, perubahan MBO -> ADD
                                                "<td>").append(rs2.getString("mbokiri")).append("</td>").append(
                                           "</tr>").append(
                                        "</table>").append(

@@ -18,7 +18,7 @@
 	<parameter name="tindakan" class="java.lang.String"/>
 	<parameter name="no_rawat" class="java.lang.String"/>
 	<parameter name="alergi" class="java.lang.String"/>
-	<parameter name="pemeriksaanralan" class="java.lang.String"/>
+	<parameter name="pemeriksaanranap" class="java.lang.String"/>
 	<parameter name="anamnesa" class="java.lang.String"/>
 	<parameter name="finger1" class="java.lang.String"/>
 	<parameter name="finger2" class="java.lang.String"/>
@@ -96,7 +96,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 	<detail>
 		<band height="898" splitType="Stretch">
 			<rectangle>
-				<reportElement mode="Transparent" x="0" y="96" width="574" height="681" uuid="b7bdb066-44c8-49d3-9134-968a8aa42f1c">
+				<reportElement mode="Transparent" x="0" y="96" width="574" height="683" uuid="b7bdb066-44c8-49d3-9134-968a8aa42f1c">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 			</rectangle>
@@ -124,7 +124,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				</textElement>
 				<textFieldExpression><![CDATA[$F{no_rkm_medis}]]></textFieldExpression>
 			</textField>
-			<textField pattern="dd MMMMM yyyy">
+			<textField isStretchWithOverflow="true" pattern="dd MMMMM yyyy">
 				<reportElement stretchType="RelativeToBandHeight" mode="Opaque" x="356" y="127" width="215" height="14" uuid="87a12409-ea6c-4fa6-9b6e-f0e76604a56e">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -142,7 +142,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				</textElement>
 				<text><![CDATA[Nama]]></text>
 			</staticText>
-			<textField pattern="">
+			<textField isStretchWithOverflow="true" pattern="">
 				<reportElement stretchType="RelativeToBandHeight" mode="Transparent" x="401" y="43" width="170" height="14" uuid="9288de15-1464-4e96-ae38-a4ba0d3f906c"/>
 				<textElement>
 					<font fontName="Tahoma" size="10"/>
@@ -158,7 +158,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				</textElement>
 				<text><![CDATA[Dokter Perujuk]]></text>
 			</staticText>
-			<textField pattern="">
+			<textField isStretchWithOverflow="true" pattern="">
 				<reportElement stretchType="RelativeToBandHeight" mode="Transparent" x="16" y="869" width="158" height="17" uuid="7402b03b-abdb-4e2b-a8a7-a0234272622a"/>
 				<textElement textAlignment="Center">
 					<font fontName="Tahoma" size="10"/>
@@ -193,7 +193,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<textFieldExpression><![CDATA[$P{diagnosa}]]></textFieldExpression>
 			</textField>
 			<textField pattern="" isBlankWhenNull="false">
-				<reportElement stretchType="RelativeToBandHeight" mode="Transparent" x="95" y="534" width="472" height="23" uuid="c7153a5a-d226-4eb8-ba2b-116cecb55b6a"/>
+				<reportElement stretchType="RelativeToBandHeight" mode="Transparent" x="95" y="536" width="472" height="38" uuid="c7153a5a-d226-4eb8-ba2b-116cecb55b6a"/>
 				<textElement>
 					<font fontName="Tahoma" size="9"/>
 					<paragraph lineSpacing="Single"/>
@@ -633,7 +633,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<textFieldExpression><![CDATA[$F{nm_dokter}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement mode="Transparent" x="2" y="505" width="110" height="14" uuid="4dc3d50c-b373-4a56-a952-7e16523a5d83"/>
+				<reportElement mode="Transparent" x="2" y="507" width="110" height="14" uuid="4dc3d50c-b373-4a56-a952-7e16523a5d83"/>
 				<textElement>
 					<font fontName="Tahoma" size="9"/>
 					<paragraph lineSpacing="Single"/>
@@ -641,7 +641,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<text><![CDATA[CATATAN KLINIS]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Transparent" x="2" y="520" width="87" height="14" uuid="feead7bb-6e39-46d2-ace1-e6204b0e5d75"/>
+				<reportElement mode="Transparent" x="2" y="522" width="87" height="14" uuid="feead7bb-6e39-46d2-ace1-e6204b0e5d75"/>
 				<textElement>
 					<font fontName="Tahoma" size="9"/>
 					<paragraph lineSpacing="Single"/>
@@ -649,7 +649,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<text><![CDATA[1. Alergi]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="89" y="520" width="6" height="14" uuid="e0e2e2c5-499a-4f4b-9fe8-e9e67d5a9837">
+				<reportElement mode="Opaque" x="89" y="522" width="6" height="14" uuid="e0e2e2c5-499a-4f4b-9fe8-e9e67d5a9837">
 					<property name="com.jaspersoft.studio.unit.height" value="inch"/>
 				</reportElement>
 				<textElement>
@@ -659,7 +659,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<text><![CDATA[:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Transparent" x="2" y="534" width="87" height="14" uuid="4f5adf68-93b5-485a-8b7d-09cf8647473e"/>
+				<reportElement mode="Transparent" x="2" y="536" width="87" height="14" uuid="4f5adf68-93b5-485a-8b7d-09cf8647473e"/>
 				<textElement>
 					<font fontName="Tahoma" size="9"/>
 					<paragraph lineSpacing="Single"/>
@@ -667,7 +667,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<text><![CDATA[2. Tindakan]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="89" y="534" width="6" height="14" uuid="6fe749dd-3923-471e-bc59-bee426b87c4d">
+				<reportElement mode="Opaque" x="89" y="536" width="6" height="14" uuid="6fe749dd-3923-471e-bc59-bee426b87c4d">
 					<property name="com.jaspersoft.studio.unit.height" value="inch"/>
 				</reportElement>
 				<textElement>
@@ -677,7 +677,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<text><![CDATA[:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Transparent" x="2" y="557" width="87" height="14" uuid="0f2c619b-356a-4cb0-bfee-c5b26aca2795"/>
+				<reportElement mode="Transparent" x="2" y="574" width="87" height="14" uuid="0f2c619b-356a-4cb0-bfee-c5b26aca2795"/>
 				<textElement>
 					<font fontName="Tahoma" size="9"/>
 					<paragraph lineSpacing="Single"/>
@@ -685,7 +685,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<text><![CDATA[3. Terapi]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="89" y="557" width="6" height="14" uuid="571b0a80-497a-481f-8f4e-8837a98a8a44">
+				<reportElement mode="Opaque" x="89" y="574" width="6" height="14" uuid="571b0a80-497a-481f-8f4e-8837a98a8a44">
 					<property name="com.jaspersoft.studio.unit.height" value="inch"/>
 				</reportElement>
 				<textElement>
@@ -695,7 +695,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<text><![CDATA[:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Transparent" x="2" y="657" width="87" height="14" uuid="ed132338-ff69-4c2d-94fd-10c3b88a97f2"/>
+				<reportElement mode="Transparent" x="2" y="659" width="87" height="14" uuid="ed132338-ff69-4c2d-94fd-10c3b88a97f2"/>
 				<textElement>
 					<font fontName="Tahoma" size="9"/>
 					<paragraph lineSpacing="Single"/>
@@ -703,7 +703,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<text><![CDATA[4. Riwayat Penyakit]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="89" y="657" width="6" height="14" uuid="2697e664-3d47-4d33-bd58-4e8007252415">
+				<reportElement mode="Opaque" x="89" y="659" width="6" height="14" uuid="2697e664-3d47-4d33-bd58-4e8007252415">
 					<property name="com.jaspersoft.studio.unit.height" value="inch"/>
 				</reportElement>
 				<textElement>
@@ -721,13 +721,13 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<text><![CDATA[Kondisi Saat Ini]]></text>
 			</staticText>
 			<line>
-				<reportElement x="0" y="736" width="574" height="1" uuid="12c9004c-a0cc-44d1-b723-af51c12bae92"/>
+				<reportElement x="0" y="739" width="574" height="1" uuid="12c9004c-a0cc-44d1-b723-af51c12bae92"/>
 			</line>
 			<line>
-				<reportElement x="1" y="756" width="574" height="1" uuid="007d3c64-1dff-46f6-94f4-29ff2c02708e"/>
+				<reportElement x="1" y="758" width="574" height="1" uuid="007d3c64-1dff-46f6-94f4-29ff2c02708e"/>
 			</line>
 			<staticText>
-				<reportElement mode="Transparent" x="5" y="739" width="178" height="14" uuid="e135f3ed-ba4d-40a1-be13-9983ae7bd053"/>
+				<reportElement mode="Transparent" x="5" y="742" width="178" height="14" uuid="e135f3ed-ba4d-40a1-be13-9983ae7bd053"/>
 				<textElement>
 					<font fontName="Tahoma" size="9"/>
 					<paragraph lineSpacing="Single"/>
@@ -735,7 +735,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<text><![CDATA[Kejadian Klinis Selama Dilakukan Transfer]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="182" y="739" width="6" height="14" uuid="c681b371-9bde-4bd1-9195-f32a839aee06">
+				<reportElement mode="Opaque" x="182" y="742" width="6" height="14" uuid="c681b371-9bde-4bd1-9195-f32a839aee06">
 					<property name="com.jaspersoft.studio.unit.height" value="inch"/>
 				</reportElement>
 				<textElement>
@@ -745,7 +745,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<text><![CDATA[:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Transparent" x="4" y="760" width="178" height="14" uuid="1bdcddf1-a8e8-4598-9a83-0ee33e0f2a2c"/>
+				<reportElement mode="Transparent" x="4" y="762" width="145" height="14" uuid="1bdcddf1-a8e8-4598-9a83-0ee33e0f2a2c"/>
 				<textElement>
 					<font fontName="Tahoma" size="9"/>
 					<paragraph lineSpacing="Single"/>
@@ -753,7 +753,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<text><![CDATA[Tanggal dan Jam Serah Terima]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="182" y="760" width="6" height="14" uuid="8f11e8cf-f99b-44d1-a877-e16f883f598e">
+				<reportElement mode="Opaque" x="149" y="762" width="6" height="14" uuid="8f11e8cf-f99b-44d1-a877-e16f883f598e">
 					<property name="com.jaspersoft.studio.unit.height" value="inch"/>
 				</reportElement>
 				<textElement>
@@ -883,7 +883,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<textFieldExpression><![CDATA[$F{nama}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="95" y="520" width="183" height="14" uuid="80692e6c-156e-4e8e-a704-d78f1d665335"/>
+				<reportElement x="95" y="522" width="183" height="14" uuid="80692e6c-156e-4e8e-a704-d78f1d665335"/>
 				<textElement>
 					<font fontName="Tahoma" size="9"/>
 				</textElement>
@@ -904,11 +904,11 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<textFieldExpression><![CDATA[$F{ruang}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="95" y="679" width="468" height="54" uuid="2d14abec-b97a-44b9-9652-28dc938bf91b"/>
+				<reportElement x="95" y="679" width="468" height="60" uuid="2d14abec-b97a-44b9-9652-28dc938bf91b"/>
 				<textElement>
 					<font fontName="Tahoma" size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{pemeriksaanralan}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{pemeriksaanranap}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="83" y="445" width="484" height="55" uuid="164adfdf-fddb-4cab-9f98-09cb207192b0"/>
@@ -986,7 +986,7 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<textFieldExpression><![CDATA[$F{ket_rujuk}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="95" y="557" width="470" height="100" uuid="4859eb9f-190c-4a47-9edd-a6bbc1cc095f"/>
+				<reportElement x="95" y="574" width="470" height="84" uuid="4859eb9f-190c-4a47-9edd-a6bbc1cc095f"/>
 				<textElement>
 					<font fontName="Tahoma" size="8"/>
 				</textElement>
@@ -1070,23 +1070,15 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<text><![CDATA[Pemeriksaan Penunjang Radiologi :]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="51" y="32" width="259" height="14" uuid="5e854b6e-78ea-4672-8999-c1bebc6fbb09"/>
-				<textElement textAlignment="Left">
-					<font fontName="Tahoma" size="10"/>
+				<reportElement x="51" y="9" width="259" height="37" uuid="7dde1be3-5d8e-44fc-8aed-a23bdc67e848"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="14" isBold="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{alamatrs}+", "+$P{kotars}+", "+$P{propinsirs}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{namars}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="50" y="65" width="259" height="14" uuid="a1f15990-db07-467f-a2c2-1047e245770c"/>
-				<textElement textAlignment="Left">
-					<font fontName="Tahoma" size="10"/>
-					<paragraph lineSpacing="Single"/>
-				</textElement>
-				<textFieldExpression><![CDATA["E-mail : "+$P{emailrs}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="51" y="49" width="259" height="14" uuid="399b511d-c241-40ba-b62e-bf0ff6f53672"/>
+				<reportElement x="51" y="58" width="259" height="14" uuid="e90221be-4ff1-49b1-8cf7-0110c4f0a3d6"/>
 				<textElement textAlignment="Left">
 					<font fontName="Tahoma" size="10"/>
 					<paragraph lineSpacing="Single"/>
@@ -1094,12 +1086,20 @@ reg_periksa.no_rawat=rujuk.no_rawat and reg_periksa.kd_dokter=dokter.kd_dokter w
 				<textFieldExpression><![CDATA[$P{kontakrs}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="51" y="0" width="259" height="37" uuid="0c781a30-78a0-4932-97b3-c6e270dd16b3"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Tahoma" size="14"/>
+				<reportElement x="50" y="74" width="259" height="14" uuid="fc68c897-7bb0-4efa-a0ea-a8c98a643784"/>
+				<textElement textAlignment="Left">
+					<font fontName="Tahoma" size="10"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{namars}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["E-mail : "+$P{emailrs}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="51" y="41" width="259" height="14" uuid="e869af5d-55cd-4eac-a52b-311f07501674"/>
+				<textElement textAlignment="Left">
+					<font fontName="Tahoma" size="10"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{alamatrs}+", "+$P{kotars}+", "+$P{propinsirs}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
