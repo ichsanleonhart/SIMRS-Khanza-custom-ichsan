@@ -207,12 +207,8 @@ public class DlgKamarInap extends javax.swing.JDialog {
             hariawal="",aktifkan_hapus_data_salah="",terbitsep="",namadokter="";
     private PreparedStatement ps,pssetjam,pscaripiutang,psdiagnosa,psibu,psanak,pstarif,psdpjp,pscariumur;
     private ResultSet rs,rs2,rssetjam;
-<<<<<<< HEAD
     private int i,row=0, reply=0;  //tambahan by ichsan untuk layar tampilan yes / no
-=======
-    private int i,row=0;
     private boolean ceksukses=false;
->>>>>>> upstream/master
     private double lama=0,persenbayi=0,hargakamar=0;
     private String gabungkan="",norawatgabung="",kamaryangdigabung="",dokterranap="",bangsal="",diagnosa_akhir="",namakamar="",umur="0",sttsumur="Th",order="order by bangsal.nm_bangsal,kamar_inap.tgl_masuk,kamar_inap.jam_masuk", tgl,finger="",kodedokter="", waktukirim="";  // penambahan tgl,finger="",kodedokter="", waktukirim=""; by ichsan
 

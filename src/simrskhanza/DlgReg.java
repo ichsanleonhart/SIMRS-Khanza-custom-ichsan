@@ -17565,12 +17565,8 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
                     THbngn.getText(),Valid.SetAngka(Double.parseDouble(TBiaya.getText())),TStatus.getText(),NoTelp.getText(),"Belum",status,kdpoli.getText(),kdpnj.getText(),"Belum Bayar"
                 });
             } 
-<<<<<<< HEAD
             // emptTeks(); //proses pengosongan form dipindah ke atas, setelah sukses mengirim whatsapp - ichsan
-=======
-            emptTeks();  
             ceksukses=false;
->>>>>>> upstream/master
         }  
     }
 

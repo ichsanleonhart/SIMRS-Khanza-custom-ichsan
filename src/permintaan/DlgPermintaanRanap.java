@@ -50,8 +50,10 @@ public class DlgPermintaanRanap extends javax.swing.JDialog {
     private ResultSet rs;
     private int i=0,nilai_detik,bookingbaru=0, reply=0;  //tambahan [reply=0] by ichsan untuk layar tampilan yes / no;
     private String alarm="",nol_detik,detik,sql="",finger="";
+	private DlgKamar kamar=new DlgKamar(null,false);
     private boolean aktif=false;
     private BackgroundMusic music;
+	private DlgCariPenyakit penyakit=new DlgCariPenyakit(null,false);
     
 
     /** Creates new form DlgPemberianInfus
