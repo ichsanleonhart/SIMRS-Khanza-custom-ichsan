@@ -2615,6 +2615,43 @@ public final class RMPenilaianFisioterapi extends javax.swing.JDialog {
                     ps.close();
                 }
             }
+            
+            // MODIFIKASI DIMULAI by Ichsan
+            // Ambil data dari tabel pemeriksaan_ralan untuk mengisi textbox
+            ps = koneksi.prepareStatement(
+                    "SELECT tensi, berat, suhu_tubuh, nadi, respirasi, alergi, keluhan, gcs, tinggi " +
+                    "FROM pemeriksaan_ralan " +
+                    "WHERE no_rawat = ? " +
+                    "ORDER BY tgl_perawatan DESC, jam_rawat DESC LIMIT 1"); // Ambil satu data terakhir
+            try {
+                ps.setString(1, TNoRw.getText());
+                rs = ps.executeQuery();
+                if (rs.next()) {
+                    TD.setText(rs.getString("tensi"));
+                    Suhu.setText(rs.getString("suhu_tubuh"));                    
+                    RR.setText(rs.getString("respirasi"));                    
+                    KeluhanUtama.setText(rs.getString("keluhan"));                    
+                                       
+                } else {
+                    // Jika tidak ada data di pemeriksaan_ralan, kosongkan field
+                    TD.setText("");
+                    Suhu.setText("");
+                    RR.setText("");
+                    KeluhanUtama.setText("");
+                   
+                }
+            } catch (Exception e) {
+                System.out.println("Notif pemeriksaan_ralan : " + e);
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+            }
+            // MODIFIKASI SELESAI by Ichsan
+            
         } catch (Exception e) {
             System.out.println("Notif : "+e);
         }

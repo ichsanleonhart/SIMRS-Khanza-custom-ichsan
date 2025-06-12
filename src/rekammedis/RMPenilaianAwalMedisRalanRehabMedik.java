@@ -2755,6 +2755,49 @@ public final class RMPenilaianAwalMedisRalanRehabMedik extends javax.swing.JDial
                     ps.close();
                 }
             }
+            
+            // MODIFIKASI DIMULAI by Ichsan
+            // Ambil data dari tabel pemeriksaan_ralan untuk mengisi textbox
+            ps = koneksi.prepareStatement(
+                    "SELECT tensi, berat, suhu_tubuh, nadi, respirasi, alergi, keluhan, gcs, tinggi " +
+                    "FROM pemeriksaan_ralan " +
+                    "WHERE no_rawat = ? " +
+                    "ORDER BY tgl_perawatan DESC, jam_rawat DESC LIMIT 1"); // Ambil satu data terakhir
+            try {
+                ps.setString(1, TNoRw.getText());
+                rs = ps.executeQuery();
+                if (rs.next()) {
+                    TD.setText(rs.getString("tensi"));                    
+                    BB.setText(rs.getString("berat"));
+                    Suhu.setText(rs.getString("suhu_tubuh"));
+                    Nadi.setText(rs.getString("nadi"));
+                    RR.setText(rs.getString("respirasi"));
+                    Alergi.setText(rs.getString("alergi"));
+                    KeluhanUtama.setText(rs.getString("keluhan"));                    
+                                       
+                } else {
+                    // Jika tidak ada data di pemeriksaan_ralan, kosongkan field
+                    TD.setText("");                    
+                    BB.setText("");
+                    Suhu.setText("");
+                    Nadi.setText("");
+                    RR.setText("");
+                    Alergi.setText("");
+                    KeluhanUtama.setText("");                   
+                   
+                }
+            } catch (Exception e) {
+                System.out.println("Notif pemeriksaan_ralan : " + e);
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+            }
+            // MODIFIKASI SELESAI by Ichsan
+            
         } catch (Exception e) {
             System.out.println("Notif : "+e);
         }
