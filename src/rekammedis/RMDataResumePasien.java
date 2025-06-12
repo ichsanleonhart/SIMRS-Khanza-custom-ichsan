@@ -2440,6 +2440,51 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
                     ps.close();
                 }
             }
+            
+            // MODIFIKASI by Ichsan: Ambil data pemeriksaan mata dari penilaian_medis_ralan_mata
+            try {
+                ps = koneksi.prepareStatement(
+                    "SELECT visuskanan, visuskiri, cckanan, cckiri, palkanan, palkiri, conkanan, conkiri, " +
+                    "corneakanan, corneakiri, coakanan, coakiri, pupilkanan, pupilkiri, lensakanan, lensakiri, " +
+                    "funduskanan, funduskiri, papilkanan, papilkiri, retinakanan, retinakiri, makulakanan, makulakiri, " +
+                    "tiokanan, tiokiri, mbokanan, mbokiri " +
+                    "FROM penilaian_medis_ralan_mata WHERE no_rawat=?"
+                );
+                ps.setString(1, TNoRw.getText());
+                rs = ps.executeQuery();
+                if (rs.next()) {
+                    StringBuilder hasilMata = new StringBuilder();
+                    hasilMata.append("Visus: OD ").append(rs.getString("visuskanan")).append(", OS ").append(rs.getString("visuskiri")).append(" | ");
+                    hasilMata.append("CC: OD ").append(rs.getString("cckanan")).append(", OS ").append(rs.getString("cckiri")).append(" | ");
+                    hasilMata.append("ADD: OD ").append(rs.getString("mbokanan")).append(", OS ").append(rs.getString("mbokiri")).append(" | ");
+                    hasilMata.append("Palpebra: OD ").append(rs.getString("palkanan")).append(", OS ").append(rs.getString("palkiri")).append(" | ");
+                    hasilMata.append("Conjunctiva: OD ").append(rs.getString("conkanan")).append(", OS ").append(rs.getString("conkiri")).append(" | ");
+                    hasilMata.append("Cornea: OD ").append(rs.getString("corneakanan")).append(", OS ").append(rs.getString("corneakiri")).append(" | ");
+                    hasilMata.append("COA: OD ").append(rs.getString("coakanan")).append(", OS ").append(rs.getString("coakiri")).append(" | ");
+                    hasilMata.append("Pupil: OD ").append(rs.getString("pupilkanan")).append(", OS ").append(rs.getString("pupilkiri")).append(" | ");
+                    hasilMata.append("Lensa: OD ").append(rs.getString("lensakanan")).append(", OS ").append(rs.getString("lensakiri")).append(" | ");
+                    hasilMata.append("Fundus: OD ").append(rs.getString("funduskanan")).append(", OS ").append(rs.getString("funduskiri")).append(" | ");
+                    hasilMata.append("Papil: OD ").append(rs.getString("papilkanan")).append(", OS ").append(rs.getString("papilkiri")).append(" | ");
+                    hasilMata.append("Retina: OD ").append(rs.getString("retinakanan")).append(", OS ").append(rs.getString("retinakiri")).append(" | ");
+                    hasilMata.append("Makula: OD ").append(rs.getString("makulakanan")).append(", OS ").append(rs.getString("makulakiri")).append(" | ");
+                    hasilMata.append("TIO: OD ").append(rs.getString("tiokanan")).append(", OS ").append(rs.getString("tiokiri")).append(" | ");
+                    JalannyaPenyakit.setText(hasilMata.toString());
+                }
+
+            } catch (Exception e) {
+                System.out.println("Notif Mata : " + e);
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+            }
+
+        /////////////// end Modif by Ichsan
+
+
         } catch (Exception e) {
             System.out.println("Notif : "+e);
         } 
