@@ -360,7 +360,7 @@ public final class SuratButaWarna extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "12-09-2021" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "02-05-2023" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -373,7 +373,7 @@ public final class SuratButaWarna extends javax.swing.JDialog {
         panelGlass9.add(DTPCari1);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "12-09-2021" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "02-05-2023" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -497,7 +497,7 @@ public final class SuratButaWarna extends javax.swing.JDialog {
         FormInput.add(jLabel13);
         jLabel13.setBounds(257, 40, 65, 23);
 
-        HasilPeriksa.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Tidak Buta Warna", "Buta Warna" }));
+        HasilPeriksa.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Tidak Buta Warna", "Buta Warna", "Buta Warna (Parsial)" }));
         HasilPeriksa.setName("HasilPeriksa"); // NOI18N
         FormInput.add(HasilPeriksa);
         HasilPeriksa.setBounds(562, 40, 160, 23);
@@ -507,7 +507,7 @@ public final class SuratButaWarna extends javax.swing.JDialog {
         FormInput.add(jLabel14);
         jLabel14.setBounds(438, 40, 120, 23);
 
-        TanggalPeriksa.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "12-09-2021" }));
+        TanggalPeriksa.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "02-05-2023" }));
         TanggalPeriksa.setDisplayFormat("dd-MM-yyyy");
         TanggalPeriksa.setName("TanggalPeriksa"); // NOI18N
         FormInput.add(TanggalPeriksa);

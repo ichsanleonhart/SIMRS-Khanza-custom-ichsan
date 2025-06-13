@@ -327,7 +327,7 @@
                     </Property>
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                       <StringArray count="1">
-                        <StringItem index="0" value="02-05-2023"/>
+                        <StringItem index="0" value="13-06-2025"/>
                       </StringArray>
                     </Property>
                     <Property name="displayFormat" type="java.lang.String" value="dd-MM-yyyy"/>
@@ -348,7 +348,7 @@
                     </Property>
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                       <StringArray count="1">
-                        <StringItem index="0" value="02-05-2023"/>
+                        <StringItem index="0" value="13-06-2025"/>
                       </StringArray>
                     </Property>
                     <Property name="displayFormat" type="java.lang.String" value="dd-MM-yyyy"/>
@@ -560,9 +560,10 @@
                 <Component class="widget.ComboBox" name="HasilPeriksa">
                   <Properties>
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                      <StringArray count="2">
+                      <StringArray count="3">
                         <StringItem index="0" value="Tidak Buta Warna"/>
                         <StringItem index="1" value="Buta Warna"/>
+                        <StringItem index="2" value="Buta Warna (Parsial)"/>
                       </StringArray>
                     </Property>
                     <Property name="name" type="java.lang.String" value="HasilPeriksa" noResource="true"/>
@@ -588,7 +589,7 @@
                   <Properties>
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                       <StringArray count="1">
-                        <StringItem index="0" value="02-05-2023"/>
+                        <StringItem index="0" value="13-06-2025"/>
                       </StringArray>
                     </Property>
                     <Property name="displayFormat" type="java.lang.String" value="dd-MM-yyyy"/>
