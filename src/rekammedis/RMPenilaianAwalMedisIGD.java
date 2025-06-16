@@ -36,6 +36,13 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import kepegawaian.DlgCariDokter;
 import java.sql.Timestamp; //tambahan modif Ichsan
+import org.apache.commons.io.FileUtils;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
  *
@@ -48,10 +55,10 @@ public final class RMPenilaianAwalMedisIGD extends javax.swing.JDialog {
     private validasi Valid=new validasi();
     private PreparedStatement ps;
     private ResultSet rs;
-    private int i=0;
+    private int i=0, reply=0;  //tambahan [reply=0] by ichsan untuk layar tampilan yes / no; by ichsan
     private DlgCariDokter dokter=new DlgCariDokter(null,false);
     private StringBuilder htmlContent;
-    private String finger="";
+    private String finger="", FileName ="",kodeberkas="", lokasifile="", SQLException=""; //tambahan ichsan FileName ="",kodeberkas="", lokasifile="" SQLException="";
     private String TANGGALMUNDUR="yes";
     
     /** Creates new form DlgRujuk
@@ -1540,6 +1547,30 @@ public final class RMPenilaianAwalMedisIGD extends javax.swing.JDialog {
                     simpan();
                 }
             }
+            
+            ///nambahin opsi upload berkas digital perawatan setelah nekan tombol simpan - ichsan
+            if (tbObat.getRowCount() > 0) {  // otomatis pilih baris terakhir di tbObat
+                int lastRow = tbObat.getRowCount() - 1;
+                tbObat.setRowSelectionInterval(lastRow, lastRow);
+            }
+
+            // tampilkan konfirmasi upload
+            reply = JOptionPane.showConfirmDialog(rootPane, "Simpan Berhasil! Mau sekalian Upload pdf ke berkas klaim?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
+            if (reply == JOptionPane.YES_OPTION) {
+                int selectedRow = tbObat.getSelectedRow();
+                if (selectedRow != -1) {
+                    FileName = "Pengkajian_Medis_IGD_" + 
+                        tbObat.getValueAt(selectedRow, 0).toString().replaceAll("/", "") + "_" + 
+                        tbObat.getValueAt(selectedRow, 2).toString().replaceAll(" ", "");
+                    CreatePDF(FileName);
+                    String filePath = "tmpPDF/" + FileName;
+                    UploadPDF(FileName, "berkasrawat/pages/upload/");
+                    HapusPDF();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Gagal memilih data terakhir untuk upload. Silakan pilih manual.");
+                }
+            }  
+            // end dari konfirmasi upload
         }
 }//GEN-LAST:event_BtnSimpanActionPerformed
 
@@ -2555,6 +2586,84 @@ public final class RMPenilaianAwalMedisIGD extends javax.swing.JDialog {
                 });
                 LCount.setText(""+tabMode.getRowCount());
                 emptTeks();
+        }
+    }
+    
+    private void CreatePDF(String FileName) {
+      if(tbObat.getSelectedRow()>-1){
+            Map<String, Object> param = new HashMap<>();
+            param.put("namars",akses.getnamars());
+            param.put("alamatrs",akses.getalamatrs());
+            param.put("kotars",akses.getkabupatenrs());
+            param.put("propinsirs",akses.getpropinsirs());
+            param.put("kontakrs",akses.getkontakrs());
+            param.put("emailrs",akses.getemailrs());          
+            param.put("logo",Sequel.cariGambar("select setting.logo from setting")); 
+            try {
+                param.put("lokalis",getClass().getResource("/picture/semua.png").openStream());
+            } catch (Exception e) {
+            } 
+            finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",tbObat.getValueAt(tbObat.getSelectedRow(),5).toString());
+            param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+tbObat.getValueAt(tbObat.getSelectedRow(),6).toString()+"\nID "+(finger.equals("")?tbObat.getValueAt(tbObat.getSelectedRow(),5).toString():finger)+"\n"+Valid.SetTgl3(tbObat.getValueAt(tbObat.getSelectedRow(),7).toString())); 
+            
+            Valid.MyReportPDFqryUpload("rptCetakPenilaianAwalMedisIGD.jasper","report","::[ Laporan Pengkajian Awal Medis IGD ]::",
+                "select reg_periksa.no_rawat,pasien.no_rkm_medis,pasien.nm_pasien,if(pasien.jk='L','Laki-Laki','Perempuan') as jk,pasien.tgl_lahir,penilaian_medis_igd.tanggal,"+
+                "penilaian_medis_igd.kd_dokter,penilaian_medis_igd.anamnesis,penilaian_medis_igd.hubungan,penilaian_medis_igd.keluhan_utama,penilaian_medis_igd.rps,penilaian_medis_igd.rpk,penilaian_medis_igd.rpd,penilaian_medis_igd.rpo,penilaian_medis_igd.alergi,"+
+                "penilaian_medis_igd.keadaan,penilaian_medis_igd.gcs,penilaian_medis_igd.kesadaran,penilaian_medis_igd.td,penilaian_medis_igd.nadi,penilaian_medis_igd.rr,penilaian_medis_igd.suhu,penilaian_medis_igd.spo,penilaian_medis_igd.bb,penilaian_medis_igd.tb,"+
+                "penilaian_medis_igd.kepala,penilaian_medis_igd.mata,penilaian_medis_igd.gigi,penilaian_medis_igd.leher,penilaian_medis_igd.thoraks,penilaian_medis_igd.abdomen,penilaian_medis_igd.ekstremitas,penilaian_medis_igd.genital,penilaian_medis_igd.ket_fisik,"+
+                "penilaian_medis_igd.ket_lokalis,penilaian_medis_igd.ekg,penilaian_medis_igd.rad,penilaian_medis_igd.lab,penilaian_medis_igd.diagnosis,penilaian_medis_igd.tata,dokter.nm_dokter "+
+                "from reg_periksa inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis "+
+                "inner join penilaian_medis_igd on reg_periksa.no_rawat=penilaian_medis_igd.no_rawat "+
+                "inner join dokter on penilaian_medis_igd.kd_dokter=dokter.kd_dokter where penilaian_medis_igd.no_rawat='"+tbObat.getValueAt(tbObat.getSelectedRow(),0).toString()+"'", FileName, param);
+        }
+    }
+    
+    private void UploadPDF(String FileName, String docpath) {
+        try {
+            File file = new File("tmpPDF/" + FileName + ".pdf");
+            byte[] data = FileUtils.readFileToByteArray(file);
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpPost postRequest = new HttpPost("http://" + koneksiDB.HOSTHYBRIDWEB() + ":" + koneksiDB.PORTWEB() + "/" + koneksiDB.HYBRIDWEB() + "/upload.php?doc=" + docpath);
+            ByteArrayBody fileData = new ByteArrayBody(data, FileName + ".pdf");
+            MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+            reqEntity.addPart("file", fileData);
+            postRequest.setEntity(reqEntity);
+            httpClient.execute(postRequest);
+
+            // Menyimpan ke database
+            boolean uploadSuccess = false;
+            kodeberkas = Sequel.cariIsi("SELECT kode FROM master_berkas_digital WHERE nama LIKE '%Klaim%'");
+            if (Sequel.cariInteger("SELECT COUNT(no_rawat) AS jumlah FROM berkas_digital_perawatan WHERE lokasi_file='pages/upload/" + FileName + ".pdf'") > 0) {
+                uploadSuccess = Sequel.mengedittf("berkas_digital_perawatan", "lokasi_file=?","no_rawat=?,kode=?, lokasi_file=?", 4, new String[]{
+                    tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().trim(),kodeberkas,"pages/upload/" + FileName + ".pdf", "pages/upload/" + FileName + ".pdf"
+                });
+            } else {
+                uploadSuccess = Sequel.menyimpantf("berkas_digital_perawatan", "?,?,?", "No.Rawat", 3, new String[]{
+                    tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().trim(), kodeberkas, "pages/upload/" + FileName + ".pdf"
+                });
+            }
+
+            // Menampilkan notifikasi
+            if (uploadSuccess) {
+                JOptionPane.showMessageDialog(null, "Upload berhasil!", "Informasi", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Upload gagal disimpan ke database.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (Exception e) {
+            System.out.println("Upload error: " + e);
+            JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void HapusPDF() {
+        File file = new File("tmpPDF");
+        String[] myFiles;
+        if (file.isDirectory()) {
+            myFiles = file.list();
+            for (int i = 0; i < myFiles.length; i++) {
+                File myFile = new File(file, myFiles[i]);
+                myFile.delete();
+            }
         }
     }
 }

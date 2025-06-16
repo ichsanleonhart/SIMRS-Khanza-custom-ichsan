@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.17.0.final using JasperReports Library version 6.17.0-6d93193241dd8cc42629e188b94f9e0bc5722efd  -->
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="null" language="groovy" pageWidth="595" pageHeight="842" columnWidth="557" leftMargin="19" rightMargin="19" topMargin="19" bottomMargin="19" uuid="34c13d5a-cd6b-451e-8001-9fd298d2274a">
 	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="0"/>
@@ -587,7 +587,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 					<font fontName="Tahoma" size="9" isBold="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<text><![CDATA[PENGKAJIAN AWAL MEDIS RAWAT JALAN MATA]]></text>
+				<text><![CDATA[PENILAIAN AWAL MEDIS RAWAT JALAN MATA]]></text>
 			</staticText>
 			<line>
 				<reportElement x="0" y="78" width="557" height="1" uuid="ba9aa647-e524-46f8-adfb-6d4a9d562118">
@@ -1196,14 +1196,14 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<imageExpression><![CDATA[$P{lokalis2}]]></imageExpression>
 			</image>
 			<staticText>
-				<reportElement x="228" y="388" width="102" height="10" uuid="f7ea23cc-cfa9-4234-b17c-ae0c9c0544d9"/>
+				<reportElement x="228" y="400" width="102" height="10" uuid="f7ea23cc-cfa9-4234-b17c-ae0c9c0544d9"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8"/>
 				</textElement>
 				<text><![CDATA[Cornea]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="228" y="364" width="102" height="10" uuid="caff155c-4776-49b1-b9fb-160bf8b9a61c"/>
+				<reportElement x="228" y="376" width="102" height="10" uuid="caff155c-4776-49b1-b9fb-160bf8b9a61c"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8"/>
 				</textElement>
@@ -1217,81 +1217,81 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<text><![CDATA[Visus SC]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="228" y="352" width="102" height="10" uuid="e46c05b9-f242-4a90-b9b5-2c0bc069308d"/>
+				<reportElement x="228" y="351" width="102" height="10" uuid="e46c05b9-f242-4a90-b9b5-2c0bc069308d"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8"/>
 				</textElement>
 				<text><![CDATA[CC]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="228" y="376" width="102" height="10" uuid="30370a8e-2433-4316-9c85-f27d1686453e"/>
+				<reportElement x="228" y="388" width="102" height="10" uuid="30370a8e-2433-4316-9c85-f27d1686453e"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8"/>
 				</textElement>
 				<text><![CDATA[Conjungtiva]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="228" y="400" width="102" height="10" uuid="656e83c8-8309-4cd5-8d85-255e10eeee91"/>
+				<reportElement x="228" y="412" width="102" height="10" uuid="656e83c8-8309-4cd5-8d85-255e10eeee91"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8"/>
 				</textElement>
 				<text><![CDATA[COA]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="228" y="412" width="102" height="10" uuid="204911bb-62d7-45d6-9308-3f9a7b51d8cb"/>
+				<reportElement x="228" y="424" width="102" height="10" uuid="204911bb-62d7-45d6-9308-3f9a7b51d8cb"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8"/>
 				</textElement>
 				<text><![CDATA[Iris/Pupil]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="228" y="424" width="102" height="10" uuid="760ab41e-3707-49ba-ab1e-d636528d6550"/>
+				<reportElement x="228" y="436" width="102" height="10" uuid="760ab41e-3707-49ba-ab1e-d636528d6550"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8"/>
 				</textElement>
 				<text><![CDATA[Lensa]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="228" y="436" width="102" height="10" uuid="70fdef5a-92c1-4bb1-8d6f-f3c19e09cd35"/>
+				<reportElement x="228" y="448" width="102" height="10" uuid="70fdef5a-92c1-4bb1-8d6f-f3c19e09cd35"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8"/>
 				</textElement>
 				<text><![CDATA[Fundus Media]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="228" y="448" width="102" height="10" uuid="a2a5ae1e-c957-4a8e-acc7-44a7d5f2866d"/>
+				<reportElement x="228" y="460" width="102" height="10" uuid="a2a5ae1e-c957-4a8e-acc7-44a7d5f2866d"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8"/>
 				</textElement>
 				<text><![CDATA[Papil]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="228" y="460" width="102" height="10" uuid="ab215a77-1d3b-47fb-92aa-b5af59244227"/>
+				<reportElement x="228" y="472" width="102" height="10" uuid="ab215a77-1d3b-47fb-92aa-b5af59244227"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8"/>
 				</textElement>
 				<text><![CDATA[Retina]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="228" y="472" width="102" height="10" uuid="0532995a-d998-4a44-b225-8a59779f9fbe"/>
+				<reportElement x="228" y="484" width="102" height="10" uuid="0532995a-d998-4a44-b225-8a59779f9fbe"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8"/>
 				</textElement>
 				<text><![CDATA[Makula]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="228" y="484" width="102" height="10" uuid="f3869f3e-fce2-42ee-941b-6621a315bb8e"/>
+				<reportElement x="228" y="496" width="102" height="10" uuid="f3869f3e-fce2-42ee-941b-6621a315bb8e"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8"/>
 				</textElement>
 				<text><![CDATA[TIO]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="228" y="497" width="102" height="10" uuid="09b57b8c-a7d2-4558-aab3-ea292d86ca83"/>
+				<reportElement x="228" y="364" width="102" height="10" uuid="09b57b8c-a7d2-4558-aab3-ea292d86ca83"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Tahoma" size="8"/>
 				</textElement>
-				<text><![CDATA[MBO]]></text>
+				<text><![CDATA[ADD]]></text>
 			</staticText>
 			<line>
 				<reportElement x="0" y="325" width="557" height="1" uuid="b4227f03-ceb1-4e96-b8c3-9bef5a4ddba8"/>
@@ -1335,7 +1335,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{visuskanan}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="3" y="352" width="221" height="10" uuid="847437ce-ba9c-48a1-b7bd-f30aeb05a876">
+				<reportElement x="3" y="351" width="221" height="10" uuid="847437ce-ba9c-48a1-b7bd-f30aeb05a876">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1346,7 +1346,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{cckanan}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="3" y="364" width="221" height="10" uuid="79710d9b-2d67-4cbb-a311-5bfd5cf70a9e">
+				<reportElement x="3" y="376" width="221" height="10" uuid="79710d9b-2d67-4cbb-a311-5bfd5cf70a9e">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1357,7 +1357,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{palkanan}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="3" y="376" width="221" height="10" uuid="96edb14f-dd82-42c1-832a-69581d4a2cf1">
+				<reportElement x="3" y="388" width="221" height="10" uuid="96edb14f-dd82-42c1-832a-69581d4a2cf1">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1368,7 +1368,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{conkanan}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="3" y="388" width="221" height="10" uuid="54cc6204-477c-4242-b5ae-bc9441808a72">
+				<reportElement x="3" y="400" width="221" height="10" uuid="54cc6204-477c-4242-b5ae-bc9441808a72">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1379,7 +1379,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{corneakanan}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="3" y="400" width="221" height="10" uuid="2c62ce97-8607-4e8e-b945-edb6df74c7f1">
+				<reportElement x="3" y="412" width="221" height="10" uuid="2c62ce97-8607-4e8e-b945-edb6df74c7f1">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1390,7 +1390,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{coakanan}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="3" y="412" width="221" height="10" uuid="0accc74c-e9ea-4426-9bb5-b695d4c0abf8">
+				<reportElement x="3" y="424" width="221" height="10" uuid="0accc74c-e9ea-4426-9bb5-b695d4c0abf8">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1401,7 +1401,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{pupilkanan}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="3" y="424" width="221" height="10" uuid="74cf6359-1831-4794-a99d-db9a3eeae295">
+				<reportElement x="3" y="436" width="221" height="10" uuid="74cf6359-1831-4794-a99d-db9a3eeae295">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1412,7 +1412,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{lensakanan}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="3" y="436" width="221" height="10" uuid="e8fa4450-f32c-4e97-9a62-5a3ff096850a">
+				<reportElement x="3" y="448" width="221" height="10" uuid="e8fa4450-f32c-4e97-9a62-5a3ff096850a">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1423,7 +1423,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{funduskanan}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="3" y="448" width="221" height="10" uuid="a599af11-982e-4c58-983b-1ccd87739ebd">
+				<reportElement x="3" y="460" width="221" height="10" uuid="a599af11-982e-4c58-983b-1ccd87739ebd">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1434,7 +1434,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{papilkanan}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="3" y="460" width="221" height="10" uuid="8657b8d8-c924-477c-8f40-29b4e2c8ffb8">
+				<reportElement x="3" y="472" width="221" height="10" uuid="8657b8d8-c924-477c-8f40-29b4e2c8ffb8">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1445,7 +1445,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{retinakanan}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="3" y="472" width="221" height="10" uuid="6d697e8b-60e9-4325-bfb3-8d12b76bd8e9">
+				<reportElement x="3" y="484" width="221" height="10" uuid="6d697e8b-60e9-4325-bfb3-8d12b76bd8e9">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1456,7 +1456,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{makulakanan}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="3" y="484" width="221" height="10" uuid="c1330a6b-45f1-4a72-82dc-15fb8cebca02">
+				<reportElement x="3" y="496" width="221" height="10" uuid="c1330a6b-45f1-4a72-82dc-15fb8cebca02">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1467,7 +1467,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{tiokanan}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="3" y="497" width="221" height="10" uuid="9d3117d3-fd7f-493e-bed0-cd2618610cab">
+				<reportElement x="3" y="364" width="221" height="10" uuid="9d3117d3-fd7f-493e-bed0-cd2618610cab">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1489,7 +1489,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{visuskiri}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="333" y="352" width="221" height="10" uuid="1aa85167-c775-46e9-811a-5e937e39b6a7">
+				<reportElement x="333" y="351" width="221" height="10" uuid="1aa85167-c775-46e9-811a-5e937e39b6a7">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1500,7 +1500,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{cckiri}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="333" y="364" width="221" height="10" uuid="252484b7-6006-4736-98a7-84a642de9cd6">
+				<reportElement x="333" y="376" width="221" height="10" uuid="252484b7-6006-4736-98a7-84a642de9cd6">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1511,7 +1511,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{palkiri}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="333" y="376" width="221" height="10" uuid="b53a66c1-1d05-47c2-b173-5a9b23c02465">
+				<reportElement x="333" y="388" width="221" height="10" uuid="b53a66c1-1d05-47c2-b173-5a9b23c02465">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1522,7 +1522,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{conkiri}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="333" y="388" width="221" height="10" uuid="434d8759-5561-496d-9144-8afe0a3ecc43">
+				<reportElement x="333" y="400" width="221" height="10" uuid="434d8759-5561-496d-9144-8afe0a3ecc43">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1533,7 +1533,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{corneakiri}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="333" y="400" width="221" height="10" uuid="ea4fb924-3998-4478-8be0-f6539774cddb">
+				<reportElement x="333" y="412" width="221" height="10" uuid="ea4fb924-3998-4478-8be0-f6539774cddb">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1544,7 +1544,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{coakiri}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="333" y="412" width="221" height="10" uuid="b4347b45-d0bf-4aca-be89-9e93a0e4cb58">
+				<reportElement x="333" y="424" width="221" height="10" uuid="b4347b45-d0bf-4aca-be89-9e93a0e4cb58">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1555,7 +1555,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{pupilkiri}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="333" y="424" width="221" height="10" uuid="aaaa83bf-083f-45ee-9df1-2cde1715aca4">
+				<reportElement x="333" y="436" width="221" height="10" uuid="aaaa83bf-083f-45ee-9df1-2cde1715aca4">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1566,7 +1566,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{lensakiri}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="333" y="436" width="221" height="10" uuid="97d094f9-c412-4656-9983-34cbe0920f62">
+				<reportElement x="333" y="448" width="221" height="10" uuid="97d094f9-c412-4656-9983-34cbe0920f62">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1577,7 +1577,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{funduskiri}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="333" y="448" width="221" height="10" uuid="85bcaeff-79ec-4de2-a528-570f9ace765a">
+				<reportElement x="333" y="460" width="221" height="10" uuid="85bcaeff-79ec-4de2-a528-570f9ace765a">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1588,7 +1588,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{papilkiri}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="333" y="460" width="221" height="10" uuid="348d8e9c-44a3-4f9c-a6d0-a79fd62c9ca1">
+				<reportElement x="333" y="472" width="221" height="10" uuid="348d8e9c-44a3-4f9c-a6d0-a79fd62c9ca1">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1599,7 +1599,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{retinakiri}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="333" y="472" width="221" height="10" uuid="fb305ae4-3e0c-4fc1-81a5-2a168933161f">
+				<reportElement x="333" y="484" width="221" height="10" uuid="fb305ae4-3e0c-4fc1-81a5-2a168933161f">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1610,7 +1610,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{makulakiri}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="333" y="484" width="221" height="10" uuid="6cb0beba-4883-4801-b6f1-4b8fa57eb891">
+				<reportElement x="333" y="496" width="221" height="10" uuid="6cb0beba-4883-4801-b6f1-4b8fa57eb891">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1621,7 +1621,7 @@ inner join dokter on penilaian_medis_ralan_mata.kd_dokter=dokter.kd_dokter]]>
 				<textFieldExpression><![CDATA[$F{tiokiri}]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm:ss">
-				<reportElement x="333" y="497" width="221" height="10" uuid="c1b2cc84-4103-43d1-b9f0-567db02d8c8c">
+				<reportElement x="333" y="364" width="221" height="10" uuid="c1b2cc84-4103-43d1-b9f0-567db02d8c8c">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>

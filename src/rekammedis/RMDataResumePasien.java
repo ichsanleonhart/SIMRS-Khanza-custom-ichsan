@@ -64,7 +64,7 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
     private validasi Valid=new validasi();
     private PreparedStatement ps;
     private ResultSet rs;
-    private int i=0;    
+    private int i=0, reply=0;  //tambahan [reply=0] by ichsan untuk layar tampilan yes / no; by ichsan    
     private DlgCariDokter dokter=new DlgCariDokter(null,false);
     private RMCariKeluhan carikeluhan=new RMCariKeluhan(null,false);
     private RMCariPemeriksaan caripemeriksaan=new RMCariPemeriksaan(null,false);
@@ -1445,6 +1445,28 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
                 LCount.setText(""+tabMode.getRowCount());
                 emptTeks();
             }
+            
+            ///nambahin opsi upload berkas digital perawatan setelah nekan tombol simpan - ichsan
+            if (tbObat.getRowCount() > 0) {  // otomatis pilih baris terakhir di tbObat
+                int lastRow = tbObat.getRowCount() - 1;
+                tbObat.setRowSelectionInterval(lastRow, lastRow);
+            }
+
+            // tampilkan konfirmasi upload
+            reply = JOptionPane.showConfirmDialog(rootPane, "Simpan Berhasil! Mau sekalian Upload pdf ke berkas klaim?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
+            if (reply == JOptionPane.YES_OPTION) {
+                int selectedRow = tbObat.getSelectedRow();
+                if (selectedRow != -1) {
+                    FileName = "RESUME_RALAN_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().replaceAll("/", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 2).toString().trim()+ "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 3).toString().replaceAll(" ", "");
+                    CreatePDF(FileName);
+                    String filePath = "tmpPDF/" + FileName;
+                    UploadPDF(FileName, "berkasrawat/pages/upload/");
+                    HapusPDF();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Gagal memilih data terakhir untuk upload otomatis. Silakan pilih manual.");
+                }
+            }  
+            // end dari konfirmasi upload
         }
 }//GEN-LAST:event_BtnSimpanActionPerformed
 

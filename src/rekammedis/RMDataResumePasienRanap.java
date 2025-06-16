@@ -57,7 +57,7 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
     private validasi Valid=new validasi();
     private PreparedStatement ps,ps2;
     private ResultSet rs,rs2;
-    private int i=0;    
+    private int i=0, reply=0;  //tambahan [reply=0] by ichsan untuk layar tampilan yes / no; by ichsan        
     private DlgCariDokter dokter=new DlgCariDokter(null,false);
     private RMCariKeluhan carikeluhan=new RMCariKeluhan(null,false);
     private RMCariPemeriksaan caripemeriksaan=new RMCariPemeriksaan(null,false);
@@ -2042,6 +2042,29 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
                     emptTeks();
                     LCount.setText(""+tabMode.getRowCount());
             }
+            
+            ///nambahin opsi upload berkas digital perawatan setelah nekan tombol simpan - ichsan
+            if (tbObat.getRowCount() > 0) {  // otomatis pilih baris terakhir di tbObat
+                int lastRow = tbObat.getRowCount() - 1;
+                tbObat.setRowSelectionInterval(lastRow, lastRow);
+            }
+
+            // tampilkan konfirmasi upload
+            reply = JOptionPane.showConfirmDialog(rootPane, "Simpan Berhasil! Mau sekalian Upload pdf ke berkas klaim?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
+            if (reply == JOptionPane.YES_OPTION) {
+                int selectedRow = tbObat.getSelectedRow();
+                if (selectedRow != -1) {
+                    FileName = "RESUME_RANAP_" + tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().replaceAll("/", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().trim()+ "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 2).toString().replaceAll(" ", "_");
+                    CreatePDFWA(FileName);
+                    String filePath = "tmpPDF/" + FileName;
+                    UploadPDF2(FileName, "media/");
+                    HapusPDF();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Gagal memilih data terakhir untuk upload otomatis. Silakan pilih manual.");
+                }
+            }  
+            // end dari konfirmasi upload
+            
         }
 }//GEN-LAST:event_BtnSimpanActionPerformed
 

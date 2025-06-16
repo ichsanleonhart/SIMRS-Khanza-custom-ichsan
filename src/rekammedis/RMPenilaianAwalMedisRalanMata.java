@@ -55,7 +55,7 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
     private validasi Valid=new validasi();
     private PreparedStatement ps;
     private ResultSet rs;
-    private int i=0;
+    private int i=0, reply=0;  //tambahan [reply=0] by ichsan untuk layar tampilan yes / no;;
     private DlgCariDokter dokter=new DlgCariDokter(null,false);
     private StringBuilder htmlContent;
     private String finger="", FileName ="",kodeberkas=""; //tambahan ichsan FileName ="",kodeberkas="", lokasifile="" SQLException="";
@@ -2126,8 +2126,31 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
                     simpan();
                 }
             }
-        }
-    
+            
+            ///nambahin opsi upload berkas digital perawatan setelah nekan tombol simpan - ichsan
+            if (tbObat.getRowCount() > 0) {  // otomatis pilih baris terakhir di tbObat
+                int lastRow = tbObat.getRowCount() - 1;
+                tbObat.setRowSelectionInterval(lastRow, lastRow);
+            }
+
+            // tampilkan konfirmasi upload
+            reply = JOptionPane.showConfirmDialog(rootPane, "Simpan Berhasil! Mau sekalian Upload pdf ke berkas klaim?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
+            if (reply == JOptionPane.YES_OPTION) {
+                int selectedRow = tbObat.getSelectedRow();
+                if (selectedRow != -1) {
+                    FileName = "Pengkajian_Medis_Mata_" + 
+                        tbObat.getValueAt(selectedRow, 0).toString().replaceAll("/", "") + "_" + 
+                        tbObat.getValueAt(selectedRow, 2).toString().replaceAll(" ", "");
+                    CreatePDF(FileName);
+                    String filePath = "tmpPDF/" + FileName;
+                    UploadPDF(FileName, "berkasrawat/pages/upload/");
+                    HapusPDF();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Gagal memilih data terakhir untuk upload. Silakan pilih manual.");
+                }
+            }  
+            // end dari konfirmasi upload
+        }    
 }//GEN-LAST:event_BtnSimpanActionPerformed
 
     private void BtnSimpanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnSimpanKeyPressed
@@ -3518,11 +3541,11 @@ public final class RMPenilaianAwalMedisRalanMata extends javax.swing.JDialog {
             kodeberkas = Sequel.cariIsi("SELECT kode FROM master_berkas_digital WHERE nama LIKE '%Klaim%'");
             if (Sequel.cariInteger("SELECT COUNT(no_rawat) AS jumlah FROM berkas_digital_perawatan WHERE lokasi_file='pages/upload/" + FileName + ".pdf'") > 0) {
                 uploadSuccess = Sequel.mengedittf("berkas_digital_perawatan", "lokasi_file=?","no_rawat=?,kode=?, lokasi_file=?", 4, new String[]{
-                    tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().trim(),kodeberkas,"pages/upload/" + FileName + ".pdf", "pages/upload/" + FileName + ".pdf"
+                    tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().trim(),kodeberkas,"pages/upload/" + FileName + ".pdf", "pages/upload/" + FileName + ".pdf"
                 });
             } else {
                 uploadSuccess = Sequel.menyimpantf("berkas_digital_perawatan", "?,?,?", "No.Rawat", 3, new String[]{
-                    tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().trim(), kodeberkas, "pages/upload/" + FileName + ".pdf"
+                    tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString().trim(), kodeberkas, "pages/upload/" + FileName + ".pdf"
                 });
             }
 
