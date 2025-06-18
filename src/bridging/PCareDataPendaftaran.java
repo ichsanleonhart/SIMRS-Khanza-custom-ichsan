@@ -6492,7 +6492,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                 ps=koneksi.prepareStatement(
                         "select pemeriksaan_ralan.tensi,pemeriksaan_ralan.nadi,pemeriksaan_ralan.respirasi,pemeriksaan_ralan.tinggi,"+
                         "pemeriksaan_ralan.berat,pemeriksaan_ralan.kesadaran,pemeriksaan_ralan.keluhan,pemeriksaan_ralan.lingkar_perut,"+
-                        "pemeriksaan_ralan.penilaian,pemeriksaan_ralan.alergi,pemeriksaan_ralan.suhu_tubuh from pemeriksaan_ralan where pemeriksaan_ralan.no_rawat=? "+
+                        "pemeriksaan_ralan.penilaian,pemeriksaan_ralan.alergi,pemeriksaan_ralan.suhu_tubuh, pemeriksaan_ralan.pemeriksaan, pemeriksaan_ralan.instruksi from pemeriksaan_ralan where pemeriksaan_ralan.no_rawat=? "+
                         "order by pemeriksaan_ralan.tgl_perawatan,pemeriksaan_ralan.jam_rawat desc limit 1");
                 try{
                     ps.setString(1,norwt);
@@ -6676,7 +6676,8 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                 
                 ps=koneksi.prepareStatement(
                         "select pemeriksaan_ranap.tensi,pemeriksaan_ranap.nadi,pemeriksaan_ranap.respirasi,pemeriksaan_ranap.tinggi,pemeriksaan_ranap.berat,"+
-                        "pemeriksaan_ranap.keluhan,pemeriksaan_ranap.kesadaran,pemeriksaan_ranap.penilaian,pemeriksaan_ranap.alergi,pemeriksaan_ranap.suhu_tubuh from pemeriksaan_ranap "+
+                        "pemeriksaan_ranap.keluhan,pemeriksaan_ranap.kesadaran,pemeriksaan_ranap.penilaian,pemeriksaan_ranap.alergi,pemeriksaan_ranap.suhu_tubuh, "+
+                        "pemeriksaan_ranap.pemeriksaan, pemeriksaan_ranap.instruksi from pemeriksaan_ranap "+
                         "where pemeriksaan_ranap.no_rawat=? order by pemeriksaan_ranap.tgl_perawatan,pemeriksaan_ranap.jam_rawat desc limit 1");
                 try{
                     ps.setString(1,norwt);

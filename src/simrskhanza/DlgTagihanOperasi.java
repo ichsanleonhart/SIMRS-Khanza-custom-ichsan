@@ -24,18 +24,28 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import keuangan.Jurnal;
 import rekammedis.MasterCariTemplateLaporanOperasi;
+import java.io.File; // tambahan by ichsan
+import org.apache.commons.io.FileUtils; // tambahan by ichsan
+import org.apache.http.client.HttpClient; // tambahan by ichsan
+import org.apache.http.client.methods.HttpPost; // tambahan by ichsan
+import org.apache.http.entity.mime.HttpMultipartMode; // tambahan by ichsan
+import org.apache.http.entity.mime.MultipartEntity; // tambahan by ichsan
+import org.apache.http.entity.mime.content.ByteArrayBody; // tambahan by ichsan
+import org.apache.http.impl.client.DefaultHttpClient; // tambahan by ichsan
+import java.util.HashMap;        // tambahan by ichsan
+import java.util.Map;            // tambahan by ichsan
 
 public class DlgTagihanOperasi extends javax.swing.JDialog {
     private final DefaultTableModel tabMode,tabMode2;
     private sekuel Sequel=new sekuel();
     private validasi Valid=new validasi();
     private Jurnal jur=new Jurnal();
-    private Connection koneksi=koneksiDB.condb();
-    private PreparedStatement pstindakan,pstindakan2,pstindakan3,pstindakan4,psobat,psset_tarif,psrekening;
+    private Connection koneksi=koneksiDB.condb();    
+    private PreparedStatement pstindakan,pstindakan2,pstindakan3,pstindakan4,psobat,psset_tarif,psrekening, ps; // TAMBAHAN ps by ichsan
     private ResultSet rs,rsset_tarif,rsrekening;
     private DlgCariPetugas petugas=new DlgCariPetugas( null,false);
     private DlgCariDokter dokter=new DlgCariDokter(null,false);
-    private String kelas_operasi="Yes",kelas="",cara_bayar_operasi="Yes",kd_pj="",status="";
+    private String kelas_operasi="Yes",kelas="",cara_bayar_operasi="Yes",kd_pj="",status="", FileName ="", kodeberkas=""; //tambahan FileName ="", kodeberkas=""; oleh ichsan
     private double ttljmdokter=0,ttljmpetugas=0,ttlpendapatan=0,ttlbhp=0;
     private String Suspen_Piutang_Operasi_Ranap="",Operasi_Ranap="",Beban_Jasa_Medik_Dokter_Operasi_Ranap="",Utang_Jasa_Medik_Dokter_Operasi_Ranap="",
             Beban_Jasa_Medik_Paramedis_Operasi_Ranap="",Utang_Jasa_Medik_Paramedis_Operasi_Ranap="",HPP_Obat_Operasi_Ranap="",Persediaan_Obat_Kamar_Operasi_Ranap="",
@@ -43,7 +53,7 @@ public class DlgTagihanOperasi extends javax.swing.JDialog {
             Beban_Jasa_Medik_Paramedis_Operasi_Ralan="",Utang_Jasa_Medik_Paramedis_Operasi_Ralan="",HPP_Obat_Operasi_Ralan="",Persediaan_Obat_Kamar_Operasi_Ralan="",
             norawatibu="";
     private double y=0,biayatindakan=0,biayaobat=0;
-    private int jml=0,pilihan=0,i=0,index=0;
+    private int jml=0,pilihan=0,i=0,index=0, reply=0;  //tambahan [reply=0] by ichsan untuk layar tampilan yes / no;
     private boolean[] pilih; 
     private boolean sukses=true;
     private String[] kode_paket, nm_perawatan,kategori,kd_obat,nm_obat, satuan;
@@ -2903,6 +2913,19 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                 }
                     
                 if(sukses==true){
+                    
+                    // start baris modifikasi ichsan untuk auto-upload PDF ke berkas digital perawatan
+                    // tampilkan konfirmasi upload
+                     reply = JOptionPane.showConfirmDialog(rootPane,"Sekalian upload pdf ke bagian klaim BPJS?","Konfirmasi",JOptionPane.YES_NO_OPTION);
+                        if (reply == JOptionPane.YES_OPTION) {                                                            
+                            String noRawatForFileName = TNoRw.getText().replaceAll("/", "");                    
+                            FileName = "BERKAS_OPERASI_" + noRawatForFileName + "_" ;
+                            CreatePDF(FileName);
+                            UploadPDF(FileName, "berkasrawat/pages/upload/"); 
+                            HapusPDF();
+                        }
+                    // end -baris modifikasi ichsan untuk auto-upload PDF ke berkas digital perawatan
+                    
                     Sequel.Commit();
                     for(int r=0;r<tbtindakan.getRowCount();r++){
                         tbtindakan.setValueAt(false,r,0);
@@ -3046,6 +3069,245 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         template.setVisible(true);
     }//GEN-LAST:event_btnTemplateActionPerformed
 
+    
+    private void CreatePDF(String FileName) {
+    // Ambil no_rawat dan tanggal operasi langsung dari komponen DlgTagihanOperasi
+    String norawat = TNoRw.getText().trim();
+    // Tanggal dan jam operasi dari komponen tgl di DlgTagihanOperasi
+    // Asumsi tgl.getSelectedItem() sudah memberikan format "dd-MM-yyyy HH:mm:ss"
+    // Valid.SetTgl digunakan untuk mengonversi ke format YYYY-MM-DD
+    String tanggaloperasi = Valid.SetTgl(tgl.getSelectedItem().toString()) + " " + tgl.getSelectedItem().toString().substring(11, 19);
+
+    // Anda bisa menambahkan validasi di sini jika norawat atau tanggaloperasi kosong
+    if (norawat.isEmpty() || tanggaloperasi.isEmpty()) {
+        JOptionPane.showMessageDialog(rootPane, "Nomor Rawat atau Tanggal Operasi tidak valid untuk membuat PDF!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        return; // Hentikan proses jika data tidak valid
+    }
+
+    Map<String, Object> param = new HashMap<>(); // Gunakan HashMap untuk param
+    param.put("namars", akses.getnamars());
+    param.put("alamatrs", akses.getalamatrs());
+    param.put("kotars", akses.getkabupatenrs());
+    param.put("propinsirs", akses.getpropinsirs());
+    param.put("kontakrs", akses.getkontakrs());
+    param.put("emailrs", akses.getemailrs());
+    param.put("logo", Sequel.cariGambar("select setting.logo from setting"));
+    param.put("norawat", norawat);
+    param.put("tanggaloperasi", tanggaloperasi);
+
+    // Mengambil kode operator (misalnya operator1) dari tabel operasi berdasarkan norawat dan tanggaloperasi
+    String kodeoperator = Sequel.cariIsi("select operasi.operator1 from operasi where operasi.no_rawat='" + norawat + "' and tgl_operasi='" + tanggaloperasi + "'");
+    String namaoperator = Sequel.cariIsi("select dokter.nm_dokter from dokter where dokter.kd_dokter='" + kodeoperator + "'");
+
+    String finger = Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?", kodeoperator);
+    param.put("finger", "Dikeluarkan di " + akses.getnamars() + ", Kabupaten/Kota " + akses.getkabupatenrs() + "\nDitandatangani secara elektronik oleh " + namaoperator + "\nID " + (finger.equals("") ? kodeoperator : finger) + "\n" + Valid.SetTgl3(tanggaloperasi));
+    
+    // Variabel baru untuk menampung daftar tindakan
+    StringBuilder tindakanListBuilder = new StringBuilder(); 
+    PreparedStatement psTindakan = null; // Deklarasi PreparedStatement lokal
+    ResultSet rsTindakan = null;         // Deklarasi ResultSet lokal
+
+    try {
+        psTindakan = koneksi.prepareStatement(
+            "select paket_operasi.nm_perawatan from operasi inner join paket_operasi on paket_operasi.kode_paket=operasi.kode_paket where " +
+            "operasi.no_rawat=? and operasi.tgl_operasi=?");
+        psTindakan.setString(1, norawat);
+        psTindakan.setString(2, tanggaloperasi);
+        rsTindakan = psTindakan.executeQuery();
+        while (rsTindakan.next()) {
+            tindakanListBuilder.append(rsTindakan.getString("nm_perawatan")).append(", ");
+        }
+    } catch (SQLException e) { // Catch SQLException secara spesifik
+        System.out.println("Error (ambil tindakan): " + e);
+    } finally {
+        // Pastikan ResultSet dan PreparedStatement lokal ditutup
+        try {
+            if (rsTindakan != null) {
+                rsTindakan.close();
+            }
+            if (psTindakan != null) {
+                psTindakan.close();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error closing resources (ambil tindakan): " + e);
+        }
+    }
+    
+    String tindakan = "";
+    if (tindakanListBuilder.length() > 0) {
+        tindakan = tindakanListBuilder.substring(0, tindakanListBuilder.length() - 2); // Hapus koma dan spasi terakhir
+    }
+    param.put("tindakan", tindakan);
+
+    // Menentukan status lanjut pasien (Ralan/Ranap)
+    String statusLanjut = Sequel.cariIsi("select reg_periksa.status_lanjut from reg_periksa where reg_periksa.no_rawat=?", norawat);
+
+    // Gunakan ps dan rs global untuk query pemeriksaan ralan/ranap
+    try {
+        if (statusLanjut.equals("Ralan")) {
+            ps = koneksi.prepareStatement(
+                "select pemeriksaan_ralan.no_rawat,pemeriksaan_ralan.tgl_perawatan,pemeriksaan_ralan.jam_rawat,pemeriksaan_ralan.suhu_tubuh," +
+                "pemeriksaan_ralan.tensi,pemeriksaan_ralan.nadi,pemeriksaan_ralan.respirasi,pemeriksaan_ralan.tinggi,pemeriksaan_ralan.berat," +
+                "pemeriksaan_ralan.gcs,pemeriksaan_ralan.keluhan,pemeriksaan_ralan.pemeriksaan,pemeriksaan_ralan.alergi,pemeriksaan_ralan.rtl," +
+                "pemeriksaan_ralan.penilaian,pemeriksaan_ralan.instruksi from pemeriksaan_ralan where pemeriksaan_ralan.no_rawat=? " +
+                "and concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) <= ? " +
+                "order by pemeriksaan_ralan.tgl_perawatan desc,pemeriksaan_ralan.jam_rawat desc limit 1");
+        } else { // Ranap
+            ps = koneksi.prepareStatement(
+                "select pemeriksaan_ranap.no_rawat,pemeriksaan_ranap.tgl_perawatan,pemeriksaan_ranap.jam_rawat,pemeriksaan_ranap.suhu_tubuh," +
+                "pemeriksaan_ranap.tensi,pemeriksaan_ranap.nadi,pemeriksaan_ranap.respirasi,pemeriksaan_ranap.tinggi,pemeriksaan_ranap.berat," +
+                "pemeriksaan_ranap.gcs,pemeriksaan_ranap.keluhan,pemeriksaan_ranap.pemeriksaan,pemeriksaan_ranap.alergi,pemeriksaan_ranap.rtl," +
+                "pemeriksaan_ranap.penilaian,pemeriksaan_ranap.instruksi from pemeriksaan_ranap " +
+                "where pemeriksaan_ranap.no_rawat=? and concat(pemeriksaan_ranap.tgl_perawatan,' ',pemeriksaan_ranap.jam_rawat) <= ? " +
+                "order by pemeriksaan_ranap.tgl_perawatan desc,pemeriksaan_ranap.jam_rawat desc limit 1");
+        }
+
+        ps.setString(1, norawat);
+        ps.setString(2, tanggaloperasi);
+        rs = ps.executeQuery();
+
+        if (rs.next()) {
+            param.put("tgl_perawatan", rs.getDate("tgl_perawatan"));
+            param.put("jam_rawat", rs.getString("jam_rawat"));
+            param.put("alergi", rs.getString("alergi"));
+            param.put("keluhan", rs.getString("keluhan"));
+            param.put("pemeriksaan", rs.getString("pemeriksaan"));
+            param.put("penilaian", rs.getString("penilaian"));
+            param.put("rtl", rs.getString("rtl"));
+            
+            // Logika untuk ruang
+            if (statusLanjut.equals("Ralan")) {
+                param.put("ruang", Sequel.cariIsi("select poliklinik.nm_poli from poliklinik inner join reg_periksa on reg_periksa.kd_poli=poliklinik.kd_poli where reg_periksa.no_rawat=?", rs.getString("no_rawat")));
+            } else { // Ranap
+                String no_rawat_gabung_tmp = Sequel.cariIsi("select no_rawat2 from ranap_gabung where no_rawat=?", norawat);
+                if (no_rawat_gabung_tmp == null) {
+                    param.put("ruang", Sequel.cariIsi("select nm_bangsal from bangsal inner join kamar inner join kamar_inap on bangsal.kd_bangsal=kamar.kd_bangsal and kamar_inap.kd_kamar=kamar.kd_kamar where no_rawat=? order by tgl_masuk desc limit 1 ", rs.getString("no_rawat")));
+                } else {
+                    param.put("ruang", Sequel.cariIsi("select nm_bangsal from bangsal inner join kamar inner join kamar_inap on bangsal.kd_bangsal=kamar.kd_bangsal and kamar_inap.kd_kamar=kamar.kd_kamar where no_rawat=? order by tgl_masuk asc limit 1", rs.getString("no_rawat")));
+                }
+            }
+            
+            param.put("suhu_tubuh", rs.getString("suhu_tubuh"));
+            param.put("tensi", rs.getString("tensi"));
+            param.put("tinggi", rs.getString("tinggi"));
+            param.put("berat", rs.getString("berat"));
+            param.put("nadi", rs.getString("nadi"));
+            param.put("respirasi", rs.getString("respirasi"));
+            param.put("gcs", rs.getString("gcs"));
+            param.put("instruksi", rs.getString("instruksi"));
+        }
+    } catch (SQLException e) { // Catch SQLException secara spesifik
+        System.out.println("Notif (pemeriksaan ralan/ranap): " + e);
+    } finally {
+        try {
+            if (rs != null) {
+                rs.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error closing resources (pemeriksaan ralan/ranap): " + e);
+        }
+    }
+
+    // Mengambil data laporan operasi dari tabel laporan_operasi
+    PreparedStatement psLaporan = null; // Deklarasi PreparedStatement lokal
+    ResultSet rsLaporan = null;         // Deklarasi ResultSet lokal
+    try {
+        psLaporan = koneksi.prepareStatement(
+            "select diagnosa_preop, diagnosa_postop, jaringan_dieksekusi, selesaioperasi, permintaan_pa, laporan_operasi " +
+            "from laporan_operasi where no_rawat=? and tanggal=?");
+        psLaporan.setString(1, norawat);
+        psLaporan.setString(2, tanggaloperasi);
+        rsLaporan = psLaporan.executeQuery();
+        if (rsLaporan.next()) {
+            param.put("diagnosa_preop", rsLaporan.getString("diagnosa_preop"));
+            param.put("diagnosa_postop", rsLaporan.getString("diagnosa_postop"));
+            param.put("jaringan_dieksekusi", rsLaporan.getString("jaringan_dieksekusi"));
+            param.put("selesaioperasi", rsLaporan.getString("selesaioperasi"));
+            param.put("permintaan_pa", rsLaporan.getString("permintaan_pa"));
+            param.put("laporan_operasi", rsLaporan.getString("laporan_operasi"));
+        }
+    } catch (SQLException e) { // Catch SQLException secara spesifik
+        System.out.println("Notif (ambil laporan_operasi): " + e);
+    } finally {
+        try {
+            if (rsLaporan != null) {
+                rsLaporan.close();
+            }
+            if (psLaporan != null) {
+                psLaporan.close();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error closing resources (laporan_operasi): " + e);
+        }
+    }
+
+    // Generate PDF
+    Valid.MyReportPDFUpload("rptLaporanOperasi.jasper", "report", "::[ Laporan Operasi ]::", FileName, param);
+}
+    
+private void UploadPDF(String FileName, String docpath) {
+    try {
+        File file = new File("tmpPDF/" + FileName + ".pdf");
+        byte[] data = FileUtils.readFileToByteArray(file);
+        HttpClient httpClient = new DefaultHttpClient();
+        HttpPost postRequest = new HttpPost("http://" + koneksiDB.HOSTHYBRIDWEB() + ":" + koneksiDB.PORTWEB() + "/" + koneksiDB.HYBRIDWEB() + "/upload.php?doc=" + docpath);
+        ByteArrayBody fileData = new ByteArrayBody(data, FileName + ".pdf");
+        MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+        reqEntity.addPart("file", fileData);
+        postRequest.setEntity(reqEntity);
+        httpClient.execute(postRequest);
+
+        // Menyimpan ke database
+        boolean uploadSuccess = false;
+        // Kodeberkas untuk Laporan Operasi
+        // Menggunakan 'OPERASI' karena ini adalah laporan operasi, bukan klaim umum.
+        kodeberkas = Sequel.cariIsi("SELECT kode FROM master_berkas_digital WHERE nama LIKE '%OPERASI%'"); //
+
+        // Mengganti tbDokter.getValueAt(...) dengan TNoRw.getText()
+        String noRawatUntukDB = TNoRw.getText().trim(); // Ambil No.Rawat dari textbox di DlgTagihanOperasi
+
+        if (Sequel.cariInteger("SELECT COUNT(no_rawat) AS jumlah FROM berkas_digital_perawatan WHERE lokasi_file='pages/upload/" + FileName + ".pdf'") > 0) {
+            uploadSuccess = Sequel.mengedittf("berkas_digital_perawatan", "lokasi_file=?", "no_rawat=?,kode=?, lokasi_file=?", 4, new String[]{
+                noRawatUntukDB, // Menggunakan TNoRw dari DlgTagihanOperasi
+                kodeberkas,
+                "pages/upload/" + FileName + ".pdf",
+                "pages/upload/" + FileName + ".pdf"
+            });
+        } else {
+            uploadSuccess = Sequel.menyimpantf("berkas_digital_perawatan", "?,?,?", "No.Rawat", 3, new String[]{
+                noRawatUntukDB, // Menggunakan TNoRw dari DlgTagihanOperasi
+                kodeberkas,
+                "pages/upload/" + FileName + ".pdf"
+            });
+        }
+
+        // Menampilkan notifikasi
+        if (uploadSuccess) {
+            JOptionPane.showMessageDialog(null, "Upload berhasil!", "Informasi", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, "Upload gagal disimpan ke database.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        }
+    } catch (Exception e) {
+        System.out.println("Upload error: " + e);
+        JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+private void HapusPDF() {
+        File file = new File("tmpPDF");
+        String[] myFiles;
+        if (file.isDirectory()) {
+            myFiles = file.list();
+            for (int i = 0; i < myFiles.length; i++) {
+                File myFile = new File(file, myFiles[i]);
+                myFile.delete();
+            }
+        }
+    }
+    
     /**
     * @param args the command line arguments
     */

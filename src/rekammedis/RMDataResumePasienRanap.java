@@ -2050,7 +2050,7 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
             }
 
             // tampilkan konfirmasi upload
-            reply = JOptionPane.showConfirmDialog(rootPane, "Simpan Berhasil! Mau sekalian Upload pdf ke berkas klaim?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
+            reply = JOptionPane.showConfirmDialog(rootPane, "Simpan Berhasil! Mau sekalian Upload pdf ke unit klaim BPJS?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
             if (reply == JOptionPane.YES_OPTION) {
                 int selectedRow = tbObat.getSelectedRow();
                 if (selectedRow != -1) {

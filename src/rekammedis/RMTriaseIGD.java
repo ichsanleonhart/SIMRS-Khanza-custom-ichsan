@@ -46,6 +46,23 @@ import javax.swing.text.html.StyleSheet;
 import kepegawaian.DlgCariPegawai;
 import java.sql.Timestamp;  //tambahan dari ichsan
 
+import java.io.File; // Tambahkan jika belum ada
+import java.sql.PreparedStatement; // Tambahkan jika belum ada
+import java.sql.ResultSet;       // Tambahkan jika belum ada
+import java.sql.SQLException;    // Tambahkan jika belum ada
+import java.util.HashMap;        // Tambahkan jika belum ada
+import java.util.Map;            // Tambahkan jika belum ada
+
+// Import untuk upload PDF (pastikan ini ada)
+import org.apache.commons.io.FileUtils;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.entity.mime.HttpMultipartMode;
+
+
 
 /**
  *
@@ -63,9 +80,9 @@ public final class RMTriaseIGD extends javax.swing.JDialog {
     private boolean[] pilih; 
     private String[] kode,pengkajian;
     private DlgCariPegawai pegawai=new DlgCariPegawai(null,false);
-    private String keputusan="",pilihan="",datatriase="",finger="",kodepetugas="";
+    private String keputusan="",pilihan="",datatriase="",finger="",kodepetugas="", FileName = "", kodeberkas = ""; // Untuk nama file PDF yang akan diupload - ichsan
     private StringBuilder htmlContent;
-    private boolean sukses=true;
+    private boolean sukses=true, mainDataFetched; //tambahan mainDataFetched; oleh ichsan
     
     /** Creates new form DlgRujuk
      * @param parent
@@ -2279,6 +2296,62 @@ public final class RMTriaseIGD extends javax.swing.JDialog {
             }
             if(sukses==true){
                 Sequel.Commit();
+                
+                    // --- MULAI KODE UNTUK AUTO-UPLOAD PDF LAPORAN TRIASE IGD ---
+                     // 1. Refresh tbTriase agar data yang baru disimpan muncul
+                    tampil(); 
+                    
+                    // 2. Cari baris yang baru saja disimpan di tbTriase dan pilih
+                    int barisTerpilihUntukUpload = -1;
+                    String noRawatBaruDisimpan = TNoRw.getText().trim(); // Ambil no_rawat yang baru disimpan
+                    for (int row = 0; row < tabMode.getRowCount(); row++) {
+                        // Asumsi kolom pertama (indeks 0) dari tabMode tbTriase adalah No.Rawat
+                        if (tabMode.getValueAt(row, 0).toString().equals(noRawatBaruDisimpan)) {
+                            barisTerpilihUntukUpload = row;
+                            break;
+                        }
+                    }
+                    
+                    if (barisTerpilihUntukUpload != -1) {
+                        tbTriase.setRowSelectionInterval(barisTerpilihUntukUpload, barisTerpilihUntukUpload);
+                        // Jika ada listener mouseClicked atau keyReleased di tbTriase yang mengisi LoadHTML,
+                        // pemilihan baris ini harusnya memicu pembaruan LoadHTML.
+                        // Jika tidak, kita perlu memanggil metode pengisi LoadHTML secara eksplisit.
+                        // Asumsi ada metode yang mengisi LoadHTML, mari kita cari tahu:
+                        // Berdasarkan RMTriaseIGD.java, LoadHTML diisi di tbTriaseMouseClicked()
+                        // dengan memanggil `getData()` lalu `LoadHTML.setText(Valid.isiAwalHTML(LoadHTML.getText()))` (opsional)
+                        // dan `LoadHTML.setText(LoadHTML.getText().replaceAll("#AA0000","<font color='#AA0000'>").replaceAll("#FF0000","<font color='#FF0000'>").replaceAll("#C8C800","<font color='#C8C800'>").replaceAll("#00AA00","<font color='#00AA00'>").replaceAll("#969696","<font color='#969696'>"))`
+                        
+                        // Panggil metode getData() untuk mengisi kembali form dan LoadHTML
+                        // Metode getData() ini yang dipanggil di tbTriaseMouseClicked
+                        getData(); // Ini akan mengisi form termasuk LoadHTML dari data yang terpilih di tbTriase
+
+                        // Tambahan penundaan sedikit untuk memastikan LoadHTML selesai diperbarui (opsional, tapi bisa membantu)
+                        try {
+                            Thread.sleep(300); // Menunda 100 milidetik
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                        
+                    // Tampilkan konfirmasi upload ke user
+                    int reply = JOptionPane.showConfirmDialog(rootPane, "Simpan Berhasil! Mau sekalian Upload PDF Triase IGD ke berkas digital perawatan?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
+                    if (reply == JOptionPane.YES_OPTION) {
+                        // Generate FileName unik berdasarkan No.Rawat dan No.RM
+                        String noRawatForFileName = TNoRw.getText().replaceAll("/", "");                        
+                        
+                        // Gabungkan untuk membentuk FileName
+                        FileName = "BERKAS_TRIASE_IGD_" + noRawatForFileName + "_";
+
+                        CreatePDF(FileName); // Panggil fungsi untuk membuat PDF
+                        UploadPDF(FileName, "berkasrawat/pages/upload/"); // Mengunggah PDF ke folder upload
+                        HapusPDF(); // Menghapus file PDF sementara setelah diunggah
+                    }
+                    
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Data yang baru disimpan tidak ditemukan di tabel untuk upload otomatis. Silakan upload manual jika perlu.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+                    }
+                    // --- AKHIR KODE UNTUK AUTO-UPLOAD PDF LAPORAN TRIASE IGD ---
+                
             }else{
                 sukses=false;
                 Sequel.RollBack();
@@ -5971,5 +6044,647 @@ public final class RMTriaseIGD extends javax.swing.JDialog {
             TabPilihan.setSelectedIndex(1);
         }
     }
+    
+    private void CreatePDF(String FileName) {  //BELUM FIX MASIH ERROR
+    if(TNoRM1.getText().trim().equals("")||TPasien1.getText().trim().equals("")){
+            Valid.textKosong(TCari,"Pasien");
+        }else{
+            if(tbTriase.getSelectedRow()> -1){
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                i=0;
+                if(LoadHTML.getText().contains("#AA0000")){
+                    Map<String, Object> param = new HashMap<>(); 
+                    param.put("namars",akses.getnamars());
+                    param.put("alamatrs",akses.getalamatrs());
+                    param.put("kotars",akses.getkabupatenrs());
+                    param.put("propinsirs",akses.getpropinsirs());
+                    param.put("kontakrs",akses.getkontakrs());
+                    param.put("emailrs",akses.getemailrs());   
+                    param.put("logo",Sequel.cariGambar("select setting.logo from setting")); 
+                    try {
+                        ps=koneksi.prepareStatement(
+                            "select data_triase_igdprimer.keluhan_utama,data_triase_igdprimer.kebutuhan_khusus,data_triase_igdprimer.catatan,"+
+                            "data_triase_igdprimer.plan,data_triase_igdprimer.tanggaltriase,data_triase_igdprimer.nik,data_triase_igd.tekanan_darah,"+
+                            "data_triase_igd.nadi,data_triase_igd.pernapasan,data_triase_igd.suhu,data_triase_igd.saturasi_o2,data_triase_igd.nyeri,"+
+                            "data_triase_igd.no_rawat,pasien.no_rkm_medis,pasien.nm_pasien,pasien.jk,pasien.tgl_lahir,pegawai.nama,data_triase_igd.tgl_kunjungan, "+
+                            "data_triase_igd.cara_masuk,master_triase_macam_kasus.macam_kasus from data_triase_igdprimer inner join data_triase_igd "+
+                            "inner join pasien inner join pegawai inner join reg_periksa inner join master_triase_macam_kasus on "+
+                            "data_triase_igd.no_rawat=data_triase_igdprimer.no_rawat and reg_periksa.no_rawat=data_triase_igd.no_rawat "+
+                            "and reg_periksa.no_rkm_medis=pasien.no_rkm_medis and pegawai.nik=data_triase_igdprimer.nik "+
+                            "and master_triase_macam_kasus.kode_kasus=data_triase_igd.kode_kasus where data_triase_igd.no_rawat=?");
+                        try {
+                            ps.setString(1,tbTriase.getValueAt(tbTriase.getSelectedRow(),0).toString());
+                            rs=ps.executeQuery();
+                            if(rs.next()){
+                                param.put("norawat",rs.getString("no_rawat"));
+                                param.put("norm",rs.getString("no_rkm_medis"));
+                                param.put("namapasien",rs.getString("nm_pasien"));
+                                param.put("tanggallahir",rs.getDate("tgl_lahir"));
+                                param.put("jk",rs.getString("jk").replaceAll("L","Laki-Laki").replaceAll("P","Perempuan"));
+                                param.put("tanggalkunjungan",rs.getDate("tgl_kunjungan"));
+                                param.put("jamkunjungan",rs.getString("tgl_kunjungan").toString().substring(11,19));
+                                param.put("caradatang",rs.getString("cara_masuk"));
+                                param.put("macamkasus",rs.getString("macam_kasus"));
+                                param.put("keluhanutama",rs.getString("keluhan_utama"));
+                                param.put("kebutuhankhusus",rs.getString("kebutuhan_khusus"));
+                                param.put("plan",rs.getString("plan"));
+                                param.put("tanggaltriase",rs.getDate("tanggaltriase"));
+                                param.put("jamtriase",rs.getString("tanggaltriase").toString().substring(11,19));
+                                param.put("pegawai",rs.getString("nama"));
+                                param.put("catatan",rs.getString("catatan"));
+                                param.put("tandavital","Suhu (C) : "+rs.getString("suhu")+", Nyeri : "+rs.getString("nyeri")+", Tensi : "+rs.getString("tekanan_darah")+", Nadi(/menit) : "+rs.getString("nadi")+", Saturasi O²(%) : "+rs.getString("saturasi_o2")+", Respirasi(/menit) : "+rs.getString("pernapasan"));
+                                finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",rs.getString("nik"));
+                                param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+rs.getString("nama")+"\nID "+(finger.equals("")?rs.getString("nik"):finger)+"\n"+Valid.SetTgl3(rs.getString("tanggaltriase"))); 
+                                ps2=koneksi.prepareStatement(
+                                    "select master_triase_pemeriksaan.kode_pemeriksaan,master_triase_pemeriksaan.nama_pemeriksaan "+
+                                    "from master_triase_pemeriksaan inner join master_triase_skala1 inner join data_triase_igddetail_skala1 "+
+                                    "on master_triase_pemeriksaan.kode_pemeriksaan=master_triase_skala1.kode_pemeriksaan and "+
+                                    "master_triase_skala1.kode_skala1=data_triase_igddetail_skala1.kode_skala1 where data_triase_igddetail_skala1.no_rawat=? "+
+                                    "group by master_triase_pemeriksaan.kode_pemeriksaan order by master_triase_pemeriksaan.kode_pemeriksaan");
+                                try {
+                                    Sequel.queryu("delete from temporary where temp37='"+akses.getalamatip()+"'");
+                                    ps2.setString(1,rs.getString("no_rawat"));
+                                    rs2=ps2.executeQuery();
+                                    while(rs2.next()){
+                                        datatriase="";
+                                        ps3=koneksi.prepareStatement(
+                                            "select master_triase_skala1.pengkajian_skala1 from master_triase_skala1 inner join data_triase_igddetail_skala1 "+
+                                            "on master_triase_skala1.kode_skala1=data_triase_igddetail_skala1.kode_skala1 where "+
+                                            "master_triase_skala1.kode_pemeriksaan=? and data_triase_igddetail_skala1.no_rawat=? "+
+                                            "order by data_triase_igddetail_skala1.kode_skala1");
+                                        try {
+                                            ps3.setString(1,rs2.getString("kode_pemeriksaan"));
+                                            ps3.setString(2,rs.getString("no_rawat"));
+                                            rs3=ps3.executeQuery();
+                                            while(rs3.next()){
+                                                datatriase=rs3.getString("pengkajian_skala1")+", "+datatriase;
+                                            }
+                                        } catch (Exception e) {
+                                            System.out.println("Notif : "+e);
+                                        } finally{
+                                            if(rs3!=null){
+                                                rs3.close();
+                                            }
+                                            if(ps3!=null){
+                                                ps3.close();
+                                            }
+                                        }
+                                        
+                                        if(datatriase.endsWith(", ")){
+                                            datatriase = datatriase.substring(0,datatriase.length() - 2);
+                                        }
+                                        Sequel.menyimpan2("temporary","'"+i+"','"+rs2.getString("nama_pemeriksaan")+"','"+datatriase+"','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','"+akses.getalamatip()+"'","Transaksi");
+                                        i++;
+                                    }
+                                } catch (Exception e) {
+                                    System.out.println("Notif : "+e);
+                                } finally{
+                                    if(rs2!=null){
+                                        rs2.close();
+                                    }
+                                    if(ps2!=null){
+                                        ps2.close();
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Notif : "+e);
+                        } finally{
+                            if(rs!=null){
+                                rs.close();
+                            }
+                            if(ps!=null){
+                                ps.close();
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Notif : "+e);
+                    }
+                      
+                    try {    
+                                  Valid.MyReportPDFqryUpload("rptLembarTriaseSkala1.jasper","report","::[ Triase Skala 1 ]::","select * from temporary where temporary.temp37='"+akses.getalamatip()+"' order by temporary.no",FileName,param);                               
+                    } catch (Exception e) {
+                    }
+                }else if(LoadHTML.getText().contains("#FF0000")){
+                    Map<String, Object> param = new HashMap<>(); 
+                    param.put("namars",akses.getnamars());
+                    param.put("alamatrs",akses.getalamatrs());
+                    param.put("kotars",akses.getkabupatenrs());
+                    param.put("propinsirs",akses.getpropinsirs());
+                    param.put("kontakrs",akses.getkontakrs());
+                    param.put("emailrs",akses.getemailrs());   
+                    param.put("logo",Sequel.cariGambar("select setting.logo from setting")); 
+                    try {
+                        ps=koneksi.prepareStatement(
+                            "select data_triase_igdprimer.keluhan_utama,data_triase_igdprimer.kebutuhan_khusus,data_triase_igdprimer.catatan,"+
+                            "data_triase_igdprimer.plan,data_triase_igdprimer.tanggaltriase,data_triase_igdprimer.nik,data_triase_igd.tekanan_darah,"+
+                            "data_triase_igd.nadi,data_triase_igd.pernapasan,data_triase_igd.suhu,data_triase_igd.saturasi_o2,data_triase_igd.nyeri,"+
+                            "data_triase_igd.no_rawat,pasien.no_rkm_medis,pasien.nm_pasien,pasien.jk,pasien.tgl_lahir,pegawai.nama,data_triase_igd.tgl_kunjungan, "+
+                            "data_triase_igd.cara_masuk,master_triase_macam_kasus.macam_kasus from data_triase_igdprimer inner join data_triase_igd "+
+                            "inner join pasien inner join pegawai inner join reg_periksa inner join master_triase_macam_kasus on "+
+                            "data_triase_igd.no_rawat=data_triase_igdprimer.no_rawat and reg_periksa.no_rawat=data_triase_igd.no_rawat "+
+                            "and reg_periksa.no_rkm_medis=pasien.no_rkm_medis and pegawai.nik=data_triase_igdprimer.nik "+
+                            "and master_triase_macam_kasus.kode_kasus=data_triase_igd.kode_kasus where data_triase_igd.no_rawat=?");
+                        try {
+                            ps.setString(1,tbTriase.getValueAt(tbTriase.getSelectedRow(),0).toString());
+                            rs=ps.executeQuery();
+                            if(rs.next()){
+                                param.put("norawat",rs.getString("no_rawat"));
+                                param.put("norm",rs.getString("no_rkm_medis"));
+                                param.put("namapasien",rs.getString("nm_pasien"));
+                                param.put("tanggallahir",rs.getDate("tgl_lahir"));
+                                param.put("jk",rs.getString("jk").replaceAll("L","Laki-Laki").replaceAll("P","Perempuan"));
+                                param.put("tanggalkunjungan",rs.getDate("tgl_kunjungan"));
+                                param.put("jamkunjungan",rs.getString("tgl_kunjungan").toString().substring(11,19));
+                                param.put("caradatang",rs.getString("cara_masuk"));
+                                param.put("macamkasus",rs.getString("macam_kasus"));
+                                param.put("keluhanutama",rs.getString("keluhan_utama"));
+                                param.put("kebutuhankhusus",rs.getString("kebutuhan_khusus"));
+                                param.put("plan",rs.getString("plan"));
+                                param.put("tanggaltriase",rs.getDate("tanggaltriase"));
+                                param.put("tandavital","Suhu (C) : "+rs.getString("suhu")+", Nyeri : "+rs.getString("nyeri")+", Tensi : "+rs.getString("tekanan_darah")+", Nadi(/menit) : "+rs.getString("nadi")+", Saturasi O²(%) : "+rs.getString("saturasi_o2")+", Respirasi(/menit) : "+rs.getString("pernapasan"));
+                                param.put("jamtriase",rs.getString("tanggaltriase").toString().substring(11,19));
+                                param.put("pegawai",rs.getString("nama"));
+                                param.put("catatan",rs.getString("catatan"));
+                                finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",rs.getString("nik"));
+                                param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+rs.getString("nama")+"\nID "+(finger.equals("")?rs.getString("nik"):finger)+"\n"+Valid.SetTgl3(rs.getString("tanggaltriase"))); 
+                                ps2=koneksi.prepareStatement(
+                                    "select master_triase_pemeriksaan.kode_pemeriksaan,master_triase_pemeriksaan.nama_pemeriksaan "+
+                                    "from master_triase_pemeriksaan inner join master_triase_skala2 inner join data_triase_igddetail_skala2 "+
+                                    "on master_triase_pemeriksaan.kode_pemeriksaan=master_triase_skala2.kode_pemeriksaan and "+
+                                    "master_triase_skala2.kode_skala2=data_triase_igddetail_skala2.kode_skala2 where data_triase_igddetail_skala2.no_rawat=? "+
+                                    "group by master_triase_pemeriksaan.kode_pemeriksaan order by master_triase_pemeriksaan.kode_pemeriksaan");
+                                try {
+                                    Sequel.queryu("delete from temporary where temp37='"+akses.getalamatip()+"'");
+                                    ps2.setString(1,rs.getString("no_rawat"));
+                                    rs2=ps2.executeQuery();
+                                    while(rs2.next()){
+                                        datatriase="";
+                                        ps3=koneksi.prepareStatement(
+                                            "select master_triase_skala2.pengkajian_skala2 from master_triase_skala2 inner join data_triase_igddetail_skala2 "+
+                                            "on master_triase_skala2.kode_skala2=data_triase_igddetail_skala2.kode_skala2 where "+
+                                            "master_triase_skala2.kode_pemeriksaan=? and data_triase_igddetail_skala2.no_rawat=? "+
+                                            "order by data_triase_igddetail_skala2.kode_skala2");
+                                        try {
+                                            ps3.setString(1,rs2.getString("kode_pemeriksaan"));
+                                            ps3.setString(2,rs.getString("no_rawat"));
+                                            rs3=ps3.executeQuery();
+                                            while(rs3.next()){
+                                                datatriase=rs3.getString("pengkajian_skala2")+", "+datatriase;
+                                            }
+                                        } catch (Exception e) {
+                                            System.out.println("Notif : "+e);
+                                        } finally{
+                                            if(rs3!=null){
+                                                rs3.close();
+                                            }
+                                            if(ps3!=null){
+                                                ps3.close();
+                                            }
+                                        }
+                                        
+                                        if(datatriase.endsWith(", ")){
+                                            datatriase = datatriase.substring(0,datatriase.length() - 2);
+                                        }
+                                        Sequel.menyimpan2("temporary","'"+i+"','"+rs2.getString("nama_pemeriksaan")+"','"+datatriase+"','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','"+akses.getalamatip()+"'","Transaksi");
+                                        i++;
+                                    }
+                                } catch (Exception e) {
+                                    System.out.println("Notif : "+e);
+                                } finally{
+                                    if(rs2!=null){
+                                        rs2.close();
+                                    }
+                                    if(ps2!=null){
+                                        ps2.close();
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Notif : "+e);
+                        } finally{
+                            if(rs!=null){
+                                rs.close();
+                            }
+                            if(ps!=null){
+                                ps.close();
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Notif : "+e);
+                    }
+                      
+                    try {                            
+                                  Valid.MyReportPDFqryUpload("rptLembarTriaseSkala2.jasper","report","::[ Triase Skala 2 ]::","select * from temporary where temporary.temp37='"+akses.getalamatip()+"' order by temporary.no",FileName,param);                                                         
+                    } catch (Exception e) {
+                    } 
+                }else if(LoadHTML.getText().contains("#C8C800")){
+                    Map<String, Object> param = new HashMap<>(); 
+                    param.put("namars",akses.getnamars());
+                    param.put("alamatrs",akses.getalamatrs());
+                    param.put("kotars",akses.getkabupatenrs());
+                    param.put("propinsirs",akses.getpropinsirs());
+                    param.put("kontakrs",akses.getkontakrs());
+                    param.put("emailrs",akses.getemailrs());   
+                    param.put("logo",Sequel.cariGambar("select setting.logo from setting")); 
+                    try {
+                        ps=koneksi.prepareStatement(
+                            "select data_triase_igdsekunder.anamnesa_singkat,data_triase_igdsekunder.catatan,"+
+                            "data_triase_igdsekunder.plan,data_triase_igdsekunder.tanggaltriase,data_triase_igdsekunder.nik,data_triase_igd.tekanan_darah,"+
+                            "data_triase_igd.nadi,data_triase_igd.pernapasan,data_triase_igd.suhu,data_triase_igd.saturasi_o2,data_triase_igd.nyeri,"+
+                            "data_triase_igd.no_rawat,pasien.no_rkm_medis,pasien.nm_pasien,pasien.jk,pasien.tgl_lahir,pegawai.nama,data_triase_igd.tgl_kunjungan, "+
+                            "data_triase_igd.cara_masuk,master_triase_macam_kasus.macam_kasus from data_triase_igdsekunder inner join data_triase_igd "+
+                            "inner join pasien inner join pegawai inner join reg_periksa inner join master_triase_macam_kasus on "+
+                            "data_triase_igd.no_rawat=data_triase_igdsekunder.no_rawat and reg_periksa.no_rawat=data_triase_igd.no_rawat "+
+                            "and reg_periksa.no_rkm_medis=pasien.no_rkm_medis and pegawai.nik=data_triase_igdsekunder.nik "+
+                            "and master_triase_macam_kasus.kode_kasus=data_triase_igd.kode_kasus where data_triase_igd.no_rawat=?");
+                        try {
+                            ps.setString(1,tbTriase.getValueAt(tbTriase.getSelectedRow(),0).toString());
+                            rs=ps.executeQuery();
+                            if(rs.next()){
+                                param.put("norawat",rs.getString("no_rawat"));
+                                param.put("norm",rs.getString("no_rkm_medis"));
+                                param.put("namapasien",rs.getString("nm_pasien"));
+                                param.put("tanggallahir",rs.getDate("tgl_lahir"));
+                                param.put("jk",rs.getString("jk").replaceAll("L","Laki-Laki").replaceAll("P","Perempuan"));
+                                param.put("tanggalkunjungan",rs.getDate("tgl_kunjungan"));
+                                param.put("jamkunjungan",rs.getString("tgl_kunjungan").toString().substring(11,19));
+                                param.put("caradatang",rs.getString("cara_masuk"));
+                                param.put("macamkasus",rs.getString("macam_kasus"));
+                                param.put("keluhanutama",rs.getString("anamnesa_singkat"));
+                                param.put("plan",rs.getString("plan"));
+                                param.put("tanggaltriase",rs.getDate("tanggaltriase"));
+                                param.put("tandavital","Suhu (C) : "+rs.getString("suhu")+", Nyeri : "+rs.getString("nyeri")+", Tensi : "+rs.getString("tekanan_darah")+", Nadi(/menit) : "+rs.getString("nadi")+", Saturasi O²(%) : "+rs.getString("saturasi_o2")+", Respirasi(/menit) : "+rs.getString("pernapasan"));
+                                param.put("jamtriase",rs.getString("tanggaltriase").toString().substring(11,19));
+                                param.put("pegawai",rs.getString("nama"));
+                                param.put("catatan",rs.getString("catatan"));
+                                finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",rs.getString("nik"));
+                                param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+rs.getString("nama")+"\nID "+(finger.equals("")?rs.getString("nik"):finger)+"\n"+Valid.SetTgl3(rs.getString("tanggaltriase"))); 
+                                ps2=koneksi.prepareStatement(
+                                    "select master_triase_pemeriksaan.kode_pemeriksaan,master_triase_pemeriksaan.nama_pemeriksaan "+
+                                    "from master_triase_pemeriksaan inner join master_triase_skala3 inner join data_triase_igddetail_skala3 "+
+                                    "on master_triase_pemeriksaan.kode_pemeriksaan=master_triase_skala3.kode_pemeriksaan and "+
+                                    "master_triase_skala3.kode_skala3=data_triase_igddetail_skala3.kode_skala3 where data_triase_igddetail_skala3.no_rawat=? "+
+                                    "group by master_triase_pemeriksaan.kode_pemeriksaan order by master_triase_pemeriksaan.kode_pemeriksaan");
+                                try {
+                                    Sequel.queryu("delete from temporary where temp37='"+akses.getalamatip()+"'");
+                                    ps2.setString(1,rs.getString("no_rawat"));
+                                    rs2=ps2.executeQuery();
+                                    while(rs2.next()){
+                                        datatriase="";
+                                        ps3=koneksi.prepareStatement(
+                                            "select master_triase_skala3.pengkajian_skala3 from master_triase_skala3 inner join data_triase_igddetail_skala3 "+
+                                            "on master_triase_skala3.kode_skala3=data_triase_igddetail_skala3.kode_skala3 where "+
+                                            "master_triase_skala3.kode_pemeriksaan=? and data_triase_igddetail_skala3.no_rawat=? "+
+                                            "order by data_triase_igddetail_skala3.kode_skala3");
+                                        try {
+                                            ps3.setString(1,rs2.getString("kode_pemeriksaan"));
+                                            ps3.setString(2,rs.getString("no_rawat"));
+                                            rs3=ps3.executeQuery();
+                                            while(rs3.next()){
+                                                datatriase=rs3.getString("pengkajian_skala3")+", "+datatriase;
+                                            }
+                                        } catch (Exception e) {
+                                            System.out.println("Notif : "+e);
+                                        } finally{
+                                            if(rs3!=null){
+                                                rs3.close();
+                                            }
+                                            if(ps3!=null){
+                                                ps3.close();
+                                            }
+                                        }
+                                        
+                                        if(datatriase.endsWith(", ")){
+                                            datatriase = datatriase.substring(0,datatriase.length() - 2);
+                                        }
+                                        Sequel.menyimpan2("temporary","'"+i+"','"+rs2.getString("nama_pemeriksaan")+"','"+datatriase+"','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','"+akses.getalamatip()+"'","Transaksi");
+                                        i++;
+                                    }
+                                } catch (Exception e) {
+                                    System.out.println("Notif : "+e);
+                                } finally{
+                                    if(rs2!=null){
+                                        rs2.close();
+                                    }
+                                    if(ps2!=null){
+                                        ps2.close();
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Notif : "+e);
+                        } finally{
+                            if(rs!=null){
+                                rs.close();
+                            }
+                            if(ps!=null){
+                                ps.close();
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Notif : "+e);
+                    }
+                       
+                    try {        
+                                  Valid.MyReportPDFqryUpload("rptLembarTriaseSkala3.jasper","report","::[ Triase Skala 3 ]::","select * from temporary where temporary.temp37='"+akses.getalamatip()+"' order by temporary.no",FileName,param);                               
+                        
+                    } catch (Exception e) {
+                    }
+                }else if(LoadHTML.getText().contains("#00AA00")){
+                    Map<String, Object> param = new HashMap<>(); 
+                    param.put("namars",akses.getnamars());
+                    param.put("alamatrs",akses.getalamatrs());
+                    param.put("kotars",akses.getkabupatenrs());
+                    param.put("propinsirs",akses.getpropinsirs());
+                    param.put("kontakrs",akses.getkontakrs());
+                    param.put("emailrs",akses.getemailrs());   
+                    param.put("logo",Sequel.cariGambar("select setting.logo from setting")); 
+                    try {
+                        ps=koneksi.prepareStatement(
+                            "select data_triase_igdsekunder.anamnesa_singkat,data_triase_igdsekunder.catatan,"+
+                            "data_triase_igdsekunder.plan,data_triase_igdsekunder.tanggaltriase,data_triase_igdsekunder.nik,data_triase_igd.tekanan_darah,"+
+                            "data_triase_igd.nadi,data_triase_igd.pernapasan,data_triase_igd.suhu,data_triase_igd.saturasi_o2,data_triase_igd.nyeri,"+
+                            "data_triase_igd.no_rawat,pasien.no_rkm_medis,pasien.nm_pasien,pasien.jk,pasien.tgl_lahir,pegawai.nama,data_triase_igd.tgl_kunjungan, "+
+                            "data_triase_igd.cara_masuk,master_triase_macam_kasus.macam_kasus from data_triase_igdsekunder inner join data_triase_igd "+
+                            "inner join pasien inner join pegawai inner join reg_periksa inner join master_triase_macam_kasus on "+
+                            "data_triase_igd.no_rawat=data_triase_igdsekunder.no_rawat and reg_periksa.no_rawat=data_triase_igd.no_rawat "+
+                            "and reg_periksa.no_rkm_medis=pasien.no_rkm_medis and pegawai.nik=data_triase_igdsekunder.nik "+
+                            "and master_triase_macam_kasus.kode_kasus=data_triase_igd.kode_kasus where data_triase_igd.no_rawat=?");
+                        try {
+                            ps.setString(1,tbTriase.getValueAt(tbTriase.getSelectedRow(),0).toString());
+                            rs=ps.executeQuery();
+                            if(rs.next()){
+                                param.put("norawat",rs.getString("no_rawat"));
+                                param.put("norm",rs.getString("no_rkm_medis"));
+                                param.put("namapasien",rs.getString("nm_pasien"));
+                                param.put("tanggallahir",rs.getDate("tgl_lahir"));
+                                param.put("jk",rs.getString("jk").replaceAll("L","Laki-Laki").replaceAll("P","Perempuan"));
+                                param.put("tanggalkunjungan",rs.getDate("tgl_kunjungan"));
+                                param.put("jamkunjungan",rs.getString("tgl_kunjungan").toString().substring(11,19));
+                                param.put("caradatang",rs.getString("cara_masuk"));
+                                param.put("macamkasus",rs.getString("macam_kasus"));
+                                param.put("keluhanutama",rs.getString("anamnesa_singkat"));
+                                param.put("plan",rs.getString("plan"));
+                                param.put("tanggaltriase",rs.getDate("tanggaltriase"));
+                                param.put("tandavital","Suhu (C) : "+rs.getString("suhu")+", Nyeri : "+rs.getString("nyeri")+", Tensi : "+rs.getString("tekanan_darah")+", Nadi(/menit) : "+rs.getString("nadi")+", Saturasi O²(%) : "+rs.getString("saturasi_o2")+", Respirasi(/menit) : "+rs.getString("pernapasan"));
+                                param.put("jamtriase",rs.getString("tanggaltriase").toString().substring(11,19));
+                                param.put("pegawai",rs.getString("nama"));
+                                param.put("catatan",rs.getString("catatan"));
+                                finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",rs.getString("nik"));
+                                param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+rs.getString("nama")+"\nID "+(finger.equals("")?rs.getString("nik"):finger)+"\n"+Valid.SetTgl3(rs.getString("tanggaltriase"))); 
+                                ps2=koneksi.prepareStatement(
+                                    "select master_triase_pemeriksaan.kode_pemeriksaan,master_triase_pemeriksaan.nama_pemeriksaan "+
+                                    "from master_triase_pemeriksaan inner join master_triase_skala4 inner join data_triase_igddetail_skala4 "+
+                                    "on master_triase_pemeriksaan.kode_pemeriksaan=master_triase_skala4.kode_pemeriksaan and "+
+                                    "master_triase_skala4.kode_skala4=data_triase_igddetail_skala4.kode_skala4 where data_triase_igddetail_skala4.no_rawat=? "+
+                                    "group by master_triase_pemeriksaan.kode_pemeriksaan order by master_triase_pemeriksaan.kode_pemeriksaan");
+                                try {
+                                    Sequel.queryu("delete from temporary where temp37='"+akses.getalamatip()+"'");
+                                    ps2.setString(1,rs.getString("no_rawat"));
+                                    rs2=ps2.executeQuery();
+                                    while(rs2.next()){
+                                        datatriase="";
+                                        ps3=koneksi.prepareStatement(
+                                            "select master_triase_skala4.pengkajian_skala4 from master_triase_skala4 inner join data_triase_igddetail_skala4 "+
+                                            "on master_triase_skala4.kode_skala4=data_triase_igddetail_skala4.kode_skala4 where "+
+                                            "master_triase_skala4.kode_pemeriksaan=? and data_triase_igddetail_skala4.no_rawat=? "+
+                                            "order by data_triase_igddetail_skala4.kode_skala4");
+                                        try {
+                                            ps3.setString(1,rs2.getString("kode_pemeriksaan"));
+                                            ps3.setString(2,rs.getString("no_rawat"));
+                                            rs3=ps3.executeQuery();
+                                            while(rs3.next()){
+                                                datatriase=rs3.getString("pengkajian_skala4")+", "+datatriase;
+                                            }
+                                        } catch (Exception e) {
+                                            System.out.println("Notif : "+e);
+                                        } finally{
+                                            if(rs3!=null){
+                                                rs3.close();
+                                            }
+                                            if(ps3!=null){
+                                                ps3.close();
+                                            }
+                                        }
+                                        
+                                        if(datatriase.endsWith(", ")){
+                                            datatriase = datatriase.substring(0,datatriase.length() - 2);
+                                        }
+                                        Sequel.menyimpan2("temporary","'"+i+"','"+rs2.getString("nama_pemeriksaan")+"','"+datatriase+"','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','"+akses.getalamatip()+"'","Transaksi");
+                                        i++;
+                                    }
+                                } catch (Exception e) {
+                                    System.out.println("Notif : "+e);
+                                } finally{
+                                    if(rs2!=null){
+                                        rs2.close();
+                                    }
+                                    if(ps2!=null){
+                                        ps2.close();
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Notif : "+e);
+                        } finally{
+                            if(rs!=null){
+                                rs.close();
+                            }
+                            if(ps!=null){
+                                ps.close();
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Notif : "+e);
+                    }
+                      
+                    try {                                                 
+                                  Valid.MyReportPDFqryUpload("rptLembarTriaseSkala4.jasper","report","::[ Triase Skala 4 ]::","select * from temporary where temporary.temp37='"+akses.getalamatip()+"' order by temporary.no",FileName,param);
+                                  
+                    } catch (Exception e) {
+                    }
+                }else if(LoadHTML.getText().contains("#969696")){
+                    Map<String, Object> param = new HashMap<>(); 
+                    param.put("namars",akses.getnamars());
+                    param.put("alamatrs",akses.getalamatrs());
+                    param.put("kotars",akses.getkabupatenrs());
+                    param.put("propinsirs",akses.getpropinsirs());
+                    param.put("kontakrs",akses.getkontakrs());
+                    param.put("emailrs",akses.getemailrs());   
+                    param.put("logo",Sequel.cariGambar("select setting.logo from setting")); 
+                    try {
+                        ps=koneksi.prepareStatement(
+                            "select data_triase_igdsekunder.anamnesa_singkat,data_triase_igdsekunder.catatan,"+
+                            "data_triase_igdsekunder.plan,data_triase_igdsekunder.tanggaltriase,data_triase_igdsekunder.nik,data_triase_igd.tekanan_darah,"+
+                            "data_triase_igd.nadi,data_triase_igd.pernapasan,data_triase_igd.suhu,data_triase_igd.saturasi_o2,data_triase_igd.nyeri,"+
+                            "data_triase_igd.no_rawat,pasien.no_rkm_medis,pasien.nm_pasien,pasien.jk,pasien.tgl_lahir,pegawai.nama,data_triase_igd.tgl_kunjungan, "+
+                            "data_triase_igd.cara_masuk,master_triase_macam_kasus.macam_kasus from data_triase_igdsekunder inner join data_triase_igd "+
+                            "inner join pasien inner join pegawai inner join reg_periksa inner join master_triase_macam_kasus on "+
+                            "data_triase_igd.no_rawat=data_triase_igdsekunder.no_rawat and reg_periksa.no_rawat=data_triase_igd.no_rawat "+
+                            "and reg_periksa.no_rkm_medis=pasien.no_rkm_medis and pegawai.nik=data_triase_igdsekunder.nik "+
+                            "and master_triase_macam_kasus.kode_kasus=data_triase_igd.kode_kasus where data_triase_igd.no_rawat=?");
+                        try {
+                            ps.setString(1,tbTriase.getValueAt(tbTriase.getSelectedRow(),0).toString());
+                            rs=ps.executeQuery();
+                            if(rs.next()){
+                                param.put("norawat",rs.getString("no_rawat"));
+                                param.put("norm",rs.getString("no_rkm_medis"));
+                                param.put("namapasien",rs.getString("nm_pasien"));
+                                param.put("tanggallahir",rs.getDate("tgl_lahir"));
+                                param.put("jk",rs.getString("jk").replaceAll("L","Laki-Laki").replaceAll("P","Perempuan"));
+                                param.put("tanggalkunjungan",rs.getDate("tgl_kunjungan"));
+                                param.put("jamkunjungan",rs.getString("tgl_kunjungan").toString().substring(11,19));
+                                param.put("caradatang",rs.getString("cara_masuk"));
+                                param.put("macamkasus",rs.getString("macam_kasus"));
+                                param.put("keluhanutama",rs.getString("anamnesa_singkat"));
+                                param.put("plan",rs.getString("plan"));
+                                param.put("tanggaltriase",rs.getDate("tanggaltriase"));
+                                param.put("tandavital","Suhu (C) : "+rs.getString("suhu")+", Nyeri : "+rs.getString("nyeri")+", Tensi : "+rs.getString("tekanan_darah")+", Nadi(/menit) : "+rs.getString("nadi")+", Saturasi O²(%) : "+rs.getString("saturasi_o2")+", Respirasi(/menit) : "+rs.getString("pernapasan"));
+                                param.put("jamtriase",rs.getString("tanggaltriase").toString().substring(11,19));
+                                param.put("pegawai",rs.getString("nama"));
+                                param.put("catatan",rs.getString("catatan"));
+                                finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",rs.getString("nik"));
+                                param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+rs.getString("nama")+"\nID "+(finger.equals("")?rs.getString("nik"):finger)+"\n"+Valid.SetTgl3(rs.getString("tanggaltriase"))); 
+                                ps2=koneksi.prepareStatement(
+                                    "select master_triase_pemeriksaan.kode_pemeriksaan,master_triase_pemeriksaan.nama_pemeriksaan "+
+                                    "from master_triase_pemeriksaan inner join master_triase_skala5 inner join data_triase_igddetail_skala5 "+
+                                    "on master_triase_pemeriksaan.kode_pemeriksaan=master_triase_skala5.kode_pemeriksaan and "+
+                                    "master_triase_skala5.kode_skala5=data_triase_igddetail_skala5.kode_skala5 where data_triase_igddetail_skala5.no_rawat=? "+
+                                    "group by master_triase_pemeriksaan.kode_pemeriksaan order by master_triase_pemeriksaan.kode_pemeriksaan");
+                                try {
+                                    Sequel.queryu("delete from temporary where temp37='"+akses.getalamatip()+"'");
+                                    ps2.setString(1,rs.getString("no_rawat"));
+                                    rs2=ps2.executeQuery();
+                                    while(rs2.next()){
+                                        datatriase="";
+                                        ps3=koneksi.prepareStatement(
+                                            "select master_triase_skala5.pengkajian_skala5 from master_triase_skala5 inner join data_triase_igddetail_skala5 "+
+                                            "on master_triase_skala5.kode_skala5=data_triase_igddetail_skala5.kode_skala5 where "+
+                                            "master_triase_skala5.kode_pemeriksaan=? and data_triase_igddetail_skala5.no_rawat=? "+
+                                            "order by data_triase_igddetail_skala5.kode_skala5");
+                                        try {
+                                            ps3.setString(1,rs2.getString("kode_pemeriksaan"));
+                                            ps3.setString(2,rs.getString("no_rawat"));
+                                            rs3=ps3.executeQuery();
+                                            while(rs3.next()){
+                                                datatriase=rs3.getString("pengkajian_skala5")+", "+datatriase;
+                                            }
+                                        } catch (Exception e) {
+                                            System.out.println("Notif : "+e);
+                                        } finally{
+                                            if(rs3!=null){
+                                                rs3.close();
+                                            }
+                                            if(ps3!=null){
+                                                ps3.close();
+                                            }
+                                        }
+                                        
+                                        if(datatriase.endsWith(", ")){
+                                            datatriase = datatriase.substring(0,datatriase.length() - 2);
+                                        }
+                                        Sequel.menyimpan2("temporary","'"+i+"','"+rs2.getString("nama_pemeriksaan")+"','"+datatriase+"','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','"+akses.getalamatip()+"'","Transaksi");
+                                        i++;
+                                    }
+                                } catch (Exception e) {
+                                    System.out.println("Notif : "+e);
+                                } finally{
+                                    if(rs2!=null){
+                                        rs2.close();
+                                    }
+                                    if(ps2!=null){
+                                        ps2.close();
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Notif : "+e);
+                        } finally{
+                            if(rs!=null){
+                                rs.close();
+                            }
+                            if(ps!=null){
+                                ps.close();
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Notif : "+e);
+                    }
+                        
+                    try {         
+                                  Valid.MyReportPDFqryUpload("rptLembarTriaseSkala5.jasper","report","::[ Triase Skala 5 ]::","select * from temporary where temporary.temp37='"+akses.getalamatip()+"' order by temporary.no",FileName,param);
+                                                          
+                    } catch (Exception e) {
+                    }
+                }
+                this.setCursor(Cursor.getDefaultCursor());
+            }else{
+                JOptionPane.showMessageDialog(null,"Silahkan pilih terlebih dahulu data yang mau dicetak data personal triasenya..!!!");
+            }
+        }
+    }
+    
+    
+    
+    private void UploadPDF(String FileName, String docpath) {
+    try {
+        File file = new File("tmpPDF/" + FileName + ".pdf");
+        byte[] data = FileUtils.readFileToByteArray(file);
+        HttpClient httpClient = new DefaultHttpClient();
+        HttpPost postRequest = new HttpPost("http://" + koneksiDB.HOSTHYBRIDWEB() + ":" + koneksiDB.PORTWEB() + "/" + koneksiDB.HYBRIDWEB() + "/upload.php?doc=" + docpath);
+        ByteArrayBody fileData = new ByteArrayBody(data, FileName + ".pdf");
+        MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+        reqEntity.addPart("file", fileData);
+        postRequest.setEntity(reqEntity);
+        httpClient.execute(postRequest);
+
+        // Menyimpan ke database
+        boolean uploadSuccess = false;
+        // Kodeberkas untuk Triase IGD
+        // Sesuaikan nama di sini jika di master_berkas_digital namanya berbeda
+        kodeberkas = Sequel.cariIsi("SELECT kode FROM master_berkas_digital WHERE nama LIKE '%Klaim%'"); 
+        
+        String noRawatUntukDB = TNoRw.getText().trim(); // Ambil No.Rawat dari textbox di RMTriaseIGD
+
+        if (Sequel.cariInteger("SELECT COUNT(no_rawat) AS jumlah FROM berkas_digital_perawatan WHERE lokasi_file='pages/upload/" + FileName + ".pdf'") > 0) {
+            uploadSuccess = Sequel.mengedittf("berkas_digital_perawatan", "lokasi_file=?", "no_rawat=?,kode=?, lokasi_file=?", 4, new String[]{
+                noRawatUntukDB,
+                kodeberkas,
+                "pages/upload/" + FileName + ".pdf",
+                "pages/upload/" + FileName + ".pdf"
+            });
+        } else {
+            uploadSuccess = Sequel.menyimpantf("berkas_digital_perawatan", "?,?,?", "No.Rawat", 3, new String[]{
+                noRawatUntukDB,
+                kodeberkas,
+                "pages/upload/" + FileName + ".pdf"
+            });
+        }
+
+        // Menampilkan notifikasi
+        if (uploadSuccess) {
+            JOptionPane.showMessageDialog(null, "Upload berhasil!", "Informasi", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, "Upload gagal disimpan ke database.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        }
+    } catch (Exception e) {
+        System.out.println("Upload error: " + e);
+        JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+// Fungsi HapusPDF (letakkan di dalam kelas RMTriaseIGD)
+private void HapusPDF() {
+    File file = new File("tmpPDF");
+    String[] myFiles;
+    if (file.isDirectory()) {
+        myFiles = file.list();
+        for (int i = 0; i < myFiles.length; i++) {
+            File myFile = new File(file, myFiles[i]);
+            myFile.delete();
+        }
+    }
+}
     
 }
