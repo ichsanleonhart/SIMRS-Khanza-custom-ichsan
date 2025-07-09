@@ -405,7 +405,7 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "16-02-2020" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-07-2025" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -419,7 +419,7 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "16-02-2020" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-07-2025" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -504,7 +504,7 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
         jLabel8.setBounds(220, 10, 110, 23);
 
         Tanggal.setForeground(new java.awt.Color(50, 70, 50));
-        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "16-02-2020" }));
+        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-07-2025" }));
         Tanggal.setDisplayFormat("dd-MM-yyyy");
         Tanggal.setName("Tanggal"); // NOI18N
         Tanggal.setOpaque(false);
@@ -553,7 +553,7 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
         FormInput.add(jLabel20);
         jLabel20.setBounds(521, 70, 85, 23);
 
-        Urgensi.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Tahunan", "Besar", "Sakit", "Bersalin", "Alasan Penting", "Keterangan Lainnya" }));
+        Urgensi.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Tahunan", "Besar", "Sakit", "Melahirkan", "Keterangan Lainnya", "Khitan Anak", "Istri Melahirkan", "Keluarga Meninggal Dunia", "Menikah", "Menikahkan Anak", "Pernikahan Saudara Kandung", "Ujian/Sidang Akademik" }));
         Urgensi.setName("Urgensi"); // NOI18N
         Urgensi.setPreferredSize(new java.awt.Dimension(55, 28));
         Urgensi.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -644,7 +644,7 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
         jLabel14.setBounds(0, 70, 86, 23);
 
         Tgl1.setForeground(new java.awt.Color(50, 70, 50));
-        Tgl1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "16-02-2020" }));
+        Tgl1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-07-2025" }));
         Tgl1.setDisplayFormat("dd-MM-yyyy");
         Tgl1.setName("Tgl1"); // NOI18N
         Tgl1.setOpaque(false);
@@ -668,7 +668,7 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
         jLabel22.setBounds(182, 70, 25, 23);
 
         Tgl2.setForeground(new java.awt.Color(50, 70, 50));
-        Tgl2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "16-02-2020" }));
+        Tgl2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-07-2025" }));
         Tgl2.setDisplayFormat("dd-MM-yyyy");
         Tgl2.setName("Tgl2"); // NOI18N
         Tgl2.setOpaque(false);
