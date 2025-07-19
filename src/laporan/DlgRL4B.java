@@ -30,6 +30,7 @@ public class DlgRL4B extends javax.swing.JDialog {
     private final Connection koneksi=koneksiDB.condb();
     private PreparedStatement ps,ps2,ps3;
     private ResultSet rs,rs2;
+<<<<<<< HEAD
     private StringBuilder htmlContent;
     private int hr1s7l=0, hr1s7p=0, hr8s28l=0, hr8s28p=0,
                 hr29k3blnl=0, hr29k3blnp=0, // 29 hari sd < 3 bulan
@@ -60,6 +61,10 @@ public class DlgRL4B extends javax.swing.JDialog {
     private DlgKecamatan kecamatan=new DlgKecamatan(null,false);
     private DlgKelurahan kelurahan=new DlgKelurahan(null,false);
     private DlgCariCaraBayar penjab=new DlgCariCaraBayar(null,false);
+=======
+    private int hr0s6l=0,hr0s6p=0,hr7s28l=0,hr7s28p=0,hr28s1thl=0,hr28s1thp=0,th1s4l=0,th1s4p=0,th5s14l=0,th5s14p=0,
+                th15s24l=0,th15s24p=0,th25s44l=0,th25s44p=0,th45s64l=0,th45s64p=0,lbth65l=0,lbth65p=0,mati=0;
+>>>>>>> upstream/master
     
     /** Creates new form DlgProgramStudi
      * @param parent
@@ -81,206 +86,6 @@ public class DlgRL4B extends javax.swing.JDialog {
         );
         Document doc = kit.createDefaultDocument();
         LoadHTML.setDocument(doc);
-        
-        poli.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(poli.getTable().getSelectedRow()!= -1){
-                    kdpoli.setText(poli.getTable().getValueAt(poli.getTable().getSelectedRow(),0).toString());
-                    nmpoli.setText(poli.getTable().getValueAt(poli.getTable().getSelectedRow(),1).toString());
-                }      
-                kdpoli.requestFocus();
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {poli.emptTeks();}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });   
-        
-        penjab.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(penjab.getTable().getSelectedRow()!= -1){
-                    kdpenjab.setText(penjab.getTable().getValueAt(penjab.getTable().getSelectedRow(),1).toString());
-                    nmpenjab.setText(penjab.getTable().getValueAt(penjab.getTable().getSelectedRow(),2).toString());
-                }      
-                kdpenjab.requestFocus();
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {penjab.emptTeks();}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });   
-        
-        penjab.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                    penjab.dispose();
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        kabupaten.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(kabupaten.getTable().getSelectedRow()!= -1){
-                    nmkabupaten.setText(kabupaten.getTable().getValueAt(kabupaten.getTable().getSelectedRow(),0).toString());
-                }      
-                nmkabupaten.requestFocus();
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {kabupaten.emptTeks();}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });   
-        
-        kabupaten.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                    kabupaten.dispose();
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        kecamatan.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(kecamatan.getTable().getSelectedRow()!= -1){
-                    nmkecamatan.setText(kecamatan.getTable().getValueAt(kecamatan.getTable().getSelectedRow(),0).toString());
-                }      
-                nmkecamatan.requestFocus();
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {kecamatan.emptTeks();}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });   
-        
-        kecamatan.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                    kecamatan.dispose();
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        kelurahan.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(kelurahan.getTable().getSelectedRow()!= -1){
-                    nmkelurahan.setText(kelurahan.getTable().getValueAt(kelurahan.getTable().getSelectedRow(),0).toString());
-                }      
-                nmkelurahan.requestFocus();
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {kelurahan.emptTeks();}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });   
-        
-        kelurahan.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                    kelurahan.dispose();
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        dokter.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(dokter.getTable().getSelectedRow()!= -1){
-                    kddokter.setText(dokter.getTable().getValueAt(dokter.getTable().getSelectedRow(),0).toString());
-                    nmdokter.setText(dokter.getTable().getValueAt(dokter.getTable().getSelectedRow(),1).toString());
-                }      
-                kddokter.requestFocus();
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {dokter.emptTeks();}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });   
-        
-        dokter.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                    dokter.dispose();
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
         
         ChkInput.setSelected(false);
         isForm();
@@ -800,6 +605,29 @@ private void btnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_b
     }//GEN-LAST:event_kdpoliKeyPressed
 
     private void BtnSeek2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSeek2ActionPerformed
+        DlgCariPoli poli=new DlgCariPoli(null,false);
+        poli.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(poli.getTable().getSelectedRow()!= -1){
+                    kdpoli.setText(poli.getTable().getValueAt(poli.getTable().getSelectedRow(),0).toString());
+                    nmpoli.setText(poli.getTable().getValueAt(poli.getTable().getSelectedRow(),1).toString());
+                }      
+                kdpoli.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {poli.emptTeks();}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });   
         poli.isCek();
         poli.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         poli.setLocationRelativeTo(internalFrame1);
@@ -822,6 +650,42 @@ private void btnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_b
     }//GEN-LAST:event_kdpenjabKeyPressed
 
     private void BtnSeek3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSeek3ActionPerformed
+        DlgCariCaraBayar penjab=new DlgCariCaraBayar(null,false);
+        penjab.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(penjab.getTable().getSelectedRow()!= -1){
+                    kdpenjab.setText(penjab.getTable().getValueAt(penjab.getTable().getSelectedRow(),1).toString());
+                    nmpenjab.setText(penjab.getTable().getValueAt(penjab.getTable().getSelectedRow(),2).toString());
+                }      
+                kdpenjab.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {penjab.emptTeks();}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });   
+        
+        penjab.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    penjab.dispose();
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
         penjab.isCek();
         penjab.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         penjab.setLocationRelativeTo(internalFrame1);
@@ -838,6 +702,42 @@ private void btnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_b
     }//GEN-LAST:event_kddokterKeyPressed
 
     private void BtnSeek4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSeek4ActionPerformed
+        DlgCariDokter dokter=new DlgCariDokter(null,false);
+        dokter.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(dokter.getTable().getSelectedRow()!= -1){
+                    kddokter.setText(dokter.getTable().getValueAt(dokter.getTable().getSelectedRow(),0).toString());
+                    nmdokter.setText(dokter.getTable().getValueAt(dokter.getTable().getSelectedRow(),1).toString());
+                }      
+                kddokter.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {dokter.emptTeks();}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });   
+        
+        dokter.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    dokter.dispose();
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
         dokter.isCek();
         dokter.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         dokter.setLocationRelativeTo(internalFrame1);
@@ -850,6 +750,41 @@ private void btnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_b
     }//GEN-LAST:event_BtnSeek4KeyPressed
 
     private void BtnSeek5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSeek5ActionPerformed
+        DlgKabupaten kabupaten=new DlgKabupaten(null,false);
+        kabupaten.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(kabupaten.getTable().getSelectedRow()!= -1){
+                    nmkabupaten.setText(kabupaten.getTable().getValueAt(kabupaten.getTable().getSelectedRow(),0).toString());
+                }      
+                nmkabupaten.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {kabupaten.emptTeks();}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });   
+        
+        kabupaten.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    kabupaten.dispose();
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
         kabupaten.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         kabupaten.setLocationRelativeTo(internalFrame1);
         kabupaten.setAlwaysOnTop(false);
@@ -861,6 +796,41 @@ private void btnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_b
     }//GEN-LAST:event_BtnSeek5KeyPressed
 
     private void BtnSeek6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSeek6ActionPerformed
+        DlgKecamatan kecamatan=new DlgKecamatan(null,false);
+        kecamatan.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(kecamatan.getTable().getSelectedRow()!= -1){
+                    nmkecamatan.setText(kecamatan.getTable().getValueAt(kecamatan.getTable().getSelectedRow(),0).toString());
+                }      
+                nmkecamatan.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {kecamatan.emptTeks();}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });   
+        
+        kecamatan.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    kecamatan.dispose();
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
         kecamatan.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         kecamatan.setLocationRelativeTo(internalFrame1);
         kecamatan.setAlwaysOnTop(false);
@@ -872,6 +842,41 @@ private void btnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_b
     }//GEN-LAST:event_BtnSeek6KeyPressed
 
     private void BtnSeek7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSeek7ActionPerformed
+        DlgKelurahan kelurahan=new DlgKelurahan(null,false);
+        kelurahan.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(kelurahan.getTable().getSelectedRow()!= -1){
+                    nmkelurahan.setText(kelurahan.getTable().getValueAt(kelurahan.getTable().getSelectedRow(),0).toString());
+                }      
+                nmkelurahan.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {kelurahan.emptTeks();}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });   
+        
+        kelurahan.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    kelurahan.dispose();
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
         kelurahan.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         kelurahan.setLocationRelativeTo(internalFrame1);
         kelurahan.setAlwaysOnTop(false);
@@ -960,6 +965,7 @@ private void btnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_b
     private void prosesCari() {
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         try {
+<<<<<<< HEAD
             htmlContent = new StringBuilder();
             // Membuat Header Tabel HTML Baru (Mirip RL4BSebab yg dikoreksi)
             htmlContent.append(
@@ -1025,6 +1031,80 @@ private void btnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_b
 
             // Query Utama (Dipertahankan dari DlgRL4B.java ASLI - Mengexclude V,W,X,Y)
             // Menggunakan AND untuk exclude SEMUA V,W,X,Y
+=======
+            StringBuilder htmlContent = new StringBuilder();
+            htmlContent.append(                             
+                "<tr class='isi'>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' width='2%' rowspan='3'>No.Urut</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' width='5%' rowspan='3'>No.Daftar Terperinci</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' width='18%' rowspan='3'>Golongan Sebab Penyakit</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' width='55%' colspan='18'>Jumlah Pasien Hidup dan Mati menurut Golongan Umur & Jenis Kelamin</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' width='10%' colspan='2'>Pasien Keluar (Hidup & Mati) Menurut Jenis Kelamin</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' width='5%' rowspan='3'>Jumlah Pasien Keluar Hidup (23+24)</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' width='5%' rowspan='3'>Jumlah Pasien Keluar Mati</td>").append(
+                "</tr>").append(
+                "<tr class='isi'>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' colspan='2'>0-6 hr</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' colspan='2'>7-28hr</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' colspan='2'>28hr-<1th</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' colspan='2'>1-4th</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' colspan='2'>5-14th</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' colspan='2'>15-24th</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' colspan='2'>25-44th</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' colspan='2'>45-64th</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' colspan='2'>> 65</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' rowspan='2'>LK</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center' rowspan='2'>PR</td>").append(
+                "</tr>").append(
+                "<tr class='isi'>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>L</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>P</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>L</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>P</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>L</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>P</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>L</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>P</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>L</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>P</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>L</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>P</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>L</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>P</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>L</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>P</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>L</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>P</td>").append(
+                "</tr>").append(
+                "<tr class='isi'>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>1</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>2</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>3</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>4</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>5</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>6</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>7</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>8</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>9</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>10</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>11</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>12</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>13</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>14</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>15</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>16</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>17</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>18</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>19</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>20</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>21</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>22</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>23</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>24</td>").append(
+                    "<td valign='middle' bgcolor='#FFFAFA' align='center'>25</td>").append(
+                "</tr>"
+            );            
+>>>>>>> upstream/master
             ps=koneksi.prepareStatement("select diagnosa_pasien.kd_penyakit,SUBSTRING(penyakit.nm_penyakit,1,80) as nm_penyakit from diagnosa_pasien "+
                     "inner join penyakit on diagnosa_pasien.kd_penyakit=penyakit.kd_penyakit "+
                     "inner join reg_periksa on reg_periksa.no_rawat=diagnosa_pasien.no_rawat "+
@@ -1219,6 +1299,7 @@ private void btnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_b
                         if(ps3!=null){ // Pastikan ps3 ditutup
                             ps3.close();
                         }
+<<<<<<< HEAD
                     } // End Try Catch Finally ps3 (mati)
 
 
@@ -1267,6 +1348,38 @@ private void btnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_b
                     htmlContent.append("<td valign='middle' align='center'>").append(mati).append("</td>"); // Jumlah Mati
                     htmlContent.append("</tr>");
 
+=======
+                    }
+                    htmlContent.append(
+                        "<tr class='isi'>").append(
+                            "<td valign='middle' align='center'>").append(i).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(rs.getString("kd_penyakit")).append("</td>").append(
+                            "<td valign='middle' align='left'>").append(rs.getString("nm_penyakit")).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(hr0s6l).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(hr0s6p).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(hr7s28l).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(hr7s28p).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(hr28s1thl).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(hr28s1thp).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(th1s4l).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(th1s4p).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(th5s14l).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(th5s14p).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(th15s24l).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(th15s24p).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(th25s44l).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(th25s44p).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(th45s64l).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(th45s64p).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(lbth65l).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(lbth65p).append("</td>").append(
+                            "<td valign='middle' align='center'>").append((hr0s6l+hr7s28l+hr28s1thl+th1s4l+th5s14l+th15s24l+th25s44l+th45s64l+lbth65l)).append("</td>").append(
+                            "<td valign='middle' align='center'>").append((hr0s6p+hr7s28p+hr28s1thp+th1s4p+th5s14p+th15s24p+th25s44p+th45s64p+lbth65p)).append("</td>").append(
+                            "<td valign='middle' align='center'>").append((hr0s6l+hr7s28l+hr28s1thl+th1s4l+th5s14l+th15s24l+th25s44l+th45s64l+lbth65l+hr0s6p+hr7s28p+hr28s1thp+th1s4p+th5s14p+th15s24p+th25s44p+th45s64p+lbth65p-mati)).append("</td>").append(
+                            "<td valign='middle' align='center'>").append(mati).append("</td>").append(
+                        "</tr>"
+                    );
+>>>>>>> upstream/master
                     i++;
                 } // End While rs
             } catch (Exception e) {
@@ -1287,6 +1400,7 @@ private void btnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_b
                        htmlContent.toString()+
                       "</table>"+
                     "</html>");
+            htmlContent=null;
         } catch (Exception e) {
             System.out.println("Notifikasi prosesCari: "+e);
         }
