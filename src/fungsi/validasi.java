@@ -1562,4 +1562,72 @@ public void MyReportPDFqryUpload(String reportName, String reportDirName, String
     public static int milliToDay(long milli) {
         return (int) ((double) milli / (1000 * 24 * 60 * 60));
     }
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    ////tambahan ichsan untuk grafikttv
+    public static void hapusFileDalamFolder(String folderPath) {
+        Properties systemProp = System.getProperties();
+        String currentDir = systemProp.getProperty("user.dir");
+
+        File folder = new File(currentDir + folderPath);
+        File[] files = folder.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                if (file.isFile()) {
+                    if (file.delete()) {
+                        System.out.println("Deleted file: " + file.getName());
+                    } else {
+                        System.out.println("Failed to delete file: " + file.getName());
+                    }
+                }
+            }
+        } else {
+            System.out.println("No files found in the folder: " + folderPath);
+        }
+    }
+
 }

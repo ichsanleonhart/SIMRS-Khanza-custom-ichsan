@@ -10,7 +10,8 @@
  */
 
 package rekammedis;
-
+import grafikanalisa.grafikttv;  //tambahan untuk menampilkan grafikttv ICHSAN
+import java.net.MalformedURLException;  //tambahan untuk grafik ttv ICHSAN
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fungsi.WarnaTable;
@@ -65,7 +66,6 @@ import javax.swing.SwingWorker;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import org.apache.hc.core5.http.io.entity.StringEntity;
-
 
 
 /**
@@ -615,7 +615,7 @@ public final class RMRiwayatPerawatan extends javax.swing.JDialog {
         WindowPhrase.getContentPane().add(internalFrame8, java.awt.BorderLayout.CENTER);
 
         Tanggal.setForeground(new java.awt.Color(50, 70, 50));
-        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "11-06-2025 07:04:57" }));
+        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "23-07-2025 11:31:21" }));
         Tanggal.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         Tanggal.setName("Tanggal"); // NOI18N
         Tanggal.setOpaque(false);
@@ -4103,7 +4103,7 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
         NoRawat.setText(norawat);
         R4.setSelected(true);
     }
-
+   
     private void isPasien() {
         try{
             ps=koneksi.prepareStatement(
@@ -15433,6 +15433,7 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                                     "</tr>" );
                                 w++; 
                         } 
+                        tampilkanGambarTTV(norawat);  //panggil fungsi untuk menampilkan grafik 
                         htmlContent.append( 
                                 "</table>"+ "</td>"+ "</tr>" ); 
                     } 
@@ -34166,4 +34167,100 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
             System.out.println("Notif Check List Kesipatan Anestesi : "+e);
         }
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+     //INSERT FUNGSI GRAFIK TTV - TAMBAHAN MODIFIKASI ICHSAN
+    private StringBuilder tampilkanGambarTTV(String norawat) throws MalformedURLException {
+        if (Sequel.cariInteger("select count(no_rawat) from catatan_observasi_ranap where no_rawat='" + norawat + "'") > 0) {
+            grafikttv ttv = new grafikttv("Grafik Tanda dan Objek Vital " + NmPasien.getText() + "", "where catatan_observasi_ranap.no_rawat= '" + norawat + "' ", norawat.replaceAll("/", ""));
+            File imageFile = new File("./gambargrafik/" + norawat.replaceAll("/", "") + ".jpg");
+
+            // Check if the file exists
+            if (!imageFile.exists()) {
+                System.out.println("Image file does not exist: " + imageFile.getAbsolutePath());
+                return htmlContent.append("Image not found.");
+            }
+
+            String imageUrl = imageFile.toURI().toURL().toString();
+
+            // Create a table row with a styled cell
+            return htmlContent.append("<tr><td colspan='15' style='text-align: center; padding: 10px; background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>")
+                    .append("<img src='").append(imageUrl).append("' style='max-width: 100%; height: auto; border-radius: 5px; object-fit: contain; max-height: 600px;' alt='Gambar TTV'/>")
+                    .append("<p style='margin-top: 10px; color: #666; font-size: 12px;'>Vital Sign Chart</p>")
+                    .append("</td></tr>");
+        } else {
+            return htmlContent.append("");
+        }
+    }
+    
 }
