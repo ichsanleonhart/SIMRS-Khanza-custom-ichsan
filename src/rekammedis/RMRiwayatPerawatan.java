@@ -15433,7 +15433,8 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                                     "</tr>" );
                                 w++; 
                         } 
-                        tampilkanGambarTTV(norawat);  //panggil fungsi untuk menampilkan grafik 
+                        validasi.hapusFileDalamFolder("/gambargrafik/"); //hapus dulu isi folder sebelum memulai sequence
+                        tampilkanGambarTTV(norawat, "ranap");  //panggil fungsi untuk menampilkan grafik  ttv by ichsan
                         htmlContent.append( 
                                 "</table>"+ "</td>"+ "</tr>" ); 
                     } 
@@ -15508,6 +15509,8 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                             );                                        
                             w++;
                         }while(rs2.next());
+                        
+                        tampilkanGambarTTV(norawat, "kebidanan");  //panggil fungsi untuk menampilkan grafik  ttv by ichsan
                         htmlContent.append(
                               "</table>").append(
                             "</td>").append(
@@ -15584,6 +15587,7 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                             );                                        
                             w++;
                         }while(rs2.next());
+                        tampilkanGambarTTV(norawat, "postpartum");  //panggil fungsi untuk menampilkan grafik  ttv by ichsan
                         htmlContent.append(
                               "</table>").append(
                             "</td>").append(
@@ -34240,6 +34244,7 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
     
     
      //INSERT FUNGSI GRAFIK TTV - TAMBAHAN MODIFIKASI ICHSAN
+    /*
     private StringBuilder tampilkanGambarTTV(String norawat) throws MalformedURLException {
         if (Sequel.cariInteger("select count(no_rawat) from catatan_observasi_ranap where no_rawat='" + norawat + "'") > 0) {
             grafikttv ttv = new grafikttv("Grafik Tanda dan Objek Vital " + NmPasien.getText() + "", "where catatan_observasi_ranap.no_rawat= '" + norawat + "' ", norawat.replaceAll("/", ""));
@@ -34262,5 +34267,58 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
             return htmlContent.append("");
         }
     }
+    */
+    
+    // GANTI metode tampilkanGambarTTV yang lama dengan yang ini
+private void tampilkanGambarTTV(String norawat, String jenisObservasi) {
+    String judulGrafik = "";
+    String namaFileGrafik = "";
+    String namaTabel = "";
+
+    switch (jenisObservasi.toLowerCase()) {
+        case "ranap":
+            judulGrafik = "Grafik TTV Umum";
+            namaFileGrafik = "grafikobservasiranap" + norawat.replaceAll("/", "") + ".jpg";
+            namaTabel = "catatan_observasi_ranap";
+            break;
+        case "kebidanan":
+            judulGrafik = "Grafik TTV Kebidanan";
+            namaFileGrafik = "grafikobservasikebidanan" + norawat.replaceAll("/", "") + ".jpg";
+            namaTabel = "catatan_observasi_ranap_kebidanan";
+            break;
+        case "postpartum":
+            judulGrafik = "Grafik TTV Post Partum";
+            namaFileGrafik = "grafikobservasipostpartum" + norawat.replaceAll("/", "") + ".jpg";
+            namaTabel = "catatan_observasi_ranap_postpartum";
+            break;
+        default:
+            return; // Jika jenis tidak dikenali, keluar dari metode
+    }
+
+    if (Sequel.cariInteger("select count(no_rawat) from " + namaTabel + " where no_rawat=?", norawat) > 0) {
+        try {
+            htmlContent.append(
+                "<tr class='isi'>"+                    
+                    "<td colspan='15' valign='top' width='95%'>"+
+                        "<div align='center'><font size='3' face='Tahoma'><b>").append(judulGrafik).append("</b></font></div>"
+            );
+            
+            // Panggil metode statis createDemoPanel, BUKAN constructor
+            grafikanalisa.grafikttv.createDemoPanel(
+                "where no_rawat='" + norawat + "' order by tgl_perawatan, jam_rawat",
+                namaFileGrafik,
+                jenisObservasi
+            );
+            
+            htmlContent.append(
+                        "<div align='center'><img src='file:gambargrafik/").append(namaFileGrafik).append("' width='1100' height='550'/></div>"+
+                    "</td>"+
+                "</tr>"
+            );
+        } catch (Exception e) {
+            System.out.println("Notif Gambar TTV " + jenisObservasi + " : " + e);
+        }
+    }
+}
     
 }
