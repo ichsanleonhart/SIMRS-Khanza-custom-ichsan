@@ -2296,62 +2296,6 @@ public final class RMTriaseIGD extends javax.swing.JDialog {
             }
             if(sukses==true){
                 Sequel.Commit();
-                
-                    // --- MULAI KODE UNTUK AUTO-UPLOAD PDF LAPORAN TRIASE IGD ---
-                     // 1. Refresh tbTriase agar data yang baru disimpan muncul
-                    tampil(); 
-                    
-                    // 2. Cari baris yang baru saja disimpan di tbTriase dan pilih
-                    int barisTerpilihUntukUpload = -1;
-                    String noRawatBaruDisimpan = TNoRw.getText().trim(); // Ambil no_rawat yang baru disimpan
-                    for (int row = 0; row < tabMode.getRowCount(); row++) {
-                        // Asumsi kolom pertama (indeks 0) dari tabMode tbTriase adalah No.Rawat
-                        if (tabMode.getValueAt(row, 0).toString().equals(noRawatBaruDisimpan)) {
-                            barisTerpilihUntukUpload = row;
-                            break;
-                        }
-                    }
-                    
-                    if (barisTerpilihUntukUpload != -1) {
-                        tbTriase.setRowSelectionInterval(barisTerpilihUntukUpload, barisTerpilihUntukUpload);
-                        // Jika ada listener mouseClicked atau keyReleased di tbTriase yang mengisi LoadHTML,
-                        // pemilihan baris ini harusnya memicu pembaruan LoadHTML.
-                        // Jika tidak, kita perlu memanggil metode pengisi LoadHTML secara eksplisit.
-                        // Asumsi ada metode yang mengisi LoadHTML, mari kita cari tahu:
-                        // Berdasarkan RMTriaseIGD.java, LoadHTML diisi di tbTriaseMouseClicked()
-                        // dengan memanggil `getData()` lalu `LoadHTML.setText(Valid.isiAwalHTML(LoadHTML.getText()))` (opsional)
-                        // dan `LoadHTML.setText(LoadHTML.getText().replaceAll("#AA0000","<font color='#AA0000'>").replaceAll("#FF0000","<font color='#FF0000'>").replaceAll("#C8C800","<font color='#C8C800'>").replaceAll("#00AA00","<font color='#00AA00'>").replaceAll("#969696","<font color='#969696'>"))`
-                        
-                        // Panggil metode getData() untuk mengisi kembali form dan LoadHTML
-                        // Metode getData() ini yang dipanggil di tbTriaseMouseClicked
-                        getData(); // Ini akan mengisi form termasuk LoadHTML dari data yang terpilih di tbTriase
-
-                        // Tambahan penundaan sedikit untuk memastikan LoadHTML selesai diperbarui (opsional, tapi bisa membantu)
-                        try {
-                            Thread.sleep(300); // Menunda 100 milidetik
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
-                        
-                    // Tampilkan konfirmasi upload ke user
-                    int reply = JOptionPane.showConfirmDialog(rootPane, "Simpan Berhasil! Mau sekalian Upload PDF Triase IGD ke berkas digital perawatan?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
-                    if (reply == JOptionPane.YES_OPTION) {
-                        // Generate FileName unik berdasarkan No.Rawat dan No.RM
-                        String noRawatForFileName = TNoRw.getText().replaceAll("/", "");                        
-                        
-                        // Gabungkan untuk membentuk FileName
-                        FileName = "BERKAS_TRIASE_IGD_" + noRawatForFileName + "_";
-
-                        CreatePDF(FileName); // Panggil fungsi untuk membuat PDF
-                        UploadPDF(FileName, "berkasrawat/pages/upload/"); // Mengunggah PDF ke folder upload
-                        HapusPDF(); // Menghapus file PDF sementara setelah diunggah
-                    }
-                    
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Data yang baru disimpan tidak ditemukan di tabel untuk upload otomatis. Silakan upload manual jika perlu.", "Peringatan", JOptionPane.WARNING_MESSAGE);
-                    }
-                    // --- AKHIR KODE UNTUK AUTO-UPLOAD PDF LAPORAN TRIASE IGD ---
-                
             }else{
                 sukses=false;
                 Sequel.RollBack();
