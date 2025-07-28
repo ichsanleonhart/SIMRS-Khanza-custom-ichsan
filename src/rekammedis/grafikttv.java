@@ -1,7 +1,7 @@
 /*
  * Dimodifikasi untuk menangani berbagai jenis observasi
  * oleh AI Google
- * PERUBAHAN TERAKHIR: Fokus hanya pada 7 TTV Universal
+ * PERUBAHAN TERAKHIR: Memisahkan grafik menjadi 4 subplot
  */
 package grafikanalisa;
 
@@ -9,15 +9,10 @@ import fungsi.koneksiDB;
 import fungsi.sekuel;
 import fungsi.validasi;
 import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -26,11 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JPanel;
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
@@ -51,7 +42,6 @@ public class grafikttv {
     public static CategoryDataset createDataset1(String symbol, String jenisObservasi) {
         DefaultCategoryDataset result = new DefaultCategoryDataset();
         
-        // PERUBAHAN: Hanya mendefinisikan 7 seri data universal
         String seriesSuhu = "Suhu (°C)";
         String seriesSistole = "Sistole";
         String seriesDiastole = "Diastole";
@@ -61,30 +51,45 @@ public class grafikttv {
         String seriesGCS = "GCS";
         
         String tableName = "";
+        String sql = "";
+
         switch (jenisObservasi.toLowerCase()) {
             case "ranap":
                 tableName = "catatan_observasi_ranap";
+                sql = "select concat(tgl_perawatan,' ',jam_rawat) as waktu, suhu, td, hr, rr, spo2, gcs from " + tableName + " " + symbol;
                 break;
             case "kebidanan":
                 tableName = "catatan_observasi_ranap_kebidanan";
+                sql = "select concat(tgl_perawatan,' ',jam_rawat) as waktu, suhu, td, hr, rr, spo2, gcs from " + tableName + " " + symbol;
                 break;
             case "postpartum":
                 tableName = "catatan_observasi_ranap_postpartum";
+                sql = "select concat(tgl_perawatan,' ',jam_rawat) as waktu, suhu, td, hr, rr, spo2, gcs from " + tableName + " " + symbol;
+                break;
+            case "igd":
+                tableName = "catatan_observasi_igd";
+                sql = "select concat(tgl_perawatan,' ',jam_rawat) as waktu, suhu, td, hr, rr, spo2, gcs from " + tableName + " " + symbol;
+                break;
+            case "bayi":
+                tableName = "catatan_observasi_bayi";
+                sql = "select concat(tgl_perawatan,' ',jam_rawat) as waktu, suhu, td, hr, rr, spo2, gcs from " + tableName + " " + symbol;
+                break;            
+            case "pemeriksaan_ranap":
+                tableName = "pemeriksaan_ranap";
+                sql = "select concat(tgl_perawatan,' ',jam_rawat) as waktu, suhu_tubuh as suhu, tensi as td, nadi as hr, respirasi as rr, spo2, gcs from " + tableName + " " + symbol;
                 break;
             default:
-                return result; // Jika jenis tidak valid, kembalikan dataset kosong
+                return result; 
         }
 
         try {
             Statement stat = koneksiDB.condb().createStatement();
-            // PERUBAHAN: Query SQL tunggal yang mengambil 7 kolom universal
-            String sql = "select concat(tgl_perawatan,' ',jam_rawat) as waktu, suhu, td, hr, rr, spo2, gcs from " + tableName + " " + symbol;
-            
             ResultSet rs = stat.executeQuery(sql);
-            // PERUBAHAN: Loop tunggal yang berlaku untuk semua jenis observasi
+            
             while (rs.next()) {
                 String waktu = rs.getString("waktu");
                 Double[] tensi = safeParseTensi(rs.getString("td"));
+                
                 result.addValue(safeParseDouble(rs.getString("suhu")), seriesSuhu, waktu);
                 result.addValue(tensi[0], seriesSistole, waktu);
                 result.addValue(tensi[1], seriesDiastole, waktu);
@@ -101,47 +106,128 @@ public class grafikttv {
     }
 
     private static JFreeChart createChart(String symbol, String jenisObservasi) {
-        CategoryDataset dataset1 = createDataset1(symbol, jenisObservasi);
-        NumberAxis rangeAxis1 = new NumberAxis("Ukuran");
-        rangeAxis1.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+        CategoryDataset datasetUtama = createDataset1(symbol, jenisObservasi);
         
-        CustomLineRenderer customRenderer = new CustomLineRenderer();
-        customRenderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
-        customRenderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-        customRenderer.setBaseItemLabelsVisible(true);
+        // --- 1. MEMISAHKAN DATASET MENJADI 4 BAGIAN ---
+        DefaultCategoryDataset datasetTensi = new DefaultCategoryDataset();
+        DefaultCategoryDataset datasetHrSpo2 = new DefaultCategoryDataset();
+        DefaultCategoryDataset datasetSuhu = new DefaultCategoryDataset();
+        DefaultCategoryDataset datasetRespGcs = new DefaultCategoryDataset();
 
-        Stroke anastesiStroke = new BasicStroke(2.0f);
-        for (int i = 0; i < dataset1.getRowCount(); i++) {
-            String seriesName = (String) dataset1.getRowKey(i);
-            // PERUBAHAN: Switch disederhanakan, hanya menangani 7 TTV universal
-            switch (seriesName) {
-                case "Suhu (°C)": customRenderer.setSeriesPaint(i, Color.BLUE); break;
-                case "Sistole":
-                case "Diastole":
-                    customRenderer.setSeriesPaint(i, Color.BLACK);
-                    customRenderer.setSeriesLinesVisible(i, false);
-                    break;
-                case "Heartrate": customRenderer.setSeriesPaint(i, Color.RED); break;
-                case "Respirasi": customRenderer.setSeriesPaint(i, Color.GREEN); break;
-                case "SpO2": customRenderer.setSeriesPaint(i, Color.ORANGE); break;
-                case "GCS": customRenderer.setSeriesPaint(i, Color.MAGENTA); break;
-                default: customRenderer.setSeriesPaint(i, Color.CYAN); break;
+        for (int i = 0; i < datasetUtama.getRowCount(); i++) {
+            String seriesName = (String) datasetUtama.getRowKey(i);
+            for (int j = 0; j < datasetUtama.getColumnCount(); j++) {
+                Comparable<String> category = datasetUtama.getColumnKey(j);
+                Number value = datasetUtama.getValue(i, j);
+                
+                switch (seriesName) {
+                    case "Sistole":
+                    case "Diastole":
+                        datasetTensi.addValue(value, seriesName, category);
+                        break;
+                    case "Heartrate":
+                    case "SpO2":
+                        datasetHrSpo2.addValue(value, seriesName, category);
+                        break;
+                    case "Suhu (°C)":
+                        datasetSuhu.addValue(value, seriesName, category);
+                        break;
+                    case "Respirasi":
+                    case "GCS":
+                        datasetRespGcs.addValue(value, seriesName, category);
+                        break;
+                }
             }
-            customRenderer.setSeriesStroke(i, anastesiStroke);
         }
-        
-        CategoryPlot subplot1 = new CategoryPlot(dataset1, null, rangeAxis1, customRenderer);
-        subplot1.setDomainGridlinesVisible(true);
-        subplot1.setRangeGridlinesVisible(true);
-        subplot1.setRangeGridlinePaint(Color.BLACK);
-        subplot1.setDomainGridlinesVisible(true);
-        subplot1.setDomainGridlinePaint(Color.BLACK);
-        subplot1.setBackgroundPaint(Color.LIGHT_GRAY);
 
+        Stroke aStroke = new BasicStroke(2.0f);
+
+        // --- 2. MEMBUAT 4 SUBPLOT TERPISAH ---
+
+        // SUBPLOT 1: Tensi (Sistole & Diastole)
+        NumberAxis rangeAxisTensi = new NumberAxis("Tekanan (mmHg)");
+        rangeAxisTensi.setRange(40.0, 200.0);
+        CustomLineRenderer rendererTensi = new CustomLineRenderer();
+        rendererTensi.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
+        rendererTensi.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+        rendererTensi.setBaseItemLabelsVisible(true);
+        rendererTensi.setSeriesPaint(0, Color.BLACK); // Sistole
+        rendererTensi.setSeriesPaint(1, Color.BLACK); // Diastole
+        rendererTensi.setSeriesStroke(0, aStroke);
+        rendererTensi.setSeriesStroke(1, aStroke);
+        rendererTensi.setSeriesLinesVisible(0, false); // Digambar manual
+        rendererTensi.setSeriesLinesVisible(1, false); // Digambar manual
+        CategoryPlot subplotTensi = new CategoryPlot(datasetTensi, null, rangeAxisTensi, rendererTensi);
+        subplotTensi.setBackgroundPaint(Color.LIGHT_GRAY);
+        subplotTensi.setDomainGridlinesVisible(true);
+        subplotTensi.setRangeGridlinesVisible(true);
+        subplotTensi.setDomainGridlinePaint(Color.BLACK);
+        subplotTensi.setRangeGridlinePaint(Color.BLACK);
+
+        // SUBPLOT 2: Heartrate & SpO2
+        NumberAxis rangeAxisHrSpo2 = new NumberAxis("Denyut & Saturasi");
+        rangeAxisHrSpo2.setRange(40.0, 200.0);
+        LineAndShapeRenderer rendererHrSpo2 = new LineAndShapeRenderer();
+        rendererHrSpo2.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
+        rendererHrSpo2.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+        rendererHrSpo2.setBaseItemLabelsVisible(true);
+        rendererHrSpo2.setSeriesPaint(0, Color.RED);     // Heartrate
+        rendererHrSpo2.setSeriesPaint(1, Color.ORANGE);  // SpO2
+        rendererHrSpo2.setSeriesStroke(0, aStroke);
+        rendererHrSpo2.setSeriesStroke(1, aStroke);
+        CategoryPlot subplotHrSpo2 = new CategoryPlot(datasetHrSpo2, null, rangeAxisHrSpo2, rendererHrSpo2);
+        subplotHrSpo2.setBackgroundPaint(Color.LIGHT_GRAY);
+        subplotHrSpo2.setDomainGridlinesVisible(true);
+        subplotHrSpo2.setRangeGridlinesVisible(true);
+        subplotHrSpo2.setDomainGridlinePaint(Color.BLACK);
+        subplotHrSpo2.setRangeGridlinePaint(Color.BLACK);
+
+        // SUBPLOT 3: Suhu
+        NumberAxis rangeAxisSuhu = new NumberAxis("Suhu (°C)");
+        rangeAxisSuhu.setRange(35.0, 41.0);
+        LineAndShapeRenderer rendererSuhu = new LineAndShapeRenderer();
+        rendererSuhu.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
+        rendererSuhu.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+        rendererSuhu.setBaseItemLabelsVisible(true);
+        rendererSuhu.setSeriesPaint(0, Color.BLUE);
+        rendererSuhu.setSeriesStroke(0, aStroke);
+        CategoryPlot subplotSuhu = new CategoryPlot(datasetSuhu, null, rangeAxisSuhu, rendererSuhu);
+        subplotSuhu.setBackgroundPaint(Color.LIGHT_GRAY);
+        subplotSuhu.setDomainGridlinesVisible(true);
+        subplotSuhu.setRangeGridlinesVisible(true);
+        subplotSuhu.setDomainGridlinePaint(Color.BLACK);
+        subplotSuhu.setRangeGridlinePaint(Color.BLACK);
+
+        // SUBPLOT 4: Respirasi & GCS
+        NumberAxis rangeAxisRespGcs = new NumberAxis("Resp & GCS");
+        rangeAxisRespGcs.setRange(0, 40.0);
+        LineAndShapeRenderer rendererRespGcs = new LineAndShapeRenderer();
+        rendererRespGcs.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
+        rendererRespGcs.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+        rendererRespGcs.setBaseItemLabelsVisible(true);
+        rendererRespGcs.setSeriesPaint(0, Color.GREEN);   // Respirasi
+        rendererRespGcs.setSeriesPaint(1, Color.MAGENTA); // GCS
+        rendererRespGcs.setSeriesStroke(0, aStroke);
+        rendererRespGcs.setSeriesStroke(1, aStroke);
+        CategoryPlot subplotRespGcs = new CategoryPlot(datasetRespGcs, null, rangeAxisRespGcs, rendererRespGcs);
+        subplotRespGcs.setBackgroundPaint(Color.LIGHT_GRAY);
+        subplotRespGcs.setDomainGridlinesVisible(true);
+        subplotRespGcs.setRangeGridlinesVisible(true);
+        subplotRespGcs.setDomainGridlinePaint(Color.BLACK);
+        subplotRespGcs.setRangeGridlinePaint(Color.BLACK);
+
+        // --- 3. MENGGABUNGKAN SEMUA PLOT ---
         CategoryAxis domainAxis = new CategoryAxis("Tanda Tanda Vital Pasien");
         domainAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
         CombinedDomainCategoryPlot plot = new CombinedDomainCategoryPlot(domainAxis);
-        plot.add(subplot1, 1);
+        
+        // Menambahkan semua subplot dengan bobot (tinggi relatif) yang berbeda
+        plot.add(subplotTensi, 2); 
+        plot.add(subplotHrSpo2, 2);
+        plot.add(subplotRespGcs, 1);
+        plot.add(subplotSuhu, 1);
+        plot.setGap(10.0);
+
         JFreeChart result = new JFreeChart("", new Font("SansSerif", Font.BOLD, 8), plot, true);
         return result;
     }
@@ -202,31 +288,30 @@ public class grafikttv {
                 }
             }
 
-            if ("Sistole".equals(rowKey)) {
-                int sistoleIndex = dataset.getRowIndex("Sistole");
-                int diastoleIndex = dataset.getRowIndex("Diastole");
+            // PERUBAHAN: Indeks diubah karena dataset ini hanya berisi Tensi
+            if (row == 0) { // Hanya perlu dijalankan saat menggambar Sistole
+                int sistoleIndex = 0; // Sistole sekarang di indeks 0
+                int diastoleIndex = 1; // Diastole sekarang di indeks 1
 
-                if (sistoleIndex != -1 && diastoleIndex != -1) {
-                    Number sistoleNumber = dataset.getValue(sistoleIndex, column);
-                    Number diastoleNumber = dataset.getValue(diastoleIndex, column);
+                Number sistoleNumber = dataset.getValue(sistoleIndex, column);
+                Number diastoleNumber = dataset.getValue(diastoleIndex, column);
 
-                    if (sistoleNumber != null && diastoleNumber != null) {
-                        double x = domainAxis.getCategoryMiddle(column, dataset.getColumnCount(), dataArea, plot.getDomainAxisEdge());
-                        double ySistole = rangeAxis.valueToJava2D(sistoleNumber.doubleValue(), dataArea, plot.getRangeAxisEdge());
-                        double yDiastole = rangeAxis.valueToJava2D(diastoleNumber.doubleValue(), dataArea, plot.getRangeAxisEdge());
+                if (sistoleNumber != null && diastoleNumber != null) {
+                    double x = domainAxis.getCategoryMiddle(column, dataset.getColumnCount(), dataArea, plot.getDomainAxisEdge());
+                    double ySistole = rangeAxis.valueToJava2D(sistoleNumber.doubleValue(), dataArea, plot.getRangeAxisEdge());
+                    double yDiastole = rangeAxis.valueToJava2D(diastoleNumber.doubleValue(), dataArea, plot.getRangeAxisEdge());
 
-                        g2.setPaint(Color.DARK_GRAY);
-                        g2.setStroke(new BasicStroke(1.5f));
-                        g2.draw(new Line2D.Double(x, ySistole, x, yDiastole));
+                    g2.setPaint(Color.DARK_GRAY);
+                    g2.setStroke(new BasicStroke(1.5f));
+                    g2.draw(new Line2D.Double(x, ySistole, x, yDiastole));
 
-                        int[] xUpArrow = {(int) x - 5, (int) x + 5, (int) x};
-                        int[] yUpArrow = {(int) ySistole + 10, (int) ySistole + 10, (int) ySistole};
-                        g2.fillPolygon(xUpArrow, yUpArrow, 3);
+                    int[] xUpArrow = {(int) x - 5, (int) x + 5, (int) x};
+                    int[] yUpArrow = {(int) ySistole + 10, (int) ySistole + 10, (int) ySistole};
+                    g2.fillPolygon(xUpArrow, yUpArrow, 3);
 
-                        int[] xDownArrow = {(int) x - 5, (int) x + 5, (int) x};
-                        int[] yDownArrow = {(int) yDiastole - 10, (int) yDiastole - 10, (int) yDiastole};
-                        g2.fillPolygon(xDownArrow, yDownArrow, 3);
-                    }
+                    int[] xDownArrow = {(int) x - 5, (int) x + 5, (int) x};
+                    int[] yDownArrow = {(int) yDiastole - 10, (int) yDiastole - 10, (int) yDiastole};
+                    g2.fillPolygon(xDownArrow, yDownArrow, 3);
                 }
             }
         }

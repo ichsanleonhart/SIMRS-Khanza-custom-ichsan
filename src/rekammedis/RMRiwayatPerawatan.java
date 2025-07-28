@@ -4105,6 +4105,7 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
     }
    
     private void isPasien() {
+        validasi.hapusFileDalamFolder("/gambargrafik/"); //hapus dulu isi folder gambargrafik sebelum memulai sequence menampilkan grafikttv - Ichsan
         try{
             ps=koneksi.prepareStatement(
                     "select pasien.no_rkm_medis,pasien.nm_pasien,pasien.jk,pasien.tmp_lahir,pasien.tgl_lahir,pasien.agama,"+
@@ -6448,7 +6449,7 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                                                 append("<td align='left'>").append(rs2.getString("instruksi").replaceAll("(\r\n|\r|\n|\n\r)","<br>")).append("</td>").
                                                 append("<td align='left'>").append(rs2.getString("evaluasi").replaceAll("(\r\n|\r|\n|\n\r)","<br>")).append("</td>").
                                             append("</tr>");
-                            }while(rs2.next());
+                            }while(rs2.next());                            
                         }       
                     } catch (Exception e) {
                         System.out.println("Notifikasi : "+e);
@@ -6457,7 +6458,7 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                             rs2.close();
                         }
                     }
-                    
+                    tampilkanGambarTTV(rs.getString("no_rawat"), "pemeriksaan_ranap",8);  //panggil fungsi untuk menampilkan grafik ttv dari SOAP Ranap by ichsan
                     try {
                         rs2=koneksi.prepareStatement(
                                 "select pemeriksaan_ranap.no_rawat,reg_periksa.no_rkm_medis,pasien.nm_pasien,"+
@@ -6492,7 +6493,7 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                                                 append("<td align='left'>").append(rs2.getString("instruksi").replaceAll("(\r\n|\r|\n|\n\r)","<br>")).append("</td>").
                                                 append("<td align='left'>").append(rs2.getString("evaluasi").replaceAll("(\r\n|\r|\n|\n\r)","<br>")).append("</td>").
                                             append("</tr>");
-                            }while(rs2.next());
+                            }while(rs2.next());                            
                         }       
                     } catch (Exception e) {
                         System.out.println("Notifikasi : "+e);
@@ -11618,7 +11619,8 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                                     "<td valign='top'>").append(rs2.getString("nip")).append(" ").append(rs2.getString("nama")).append("</td>").append(
                                  "</tr>");                                        
                             w++;
-                        }while(rs2.next());
+                        }while(rs2.next());                        
+                        tampilkanGambarTTV(norawat, "igd",9);  //panggil fungsi untuk menampilkan grafik  ttv di IGD by ichsan
                         htmlContent.append(
                               "</table>").append(
                             "</td>").append(
@@ -15432,9 +15434,8 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                                             "<td valign='top'>"+rs2.getString("nip")+" "+rs2.getString("nama")+"</td>"+ 
                                     "</tr>" );
                                 w++; 
-                        } 
-                        validasi.hapusFileDalamFolder("/gambargrafik/"); //hapus dulu isi folder sebelum memulai sequence
-                        tampilkanGambarTTV(norawat, "ranap");  //panggil fungsi untuk menampilkan grafik  ttv by ichsan
+                        }                         
+                        tampilkanGambarTTV(norawat, "ranap",15);  //panggil fungsi untuk menampilkan grafik  ttv by ichsan
                         htmlContent.append( 
                                 "</table>"+ "</td>"+ "</tr>" ); 
                     } 
@@ -15510,7 +15511,7 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                             w++;
                         }while(rs2.next());
                         
-                        tampilkanGambarTTV(norawat, "kebidanan");  //panggil fungsi untuk menampilkan grafik  ttv by ichsan
+                        tampilkanGambarTTV(norawat, "kebidanan",9);  //panggil fungsi untuk menampilkan grafik  ttv by ichsan
                         htmlContent.append(
                               "</table>").append(
                             "</td>").append(
@@ -15587,7 +15588,7 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                             );                                        
                             w++;
                         }while(rs2.next());
-                        tampilkanGambarTTV(norawat, "postpartum");  //panggil fungsi untuk menampilkan grafik  ttv by ichsan
+                        tampilkanGambarTTV(norawat, "postpartum",9);  //panggil fungsi untuk menampilkan grafik  ttv by ichsan
                         htmlContent.append(
                               "</table>").append(
                             "</td>").append(
@@ -15671,6 +15672,7 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                                         append("<tr>");                                        
                             w++;
                         }while(rs2.next());
+                        tampilkanGambarTTV(norawat, "bayi",9);  //panggil fungsi untuk menampilkan grafik ttv observasi bayi by ichsan
                         htmlContent.append("</table>").
                                 append("</td>").
                             append("</tr>");
@@ -34244,33 +34246,8 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
     
     
      //INSERT FUNGSI GRAFIK TTV - TAMBAHAN MODIFIKASI ICHSAN
-    /*
-    private StringBuilder tampilkanGambarTTV(String norawat) throws MalformedURLException {
-        if (Sequel.cariInteger("select count(no_rawat) from catatan_observasi_ranap where no_rawat='" + norawat + "'") > 0) {
-            grafikttv ttv = new grafikttv("Grafik Tanda dan Objek Vital " + NmPasien.getText() + "", "where catatan_observasi_ranap.no_rawat= '" + norawat + "' ", norawat.replaceAll("/", ""));
-            File imageFile = new File("./gambargrafik/" + norawat.replaceAll("/", "") + ".jpg");
-
-            // Check if the file exists
-            if (!imageFile.exists()) {
-                System.out.println("Image file does not exist: " + imageFile.getAbsolutePath());
-                return htmlContent.append("Image not found.");
-            }
-
-            String imageUrl = imageFile.toURI().toURL().toString();
-
-            // Create a table row with a styled cell
-            return htmlContent.append("<tr><td colspan='15' style='text-align: center; padding: 10px; background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>")
-                    .append("<img src='").append(imageUrl).append("' style='max-width: 100%; height: auto; border-radius: 5px; object-fit: contain; max-height: 600px;' alt='Gambar TTV'/>")
-                    .append("<p style='margin-top: 10px; color: #666; font-size: 12px;'>Vital Sign Chart</p>")
-                    .append("</td></tr>");
-        } else {
-            return htmlContent.append("");
-        }
-    }
-    */
     
-    // GANTI metode tampilkanGambarTTV yang lama dengan yang ini
-private void tampilkanGambarTTV(String norawat, String jenisObservasi) {
+private void tampilkanGambarTTV(String norawat, String jenisObservasi, int jumlahKolom) {
     String judulGrafik = "";
     String namaFileGrafik = "";
     String namaTabel = "";
@@ -34291,15 +34268,31 @@ private void tampilkanGambarTTV(String norawat, String jenisObservasi) {
             namaFileGrafik = "grafikobservasipostpartum" + norawat.replaceAll("/", "") + ".jpg";
             namaTabel = "catatan_observasi_ranap_postpartum";
             break;
+        case "igd":
+            judulGrafik = "Grafik TTV IGD";
+            namaFileGrafik = "grafikobservasiigd" + norawat.replaceAll("/", "") + ".jpg";
+            namaTabel = "catatan_observasi_igd";
+            break;
+        case "bayi":
+            judulGrafik = "Grafik TTV Bayi";
+            namaFileGrafik = "grafikobservasibayi" + norawat.replaceAll("/", "") + ".jpg";
+            namaTabel = "catatan_observasi_bayi";
+            break;        
+        case "pemeriksaan_ranap":  //ini buat SOAP Ranap
+            judulGrafik = "Grafik TTV Pemeriksaan Ranap";
+            namaFileGrafik = "grafikpemeriksaanranap" + norawat.replaceAll("/", "") + ".jpg";
+            namaTabel = "pemeriksaan_ranap";
+            break;
         default:
             return; // Jika jenis tidak dikenali, keluar dari metode
     }
 
     if (Sequel.cariInteger("select count(no_rawat) from " + namaTabel + " where no_rawat=?", norawat) > 0) {
         try {
+             // PERUBAHAN DI SINI: colspan kini menggunakan parameter jumlahKolom
             htmlContent.append(
                 "<tr class='isi'>"+                    
-                    "<td colspan='15' valign='top' width='95%'>"+
+                    "<td colspan='").append(jumlahKolom).append("' valign='top' width='100%'>"+
                         "<div align='center'><font size='3' face='Tahoma'><b>").append(judulGrafik).append("</b></font></div>"
             );
             
@@ -34311,7 +34304,7 @@ private void tampilkanGambarTTV(String norawat, String jenisObservasi) {
             );
             
             htmlContent.append(
-                        "<div align='center'><img src='file:gambargrafik/").append(namaFileGrafik).append("' width='1100' height='550'/></div>"+
+                        "<div align='center'><img src='file:gambargrafik/").append(namaFileGrafik).append("' style='width: 100%; height: auto;'/></div>"+
                     "</td>"+
                 "</tr>"
             );
