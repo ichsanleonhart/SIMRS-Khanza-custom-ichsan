@@ -47,6 +47,7 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
     private ResultSet rs;
     private int i=0,pilihan=0;
     private double total=0;
+    private boolean isHRD = false; // <-- TAMBAHAN UNTUK MENGECEK USER LOGIN SEBAGAI HRD ATAU BUKAN
     /** Creates new form DlgRujuk
      * @param parent
      * @param modal */
@@ -55,10 +56,11 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
         initComponents();
         this.setLocation(8,1);
         setSize(628,674);
+        isHRD = cekApakahHRD(); //cek apakah user login sebagai HRD? - Ichsan
 
         tabMode=new DefaultTableModel(null,new Object[]{
                 "No.Pengajuan","Tanggal","Tgl Awal","Tgl Akhir","NIK","Diajukan Oleh","Bidang","Departemen","Jenis Cuti","Alamat Tujuan",
-                "Jml Cuti","Kepentingan Cuti","NIK P.J.","P.J. Terkait", "Status"
+                "Jml Cuti","Kepentingan Cuti","NIK P.J.","P.J. Terkait", "Status Atasan", "Waktu Setuju Atasan", "Status HRD", "Waktu Setuju HRD "  //tambahan "P.J. Terkait", "Status Atasan", "Status HRD" - ichsan
             }){
               @Override public boolean isCellEditable(int rowIndex, int colIndex){return false;}
         };
@@ -98,8 +100,14 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
                 column.setPreferredWidth(85);
             }else if(i==13){
                 column.setPreferredWidth(160);
-            }else if(i==14){
+            }else if(i==14){ // Status Atasan
                 column.setPreferredWidth(95);
+            }else if(i==15){ // Waktu Setuju Atasan
+                column.setPreferredWidth(130);
+            }else if(i==16){ // Status HRD
+                column.setPreferredWidth(95);
+            }else if(i==17){ // Waktu Setuju HRD
+               column.setPreferredWidth(130);
             }
         }
         tbObat.setDefaultRenderer(Object.class, new WarnaTable());
@@ -165,6 +173,23 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
         
         ChkInput.setSelected(false);
         isForm();
+    }
+    
+    private boolean cekApakahHRD() {
+        boolean hrd = false;
+        try (PreparedStatement p = koneksi.prepareStatement(
+                "SELECT jbtn FROM pegawai WHERE nik = ? AND jbtn LIKE ?")) {
+            p.setString(1, akses.getkode()); // Mengambil NIK user yang login
+            p.setString(2, "%HRD%");
+            try (ResultSet r = p.executeQuery()) {
+                if (r.next()) {
+                    hrd = true; // Jika ditemukan, set status hrd menjadi true
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Gagal cek jabatan HRD: " + e);
+        }
+        return hrd;
     }
 
     private DlgCariPegawai petugas=new DlgCariPegawai(null,false);
@@ -863,29 +888,53 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
 }//GEN-LAST:event_BtnHapusKeyPressed
 
     private void BtnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnEditActionPerformed
-        if(NoPengajuan.getText().trim().equals("")){
-            Valid.textKosong(NoPengajuan,"No.Pengajuan");
-        }else if(NmPetugas.getText().trim().equals("")){
-            Valid.textKosong(KdPetugas,"Yang Mengajukan");
-        }else if(Alamat.getText().trim().equals("")){
-            Valid.textKosong(Alamat,"Alamat Tujuan");
-        }else if(Jumlah.getText().trim().equals("")||Jumlah.getText().trim().equals("0")){
-            Valid.textKosong(Jumlah,"Jml Cuti");
-        }else if(Kepentingan.getText().trim().equals("")){
-            Valid.textKosong(Kepentingan,"Kepentingan Cuti");
-        }else if(NmPetugasPJ.getText().trim().equals("")){
-            Valid.textKosong(KdPetugasPJ,"P.J. terkait pengajuan");
-        }else{
-            if(tbObat.getSelectedRow()> -1){
-                if(Sequel.mengedittf("pengajuan_cuti","no_pengajuan=?","no_pengajuan=?,tanggal=?,tanggal_awal=?,tanggal_akhir=?,nik=?,urgensi=?,alamat=?,jumlah=?,kepentingan=?,nik_pj=?,status=?",12,new String[]{
-                        NoPengajuan.getText(),Valid.SetTgl(Tanggal.getSelectedItem()+""),Valid.SetTgl(Tgl1.getSelectedItem()+""),Valid.SetTgl(Tgl2.getSelectedItem()+""),KdPetugas.getText(),Urgensi.getSelectedItem().toString(),
-                        Alamat.getText(),Jumlah.getText(),Kepentingan.getText(),KdPetugasPJ.getText(),Status.getSelectedItem().toString(),tbObat.getValueAt(tbObat.getSelectedRow(),0).toString()
+    if(NoPengajuan.getText().trim().equals("")){
+        Valid.textKosong(NoPengajuan,"No.Pengajuan");
+    }else if(NmPetugas.getText().trim().equals("")){
+        Valid.textKosong(KdPetugas,"Yang Mengajukan");
+    }else if(Alamat.getText().trim().equals("")){
+        Valid.textKosong(Alamat,"Alamat Tujuan");
+    }else if(Jumlah.getText().trim().equals("")||Jumlah.getText().trim().equals("0")){
+        Valid.textKosong(Jumlah,"Jml Cuti");
+    }else if(Kepentingan.getText().trim().equals("")){
+        Valid.textKosong(Kepentingan,"Kepentingan Cuti");
+    }else if(NmPetugasPJ.getText().trim().equals("")){
+        Valid.textKosong(KdPetugasPJ,"P.J. terkait pengajuan");
+    }else{
+        if(tbObat.getSelectedRow()> -1){
+            String noPengajuan = tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString();
+
+            if (isHRD) {
+                // LOGIKA UNTUK HRD
+                // HRD bisa mengubah kapan saja tanpa validasi
+                if(Sequel.mengedittf("pengajuan_cuti", "no_pengajuan=?",
+                        "status_persetujuan_HRD=?, waktu_disetujui_HRD=NOW()", 2, new String[]{
+                            Status.getSelectedItem().toString(),
+                            noPengajuan
+                        })==true){
+                    tampil();
+                    emptTeks();
+                }                
+            } else {
+                // LOGIKA UNTUK ATASAN (USER BIASA)
+                
+                // Cek apakah sudah pernah diproses oleh HRD
+                if (Sequel.cariInteger("select count(*) from pengajuan_cuti where no_pengajuan=? and waktu_disetujui_HRD is not null", noPengajuan) > 0) {
+                    // Jika sudah (count > 0), tampilkan pesan dan hentikan proses
+                    JOptionPane.showMessageDialog(null, "Tidak bisa diedit lagi, sudah disetujui / ditolak oleh HRD");
+                } else {
+                    // Jika belum, lanjutkan proses persetujuan oleh atasan
+                    if(Sequel.mengedittf("pengajuan_cuti","no_pengajuan=?","status=?, waktu_disetujui_atasan=NOW()",2,new String[]{
+                        Status.getSelectedItem().toString(),
+                        noPengajuan
                     })==true){
                         tampil();
                         emptTeks();
+                    }
                 }
             }
         }
+    }
 }//GEN-LAST:event_BtnEditActionPerformed
 
     private void BtnEditKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnEditKeyPressed
@@ -1173,6 +1222,7 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
     private widget.Table tbObat;
     // End of variables declaration//GEN-END:variables
 
+    /*
     private void tampil() {
         Valid.tabelKosong(tabMode);
         try{
@@ -1181,6 +1231,7 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
                    "select pengajuan_cuti.no_pengajuan,pengajuan_cuti.tanggal,pengajuan_cuti.tanggal_awal,pengajuan_cuti.tanggal_akhir,"+
                    "pengajuan_cuti.nik,peg1.nama as namapengaju,peg1.bidang,peg1.departemen,pengajuan_cuti.urgensi,pengajuan_cuti.alamat,"+
                    "pengajuan_cuti.jumlah,pengajuan_cuti.kepentingan,pengajuan_cuti.nik_pj,peg2.nama as namapj,pengajuan_cuti.status "+
+                   "pengajuan_cuti.status_persetujuan_HRD " + // <-- KOLOM TAMBAHAN - ichsan
                    "from pengajuan_cuti inner join pegawai as peg1 on pengajuan_cuti.nik=peg1.nik "+
                    "inner join pegawai as peg2 on pengajuan_cuti.nik_pj=peg2.nik where "+
                    "pengajuan_cuti.tanggal between ? and ? order by pengajuan_cuti.tanggal");
@@ -1188,7 +1239,7 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
                 ps=koneksi.prepareStatement(
                    "select pengajuan_cuti.no_pengajuan,pengajuan_cuti.tanggal,pengajuan_cuti.tanggal_awal,pengajuan_cuti.tanggal_akhir,"+
                    "pengajuan_cuti.nik,peg1.nama as namapengaju,peg1.bidang,peg1.departemen,pengajuan_cuti.urgensi,pengajuan_cuti.alamat,"+
-                   "pengajuan_cuti.jumlah,pengajuan_cuti.kepentingan,pengajuan_cuti.nik_pj,peg2.nama as namapj,pengajuan_cuti.status "+
+                   "pengajuan_cuti.jumlah,pengajuan_cuti.kepentingan,pengajuan_cuti.nik_pj,peg2.nama as namapj,pengajuan_cuti.status, pengajuan_cuti.status_persetujuan_HRD "+ //tambahan pengajuan_cuti.status_persetujuan_HRD - ichsan
                    "from pengajuan_cuti inner join pegawai as peg1 on pengajuan_cuti.nik=peg1.nik "+
                    "inner join pegawai as peg2 on pengajuan_cuti.nik_pj=peg2.nik where "+
                    "pengajuan_cuti.tanggal between ? and ? and pengajuan_cuti.no_pengajuan like ? or "+
@@ -1252,7 +1303,8 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
                         rs.getString("no_pengajuan"),rs.getString("tanggal"),rs.getString("tanggal_awal"),rs.getString("tanggal_akhir"),
                         rs.getString("nik"),rs.getString("namapengaju"),rs.getString("bidang"),rs.getString("departemen"),
                         rs.getString("urgensi"),rs.getString("alamat"),rs.getString("jumlah"),rs.getString("kepentingan"),
-                        rs.getString("nik_pj"),rs.getString("namapj"),rs.getString("status")
+                        rs.getString("nik_pj"),rs.getString("namapj"),rs.getString("status"),
+                        rs.getString("status_persetujuan_HRD") //tambahan kolom - ichsan
                     });
                     total=total+rs.getDouble("jumlah");
                 }
@@ -1273,6 +1325,81 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
         LCount1.setText(Valid.SetAngka(total));
     }
 
+    */
+    
+    private void tampil() {
+    Valid.tabelKosong(tabMode);
+    try {
+        // 1. Membangun query SQL dasar dengan kolom timestamp
+        StringBuilder sql = new StringBuilder(
+            "select pengajuan_cuti.no_pengajuan,pengajuan_cuti.tanggal,pengajuan_cuti.tanggal_awal,pengajuan_cuti.tanggal_akhir," +
+            "pengajuan_cuti.nik,peg1.nama as namapengaju,peg1.bidang,peg1.departemen,pengajuan_cuti.urgensi,pengajuan_cuti.alamat," +
+            "pengajuan_cuti.jumlah,pengajuan_cuti.kepentingan,pengajuan_cuti.nik_pj,peg2.nama as namapj,pengajuan_cuti.status," +
+            "pengajuan_cuti.waktu_disetujui_atasan, pengajuan_cuti.status_persetujuan_HRD, pengajuan_cuti.waktu_disetujui_HRD " + // Kolom baru ditambahkan
+            "from pengajuan_cuti inner join pegawai as peg1 on pengajuan_cuti.nik=peg1.nik " +
+            "inner join pegawai as peg2 on pengajuan_cuti.nik_pj=peg2.nik " +
+            "where pengajuan_cuti.tanggal between ? and ? "
+        );
+
+        // 2. Filter kondisional berdasarkan peran (role) pengguna
+        if (!isHRD) {
+            sql.append("and pengajuan_cuti.nik_pj = ? ");
+        }
+
+        // 3. Filter pencarian jika ada keyword
+        if (!TCari.getText().trim().isEmpty()) {
+            sql.append("and (pengajuan_cuti.no_pengajuan like ? or pengajuan_cuti.nik like ? or peg1.nama like ? or peg1.bidang like ? or " +
+                       "peg1.departemen like ? or pengajuan_cuti.urgensi like ? or pengajuan_cuti.alamat like ? or pengajuan_cuti.kepentingan like ? or " +
+                       "pengajuan_cuti.nik_pj like ? or peg2.nama like ? or pengajuan_cuti.status like ?) ");
+        }
+
+        sql.append("order by pengajuan_cuti.tanggal");
+
+        ps = koneksi.prepareStatement(sql.toString());
+        
+        try {
+            int paramIndex = 1;
+            ps.setString(paramIndex++, Valid.SetTgl(DTPCari1.getSelectedItem() + ""));
+            ps.setString(paramIndex++, Valid.SetTgl(DTPCari2.getSelectedItem() + ""));
+
+            if (!isHRD) {
+                ps.setString(paramIndex++, akses.getkode());
+            }
+
+            if (!TCari.getText().trim().isEmpty()) {
+                String keyword = "%" + TCari.getText().trim() + "%";
+                for (int j = 0; j < 11; j++) { 
+                    ps.setString(paramIndex++, keyword);
+                }
+            }
+
+            rs = ps.executeQuery();
+            total = 0;
+            while (rs.next()) {
+                // Menambahkan data baru ke baris tabel
+                tabMode.addRow(new Object[]{
+                    rs.getString("no_pengajuan"), rs.getString("tanggal"), rs.getString("tanggal_awal"), rs.getString("tanggal_akhir"),
+                    rs.getString("nik"), rs.getString("namapengaju"), rs.getString("bidang"), rs.getString("departemen"),
+                    rs.getString("urgensi"), rs.getString("alamat"), rs.getString("jumlah"), rs.getString("kepentingan"),
+                    rs.getString("nik_pj"), rs.getString("namapj"), rs.getString("status"),
+                    rs.getString("waktu_disetujui_atasan"), rs.getString("status_persetujuan_HRD"), rs.getString("waktu_disetujui_HRD")
+                });
+                total = total + rs.getDouble("jumlah");
+            }
+        } catch (Exception e) {
+            System.out.println("Notif : " + e);
+        } finally {
+            if (rs != null) { rs.close(); }
+            if (ps != null) { ps.close(); }
+        }
+    } catch (Exception e) {
+        System.out.println("Notifikasi : " + e);
+    }
+    LCount.setText("" + tabMode.getRowCount());
+    LCount1.setText(Valid.SetAngka(total));
+}
+
+    
     private void emptTeks() {
         Tanggal.setDate(new Date());
         Tgl1.setDate(new Date());
@@ -1288,22 +1415,31 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
         Urgensi.requestFocus();
     }
     
-        private void getData() {
+    private void getData() {
         if(tbObat.getSelectedRow()!= -1){
-            NoPengajuan.setText(tbObat.getValueAt(tbObat.getSelectedRow(),0).toString());
-            Valid.SetTgl(Tanggal,tbObat.getValueAt(tbObat.getSelectedRow(),1).toString());
-            Valid.SetTgl(Tgl1,tbObat.getValueAt(tbObat.getSelectedRow(),2).toString());
-            Valid.SetTgl(Tgl2,tbObat.getValueAt(tbObat.getSelectedRow(),3).toString());
-            KdPetugas.setText(tbObat.getValueAt(tbObat.getSelectedRow(),4).toString());
-            NmPetugas.setText(tbObat.getValueAt(tbObat.getSelectedRow(),5).toString());
-            Bidang.setText(tbObat.getValueAt(tbObat.getSelectedRow(),6).toString());
-            Departemen.setText(tbObat.getValueAt(tbObat.getSelectedRow(),7).toString());
-            Urgensi.setSelectedItem(tbObat.getValueAt(tbObat.getSelectedRow(),8).toString());
-            Alamat.setText(tbObat.getValueAt(tbObat.getSelectedRow(),9).toString());
-            Jumlah.setText(tbObat.getValueAt(tbObat.getSelectedRow(),10).toString());
-            Kepentingan.setText(tbObat.getValueAt(tbObat.getSelectedRow(),11).toString());
-            KdPetugasPJ.setText(tbObat.getValueAt(tbObat.getSelectedRow(),12).toString());
-            NmPetugasPJ.setText(tbObat.getValueAt(tbObat.getSelectedRow(),13).toString());
+        NoPengajuan.setText(tbObat.getValueAt(tbObat.getSelectedRow(),0).toString());
+        Valid.SetTgl(Tanggal,tbObat.getValueAt(tbObat.getSelectedRow(),1).toString());
+        Valid.SetTgl(Tgl1,tbObat.getValueAt(tbObat.getSelectedRow(),2).toString());
+        Valid.SetTgl(Tgl2,tbObat.getValueAt(tbObat.getSelectedRow(),3).toString());
+        KdPetugas.setText(tbObat.getValueAt(tbObat.getSelectedRow(),4).toString());
+        NmPetugas.setText(tbObat.getValueAt(tbObat.getSelectedRow(),5).toString());
+        Bidang.setText(tbObat.getValueAt(tbObat.getSelectedRow(),6).toString());
+        Departemen.setText(tbObat.getValueAt(tbObat.getSelectedRow(),7).toString());
+        Urgensi.setSelectedItem(tbObat.getValueAt(tbObat.getSelectedRow(),8).toString());
+        Alamat.setText(tbObat.getValueAt(tbObat.getSelectedRow(),9).toString());
+        Jumlah.setText(tbObat.getValueAt(tbObat.getSelectedRow(),10).toString());
+        Kepentingan.setText(tbObat.getValueAt(tbObat.getSelectedRow(),11).toString());
+        KdPetugasPJ.setText(tbObat.getValueAt(tbObat.getSelectedRow(),12).toString());
+        NmPetugasPJ.setText(tbObat.getValueAt(tbObat.getSelectedRow(),13).toString());
+        
+        // Logika untuk menampilkan status yang relevan dengan indeks kolom yang baru
+        if (isHRD) {
+            // Jika user adalah HRD, tampilkan status HRD di combobox (indeks 16)
+            Status.setSelectedItem(tbObat.getValueAt(tbObat.getSelectedRow(), 16).toString());
+        } else {
+            // Jika bukan HRD, tampilkan status dari atasan (indeks 14)
+            Status.setSelectedItem(tbObat.getValueAt(tbObat.getSelectedRow(), 14).toString());
+        }
         }
     }
 
