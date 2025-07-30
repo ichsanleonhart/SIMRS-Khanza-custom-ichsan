@@ -70,7 +70,7 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
         tbObat.setPreferredScrollableViewportSize(new Dimension(500,500));
         tbObat.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-        for (i = 0; i < 15; i++) {
+        for (i = 0; i < 18; i++) {
             TableColumn column = tbObat.getColumnModel().getColumn(i);
             if(i==0){
                 column.setPreferredWidth(85);
@@ -438,7 +438,7 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-07-2025" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "30-07-2025" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -452,7 +452,7 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-07-2025" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "30-07-2025" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -537,7 +537,7 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
         jLabel8.setBounds(226, 10, 99, 23);
 
         Tanggal.setForeground(new java.awt.Color(50, 70, 50));
-        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-07-2025" }));
+        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "30-07-2025" }));
         Tanggal.setDisplayFormat("dd-MM-yyyy");
         Tanggal.setName("Tanggal"); // NOI18N
         Tanggal.setOpaque(false);
@@ -631,7 +631,7 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
         FormInput.add(Urgensi);
         Urgensi.setBounds(535, 10, 159, 23);
 
-        jLabel4.setText("Kepentingan Cuti :");
+        jLabel4.setText("Keterangan");
         jLabel4.setName("jLabel4"); // NOI18N
         FormInput.add(jLabel4);
         jLabel4.setBounds(250, 130, 120, 23);
@@ -693,7 +693,7 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
         FormInput.add(Departemen);
         Departemen.setBounds(655, 40, 115, 23);
 
-        jLabel17.setText("P.J.Terkait :");
+        jLabel17.setText("Atasan / Kanit");
         jLabel17.setName("jLabel17"); // NOI18N
         FormInput.add(jLabel17);
         jLabel17.setBounds(0, 70, 88, 23);
@@ -733,7 +733,7 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
         jLabel14.setBounds(0, 100, 88, 23);
 
         Tgl1.setForeground(new java.awt.Color(50, 70, 50));
-        Tgl1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-07-2025" }));
+        Tgl1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "30-07-2025" }));
         Tgl1.setDisplayFormat("dd-MM-yyyy");
         Tgl1.setName("Tgl1"); // NOI18N
         Tgl1.setOpaque(false);
@@ -757,7 +757,7 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
         jLabel22.setBounds(184, 100, 25, 23);
 
         Tgl2.setForeground(new java.awt.Color(50, 70, 50));
-        Tgl2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-07-2025" }));
+        Tgl2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "30-07-2025" }));
         Tgl2.setDisplayFormat("dd-MM-yyyy");
         Tgl2.setName("Tgl2"); // NOI18N
         Tgl2.setOpaque(false);
@@ -903,36 +903,59 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
     }else{
         if(tbObat.getSelectedRow()> -1){
             String noPengajuan = tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString();
+            String nikPJdiData = tbObat.getValueAt(tbObat.getSelectedRow(), 12).toString();
+            String nikUserLogin = akses.getkode();
 
-            if (isHRD) {
-                // LOGIKA UNTUK HRD
-                // HRD bisa mengubah kapan saja tanpa validasi
-                if(Sequel.mengedittf("pengajuan_cuti", "no_pengajuan=?",
-                        "status_persetujuan_HRD=?, waktu_disetujui_HRD=NOW()", 2, new String[]{
+            // KASUS 1: Pengguna yang login adalah ATASAN LANGSUNG untuk pengajuan ini
+            if (nikUserLogin.equals(nikPJdiData)) {
+                // Cek apakah pengguna ini juga seorang HRD
+                if (isHRD) {
+                    // SKENARIO KHUSUS: HRD bertindak sebagai atasan langsung.
+                    // Lakukan persetujuan Level 1 dan Level 2 sekaligus.
+                    if(Sequel.mengedittf("pengajuan_cuti", "no_pengajuan=?",
+                            "status=?, waktu_disetujui_atasan=NOW(), status_persetujuan_HRD=?, waktu_disetujui_HRD=NOW()", 3, new String[]{
+                                Status.getSelectedItem().toString(), // untuk status atasan
+                                Status.getSelectedItem().toString(), // untuk status HRD
+                                noPengajuan                          // untuk klausa WHERE
+                            })==true){
+                        tampil();
+                        emptTeks();
+                    }
+                } else {
+                    // SKENARIO NORMAL: Atasan biasa melakukan persetujuan Level 1.
+                    // Cek dulu apakah sudah diproses HRD (sebagai pengaman).
+                    if (Sequel.cariInteger("select count(*) from pengajuan_cuti where no_pengajuan=? and waktu_disetujui_HRD is not null", noPengajuan) > 0) {
+                        JOptionPane.showMessageDialog(null, "Tidak bisa diedit, pengajuan ini sudah diproses oleh HRD.");
+                    } else {
+                        if(Sequel.mengedittf("pengajuan_cuti","no_pengajuan=?","status=?, waktu_disetujui_atasan=NOW()",2,new String[]{
                             Status.getSelectedItem().toString(),
                             noPengajuan
                         })==true){
-                    tampil();
-                    emptTeks();
-                }                
-            } else {
-                // LOGIKA UNTUK ATASAN (USER BIASA)
-                
-                // Cek apakah sudah pernah diproses oleh HRD
-                if (Sequel.cariInteger("select count(*) from pengajuan_cuti where no_pengajuan=? and waktu_disetujui_HRD is not null", noPengajuan) > 0) {
-                    // Jika sudah (count > 0), tampilkan pesan dan hentikan proses
-                    JOptionPane.showMessageDialog(null, "Tidak bisa diedit lagi, sudah disetujui / ditolak oleh HRD");
+                            tampil();
+                            emptTeks();
+                        }
+                    }
+                }
+            }
+            // KASUS 2: Pengguna yang login adalah HRD dan BUKAN atasan langsung
+            else if (isHRD) {
+                // Ini adalah persetujuan Level 2.
+                String statusAtasan = tbObat.getValueAt(tbObat.getSelectedRow(), 14).toString();
+                if (!statusAtasan.equals("Disetujui")) {
+                    JOptionPane.showMessageDialog(null, "Harus disetujui oleh atasan terlebih dahulu sebelum diproses HRD.");
                 } else {
-                    // Jika belum, lanjutkan proses persetujuan oleh atasan
-                    if(Sequel.mengedittf("pengajuan_cuti","no_pengajuan=?","status=?, waktu_disetujui_atasan=NOW()",2,new String[]{
-                        Status.getSelectedItem().toString(),
-                        noPengajuan
-                    })==true){
+                    if(Sequel.mengedittf("pengajuan_cuti", "no_pengajuan=?",
+                            "status_persetujui_HRD=?, waktu_disetujui_HRD=NOW()", 2, new String[]{
+                                Status.getSelectedItem().toString(),
+                                noPengajuan
+                            })==true){
                         tampil();
                         emptTeks();
                     }
                 }
             }
+            
+            
         }
     }
 }//GEN-LAST:event_BtnEditActionPerformed
@@ -1330,19 +1353,23 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
     private void tampil() {
     Valid.tabelKosong(tabMode);
     try {
-        // 1. Membangun query SQL dasar dengan kolom timestamp
+        // 1. Membangun query SQL dasar
         StringBuilder sql = new StringBuilder(
             "select pengajuan_cuti.no_pengajuan,pengajuan_cuti.tanggal,pengajuan_cuti.tanggal_awal,pengajuan_cuti.tanggal_akhir," +
             "pengajuan_cuti.nik,peg1.nama as namapengaju,peg1.bidang,peg1.departemen,pengajuan_cuti.urgensi,pengajuan_cuti.alamat," +
             "pengajuan_cuti.jumlah,pengajuan_cuti.kepentingan,pengajuan_cuti.nik_pj,peg2.nama as namapj,pengajuan_cuti.status," +
-            "pengajuan_cuti.waktu_disetujui_atasan, pengajuan_cuti.status_persetujuan_HRD, pengajuan_cuti.waktu_disetujui_HRD " + // Kolom baru ditambahkan
+            "pengajuan_cuti.waktu_disetujui_atasan, pengajuan_cuti.status_persetujuan_HRD, pengajuan_cuti.waktu_disetujui_HRD " +
             "from pengajuan_cuti inner join pegawai as peg1 on pengajuan_cuti.nik=peg1.nik " +
             "inner join pegawai as peg2 on pengajuan_cuti.nik_pj=peg2.nik " +
             "where pengajuan_cuti.tanggal between ? and ? "
         );
 
-        // 2. Filter kondisional berdasarkan peran (role) pengguna
-        if (!isHRD) {
+        // 2. Filter kondisional berdasarkan peran dan konteks
+        if (isHRD) {
+            // Jika HRD, tampilkan (pengajuan untuknya SEBAGAI ATASAN) ATAU (pengajuan yang sudah disetujui atasan lain)
+            sql.append("and (pengajuan_cuti.nik_pj = ? OR pengajuan_cuti.status = 'Disetujui') ");
+        } else {
+            // Jika BUKAN HRD, tampilkan hanya data yang ditujukan kepadanya sebagai atasan
             sql.append("and pengajuan_cuti.nik_pj = ? ");
         }
 
@@ -1362,10 +1389,9 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
             ps.setString(paramIndex++, Valid.SetTgl(DTPCari1.getSelectedItem() + ""));
             ps.setString(paramIndex++, Valid.SetTgl(DTPCari2.getSelectedItem() + ""));
 
-            if (!isHRD) {
-                ps.setString(paramIndex++, akses.getkode());
-            }
-
+            // Parameter NIK PJ ini berlaku untuk kedua kondisi di atas (isHRD atau bukan)
+            ps.setString(paramIndex++, akses.getkode());
+            
             if (!TCari.getText().trim().isEmpty()) {
                 String keyword = "%" + TCari.getText().trim() + "%";
                 for (int j = 0; j < 11; j++) { 
@@ -1376,7 +1402,6 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
             rs = ps.executeQuery();
             total = 0;
             while (rs.next()) {
-                // Menambahkan data baru ke baris tabel
                 tabMode.addRow(new Object[]{
                     rs.getString("no_pengajuan"), rs.getString("tanggal"), rs.getString("tanggal_awal"), rs.getString("tanggal_akhir"),
                     rs.getString("nik"), rs.getString("namapengaju"), rs.getString("bidang"), rs.getString("departemen"),
@@ -1432,13 +1457,16 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
         KdPetugasPJ.setText(tbObat.getValueAt(tbObat.getSelectedRow(),12).toString());
         NmPetugasPJ.setText(tbObat.getValueAt(tbObat.getSelectedRow(),13).toString());
         
-        // Logika untuk menampilkan status yang relevan dengan indeks kolom yang baru
-        if (isHRD) {
-            // Jika user adalah HRD, tampilkan status HRD di combobox (indeks 16)
-            Status.setSelectedItem(tbObat.getValueAt(tbObat.getSelectedRow(), 16).toString());
-        } else {
-            // Jika bukan HRD, tampilkan status dari atasan (indeks 14)
+        String nikPJdiData = tbObat.getValueAt(tbObat.getSelectedRow(), 12).toString();
+        String nikUserLogin = akses.getkode();
+        
+        // Logika untuk menampilkan status yang relevan sesuai konteks
+        // Jika pengguna login adalah atasan langsung di data ini, ATAU jika pengguna bukan HRD,
+        // maka tampilkan status persetujuan atasan.
+        if (nikUserLogin.equals(nikPJdiData) || !isHRD) {
             Status.setSelectedItem(tbObat.getValueAt(tbObat.getSelectedRow(), 14).toString());
+        } else { // Jika pengguna adalah HRD dan bukan atasan langsung, tampilkan status HRD.
+            Status.setSelectedItem(tbObat.getValueAt(tbObat.getSelectedRow(), 16).toString());
         }
         }
     }
