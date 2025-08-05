@@ -200,7 +200,7 @@ public class grafikttv {
 
         // SUBPLOT 4: Respirasi & GCS
         NumberAxis rangeAxisRespGcs = new NumberAxis("Resp & GCS");
-        rangeAxisRespGcs.setRange(0, 40.0);
+        rangeAxisRespGcs.setRange(0, 60.0);
         LineAndShapeRenderer rendererRespGcs = new LineAndShapeRenderer();
         rendererRespGcs.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
         rendererRespGcs.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
