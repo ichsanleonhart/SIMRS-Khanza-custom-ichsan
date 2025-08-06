@@ -930,17 +930,17 @@ public class DlgKamarInap extends javax.swing.JDialog {
         ppKlasifikasiPasien = new javax.swing.JMenuItem();
         ppSkriningManagerPelayananPasien = new javax.swing.JMenuItem();
         SetStatus = new javax.swing.JMenu();
-        MnSehat = new javax.swing.JMenuItem();
+        //MnSehat = new javax.swing.JMenuItem();
         MnStatusRujuk = new javax.swing.JMenuItem();
         MnStatusAPS = new javax.swing.JMenuItem();
-        MnStatusPlus = new javax.swing.JMenuItem();
+        //MnStatusPlus = new javax.swing.JMenuItem();
         MnStatusMeninggal = new javax.swing.JMenuItem();
         MnStatusSembuh = new javax.swing.JMenuItem();
-        MnStatusMembaik = new javax.swing.JMenuItem();
-        MnStatusPulangPaksa = new javax.swing.JMenuItem();
+        //MnStatusMembaik = new javax.swing.JMenuItem();
+        //MnStatusPulangPaksa = new javax.swing.JMenuItem();
         MnStatusMin = new javax.swing.JMenuItem();
         MnStatusBelumLengkap = new javax.swing.JMenuItem();
-        MnStatusBelumPulang = new javax.swing.JMenuItem();
+        //MnStatusBelumPulang = new javax.swing.JMenuItem();
         MnGanti = new javax.swing.JMenu();
         MnPenjab = new javax.swing.JMenuItem();
         MnDiagnosaMasuk = new javax.swing.JMenuItem();
@@ -1437,7 +1437,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
         internalFrame2.add(jLabel24);
         jLabel24.setBounds(0, 115, 72, 23);
 
-        cmbStatus.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Rujuk", "Meninggal", "Sembuh", "-", "Pindah Kamar", "Status Belum Lengkap", "Atas Persetujuan Dokter", "Atas Permintaan Sendiri" }));  // modif by ichsan
+        cmbStatus.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Rujuk", "Meninggal", "Sembuh", "Pindah Kamar", "Status Belum Lengkap", "Atas Persetujuan Dokter", "Atas Permintaan Sendiri" }));  // modif by ichsan
         cmbStatus.setName("cmbStatus"); // NOI18N
         internalFrame2.add(cmbStatus);
         cmbStatus.setBounds(418, 175, 240, 23);
@@ -4152,7 +4152,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
         SetStatus.setName("SetStatus"); // NOI18N
         SetStatus.setPreferredSize(new java.awt.Dimension(200, 26));
 
-        MnSehat.setBackground(new java.awt.Color(255, 255, 254));
+        /*MnSehat.setBackground(new java.awt.Color(255, 255, 254));
         MnSehat.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
         MnSehat.setForeground(new java.awt.Color(50, 50, 50));
         MnSehat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
@@ -4166,7 +4166,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
                 MnSehatActionPerformed(evt);
             }
         });
-        SetStatus.add(MnSehat);
+        SetStatus.add(MnSehat);  */
 
         MnStatusRujuk.setBackground(new java.awt.Color(255, 255, 254));
         MnStatusRujuk.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
@@ -4188,7 +4188,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
         MnStatusAPS.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
         MnStatusAPS.setForeground(new java.awt.Color(50, 50, 50));
         MnStatusAPS.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
-        MnStatusAPS.setText("APS");
+        MnStatusAPS.setText("Atas Permintaan Sendiri");
         MnStatusAPS.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         MnStatusAPS.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         MnStatusAPS.setName("MnStatusAPS"); // NOI18N
@@ -4198,9 +4198,9 @@ public class DlgKamarInap extends javax.swing.JDialog {
                 MnStatusAPSActionPerformed(evt);
             }
         });
-        SetStatus.add(MnStatusAPS);
+        SetStatus.add(MnStatusAPS); 
 
-        MnStatusPlus.setBackground(new java.awt.Color(255, 255, 254));
+        /*MnStatusPlus.setBackground(new java.awt.Color(255, 255, 254));
         MnStatusPlus.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
         MnStatusPlus.setForeground(new java.awt.Color(50, 50, 50));
         MnStatusPlus.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
@@ -4214,7 +4214,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
                 MnStatusPlusActionPerformed(evt);
             }
         });
-        SetStatus.add(MnStatusPlus);
+        SetStatus.add(MnStatusPlus);*/
 
         MnStatusMeninggal.setBackground(new java.awt.Color(255, 255, 254));
         MnStatusMeninggal.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
@@ -4248,7 +4248,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
         });
         SetStatus.add(MnStatusSembuh);
 
-        MnStatusMembaik.setBackground(new java.awt.Color(255, 255, 254));
+        /*MnStatusMembaik.setBackground(new java.awt.Color(255, 255, 254));
         MnStatusMembaik.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
         MnStatusMembaik.setForeground(new java.awt.Color(50, 50, 50));
         MnStatusMembaik.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
@@ -4262,7 +4262,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
                 MnStatusMembaikActionPerformed(evt);
             }
         });
-        SetStatus.add(MnStatusMembaik);
+        SetStatus.add(MnStatusMembaik); 
 
         MnStatusPulangPaksa.setBackground(new java.awt.Color(255, 255, 254));
         MnStatusPulangPaksa.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
@@ -4278,7 +4278,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
                 MnStatusPulangPaksaActionPerformed(evt);
             }
         });
-        SetStatus.add(MnStatusPulangPaksa);
+        SetStatus.add(MnStatusPulangPaksa); */
 
         MnStatusMin.setBackground(new java.awt.Color(255, 255, 254));
         MnStatusMin.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
@@ -4312,7 +4312,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
         });
         SetStatus.add(MnStatusBelumLengkap);
 
-        MnStatusBelumPulang.setBackground(new java.awt.Color(255, 255, 254));
+        /*MnStatusBelumPulang.setBackground(new java.awt.Color(255, 255, 254));
         MnStatusBelumPulang.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
         MnStatusBelumPulang.setForeground(new java.awt.Color(50, 50, 50));
         MnStatusBelumPulang.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
@@ -4326,7 +4326,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
                 MnStatusBelumPulangActionPerformed(evt);
             }
         });
-        SetStatus.add(MnStatusBelumPulang);
+        SetStatus.add(MnStatusBelumPulang); */
 
         jPopupMenu1.add(SetStatus);
 
@@ -7762,7 +7762,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
                 }else{
                     Sequel.mengedit("kamar_inap","no_rawat='"+norawat.getText()+"' and kd_kamar='"+kdkamar.getText()+"' and tgl_masuk='"+TIn.getText()+"' and jam_masuk='"+JamMasuk.getText()+"'","stts_pulang='APS'");
                     Sequel.mengedit("kamar","kd_kamar='"+tbKamIn.getValueAt(tbKamIn.getSelectedRow(),19).toString()+"'","status='KOSONG'");  
-                    tbKamIn.setValueAt("APS",tbKamIn.getSelectedRow(),16);
+                    tbKamIn.setValueAt("Atas Permintaan Sendiri",tbKamIn.getSelectedRow(),16);
                 }  
             }
         }             
@@ -18388,7 +18388,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
     private javax.swing.JMenuItem MnRujukSisrute;
     private javax.swing.JMenu MnRujukan;
     private javax.swing.JMenuItem MnSEP;
-    private javax.swing.JMenuItem MnSehat;
+    //private javax.swing.JMenuItem MnSehat;
     private javax.swing.JMenuItem MnSensusRanap;
     private javax.swing.JMenuItem MnSignInSebelumAnestesi;
     private javax.swing.JMenuItem MnSignOutSebelumMenutupLuka;
@@ -18396,12 +18396,12 @@ public class DlgKamarInap extends javax.swing.JDialog {
     private javax.swing.JMenuItem MnSkorStewardPascaAnestesi;
     private javax.swing.JMenuItem MnStatusAPS;
     private javax.swing.JMenuItem MnStatusBelumLengkap;
-    private javax.swing.JMenuItem MnStatusBelumPulang;
-    private javax.swing.JMenuItem MnStatusMembaik;
+    //private javax.swing.JMenuItem MnStatusBelumPulang;
+    //private javax.swing.JMenuItem MnStatusMembaik;
     private javax.swing.JMenuItem MnStatusMeninggal;
     private javax.swing.JMenuItem MnStatusMin;
-    private javax.swing.JMenuItem MnStatusPlus;
-    private javax.swing.JMenuItem MnStatusPulangPaksa;
+    //private javax.swing.JMenuItem MnStatusPlus;
+    //private javax.swing.JMenuItem MnStatusPulangPaksa;
     private javax.swing.JMenuItem MnStatusRujuk;
     private javax.swing.JMenuItem MnStatusSembuh;
     private javax.swing.JMenuItem MnStokObatPasien;
@@ -18996,13 +18996,13 @@ public class DlgKamarInap extends javax.swing.JDialog {
         MnPenjab.setEnabled(akses.getregistrasi());
         MnStatusRujuk.setEnabled(akses.getkamar_inap());
         MnStatusAPS.setEnabled(akses.getkamar_inap());
-        MnStatusPlus.setEnabled(akses.getkamar_inap());
+        //MnStatusPlus.setEnabled(false); //MnStatusPlus.setEnabled(akses.getkamar_inap());
         MnRanapGabung.setEnabled(akses.getkamar_inap());
         MnGabungkanRanap.setEnabled(akses.getkamar_inap());
         MnStatusMeninggal.setEnabled(akses.getkamar_inap()); 
         MnStatusSembuh.setEnabled(akses.getkamar_inap());
-        MnStatusMembaik.setEnabled(akses.getkamar_inap());
-        MnStatusPulangPaksa.setEnabled(akses.getkamar_inap());
+        //MnStatusMembaik.setEnabled(false); //MnStatusMembaik.setEnabled(akses.getkamar_inap());
+        //MnStatusPulangPaksa.setEnabled(false); //MnStatusPulangPaksa.setEnabled(akses.getkamar_inap());
         MnStatusMin.setEnabled(akses.getkamar_inap());
         MnUpdateHari.setEnabled(akses.getkamar_inap());
         MnPermintaanStokObatPasien.setEnabled(akses.getpermintaan_stok_obat_pasien());
