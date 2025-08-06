@@ -826,8 +826,8 @@ public final class DlgKasirRalan extends javax.swing.JDialog {
         MnSuratBebasTato = new javax.swing.JMenuItem();
         MnSuratKewaspadaanKesehatan = new javax.swing.JMenuItem();
         MnCetakSuratBebasTBC = new javax.swing.JMenuItem();
-        MnCetakSuratSehat = new javax.swing.JMenuItem();
-        MnCetakSuratSehat1 = new javax.swing.JMenuItem();
+        //MnCetakSuratSehat = new javax.swing.JMenuItem();
+        //MnCetakSuratSehat1 = new javax.swing.JMenuItem();
         MnCetakSuratSehat2 = new javax.swing.JMenuItem();
         MnCetakBebasNarkoba = new javax.swing.JMenuItem();
         MnCetakSuratSakit = new javax.swing.JMenuItem();
@@ -3395,7 +3395,8 @@ public final class DlgKasirRalan extends javax.swing.JDialog {
             }
         });
         MnSuratSurat.add(MnCetakSuratBebasTBC);
-
+        
+        /*
         MnCetakSuratSehat.setBackground(new java.awt.Color(255, 255, 254));
         MnCetakSuratSehat.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
         MnCetakSuratSehat.setForeground(new java.awt.Color(50, 50, 50));
@@ -3427,7 +3428,7 @@ public final class DlgKasirRalan extends javax.swing.JDialog {
             }
         });
         MnSuratSurat.add(MnCetakSuratSehat1);
-
+        */
         MnCetakSuratSehat2.setBackground(new java.awt.Color(255, 255, 254));
         MnCetakSuratSehat2.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
         MnCetakSuratSehat2.setForeground(new java.awt.Color(50, 50, 50));
@@ -3443,6 +3444,7 @@ public final class DlgKasirRalan extends javax.swing.JDialog {
             }
         });
         MnSuratSurat.add(MnCetakSuratSehat2);
+        
 
         MnCetakBebasNarkoba.setBackground(new java.awt.Color(255, 255, 254));
         MnCetakBebasNarkoba.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
@@ -15391,8 +15393,8 @@ private void MnDataPemberianObatActionPerformed(java.awt.event.ActionEvent evt) 
     private javax.swing.JMenuItem MnCetakSuratSakit;
     private javax.swing.JMenuItem MnCetakSuratSakit1;
     private javax.swing.JMenuItem MnCetakSuratSakitPihak2;
-    private javax.swing.JMenuItem MnCetakSuratSehat;
-    private javax.swing.JMenuItem MnCetakSuratSehat1;
+    //private javax.swing.JMenuItem MnCetakSuratSehat;
+    //private javax.swing.JMenuItem MnCetakSuratSehat1;
     private javax.swing.JMenuItem MnCetakSuratSehat2;
     private javax.swing.JMenuItem MnCheckListKriteriaMasukHCU;
     private javax.swing.JMenuItem MnCheckListKriteriaMasukICU;
