@@ -20,12 +20,10 @@
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/permintaan/DlgPermintaanRanap.java</file>
             <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/simrskhanza/DlgKamarInap.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/laporan/DlgDataInsidenKeselamatan.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/inventory/DlgDaftarPermintaanResep.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/simrskhanza/DlgReg.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/rekammedis/RMTriaseIGD.java</file>
+            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/rekammedis/RMRiwayatPerawatan.java</file>
+            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/rekammedis/grafikttv.java</file>
+            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/surat/SuratSakit.java</file>
         </group>
     </open-files>
 </project-private>
