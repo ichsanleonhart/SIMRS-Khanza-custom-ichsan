@@ -294,7 +294,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "from reg_periksa inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pegawai on pegawai.nik=reg_periksa.kd_dokter "+
                    "inner join poliklinik on reg_periksa.kd_poli=poliklinik.kd_poli inner join satu_sehat_mapping_lokasi_ralan on satu_sehat_mapping_lokasi_ralan.kd_poli=poliklinik.kd_poli "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat left join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_encounter.id_encounter,'')=''");
+                   "where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_encounter.id_encounter,'')='' and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000'");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -476,6 +476,12 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
+                
                 }
             } catch (Exception ex) {
                 System.out.println("Notif : "+ex);
@@ -495,7 +501,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "from reg_periksa inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pegawai on pegawai.nik=reg_periksa.kd_dokter "+
                    "inner join poliklinik on reg_periksa.kd_poli=poliklinik.kd_poli inner join satu_sehat_mapping_lokasi_ralan on satu_sehat_mapping_lokasi_ralan.kd_poli=poliklinik.kd_poli "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat left join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_inap.tanggal between ? and ?");
+                   "where nota_inap.tanggal between ? and ? and ifnull(satu_sehat_encounter.id_encounter,'')='' and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000'");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -589,6 +595,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception ex) {
                 System.out.println("Notif : "+ex);
@@ -615,7 +626,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ralan on pemeriksaan_ralan.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ralan.nip=pegawai.nik left join satu_sehat_observationttvsuhu on satu_sehat_observationttvsuhu.no_rawat=pemeriksaan_ralan.no_rawat "+
                    "and satu_sehat_observationttvsuhu.tgl_perawatan=pemeriksaan_ralan.tgl_perawatan and satu_sehat_observationttvsuhu.jam_rawat=pemeriksaan_ralan.jam_rawat "+
-                   "and satu_sehat_observationttvsuhu.status='Ralan' where pemeriksaan_ralan.suhu_tubuh<>'' and nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_observationttvsuhu.id_observation,'')=''");
+                   "and satu_sehat_observationttvsuhu.status='Ralan' where pemeriksaan_ralan.suhu_tubuh<>'' and nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvsuhu.id_observation,'')=''");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -691,6 +702,12 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ed);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
+                    
                 }
             } catch (Exception ez) {
                 System.out.println("Notif : "+ez);
@@ -710,7 +727,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ranap on pemeriksaan_ranap.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ranap.nip=pegawai.nik left join satu_sehat_observationttvsuhu on satu_sehat_observationttvsuhu.no_rawat=pemeriksaan_ranap.no_rawat "+
                    "and satu_sehat_observationttvsuhu.tgl_perawatan=pemeriksaan_ranap.tgl_perawatan and satu_sehat_observationttvsuhu.jam_rawat=pemeriksaan_ranap.jam_rawat "+
-                   "and satu_sehat_observationttvsuhu.status='Ranap' where pemeriksaan_ranap.suhu_tubuh<>'' and nota_inap.tanggal between ? and ? ");
+                   "and satu_sehat_observationttvsuhu.status='Ranap' where pemeriksaan_ranap.suhu_tubuh<>'' and nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvsuhu.id_observation,'')=''");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -786,6 +803,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ed);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception ez) {
                 System.out.println("Notif : "+ez);
@@ -810,7 +832,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ralan on pemeriksaan_ralan.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ralan.nip=pegawai.nik left join satu_sehat_observationttvrespirasi on satu_sehat_observationttvrespirasi.no_rawat=pemeriksaan_ralan.no_rawat "+
                    "and satu_sehat_observationttvrespirasi.tgl_perawatan=pemeriksaan_ralan.tgl_perawatan and satu_sehat_observationttvrespirasi.jam_rawat=pemeriksaan_ralan.jam_rawat "+
-                   "and satu_sehat_observationttvrespirasi.status='Ralan' where pemeriksaan_ralan.respirasi<>'' and nota_jalan.tanggal between ? and ? ");
+                   "and satu_sehat_observationttvrespirasi.status='Ralan' where pemeriksaan_ralan.respirasi<>'' and nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvrespirasi.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -886,6 +908,13 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+eg);
                         }
                     }
+                    
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
+                    
                 }
             } catch (Exception ez) {
                 System.out.println("Notif : "+ez);
@@ -905,7 +934,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ranap on pemeriksaan_ranap.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ranap.nip=pegawai.nik left join satu_sehat_observationttvrespirasi on satu_sehat_observationttvrespirasi.no_rawat=pemeriksaan_ranap.no_rawat "+
                    "and satu_sehat_observationttvrespirasi.tgl_perawatan=pemeriksaan_ranap.tgl_perawatan and satu_sehat_observationttvrespirasi.jam_rawat=pemeriksaan_ranap.jam_rawat "+
-                   "and satu_sehat_observationttvrespirasi.status='Ranap' where pemeriksaan_ranap.respirasi<>'' and nota_inap.tanggal between ? and ? ");
+                   "and satu_sehat_observationttvrespirasi.status='Ranap' where pemeriksaan_ranap.respirasi<>'' and nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvrespirasi.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -981,6 +1010,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+eg);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception ez) {
                 System.out.println("Notif : "+ez);
@@ -1005,7 +1039,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ralan on pemeriksaan_ralan.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ralan.nip=pegawai.nik left join satu_sehat_observationttvnadi on satu_sehat_observationttvnadi.no_rawat=pemeriksaan_ralan.no_rawat "+
                    "and satu_sehat_observationttvnadi.tgl_perawatan=pemeriksaan_ralan.tgl_perawatan and satu_sehat_observationttvnadi.jam_rawat=pemeriksaan_ralan.jam_rawat "+
-                   "and satu_sehat_observationttvnadi.status='Ralan' where pemeriksaan_ralan.nadi<>'' and nota_jalan.tanggal between ? and ? ");
+                   "and satu_sehat_observationttvnadi.status='Ralan' where pemeriksaan_ralan.nadi<>'' and nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvnadi.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -1081,6 +1115,12 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+es);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
+
                 }
             } catch (Exception ez) {
                 System.out.println("Notif : "+ez);
@@ -1100,7 +1140,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ranap on pemeriksaan_ranap.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ranap.nip=pegawai.nik left join satu_sehat_observationttvnadi on satu_sehat_observationttvnadi.no_rawat=pemeriksaan_ranap.no_rawat "+
                    "and satu_sehat_observationttvnadi.tgl_perawatan=pemeriksaan_ranap.tgl_perawatan and satu_sehat_observationttvnadi.jam_rawat=pemeriksaan_ranap.jam_rawat "+
-                   "and satu_sehat_observationttvnadi.status='Ranap' where pemeriksaan_ranap.nadi<>'' and nota_inap.tanggal between ? and ? ");
+                   "and satu_sehat_observationttvnadi.status='Ranap' where pemeriksaan_ranap.nadi<>'' and nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvnadi.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -1176,6 +1216,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+es);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception ez) {
                 System.out.println("Notif : "+ez);
@@ -1200,7 +1245,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ralan on pemeriksaan_ralan.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ralan.nip=pegawai.nik left join satu_sehat_observationttvspo2 on satu_sehat_observationttvspo2.no_rawat=pemeriksaan_ralan.no_rawat "+
                    "and satu_sehat_observationttvspo2.tgl_perawatan=pemeriksaan_ralan.tgl_perawatan and satu_sehat_observationttvspo2.jam_rawat=pemeriksaan_ralan.jam_rawat "+
-                   "and satu_sehat_observationttvspo2.status='Ralan' where pemeriksaan_ralan.spo2<>'' and nota_jalan.tanggal between ? and ? ");
+                   "and satu_sehat_observationttvspo2.status='Ralan' where pemeriksaan_ralan.spo2<>'' and nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvspo2.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -1276,6 +1321,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ex);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception ez) {
                 System.out.println("Notif : "+ez);
@@ -1295,7 +1345,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ranap on pemeriksaan_ranap.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ranap.nip=pegawai.nik left join satu_sehat_observationttvspo2 on satu_sehat_observationttvspo2.no_rawat=pemeriksaan_ranap.no_rawat "+
                    "and satu_sehat_observationttvspo2.tgl_perawatan=pemeriksaan_ranap.tgl_perawatan and satu_sehat_observationttvspo2.jam_rawat=pemeriksaan_ranap.jam_rawat "+
-                   "and satu_sehat_observationttvspo2.status='Ranap' where pemeriksaan_ranap.spo2<>'' and nota_inap.tanggal between ? and ? ");
+                   "and satu_sehat_observationttvspo2.status='Ranap' where pemeriksaan_ranap.spo2<>'' and nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvspo2.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -1371,6 +1421,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ex);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception ez) {
                 System.out.println("Notif : "+ez);
@@ -1395,7 +1450,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ralan on pemeriksaan_ralan.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ralan.nip=pegawai.nik left join satu_sehat_observationttvgcs on satu_sehat_observationttvgcs.no_rawat=pemeriksaan_ralan.no_rawat "+
                    "and satu_sehat_observationttvgcs.tgl_perawatan=pemeriksaan_ralan.tgl_perawatan and satu_sehat_observationttvgcs.jam_rawat=pemeriksaan_ralan.jam_rawat "+
-                   "and satu_sehat_observationttvgcs.status='Ralan' where pemeriksaan_ralan.gcs<>'' and nota_jalan.tanggal between ? and ? ");
+                   "and satu_sehat_observationttvgcs.status='Ralan' where pemeriksaan_ralan.gcs<>'' and nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvgcs.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -1470,6 +1525,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ea);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception ez) {
                 System.out.println("Notif : "+ez);
@@ -1489,7 +1549,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ranap on pemeriksaan_ranap.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ranap.nip=pegawai.nik left join satu_sehat_observationttvgcs on satu_sehat_observationttvgcs.no_rawat=pemeriksaan_ranap.no_rawat "+
                    "and satu_sehat_observationttvgcs.tgl_perawatan=pemeriksaan_ranap.tgl_perawatan and satu_sehat_observationttvgcs.jam_rawat=pemeriksaan_ranap.jam_rawat "+
-                   "and satu_sehat_observationttvgcs.status='Ranap' where pemeriksaan_ranap.gcs<>'' and nota_inap.tanggal between ? and ? ");
+                   "and satu_sehat_observationttvgcs.status='Ranap' where pemeriksaan_ranap.gcs<>'' and nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvgcs.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -1564,6 +1624,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ea);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception ez) {
                 System.out.println("Notif : "+ez);
@@ -1588,7 +1653,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ralan on pemeriksaan_ralan.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ralan.nip=pegawai.nik left join satu_sehat_observationttvkesadaran on satu_sehat_observationttvkesadaran.no_rawat=pemeriksaan_ralan.no_rawat "+
                    "and satu_sehat_observationttvkesadaran.tgl_perawatan=pemeriksaan_ralan.tgl_perawatan and satu_sehat_observationttvkesadaran.jam_rawat=pemeriksaan_ralan.jam_rawat "+
-                   "and satu_sehat_observationttvkesadaran.status='Ralan' where pemeriksaan_ralan.kesadaran<>'' and nota_jalan.tanggal between ? and ? ");
+                   "and satu_sehat_observationttvkesadaran.status='Ralan' where pemeriksaan_ralan.kesadaran<>'' and nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvkesadaran.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -1661,6 +1726,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception ez) {
                 System.out.println("Notif : "+ez);
@@ -1680,7 +1750,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ranap on pemeriksaan_ranap.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ranap.nip=pegawai.nik left join satu_sehat_observationttvkesadaran on satu_sehat_observationttvkesadaran.no_rawat=pemeriksaan_ranap.no_rawat "+
                    "and satu_sehat_observationttvkesadaran.tgl_perawatan=pemeriksaan_ranap.tgl_perawatan and satu_sehat_observationttvkesadaran.jam_rawat=pemeriksaan_ranap.jam_rawat "+
-                   "and satu_sehat_observationttvkesadaran.status='Ranap' where pemeriksaan_ranap.kesadaran<>'' and nota_inap.tanggal between ? and ? ");
+                   "and satu_sehat_observationttvkesadaran.status='Ranap' where pemeriksaan_ranap.kesadaran<>'' and nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvkesadaran.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -1753,6 +1823,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception ez) {
                 System.out.println("Notif : "+ez);
@@ -1777,7 +1852,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ralan on pemeriksaan_ralan.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ralan.nip=pegawai.nik left join satu_sehat_observationttvtensi on satu_sehat_observationttvtensi.no_rawat=pemeriksaan_ralan.no_rawat "+
                    "and satu_sehat_observationttvtensi.tgl_perawatan=pemeriksaan_ralan.tgl_perawatan and satu_sehat_observationttvtensi.jam_rawat=pemeriksaan_ralan.jam_rawat "+
-                   "and satu_sehat_observationttvtensi.status='Ralan' where pemeriksaan_ralan.tensi<>'' and nota_jalan.tanggal between ? and ? ");
+                   "and satu_sehat_observationttvtensi.status='Ralan' where pemeriksaan_ralan.tensi<>'' and nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvtensi.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -1901,6 +1976,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception ez) {
                 System.out.println("Notif : "+ez);
@@ -1920,7 +2000,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ranap on pemeriksaan_ranap.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ranap.nip=pegawai.nik left join satu_sehat_observationttvtensi on satu_sehat_observationttvtensi.no_rawat=pemeriksaan_ranap.no_rawat "+
                    "and satu_sehat_observationttvtensi.tgl_perawatan=pemeriksaan_ranap.tgl_perawatan and satu_sehat_observationttvtensi.jam_rawat=pemeriksaan_ranap.jam_rawat "+
-                   "and satu_sehat_observationttvtensi.status='Ranap' where pemeriksaan_ranap.tensi<>'' and nota_inap.tanggal between ? and ?");
+                   "and satu_sehat_observationttvtensi.status='Ranap' where pemeriksaan_ranap.tensi<>'' and nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvtensi.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -2044,6 +2124,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception ez) {
                 System.out.println("Notif : "+ez);
@@ -2068,7 +2153,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ralan on pemeriksaan_ralan.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ralan.nip=pegawai.nik left join satu_sehat_observationttvtb on satu_sehat_observationttvtb.no_rawat=pemeriksaan_ralan.no_rawat "+
                    "and satu_sehat_observationttvtb.tgl_perawatan=pemeriksaan_ralan.tgl_perawatan and satu_sehat_observationttvtb.jam_rawat=pemeriksaan_ralan.jam_rawat "+
-                   "and satu_sehat_observationttvtb.status='Ralan' where pemeriksaan_ralan.tinggi<>'' and nota_jalan.tanggal between ? and ?");
+                   "and satu_sehat_observationttvtb.status='Ralan' where pemeriksaan_ralan.tinggi<>'' and nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvtb.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -2144,6 +2229,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception ef) {
                 System.out.println("Notif : "+ef);
@@ -2163,7 +2253,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ranap on pemeriksaan_ranap.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ranap.nip=pegawai.nik left join satu_sehat_observationttvtb on satu_sehat_observationttvtb.no_rawat=pemeriksaan_ranap.no_rawat "+
                    "and satu_sehat_observationttvtb.tgl_perawatan=pemeriksaan_ranap.tgl_perawatan and satu_sehat_observationttvtb.jam_rawat=pemeriksaan_ranap.jam_rawat "+
-                   "and satu_sehat_observationttvtb.status='Ranap' where pemeriksaan_ranap.tinggi<>'' and nota_inap.tanggal between ? and ? ");
+                   "and satu_sehat_observationttvtb.status='Ranap' where pemeriksaan_ranap.tinggi<>'' and nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvtb.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -2239,6 +2329,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception ef) {
                 System.out.println("Notif : "+ef);
@@ -2263,7 +2358,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ralan on pemeriksaan_ralan.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ralan.nip=pegawai.nik left join satu_sehat_observationttvbb on satu_sehat_observationttvbb.no_rawat=pemeriksaan_ralan.no_rawat "+
                    "and satu_sehat_observationttvbb.tgl_perawatan=pemeriksaan_ralan.tgl_perawatan and satu_sehat_observationttvbb.jam_rawat=pemeriksaan_ralan.jam_rawat "+
-                   "and satu_sehat_observationttvbb.status='Ralan' where pemeriksaan_ralan.berat<>'' and nota_jalan.tanggal between ? and ? ");
+                   "and satu_sehat_observationttvbb.status='Ralan' where pemeriksaan_ralan.berat<>'' and nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvbb.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -2339,6 +2434,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -2358,7 +2458,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ranap on pemeriksaan_ranap.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ranap.nip=pegawai.nik left join satu_sehat_observationttvbb on satu_sehat_observationttvbb.no_rawat=pemeriksaan_ranap.no_rawat "+
                    "and satu_sehat_observationttvbb.tgl_perawatan=pemeriksaan_ranap.tgl_perawatan and satu_sehat_observationttvbb.jam_rawat=pemeriksaan_ranap.jam_rawat "+
-                   "and satu_sehat_observationttvbb.status='Ranap' where pemeriksaan_ranap.berat<>'' and nota_inap.tanggal between ? and ? ");
+                   "and satu_sehat_observationttvbb.status='Ranap' where pemeriksaan_ranap.berat<>'' and nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observationttvbb.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -2434,6 +2534,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -2458,7 +2563,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join pemeriksaan_ralan on pemeriksaan_ralan.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on pemeriksaan_ralan.nip=pegawai.nik left join satu_sehat_observationttvlp on satu_sehat_observationttvlp.no_rawat=pemeriksaan_ralan.no_rawat "+
                    "and satu_sehat_observationttvlp.tgl_perawatan=pemeriksaan_ralan.tgl_perawatan and satu_sehat_observationttvlp.jam_rawat=pemeriksaan_ralan.jam_rawat "+
-                   "and satu_sehat_observationttvlp.status='Ralan' where pemeriksaan_ralan.lingkar_perut<>'' and nota_jalan.tanggal between ? and ? ");
+                   "and satu_sehat_observationttvlp.status='Ralan' where pemeriksaan_ralan.lingkar_perut<>'' and nota_jalan.tanggal between ? and ?  and ifnull(satu_sehat_observationttvlp.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -2534,6 +2639,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -2569,7 +2679,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_clinicalimpression.tgl_perawatan=pemeriksaan_ralan.tgl_perawatan "+
                    "and satu_sehat_clinicalimpression.jam_rawat=pemeriksaan_ralan.jam_rawat "+
                    "and satu_sehat_clinicalimpression.status='Ralan' where pemeriksaan_ralan.penilaian<>'' "+
-                   "and nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_clinicalimpression.id_clinicalimpression,'')='' ");
+                   "and nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_clinicalimpression.id_clinicalimpression,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -2646,6 +2756,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -2673,7 +2788,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join pegawai on pemeriksaan_ranap.nip=pegawai.nik "+
                    "left join satu_sehat_clinicalimpression on satu_sehat_clinicalimpression.no_rawat=pemeriksaan_ranap.no_rawat "+
                    "and satu_sehat_clinicalimpression.tgl_perawatan=pemeriksaan_ranap.tgl_perawatan and satu_sehat_clinicalimpression.jam_rawat=pemeriksaan_ranap.jam_rawat "+
-                   "and satu_sehat_clinicalimpression.status='Ranap' where pemeriksaan_ranap.penilaian<>'' and nota_inap.tanggal between ? and ?");
+                   "and satu_sehat_clinicalimpression.status='Ranap' where pemeriksaan_ranap.penilaian<>'' and nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_clinicalimpression.id_clinicalimpression,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -2750,6 +2865,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -2787,7 +2907,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "left join satu_sehat_immunization on satu_sehat_immunization.no_rawat=detail_pemberian_obat.no_rawat and satu_sehat_immunization.tgl_perawatan=detail_pemberian_obat.tgl_perawatan and "+
                    "satu_sehat_immunization.jam=detail_pemberian_obat.jam and satu_sehat_immunization.kode_brng=detail_pemberian_obat.kode_brng and "+
                    "satu_sehat_immunization.no_batch=detail_pemberian_obat.no_batch and satu_sehat_immunization.no_faktur=detail_pemberian_obat.no_faktur "+
-                   "where detail_pemberian_obat.no_batch<>'' and nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_immunization.id_immunization,'')=''");
+                   "where detail_pemberian_obat.no_batch<>'' and nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_immunization.id_immunization,'')=''");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -2895,6 +3015,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -2926,7 +3051,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "left join satu_sehat_immunization on satu_sehat_immunization.no_rawat=detail_pemberian_obat.no_rawat and satu_sehat_immunization.tgl_perawatan=detail_pemberian_obat.tgl_perawatan and "+
                    "satu_sehat_immunization.jam=detail_pemberian_obat.jam and satu_sehat_immunization.kode_brng=detail_pemberian_obat.kode_brng and "+
                    "satu_sehat_immunization.no_batch=detail_pemberian_obat.no_batch and satu_sehat_immunization.no_faktur=detail_pemberian_obat.no_faktur "+
-                   "where detail_pemberian_obat.no_batch<>'' and nota_inap.tanggal between ? and ? ");
+                   "where detail_pemberian_obat.no_batch<>'' and nota_inap.tanggal between ? and ?  and ifnull(satu_sehat_immunization.id_immunization,'')=''");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -3034,6 +3159,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -3059,7 +3189,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat "+
                    "inner join prosedur_pasien on prosedur_pasien.no_rawat=reg_periksa.no_rawat inner join icd9 on prosedur_pasien.kode=icd9.kode "+
                    "left join satu_sehat_procedure on satu_sehat_procedure.no_rawat=prosedur_pasien.no_rawat and satu_sehat_procedure.kode=prosedur_pasien.kode "+
-                   "and satu_sehat_procedure.status=prosedur_pasien.status where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_procedure.id_procedure,'')='' ");
+                   "and satu_sehat_procedure.status=prosedur_pasien.status where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and ifnull(satu_sehat_procedure.id_procedure,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -3126,6 +3256,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -3145,7 +3280,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat "+
                    "inner join prosedur_pasien on prosedur_pasien.no_rawat=reg_periksa.no_rawat inner join icd9 on prosedur_pasien.kode=icd9.kode "+
                    "left join satu_sehat_procedure on satu_sehat_procedure.no_rawat=prosedur_pasien.no_rawat and satu_sehat_procedure.kode=prosedur_pasien.kode "+
-                   "and satu_sehat_procedure.status=prosedur_pasien.status where nota_inap.tanggal between ? and ? ");
+                   "and satu_sehat_procedure.status=prosedur_pasien.status where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and ifnull(satu_sehat_procedure.id_procedure,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -3212,6 +3347,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -3237,7 +3377,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join diagnosa_pasien on diagnosa_pasien.no_rawat=reg_periksa.no_rawat "+
                    "inner join penyakit on diagnosa_pasien.kd_penyakit=penyakit.kd_penyakit left join satu_sehat_condition on satu_sehat_condition.no_rawat=diagnosa_pasien.no_rawat "+
                    "and satu_sehat_condition.kd_penyakit=diagnosa_pasien.kd_penyakit and satu_sehat_condition.status=diagnosa_pasien.status "+
-                   "where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_condition.id_condition,'')=''");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and ifnull(satu_sehat_condition.id_condition,'')=''");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -3309,6 +3449,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -3328,7 +3473,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join diagnosa_pasien on diagnosa_pasien.no_rawat=reg_periksa.no_rawat "+
                    "inner join penyakit on diagnosa_pasien.kd_penyakit=penyakit.kd_penyakit left join satu_sehat_condition on satu_sehat_condition.no_rawat=diagnosa_pasien.no_rawat "+
                    "and satu_sehat_condition.kd_penyakit=diagnosa_pasien.kd_penyakit and satu_sehat_condition.status=diagnosa_pasien.status "+
-                   "where nota_inap.tanggal between ? and ? ");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and ifnull(satu_sehat_condition.id_condition,'')=''");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -3400,6 +3545,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -3430,10 +3580,10 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join pegawai on catatan_adime_gizi.nip=pegawai.nik "+
                    "left join satu_sehat_diet on satu_sehat_diet.no_rawat=catatan_adime_gizi.no_rawat "+
                    "and satu_sehat_diet.tanggal=catatan_adime_gizi.tanggal "+
-                   "where catatan_adime_gizi.instruksi<>'' and nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_diet.id_diet,'')=''");
+                   "where catatan_adime_gizi.instruksi<>'' and nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_diet.id_diet,'')=''");
             try {
-                ps.setString(1,Tanggal1.getText()+" ");
-                ps.setString(2,Tanggal2.getText()+" ");
+                ps.setString(1,Tanggal1.getText());
+                ps.setString(2,Tanggal2.getText());
                 rs=ps.executeQuery();
                 while(rs.next()){
                     if((!rs.getString("no_ktp").equals(""))&&(!rs.getString("ktppraktisi").equals(""))&&rs.getString("satu_sehat_diet").equals("")){
@@ -3527,6 +3677,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -3551,7 +3706,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join pegawai on catatan_adime_gizi.nip=pegawai.nik "+
                    "left join satu_sehat_diet on satu_sehat_diet.no_rawat=catatan_adime_gizi.no_rawat "+
                    "and satu_sehat_diet.tanggal=catatan_adime_gizi.tanggal "+
-                   "where catatan_adime_gizi.instruksi<>'' and nota_inap.tanggal between ? and ? ");
+                   "where catatan_adime_gizi.instruksi<>'' and nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_diet.id_diet,'')=''");
             try {
                 ps.setString(1,Tanggal1.getText()+" ");
                 ps.setString(2,Tanggal2.getText()+" ");
@@ -3648,6 +3803,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -3739,6 +3899,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi Bridging : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -3773,7 +3938,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_medication on satu_sehat_medication.kode_brng=satu_sehat_mapping_obat.kode_brng "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "+
                    "left join satu_sehat_medicationrequest on satu_sehat_medicationrequest.no_resep=resep_dokter.no_resep and satu_sehat_medicationrequest.kode_brng=resep_dokter.kode_brng "+
-                   "where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_medicationrequest.id_medicationrequest,'')=''");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_medicationrequest.id_medicationrequest,'')=''");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -3910,6 +4075,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -3938,7 +4108,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_medication on satu_sehat_medication.kode_brng=satu_sehat_mapping_obat.kode_brng "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat "+
                    "left join satu_sehat_medicationrequest on satu_sehat_medicationrequest.no_resep=resep_dokter.no_resep and satu_sehat_medicationrequest.kode_brng=resep_dokter.kode_brng "+
-                   "where nota_inap.tanggal between ? and ? ");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_medicationrequest.id_medicationrequest,'')=''");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -4075,6 +4245,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -4105,7 +4280,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "+
                    "left join satu_sehat_medicationrequest_racikan on satu_sehat_medicationrequest_racikan.no_resep=resep_dokter_racikan_detail.no_resep and "+
                    "satu_sehat_medicationrequest_racikan.kode_brng=resep_dokter_racikan_detail.kode_brng and satu_sehat_medicationrequest_racikan.no_racik=resep_dokter_racikan_detail.no_racik "+
-                   "where nota_jalan.tanggal between ? and ? ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_medicationrequest_racikan.id_medicationrequest,'')=''");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -4242,6 +4417,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -4272,7 +4452,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat "+
                    "left join satu_sehat_medicationrequest_racikan on satu_sehat_medicationrequest_racikan.no_resep=resep_dokter_racikan_detail.no_resep and "+
                    "satu_sehat_medicationrequest_racikan.kode_brng=resep_dokter_racikan_detail.kode_brng and satu_sehat_medicationrequest_racikan.no_racik=resep_dokter_racikan_detail.no_racik "+
-                   "where nota_inap.tanggal between ? and ? ");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_medicationrequest_racikan.id_medicationrequest,'')=''");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -4409,6 +4589,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -4455,7 +4640,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "satu_sehat_medicationdispense.kode_brng=detail_pemberian_obat.kode_brng and "+
                    "satu_sehat_medicationdispense.no_batch=detail_pemberian_obat.no_batch and "+
                    "satu_sehat_medicationdispense.no_faktur=detail_pemberian_obat.no_faktur "+
-                   "where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_medicationdispense.id_medicationdispense,'')='' ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_medicationdispense.id_medicationdispense,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -4598,6 +4783,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -4638,7 +4828,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "satu_sehat_medicationdispense.kode_brng=detail_pemberian_obat.kode_brng and "+
                    "satu_sehat_medicationdispense.no_batch=detail_pemberian_obat.no_batch and "+
                    "satu_sehat_medicationdispense.no_faktur=detail_pemberian_obat.no_faktur "+
-                   "where nota_inap.tanggal between ? and ?");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_medicationdispense.id_medicationdispense,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -4781,6 +4971,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -4812,7 +5007,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "left join satu_sehat_servicerequest_radiologi on satu_sehat_servicerequest_radiologi.noorder=permintaan_pemeriksaan_radiologi.noorder "+
                    "and satu_sehat_servicerequest_radiologi.kd_jenis_prw=permintaan_pemeriksaan_radiologi.kd_jenis_prw "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_servicerequest_radiologi.id_servicerequest,'')='' ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_servicerequest_radiologi.id_servicerequest,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -4898,6 +5093,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -4927,7 +5127,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "left join satu_sehat_servicerequest_radiologi on satu_sehat_servicerequest_radiologi.noorder=permintaan_pemeriksaan_radiologi.noorder "+
                    "and satu_sehat_servicerequest_radiologi.kd_jenis_prw=permintaan_pemeriksaan_radiologi.kd_jenis_prw "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_inap.tanggal between ? and ? ");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_servicerequest_radiologi.id_servicerequest,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -5013,6 +5213,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -5044,7 +5249,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "left join satu_sehat_specimen_radiologi on satu_sehat_servicerequest_radiologi.noorder=satu_sehat_specimen_radiologi.noorder "+
                    "and satu_sehat_servicerequest_radiologi.kd_jenis_prw=satu_sehat_specimen_radiologi.kd_jenis_prw "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_specimen_radiologi.id_specimen,'')='' ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and ifnull(satu_sehat_specimen_radiologi.id_specimen,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -5105,6 +5310,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -5134,7 +5344,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "left join satu_sehat_specimen_radiologi on satu_sehat_servicerequest_radiologi.noorder=satu_sehat_specimen_radiologi.noorder "+
                    "and satu_sehat_servicerequest_radiologi.kd_jenis_prw=satu_sehat_specimen_radiologi.kd_jenis_prw "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_inap.tanggal between ? and ? ");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_specimen_radiologi.id_specimen,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -5195,6 +5405,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -5233,7 +5448,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_specimen_radiologi.kd_jenis_prw=satu_sehat_observation_radiologi.kd_jenis_prw "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on periksa_radiologi.kd_dokter=pegawai.nik "+
-                   "where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_observation_radiologi.id_observation,'')='' ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observation_radiologi.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -5313,6 +5528,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -5349,7 +5569,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_specimen_radiologi.kd_jenis_prw=satu_sehat_observation_radiologi.kd_jenis_prw "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on periksa_radiologi.kd_dokter=pegawai.nik "+
-                   "where nota_inap.tanggal between ? and ? ");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observation_radiologi.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -5429,6 +5649,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -5472,7 +5697,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_radiologi.kd_jenis_prw=satu_sehat_diagnosticreport_radiologi.kd_jenis_prw "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on periksa_radiologi.kd_dokter=pegawai.nik "+
-                   "where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_diagnosticreport_radiologi.id_diagnosticreport,'')='' ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_diagnosticreport_radiologi.id_diagnosticreport,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -5563,6 +5788,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -5604,7 +5834,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_radiologi.kd_jenis_prw=satu_sehat_diagnosticreport_radiologi.kd_jenis_prw "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on periksa_radiologi.kd_dokter=pegawai.nik "+
-                   "where nota_inap.tanggal between ? and ? ");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_diagnosticreport_radiologi.id_diagnosticreport,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -5695,6 +5925,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -5727,7 +5962,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_lab.id_template=permintaan_detail_permintaan_lab.id_template "+
                    "and satu_sehat_servicerequest_lab.kd_jenis_prw=permintaan_detail_permintaan_lab.kd_jenis_prw "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_servicerequest_lab.id_servicerequest,'')='' ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_servicerequest_lab.id_servicerequest,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -5813,6 +6048,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -5843,7 +6083,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_lab.id_template=permintaan_detail_permintaan_lab.id_template "+
                    "and satu_sehat_servicerequest_lab.kd_jenis_prw=permintaan_detail_permintaan_lab.kd_jenis_prw "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_inap.tanggal between ? and ? ");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_servicerequest_lab.id_servicerequest,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -5929,6 +6169,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -5961,7 +6206,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_lab_mb.id_template=permintaan_detail_permintaan_labmb.id_template "+
                    "and satu_sehat_servicerequest_lab_mb.kd_jenis_prw=permintaan_detail_permintaan_labmb.kd_jenis_prw "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_servicerequest_lab_mb.id_servicerequest,'')='' ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_servicerequest_lab_mb.id_servicerequest,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -6047,6 +6292,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -6077,7 +6327,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_lab_mb.id_template=permintaan_detail_permintaan_labmb.id_template "+
                    "and satu_sehat_servicerequest_lab_mb.kd_jenis_prw=permintaan_detail_permintaan_labmb.kd_jenis_prw "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_inap.tanggal between ? and ? ");
+                   "where nota_inap.tanggal between ? and ?  and ifnull(satu_sehat_servicerequest_lab_mb.id_servicerequest,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -6163,6 +6413,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -6197,7 +6452,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_lab.id_template=satu_sehat_specimen_lab.id_template "+
                    "and satu_sehat_servicerequest_lab.kd_jenis_prw=satu_sehat_specimen_lab.kd_jenis_prw "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_specimen_lab.id_speciment,'')='' ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and ifnull(satu_sehat_specimen_lab.id_speciment,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -6258,6 +6513,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -6290,7 +6550,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_lab.id_template=satu_sehat_specimen_lab.id_template "+
                    "and satu_sehat_servicerequest_lab.kd_jenis_prw=satu_sehat_specimen_lab.kd_jenis_prw "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_inap.tanggal between ? and ? ");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_specimen_lab.id_speciment,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -6351,6 +6611,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -6385,7 +6650,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_lab_mb.id_template=satu_sehat_specimen_lab_mb.id_template "+
                    "and satu_sehat_servicerequest_lab_mb.kd_jenis_prw=satu_sehat_specimen_lab_mb.kd_jenis_prw "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_specimen_lab_mb.id_speciment,'')='' ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_specimen_lab_mb.id_speciment,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -6446,6 +6711,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -6478,7 +6748,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_lab_mb.id_template=satu_sehat_specimen_lab_mb.id_template "+
                    "and satu_sehat_servicerequest_lab_mb.kd_jenis_prw=satu_sehat_specimen_lab_mb.kd_jenis_prw "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_inap.tanggal between ? and ? ");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_specimen_lab_mb.id_speciment,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -6539,6 +6809,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -6580,7 +6855,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_specimen_lab.kd_jenis_prw=satu_sehat_observation_lab.kd_jenis_prw "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on periksa_lab.kd_dokter=pegawai.nik "+
-                   "where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_observation_lab.id_observation,'')='' ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observation_lab.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -6660,6 +6935,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -6699,7 +6979,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_specimen_lab.kd_jenis_prw=satu_sehat_observation_lab.kd_jenis_prw "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on periksa_lab.kd_dokter=pegawai.nik "+
-                   "where nota_inap.tanggal between ? and ? ");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observation_lab.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -6779,6 +7059,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -6820,7 +7105,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_specimen_lab_mb.kd_jenis_prw=satu_sehat_observation_lab_mb.kd_jenis_prw "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on periksa_lab.kd_dokter=pegawai.nik "+
-                   "where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_observation_lab_mb.id_observation,'')='' ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_observation_lab_mb.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -6900,6 +7185,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -6939,7 +7229,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_specimen_lab_mb.kd_jenis_prw=satu_sehat_observation_lab_mb.kd_jenis_prw "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on periksa_lab.kd_dokter=pegawai.nik "+
-                   "where nota_inap.tanggal between ? and ? ");
+                   "where nota_inap.tanggal between ? and ?  and ifnull(satu_sehat_observation_lab_mb.id_observation,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -7019,6 +7309,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -7066,7 +7361,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_lab.kd_jenis_prw=satu_sehat_diagnosticreport_lab.kd_jenis_prw "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on periksa_lab.kd_dokter=pegawai.nik "+
-                   "where nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_diagnosticreport_lab.id_diagnosticreport,'')='' ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_diagnosticreport_lab.id_diagnosticreport,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -7157,6 +7452,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -7202,7 +7502,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_lab.kd_jenis_prw=satu_sehat_diagnosticreport_lab.kd_jenis_prw "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on periksa_lab.kd_dokter=pegawai.nik "+
-                   "where nota_inap.tanggal between ? and ? ");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_diagnosticreport_lab.id_diagnosticreport,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -7293,6 +7593,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -7340,7 +7645,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_lab_mb.kd_jenis_prw=satu_sehat_diagnosticreport_lab_mb.kd_jenis_prw "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on periksa_lab.kd_dokter=pegawai.nik "+
-                   "where nota_jalan.tanggal between ? and ?  and ifnull(satu_sehat_diagnosticreport_lab_mb.id_diagnosticreport,'')='' ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_diagnosticreport_lab_mb.id_diagnosticreport,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -7431,6 +7736,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -7476,7 +7786,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_lab_mb.kd_jenis_prw=satu_sehat_diagnosticreport_lab_mb.kd_jenis_prw "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat "+
                    "inner join pegawai on periksa_lab.kd_dokter=pegawai.nik "+
-                   "where nota_inap.tanggal between ? and ? ");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_diagnosticreport_lab_mb.id_diagnosticreport,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -7567,6 +7877,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+ef);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -7597,7 +7912,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join pegawai on pemeriksaan_ralan.nip=pegawai.nik "+
                    "left join satu_sehat_careplan on satu_sehat_careplan.no_rawat=pemeriksaan_ralan.no_rawat "+
                    "and satu_sehat_careplan.tgl_perawatan=pemeriksaan_ralan.tgl_perawatan and satu_sehat_careplan.jam_rawat=pemeriksaan_ralan.jam_rawat "+
-                   "where pemeriksaan_ralan.rtl<>'' and nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_careplan.id_careplan,'')='' ");
+                   "where pemeriksaan_ralan.rtl<>'' and nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_careplan.id_careplan,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText()+" ");
                 ps.setString(2,Tanggal2.getText()+" ");
@@ -7665,6 +7980,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -7689,7 +8009,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join pegawai on pemeriksaan_ranap.nip=pegawai.nik "+
                    "left join satu_sehat_careplan on satu_sehat_careplan.no_rawat=pemeriksaan_ranap.no_rawat "+
                    "and satu_sehat_careplan.tgl_perawatan=pemeriksaan_ranap.tgl_perawatan and satu_sehat_careplan.jam_rawat=pemeriksaan_ranap.jam_rawat "+
-                   "where pemeriksaan_ranap.rtl<>'' and nota_inap.tanggal between ? and ? ");
+                   "where pemeriksaan_ranap.rtl<>'' and nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_careplan.id_careplan,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText()+" ");
                 ps.setString(2,Tanggal2.getText()+" ");
@@ -7757,6 +8077,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -7790,7 +8115,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_medication on satu_sehat_medication.kode_brng=satu_sehat_mapping_obat.kode_brng "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "+
                    "left join satu_sehat_medicationstatement on satu_sehat_medicationstatement.no_resep=resep_dokter.no_resep and satu_sehat_medicationstatement.kode_brng=resep_dokter.kode_brng "+
-                   "where resep_obat.tgl_penyerahan<>'0000-00-00' and nota_jalan.tanggal between ? and ? and ifnull(satu_sehat_medicationstatement.id_medicationstatement,'')='' ");
+                   "where resep_obat.tgl_penyerahan<>'0000-00-00' and nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_medicationstatement.id_medicationstatement,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -7840,7 +8165,8 @@ public class frmUtama extends javax.swing.JFrame {
                                                 "]" +
                                             "}," +
                                             "\"medicationReference\": {" +
-                                                "\"reference\": \"Medication/"+rs.getString("id_medicationrequest")+"\"," +
+                                              //"\"reference\": \"Medication/"+rs.getString("id_medicationrequest")+"\"," +
+                                                "\"reference\": \"Medication/"+rs.getString("id_medication")+"\"," +
                                                 "\"display\": \""+rs.getString("obat_display")+"\"" +
                                             "}," +
                                             "\"subject\": {" +
@@ -7907,6 +8233,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -7934,7 +8265,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join satu_sehat_medication on satu_sehat_medication.kode_brng=satu_sehat_mapping_obat.kode_brng "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat "+
                    "left join satu_sehat_medicationstatement on satu_sehat_medicationstatement.no_resep=resep_dokter.no_resep and satu_sehat_medicationstatement.kode_brng=resep_dokter.kode_brng "+
-                   "where resep_obat.tgl_penyerahan<>'0000-00-00' and nota_inap.tanggal between ? and ? ");
+                   "where resep_obat.tgl_penyerahan<>'0000-00-00' and nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_medicationstatement.id_medicationstatement,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -8051,6 +8382,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -8080,7 +8416,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "+
                    "left join satu_sehat_medicationstatement_racikan on satu_sehat_medicationstatement_racikan.no_resep=resep_dokter_racikan_detail.no_resep and "+
                    "satu_sehat_medicationstatement_racikan.kode_brng=resep_dokter_racikan_detail.kode_brng and satu_sehat_medicationstatement_racikan.no_racik=resep_dokter_racikan_detail.no_racik "+
-                   "where resep_obat.tgl_penyerahan<>'0000-00-00' and nota_jalan.tanggal between ? and ? ");
+                   "where resep_obat.tgl_penyerahan<>'0000-00-00' and nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_medicationstatement.id_medicationstatement,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -8197,6 +8533,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -8226,7 +8567,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat "+
                    "left join satu_sehat_medicationstatement_racikan on satu_sehat_medicationstatement_racikan.no_resep=resep_dokter_racikan_detail.no_resep and "+
                    "satu_sehat_medicationstatement_racikan.kode_brng=resep_dokter_racikan_detail.kode_brng and satu_sehat_medicationstatement_racikan.no_racik=resep_dokter_racikan_detail.no_racik "+
-                   "where resep_obat.tgl_penyerahan<>'0000-00-00' and nota_inap.tanggal between ? and ? ");
+                   "where resep_obat.tgl_penyerahan<>'0000-00-00' and nota_inap.tanggal between ? and ?  and ifnull(satu_sehat_medicationstatement.id_medicationstatement,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -8343,6 +8684,11 @@ public class frmUtama extends javax.swing.JFrame {
                             System.out.println("Notifikasi : "+e);
                         }
                     }
+//------------------------------//tambahan buat rem  - ichsan
+                try { Thread.sleep(100);  }  
+                    catch (InterruptedException ex) 
+                        { System.out.println("Proses jeda gagal: " + ex); }
+//------------------------------//tambahan buat rem  - ichsan
                 }
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
@@ -8358,6 +8704,11 @@ public class frmUtama extends javax.swing.JFrame {
             System.out.println("Notifikasi : "+e);
         }
     }
+    
+    private void jeda() throws InterruptedException {
+        Thread.sleep(300); // Jeda selama 300 milidetik (0.3 detik)
+    }
+    
     private void jalankanSemuaQueryBridging() {
     // Menambahkan log ke TeksArea untuk memberikan feedback ke user
     TeksArea.append("\n======================================================\n");
