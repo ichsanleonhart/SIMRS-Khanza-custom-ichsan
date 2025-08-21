@@ -1710,6 +1710,42 @@ public class koneksiDB {
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
      //TAMBAHAN DARI ICHSAN
     public static String AKTIFKANWARNARANAP(){
         try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
@@ -1730,21 +1766,20 @@ public class koneksiDB {
             var=""; 
         }
         return var;
-    }		
-    //////////////// tambahan untuk setup upload file ke WA Pasien
-    
-    public static String HOSTWAWEB() {
+    }		   
+		
+////////////////////////////////////////////// setting whatsapp		
+    public static String HOSTWA() {
         try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
             prop.loadFromXML(fis);
-            var=EnkripsiAES.decrypt(prop.getProperty("HOSTWAWEB"));
+            var=EnkripsiAES.decrypt(prop.getProperty("HOSTWA"));
         }catch(Exception e){
             var=""; 
         }
         return var;
     }
-		
-		
-    public static String PORTWEBWA() {
+   
+   public static String PORTWEBWA() {
         try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
             prop.loadFromXML(fis);
             var=EnkripsiAES.decrypt(prop.getProperty("PORTWEBWA"));
@@ -1753,12 +1788,33 @@ public class koneksiDB {
         }
         return var;
     }
-
-////////////////////////////
-    public static String HOSTWA() {
+    
+    public static String    FOLDERFILEWA() {
         try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
             prop.loadFromXML(fis);
-            var=EnkripsiAES.decrypt(prop.getProperty("HOSTWA"));
+            var=prop.getProperty("FOLDERFILEWA");
+        }catch(Exception e){
+            var=""; 
+        }
+        return var;
+    }
+    ///////////////////////////////////////////////////////  
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+     public static String HOSTWAWEB() {
+        try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
+            prop.loadFromXML(fis);
+            var=EnkripsiAES.decrypt(prop.getProperty("HOSTWAWEB"));
         }catch(Exception e){
             var=""; 
         }
@@ -1785,15 +1841,7 @@ public class koneksiDB {
         return var;
     }
 
-    public static String    FOLDERFILEWA() {
-        try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
-            prop.loadFromXML(fis);
-            var=prop.getProperty("FOLDERFILEWA");
-        }catch(Exception e){
-            var=""; 
-        }
-        return var;
-    }
+    
     
     public static String USERWA() {
     try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
