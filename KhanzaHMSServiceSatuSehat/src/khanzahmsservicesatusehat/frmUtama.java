@@ -78,6 +78,7 @@ public class frmUtama extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         TeksArea = new javax.swing.JTextArea();
         jPanel1 = new javax.swing.JPanel();
+        jButtonStartKirim = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         Tanggal1 = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
@@ -93,6 +94,14 @@ public class frmUtama extends javax.swing.JFrame {
         jScrollPane1.setViewportView(TeksArea);
 
         getContentPane().add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+        jButtonStartKirim.setText("Start Kirim Manual!");
+        jButtonStartKirim.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonStartKirimActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButtonStartKirim);
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel1.setText("Tanggal :");
@@ -128,6 +137,31 @@ public class frmUtama extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         System.exit(0);
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButtonStartKirimActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonStartKirimActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN DATA MANUAL ATAS PERMINTAAN USER...\n");
+    
+    // Nonaktifkan tombol agar tidak bisa diklik berkali-kali saat proses berjalan
+    jButtonStartKirim.setEnabled(false);
+
+    // Gunakan SwingWorker untuk menjalankan tugas berat di background
+    new javax.swing.SwingWorker<Void, Void>() {
+        @Override
+        protected Void doInBackground() throws Exception {
+            // Panggil metode yang berisi semua query di sini
+            jalankanSemuaQueryBridging();
+            return null;
+        }
+
+        @Override
+        protected void done() {
+            // Setelah selesai, aktifkan kembali tombolnya
+            // Ini akan dieksekusi di thread utama GUI (Event Dispatch Thread)
+            TeksArea.append("\nPENGIRIMAN DATA MANUAL SELESAI.\nTimer otomatis akan melanjutkan jadwal seperti biasa.\n");
+            jButtonStartKirim.setEnabled(true);
+        }
+    }.execute();
+    }//GEN-LAST:event_jButtonStartKirimActionPerformed
 
     /**
      * @param args the command line arguments
@@ -170,6 +204,7 @@ public class frmUtama extends javax.swing.JFrame {
     private javax.swing.JTextField Tanggal2;
     private javax.swing.JTextArea TeksArea;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButtonStartKirim;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -218,34 +253,35 @@ public class frmUtama extends javax.swing.JFrame {
                 }
                 
                 if((nilai_jam%4==0)&&(detik.equals("01")&&menit.equals("01"))){
-                    encounter();
-                    observationTTV();
-                    vaksin();
-                    prosedur();
-                    condition();
-                    clinicalimpression();
-                    dietgizi();
-                    medicationrequest();
-                    medicationdispense();
-                    medicationstatement();
-                    servicerequestradiologi();
-                    specimenradiologi();
-                    observationradiologi();
-                    diagnosticreportradiologi();
-                    servicerequestlabpk();
-                    servicerequestlabmb();
-                    specimenlabpk();
-                    specimenlabmb();
-                    observationlabpk();
-                    observationlabmb();
-                    diagnosticreportlabpk();
-                    diagnosticreportlabmb();
-                    careplan();
+                    new Thread(() -> jalankanSemuaQueryBridging()).start(); //tambahan ichsan
+                    //encounter();
+                    //observationTTV();
+                    //vaksin();
+                    //prosedur();
+                    //condition();
+                    //clinicalimpression();
+                    //dietgizi();
+                    //medicationrequest();
+                    //medicationdispense();
+                    //medicationstatement();
+                    //servicerequestradiologi();
+                    //specimenradiologi();
+                    //observationradiologi();
+                    //diagnosticreportradiologi();
+                    //servicerequestlabpk();
+                    //servicerequestlabmb();
+                    //specimenlabpk();
+                    //specimenlabmb();
+                    //observationlabpk();
+                    //observationlabmb();
+                    //diagnosticreportlabpk();
+                    //diagnosticreportlabmb();
+                    //careplan();
                 }
             }
         };
         // Timer
-        new Timer(1000, taskPerformer).start();
+        // new Timer(1000, taskPerformer).start();
     }
     
     private void encounter() {
@@ -8322,4 +8358,38 @@ public class frmUtama extends javax.swing.JFrame {
             System.out.println("Notifikasi : "+e);
         }
     }
+    private void jalankanSemuaQueryBridging() {
+    // Menambahkan log ke TeksArea untuk memberikan feedback ke user
+    TeksArea.append("\n======================================================\n");
+    TeksArea.append("MEMULAI PROSES BRIDGING DATA KE SATU SEHAT...\n");
+    TeksArea.append("======================================================\n");
+    
+    encounter();
+    observationTTV();
+    vaksin();
+    prosedur();
+    condition();
+    clinicalimpression();
+    dietgizi();
+    medicationrequest();
+    medicationdispense();
+    medicationstatement();
+    servicerequestradiologi();
+    specimenradiologi();
+    observationradiologi();
+    diagnosticreportradiologi();
+    servicerequestlabpk();
+    servicerequestlabmb();
+    specimenlabpk();
+    specimenlabmb();
+    observationlabpk();
+    observationlabmb();
+    diagnosticreportlabpk();
+    diagnosticreportlabmb();
+    careplan();
+    
+    TeksArea.append("\n======================================================\n");
+    TeksArea.append("PROSES BRIDGING DATA SELESAI.\n");
+    TeksArea.append("======================================================\n");
+}
 }

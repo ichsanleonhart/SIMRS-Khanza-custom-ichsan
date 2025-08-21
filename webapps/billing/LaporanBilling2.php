@@ -101,12 +101,12 @@
                                          <td padding='0' width='40%' align='center'><font color='000000' size='1'  face='Tahoma'>".getOne("select setting.kabupaten from setting").", ".$tanggal."</font></td>              
                                         </tr>  
                                         <tr class='isi12' padding='0'>
-                                         <td padding='0' width='40%' align=center><font color='000000' size='1'  face='Tahoma'>Kabid Umum & Keuangan</td> 
+                                         <td padding='0' width='40%' align=center><font color='000000' size='1'  face='Tahoma'> </td> 
                                          <td padding='0' width='20%' align=center><font color='000000' size='1'  face='Tahoma'>&nbsp;</td>   
                                          <td padding='0' width='40%' align='center'><font color='000000' size='1'  face='Tahoma'>Kasir</font></td>              
                                         </tr>  
                                         <tr class='isi12' padding='0'>
-                                         <td padding='0' width='40%' align=center><font color='000000' size='1'  face='Tahoma'>( ............................. )</td>     
+                                         <td padding='0' width='40%' align=center><font color='000000' size='1'  face='Tahoma'> </td>     
                                          <td padding='0' width='20%' align=center><font color='000000' size='1'  face='Tahoma'>&nbsp;</td>   
                                          <td padding='0' width='40%' align='center'><font color='000000' size='1'  face='Tahoma'>";
                                             if(getOne("select count(petugas.nama) from petugas where petugas.nip='$petugas'")>=1){
