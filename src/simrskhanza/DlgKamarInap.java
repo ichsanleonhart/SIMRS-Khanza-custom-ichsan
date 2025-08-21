@@ -940,7 +940,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
         //MnStatusPulangPaksa = new javax.swing.JMenuItem();
         MnStatusMin = new javax.swing.JMenuItem();
         MnStatusBelumLengkap = new javax.swing.JMenuItem();
-        //MnStatusBelumPulang = new javax.swing.JMenuItem();
+        MnStatusBelumPulang = new javax.swing.JMenuItem();
         MnGanti = new javax.swing.JMenu();
         MnPenjab = new javax.swing.JMenuItem();
         MnDiagnosaMasuk = new javax.swing.JMenuItem();
@@ -4312,7 +4312,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
         });
         SetStatus.add(MnStatusBelumLengkap);
 
-        /*MnStatusBelumPulang.setBackground(new java.awt.Color(255, 255, 254));
+        MnStatusBelumPulang.setBackground(new java.awt.Color(255, 255, 254));
         MnStatusBelumPulang.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
         MnStatusBelumPulang.setForeground(new java.awt.Color(50, 50, 50));
         MnStatusBelumPulang.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
@@ -4326,7 +4326,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
                 MnStatusBelumPulangActionPerformed(evt);
             }
         });
-        SetStatus.add(MnStatusBelumPulang); */
+        SetStatus.add(MnStatusBelumPulang); 
 
         jPopupMenu1.add(SetStatus);
 
@@ -18396,7 +18396,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
     private javax.swing.JMenuItem MnSkorStewardPascaAnestesi;
     private javax.swing.JMenuItem MnStatusAPS;
     private javax.swing.JMenuItem MnStatusBelumLengkap;
-    //private javax.swing.JMenuItem MnStatusBelumPulang;
+    private javax.swing.JMenuItem MnStatusBelumPulang;
     //private javax.swing.JMenuItem MnStatusMembaik;
     private javax.swing.JMenuItem MnStatusMeninggal;
     private javax.swing.JMenuItem MnStatusMin;
