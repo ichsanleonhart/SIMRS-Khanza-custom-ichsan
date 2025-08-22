@@ -1361,17 +1361,22 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
             "pengajuan_cuti.waktu_disetujui_atasan, pengajuan_cuti.status_persetujuan_HRD, pengajuan_cuti.waktu_disetujui_HRD " +
             "from pengajuan_cuti inner join pegawai as peg1 on pengajuan_cuti.nik=peg1.nik " +
             "inner join pegawai as peg2 on pengajuan_cuti.nik_pj=peg2.nik " +
-            "where pengajuan_cuti.tanggal between ? and ? "
+            "where pengajuan_cuti.tanggal_awal between ? and ? "
         );
 
-        // 2. Filter kondisional berdasarkan peran dan konteks
-        if (isHRD) {
-            // Jika HRD, tampilkan (pengajuan untuknya SEBAGAI ATASAN) ATAU (pengajuan yang sudah disetujui atasan lain)
-            sql.append("and (pengajuan_cuti.nik_pj = ? OR pengajuan_cuti.status = 'Disetujui') ");
-        } else {
-            // Jika BUKAN HRD, tampilkan hanya data yang ditujukan kepadanya sebagai atasan
-            sql.append("and pengajuan_cuti.nik_pj = ? ");
+        // 2. Filter kondisional berdasarkan peran (role) pengguna
+        boolean isAdminUtama = akses.getkode().equals("Admin Utama");
+
+        if (!isAdminUtama) { // Jika BUKAN Admin Utama, terapkan filter biasa
+            if (isHRD) {
+                // Jika HRD, tampilkan (pengajuan untuknya SEBAGAI ATASAN) ATAU (pengajuan yang sudah disetujui atasan lain)
+                sql.append("and (pengajuan_cuti.nik_pj = ? OR pengajuan_cuti.status = 'Disetujui') ");
+            } else {
+                // Jika BUKAN HRD, tampilkan hanya data yang ditujukan kepadanya sebagai atasan
+                sql.append("and pengajuan_cuti.nik_pj = ? ");
+            }
         }
+        // Jika Admin Utama, tidak ada filter tambahan yang ditambahkan, sehingga semua data akan tampil
 
         // 3. Filter pencarian jika ada keyword
         if (!TCari.getText().trim().isEmpty()) {
@@ -1389,8 +1394,10 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
             ps.setString(paramIndex++, Valid.SetTgl(DTPCari1.getSelectedItem() + ""));
             ps.setString(paramIndex++, Valid.SetTgl(DTPCari2.getSelectedItem() + ""));
 
-            // Parameter NIK PJ ini berlaku untuk kedua kondisi di atas (isHRD atau bukan)
-            ps.setString(paramIndex++, akses.getkode());
+            // Hanya set parameter NIK PJ jika BUKAN Admin Utama
+            if (!isAdminUtama) {
+                ps.setString(paramIndex++, akses.getkode());
+            }
             
             if (!TCari.getText().trim().isEmpty()) {
                 String keyword = "%" + TCari.getText().trim() + "%";

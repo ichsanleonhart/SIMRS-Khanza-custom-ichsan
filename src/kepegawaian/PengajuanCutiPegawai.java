@@ -407,7 +407,7 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "30-07-2025" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-08-2025" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -421,7 +421,7 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "30-07-2025" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-08-2025" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -506,7 +506,7 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
         jLabel8.setBounds(220, 10, 110, 23);
 
         Tanggal.setForeground(new java.awt.Color(50, 70, 50));
-        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "30-07-2025" }));
+        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-08-2025" }));
         Tanggal.setDisplayFormat("dd-MM-yyyy");
         Tanggal.setName("Tanggal"); // NOI18N
         Tanggal.setOpaque(false);
@@ -546,7 +546,18 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
         jLabel3.setBounds(0, 10, 86, 23);
 
         NoPengajuan.setHighlighter(null);
-        NoPengajuan.setName("NoPengajuan"); // NOI18N
+        NoPengajuan.setName("NoPengajuan");
+        Tanggal.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                // Setiap kali tanggal berubah, panggil autoNomor()
+                autoNomor();
+            }
+        });
+        NoPengajuan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NoPengajuanActionPerformed(evt);
+            }
+        });
         FormInput.add(NoPengajuan);
         NoPengajuan.setBounds(90, 10, 125, 23);
 
@@ -646,7 +657,7 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
         jLabel14.setBounds(0, 70, 86, 23);
 
         Tgl1.setForeground(new java.awt.Color(50, 70, 50));
-        Tgl1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "30-07-2025" }));
+        Tgl1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-08-2025" }));
         Tgl1.setDisplayFormat("dd-MM-yyyy");
         Tgl1.setName("Tgl1"); // NOI18N
         Tgl1.setOpaque(false);
@@ -670,7 +681,7 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
         jLabel22.setBounds(182, 70, 25, 23);
 
         Tgl2.setForeground(new java.awt.Color(50, 70, 50));
-        Tgl2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "30-07-2025" }));
+        Tgl2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-08-2025" }));
         Tgl2.setDisplayFormat("dd-MM-yyyy");
         Tgl2.setName("Tgl2"); // NOI18N
         Tgl2.setOpaque(false);
@@ -784,6 +795,7 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
 }//GEN-LAST:event_BtnSimpanKeyPressed
 
     private void BtnBatalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnBatalActionPerformed
+        autoNomor(); //tambahan ichsan
         ChkInput.setSelected(true);
         isForm(); 
         emptTeks();
@@ -1040,6 +1052,10 @@ private void NmPetugasKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
         Sequel.cariIsi("select to_days('"+Valid.SetTgl(Tgl1.getSelectedItem()+"")+"')-to_days('"+Valid.SetTgl(Tgl2.getSelectedItem()+"")+"')",Jumlah); 
     }//GEN-LAST:event_Tgl1ItemStateChanged
 
+    private void NoPengajuanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NoPengajuanActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_NoPengajuanActionPerformed
+
     /**
     * @param args the command line arguments
     */
@@ -1110,7 +1126,7 @@ private void NmPetugasKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
     private widget.Table tbObat;
     // End of variables declaration//GEN-END:variables
 
-    private void tampil() {
+    private void tampil() {        
         Valid.tabelKosong(tabMode);
     try {
         // Membangun query dasar dengan kolom baru
@@ -1217,10 +1233,49 @@ private void NmPetugasKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
         NmPetugas.setText(petugas.tampil3(KdPetugas.getText()));
     }
     
+    /*
     private void autoNomor() {
         Valid.autoNomer3("select ifnull(MAX(CONVERT(RIGHT(pengajuan_cuti.no_pengajuan,3),signed)),0) from pengajuan_cuti where pengajuan_cuti.tanggal='"+Valid.SetTgl(Tanggal.getSelectedItem()+"")+"' ",
                 "PC"+Tanggal.getSelectedItem().toString().substring(6,10)+Tanggal.getSelectedItem().toString().substring(3,5)+Tanggal.getSelectedItem().toString().substring(0,2),3,NoPengajuan); 
     }
+    */
+    private void autoNomor() {  //tambahan by Ichsan
+    try {
+        // Mengambil tanggal dari komponen dan memformatnya ke YYYY-MM-DD
+        String tgl = Valid.SetTgl(Tanggal.getSelectedItem() + "");
+        // Membuat prefix nomor pengajuan berdasarkan tanggal, contoh: PC20230810
+        String prefix = "PC" + tgl.substring(0, 4) + tgl.substring(5, 7) + tgl.substring(8, 10);
+        
+        // Query untuk mencari nomor urut terakhir pada tanggal yang dipilih
+        ps = koneksi.prepareStatement(
+            "SELECT IFNULL(MAX(CONVERT(RIGHT(no_pengajuan, 3), SIGNED)), 0) " +
+            "FROM pengajuan_cuti WHERE tanggal = ?");
+        
+        try {
+            ps.setString(1, tgl);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                // Ambil nomor terakhir, tambahkan 1 untuk nomor baru
+                int nomorUrutBaru = rs.getInt(1) + 1;
+                // Format nomor baru menjadi 3 digit dengan angka nol di depan (contoh: 001, 002, 010)
+                String nomorUrutString = String.format("%03d", nomorUrutBaru);
+                // Gabungkan prefix dengan nomor baru dan tampilkan di textbox
+                NoPengajuan.setText(prefix + nomorUrutString);
+            }
+        } catch (Exception e) {
+            System.out.println("Notif (autoNomor) : " + e);
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
+        }
+    } catch (Exception e) {
+        System.out.println("Notifikasi (autoNomor) : " + e);
+    }
+}
     
     
 }
