@@ -750,6 +750,15 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
         }else{
             // Bagian penyimpanan diganti dengan PreparedStatement  -- ichsan
         try {
+            
+            // Panggil metode untuk membuat nomor baru SEKARANG, tepat sebelum menyimpan
+            String noPengajuanOtomatis = generateNoPengajuan();
+            
+            if (noPengajuanOtomatis.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Gagal membuat nomor pengajuan, silakan coba lagi.");
+                return; // Hentikan proses jika nomor gagal dibuat
+            }
+            
             koneksi.setAutoCommit(false);
             // Query INSERT kini menyebutkan nama kolom secara eksplisit
             ps = koneksi.prepareStatement(
@@ -757,7 +766,8 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
                 "VALUES (?,?,?,?,?,?,?,?,?,?,?)"
             );
             try {
-                ps.setString(1, NoPengajuan.getText());
+                //ps.setString(1, NoPengajuan.getText());
+                ps.setString(1, noPengajuanOtomatis);
                 ps.setString(2, Valid.SetTgl(Tanggal.getSelectedItem()+""));
                 ps.setString(3, Valid.SetTgl(Tgl1.getSelectedItem()+""));
                 ps.setString(4, Valid.SetTgl(Tgl2.getSelectedItem()+""));
@@ -1275,6 +1285,40 @@ private void NmPetugasKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
     } catch (Exception e) {
         System.out.println("Notifikasi (autoNomor) : " + e);
     }
+}
+    
+    private String generateNoPengajuan() {
+    String noPengajuanBaru = "";
+    try {
+        // Mengambil tanggal dari komponen dan memformatnya ke YYYY-MM-DD
+        String tgl = Valid.SetTgl(Tanggal.getSelectedItem() + "");
+        // Membuat prefix nomor pengajuan berdasarkan tanggal, contoh: PC20250825
+        String prefix = "PC" + tgl.substring(0, 4) + tgl.substring(5, 7) + tgl.substring(8, 10);
+        
+        // Query untuk mencari nomor urut terakhir BERDASARKAN PREFIX, bukan tanggal
+        ps = koneksi.prepareStatement(
+            "SELECT IFNULL(MAX(CONVERT(RIGHT(no_pengajuan, 3), SIGNED)), 0) " +
+            "FROM pengajuan_cuti WHERE no_pengajuan LIKE ?");
+        
+        try {
+            // Parameter LIKE menggunakan prefix, contoh: 'PC20250825%'
+            ps.setString(1, prefix + "%");
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                int nomorUrutBaru = rs.getInt(1) + 1;
+                String nomorUrutString = String.format("%03d", nomorUrutBaru);
+                noPengajuanBaru = prefix + nomorUrutString;
+            }
+        } catch (Exception e) {
+            System.out.println("Notif (generateNoPengajuan) : " + e);
+        } finally {
+            if (rs != null) rs.close();
+            if (ps != null) ps.close();
+        }
+    } catch (Exception e) {
+        System.out.println("Notifikasi (generateNoPengajuan) : " + e);
+    }
+    return noPengajuanBaru;
 }
     
     
