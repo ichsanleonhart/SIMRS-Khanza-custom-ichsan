@@ -945,7 +945,7 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
                     JOptionPane.showMessageDialog(null, "Harus disetujui oleh atasan terlebih dahulu sebelum diproses HRD.");
                 } else {
                     if(Sequel.mengedittf("pengajuan_cuti", "no_pengajuan=?",
-                            "status_persetujui_HRD=?, waktu_disetujui_HRD=NOW()", 2, new String[]{
+                            "status_persetujuan_HRD=?, waktu_disetujui_HRD=NOW()", 2, new String[]{
                                 Status.getSelectedItem().toString(),
                                 noPengajuan
                             })==true){
