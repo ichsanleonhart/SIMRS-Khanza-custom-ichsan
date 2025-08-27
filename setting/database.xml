@@ -228,9 +228,9 @@
 	
     <!--WA GATEWAY YANG NARO WA_OUTBOX DI DATABASE UTAMA-->
 	<entry key="HOSTWA">XnZVcbnUcp77wV9jmpGn7Q==</entry>  <!--ip address tempat aplikasi wa_gateway maskofa (windows), harus di-enkript AES-->
-	<entry key="PORTWEBWA">ZhB7fM96Hq28mN8/XoXjfA==</entry> <!--Port ke aplkasi web wa_gateway (upload.php), biasanya port 80, harus di-enkript AES-->
-	<entry key="PORTWA">/prN8BUwM8LSZSYtHNIDBQ==</entry> <!--Port ke aplkasi wa_gateway, cek di app nya dapet port berapa. Biasanya port 8100, harus di-enkript AES-->	
 	<entry key="IPFOLDERFILEWA">XnZVcbnUcp77wV9jmpGn7Q==</entry> <!--IP address tempat wa_gateway disimpan, harus di-enkript AES-->
+	<entry key="PORTWEBWA">ZhB7fM96Hq28mN8/XoXjfA==</entry> <!--Port ke aplkasi web wa_gateway (upload.php), biasanya port 80, harus di-enkript AES-->
+	<!--<entry key="PORTWA">/prN8BUwM8LSZSYtHNIDBQ==</entry> <!--Port ke aplkasi wa_gateway, cek di app nya dapet port berapa. Biasanya port 8100, harus di-enkript AES-->	
 	<entry key="FOLDERFILEWA">wa_gateway</entry> <!--nama folder Lokasi tempat mengirim pdf untuk dikirim by WA, lokasi tempat wa gateway ditaro di localhost-->
     <entry key="DATABASEWA">B/VFXMnPOQpwL6aPTlmEcQ==</entry> <!--nama database untuk wa_gateway, kalo ditaro di server utama, copas aja dari value di atas (DATABASE). Harus di-enkript AES-->			
         
