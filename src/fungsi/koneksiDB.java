@@ -1769,10 +1769,20 @@ public class koneksiDB {
     }		   
 		
 ////////////////////////////////////////////// setting whatsapp		
-    public static String HOSTWA() {
+    public static String HOSTWA() {  //akan diarahkan menjadi IPFOLDERFILEWA karena terlalu rancu dengan settingan database whatsapp terpisah
         try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
             prop.loadFromXML(fis);
             var=EnkripsiAES.decrypt(prop.getProperty("HOSTWA"));
+        }catch(Exception e){
+            var=""; 
+        }
+        return var;
+    }
+    
+    public static String IPFOLDERFILEWA() {
+        try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
+            prop.loadFromXML(fis);
+            var=EnkripsiAES.decrypt(prop.getProperty("IPFOLDERFILEWA"));
         }catch(Exception e){
             var=""; 
         }

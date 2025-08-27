@@ -735,29 +735,35 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void BtnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSimpanActionPerformed
-        if(NoPengajuan.getText().trim().equals("")){
-            Valid.textKosong(NoPengajuan,"No.Pengajuan");
-        }else if(NmPetugas.getText().trim().equals("")){
-            Valid.textKosong(KdPetugas,"Yang Mengajukan");
-        }else if(Jumlah.getText().trim().equals("")||Jumlah.getText().trim().equals("0")){
-            Valid.textKosong(Jumlah,"Jml Cuti");
-        }else if(Alamat.getText().trim().equals("")){
-            Valid.textKosong(Alamat,"Alamat Tujuan");
-        }else if(Kepentingan.getText().trim().equals("")){
-            Valid.textKosong(Kepentingan,"Kepentingan Cuti");
-        }else if(NmPetugasPJ.getText().trim().equals("")){
-            Valid.textKosong(KdPetugasPJ,"P.J. terkait pengajuan");
-        }else{
-            // Bagian penyimpanan diganti dengan PreparedStatement  -- ichsan
+        // Validasi input tetap sama
+    if(NmPetugas.getText().trim().equals("")){
+        Valid.textKosong(KdPetugas,"Yang Mengajukan");
+    }else if(Jumlah.getText().trim().equals("")||Jumlah.getText().trim().equals("0")){
+        Valid.textKosong(Jumlah,"Jml Cuti");
+    }else if(Alamat.getText().trim().equals("")){
+        Valid.textKosong(Alamat,"Alamat Tujuan");
+    }else if(Kepentingan.getText().trim().equals("")){
+        Valid.textKosong(Kepentingan,"Kepentingan Cuti");
+    }else if(NmPetugasPJ.getText().trim().equals("")){
+        Valid.textKosong(KdPetugasPJ,"P.J. terkait pengajuan");
+    }else{
         try {
+            // Panggil metode untuk membuat nomor baru SEKARANG, tepat sebelum menyimpan
+            String noPengajuanOtomatis = generateNoPengajuan();
+            
+            if (noPengajuanOtomatis.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Gagal membuat nomor pengajuan, silakan coba lagi.");
+                return; // Hentikan proses jika nomor gagal dibuat
+            }
+
             koneksi.setAutoCommit(false);
-            // Query INSERT kini menyebutkan nama kolom secara eksplisit
             ps = koneksi.prepareStatement(
                 "INSERT INTO pengajuan_cuti (no_pengajuan, tanggal, tanggal_awal, tanggal_akhir, nik, urgensi, alamat, jumlah, kepentingan, nik_pj, status) " +
                 "VALUES (?,?,?,?,?,?,?,?,?,?,?)"
             );
             try {
-                ps.setString(1, NoPengajuan.getText());
+                // Gunakan nomor yang baru dibuat dari generateNoPengajuan(), BUKAN dari NoPengajuan.getText()
+                ps.setString(1, noPengajuanOtomatis);
                 ps.setString(2, Valid.SetTgl(Tanggal.getSelectedItem()+""));
                 ps.setString(3, Valid.SetTgl(Tgl1.getSelectedItem()+""));
                 ps.setString(4, Valid.SetTgl(Tgl2.getSelectedItem()+""));
@@ -767,10 +773,12 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
                 ps.setString(8, Jumlah.getText());
                 ps.setString(9, Kepentingan.getText());
                 ps.setString(10, KdPetugasPJ.getText());
-                ps.setString(11, "Proses Pengajuan"); // Status awal saat pegawai mengajukan
+                ps.setString(11, "Proses Pengajuan");
                 ps.executeUpdate();
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
+                // Rollback jika terjadi error saat eksekusi
+                koneksi.rollback();
             } finally{
                 if(ps != null){
                     ps.close();
@@ -782,8 +790,13 @@ public final class PengajuanCutiPegawai extends javax.swing.JDialog {
             emptTeks();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat menyimpan data: " + e.getMessage());
+            try {
+                koneksi.rollback();
+            } catch (Exception ex) {
+                System.out.println("Rollback Gagal: " + ex);
+            }
         }
-        }
+    }
 }//GEN-LAST:event_BtnSimpanActionPerformed
 
     private void BtnSimpanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnSimpanKeyPressed
@@ -1275,6 +1288,40 @@ private void NmPetugasKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
     } catch (Exception e) {
         System.out.println("Notifikasi (autoNomor) : " + e);
     }
+}
+    
+    private String generateNoPengajuan() {
+    String noPengajuanBaru = "";
+    try {
+        // Mengambil tanggal dari komponen dan memformatnya ke YYYY-MM-DD
+        String tgl = Valid.SetTgl(Tanggal.getSelectedItem() + "");
+        // Membuat prefix nomor pengajuan berdasarkan tanggal, contoh: PC20250825
+        String prefix = "PC" + tgl.substring(0, 4) + tgl.substring(5, 7) + tgl.substring(8, 10);
+        
+        // Query untuk mencari nomor urut terakhir BERDASARKAN PREFIX, bukan tanggal
+        ps = koneksi.prepareStatement(
+            "SELECT IFNULL(MAX(CONVERT(RIGHT(no_pengajuan, 3), SIGNED)), 0) " +
+            "FROM pengajuan_cuti WHERE no_pengajuan LIKE ?");
+        
+        try {
+            // Parameter LIKE menggunakan prefix, contoh: 'PC20250825%'
+            ps.setString(1, prefix + "%");
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                int nomorUrutBaru = rs.getInt(1) + 1;
+                String nomorUrutString = String.format("%03d", nomorUrutBaru);
+                noPengajuanBaru = prefix + nomorUrutString;
+            }
+        } catch (Exception e) {
+            System.out.println("Notif (generateNoPengajuan) : " + e);
+        } finally {
+            if (rs != null) rs.close();
+            if (ps != null) ps.close();
+        }
+    } catch (Exception e) {
+        System.out.println("Notifikasi (generateNoPengajuan) : " + e);
+    }
+    return noPengajuanBaru;
 }
     
     

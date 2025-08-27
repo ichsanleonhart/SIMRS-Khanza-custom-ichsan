@@ -1948,10 +1948,10 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
         BtnPrint.setEnabled(akses.getpemesanan_obat());
         if(akses.getkode().equals("Admin Utama")){
             ppHapus.setEnabled(true);
-            ppUbah.setEnabled(true);
+            //ppUbah.setEnabled(true);
         }else{
             ppHapus.setEnabled(false);
-            ppUbah.setEnabled(false);
+            ppUbah.setEnabled(true);  //dibuat agar user bisa  mengakses menu ubah
         }        
         ppBayar.setEnabled(akses.getbayar_pemesanan_obat());
     }
