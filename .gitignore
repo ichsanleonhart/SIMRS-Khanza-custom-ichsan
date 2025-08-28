@@ -16,6 +16,7 @@ api-bridgingradiologi/
 /ServiceAbsensi/build/
 /ServiceAbsensi/nbproject/private/
 /ServiceAbsensi/dist/
+<<<<<<< Updated upstream
 /KhanzaHMSServiceSatuSehat/dist/
 /KhanzaHMSServiceSatuSehat - Copy/build/
 /KhanzaHMSServiceSatuSehat - Copy/dist/
@@ -23,3 +24,6 @@ api-bridgingradiologi/
 /KhanzaHMSServiceSatuSehat_manual/build/
 /KhanzaHMSServiceSatuSehat_manual/dist/
 /KhanzaHMSServiceSatuSehat_manual/nbproject/private/
+=======
+nbproject/private/private.xml
+>>>>>>> Stashed changes

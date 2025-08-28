@@ -2451,7 +2451,7 @@ private void HapusPDF() {
         
          // Step 3: Create HTTP request using DefaultHttpClient (same as UploadPDF)
         HttpClient httpClient = new DefaultHttpClient();
-        String uploadURL = "http://" + koneksiDB.HOSTWA() + ":" +
+        String uploadURL = "http://" + koneksiDB.IPFOLDERFILEWA() + ":" +
                            koneksiDB.PORTWEBWA() + "/" +
                            koneksiDB.FOLDERFILEWA() + "/upload.php?doc=" + docpath;
         HttpPost postRequest = new HttpPost(uploadURL);

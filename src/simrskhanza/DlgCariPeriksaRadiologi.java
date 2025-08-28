@@ -3223,7 +3223,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
         
          // Step 3: Create HTTP request using DefaultHttpClient (same as UploadPDF)
         HttpClient httpClient = new DefaultHttpClient();
-        String uploadURL = "http://" + koneksiDB.HOSTWA() + ":" +
+        String uploadURL = "http://" + koneksiDB.IPFOLDERFILEWA() + ":" +
                            koneksiDB.PORTWEBWA() + "/" +
                            koneksiDB.FOLDERFILEWA() + "/upload.php?doc=" + docpath;
         HttpPost postRequest = new HttpPost(uploadURL);

@@ -13,6 +13,7 @@ package kepegawaian;
 import fungsi.WarnaTable;
 import fungsi.batasInput;
 import fungsi.koneksiDB;
+import fungsi.koneksiDBWa_mgm;
 import fungsi.sekuel;
 import fungsi.validasi;
 import fungsi.akses;
@@ -21,6 +22,8 @@ import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
+import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,6 +35,13 @@ import javax.swing.JTable;
 import javax.swing.event.DocumentEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 
 /**
@@ -41,12 +51,14 @@ import javax.swing.table.TableColumn;
 public final class PengajuanCutiAdmin extends javax.swing.JDialog {
     private final DefaultTableModel tabMode;
     private Connection koneksi=koneksiDB.condb();
+    private  Connection koneksiwa;
     private sekuel Sequel=new sekuel();
     private validasi Valid=new validasi();
     private PreparedStatement ps;
     private ResultSet rs;
-    private int i=0,pilihan=0;
+    private int i=0,pilihan=0,reply=0;  //tambahan [reply=0] by ichsan untuk layar tampilan yes / no;
     private double total=0;
+    private String FileName ="", lokasifilepdf="", SQLException=""; //tambahan ichsan FileName ="",kodeberkas="", lokasifile="" SQLException=""
     private boolean isHRD = false; // <-- TAMBAHAN UNTUK MENGECEK USER LOGIN SEBAGAI HRD ATAU BUKAN
     /** Creates new form DlgRujuk
      * @param parent
@@ -203,6 +215,8 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPopupMenu1 = new javax.swing.JPopupMenu();
+        MnCetakCuti = new javax.swing.JMenuItem();
         internalFrame1 = new widget.InternalFrame();
         Scroll = new widget.ScrollPane();
         tbObat = new widget.Table();
@@ -263,6 +277,17 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
         Status = new widget.ComboBox();
         ChkInput = new widget.CekBox();
 
+        jPopupMenu1.setName("jPopupMenu1"); // NOI18N
+
+        MnCetakCuti.setText("Cetak Approval Surat Cuti");
+        MnCetakCuti.setName("MnCetakCuti"); // NOI18N
+        MnCetakCuti.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                MnCetakCutiActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(MnCetakCuti);
+
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setUndecorated(true);
         setResizable(false);
@@ -283,6 +308,7 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
 
         tbObat.setAutoCreateRowSorter(true);
         tbObat.setToolTipText("Silahkan klik untuk memilih data yang mau diedit ataupun dihapus");
+        tbObat.setComponentPopupMenu(jPopupMenu1);
         tbObat.setName("tbObat"); // NOI18N
         tbObat.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -438,7 +464,7 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "30-07-2025" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "27-08-2025" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -452,7 +478,7 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "30-07-2025" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "27-08-2025" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -537,7 +563,7 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
         jLabel8.setBounds(226, 10, 99, 23);
 
         Tanggal.setForeground(new java.awt.Color(50, 70, 50));
-        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "30-07-2025" }));
+        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "27-08-2025" }));
         Tanggal.setDisplayFormat("dd-MM-yyyy");
         Tanggal.setName("Tanggal"); // NOI18N
         Tanggal.setOpaque(false);
@@ -733,13 +759,18 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
         jLabel14.setBounds(0, 100, 88, 23);
 
         Tgl1.setForeground(new java.awt.Color(50, 70, 50));
-        Tgl1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "30-07-2025" }));
+        Tgl1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "27-08-2025" }));
         Tgl1.setDisplayFormat("dd-MM-yyyy");
         Tgl1.setName("Tgl1"); // NOI18N
         Tgl1.setOpaque(false);
         Tgl1.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 Tgl1ItemStateChanged(evt);
+            }
+        });
+        Tgl1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                Tgl1ActionPerformed(evt);
             }
         });
         Tgl1.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -757,7 +788,7 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
         jLabel22.setBounds(184, 100, 25, 23);
 
         Tgl2.setForeground(new java.awt.Color(50, 70, 50));
-        Tgl2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "30-07-2025" }));
+        Tgl2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "27-08-2025" }));
         Tgl2.setDisplayFormat("dd-MM-yyyy");
         Tgl2.setName("Tgl2"); // NOI18N
         Tgl2.setOpaque(false);
@@ -918,6 +949,8 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
                                 Status.getSelectedItem().toString(), // untuk status HRD
                                 noPengajuan                          // untuk klausa WHERE
                             })==true){
+                        // Tawarkan kirim WA setelah approval gabungan
+                        kirimNotifikasiWA();
                         tampil();
                         emptTeks();
                     }
@@ -949,6 +982,9 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
                                 Status.getSelectedItem().toString(),
                                 noPengajuan
                             })==true){
+                        
+                        // Tawarkan kirim WA setelah approval gabungan
+                        kirimNotifikasiWA();
                         tampil();
                         emptTeks();
                     }
@@ -999,7 +1035,7 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
                         "pengajuan_cuti.jumlah,pengajuan_cuti.kepentingan,pengajuan_cuti.nik_pj,peg2.nama as namapj,pengajuan_cuti.status "+
                         "from pengajuan_cuti inner join pegawai as peg1 on pengajuan_cuti.nik=peg1.nik "+
                         "inner join pegawai as peg2 on pengajuan_cuti.nik_pj=peg2.nik where "+
-                        "pengajuan_cuti.tanggal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' order by pengajuan_cuti.tanggal",param);
+                        "pengajuan_cuti.tanggal_awal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' order by pengajuan_cuti.tanggal",param);
             }else{
                 Valid.MyReportqry("rptPengajuanCutiAdmin.jasper","report","::[ Data Pengajuan Cuti ]::",
                        "select pengajuan_cuti.no_pengajuan,pengajuan_cuti.tanggal,pengajuan_cuti.tanggal_awal,pengajuan_cuti.tanggal_akhir,"+
@@ -1007,17 +1043,17 @@ public final class PengajuanCutiAdmin extends javax.swing.JDialog {
                         "pengajuan_cuti.jumlah,pengajuan_cuti.kepentingan,pengajuan_cuti.nik_pj,peg2.nama as namapj,pengajuan_cuti.status "+
                         "from pengajuan_cuti inner join pegawai as peg1 on pengajuan_cuti.nik=peg1.nik "+
                         "inner join pegawai as peg2 on pengajuan_cuti.nik_pj=peg2.nik where "+
-                       "pengajuan_cuti.tanggal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and pengajuan_cuti.no_pengajuan like '%"+TCari.getText().trim()+"%' or "+
-                       "pengajuan_cuti.tanggal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and pengajuan_cuti.nik like '%"+TCari.getText().trim()+"%' or "+
-                       "pengajuan_cuti.tanggal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and peg1.nama like '%"+TCari.getText().trim()+"%' or "+
-                       "pengajuan_cuti.tanggal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and peg1.bidang like '%"+TCari.getText().trim()+"%' or "+
-                       "pengajuan_cuti.tanggal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and peg1.departemen like '%"+TCari.getText().trim()+"%' or "+
-                       "pengajuan_cuti.tanggal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and pengajuan_cuti.urgensi like '%"+TCari.getText().trim()+"%' or "+
-                       "pengajuan_cuti.tanggal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and pengajuan_cuti.alamat like '%"+TCari.getText().trim()+"%' or "+
-                       "pengajuan_cuti.tanggal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and pengajuan_cuti.kepentingan like '%"+TCari.getText().trim()+"%' or "+
-                       "pengajuan_cuti.tanggal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and pengajuan_cuti.nik_pj like '%"+TCari.getText().trim()+"%' or "+
-                       "pengajuan_cuti.tanggal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and peg2.nama like '%"+TCari.getText().trim()+"%' or "+
-                       "pengajuan_cuti.tanggal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and pengajuan_cuti.status like '%"+TCari.getText().trim()+"%' order by pengajuan_cuti.tanggal",param);
+                       "pengajuan_cuti.tanggal_awal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and pengajuan_cuti.no_pengajuan like '%"+TCari.getText().trim()+"%' or "+
+                       "pengajuan_cuti.tanggal_awal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and pengajuan_cuti.nik like '%"+TCari.getText().trim()+"%' or "+
+                       "pengajuan_cuti.tanggal_awal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and peg1.nama like '%"+TCari.getText().trim()+"%' or "+
+                       "pengajuan_cuti.tanggal_awal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and peg1.bidang like '%"+TCari.getText().trim()+"%' or "+
+                       "pengajuan_cuti.tanggal_awal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and peg1.departemen like '%"+TCari.getText().trim()+"%' or "+
+                       "pengajuan_cuti.tanggal_awal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and pengajuan_cuti.urgensi like '%"+TCari.getText().trim()+"%' or "+
+                       "pengajuan_cuti.tanggal_awal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and pengajuan_cuti.alamat like '%"+TCari.getText().trim()+"%' or "+
+                       "pengajuan_cuti.tanggal_awal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and pengajuan_cuti.kepentingan like '%"+TCari.getText().trim()+"%' or "+
+                       "pengajuan_cuti.tanggal_awal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and pengajuan_cuti.nik_pj like '%"+TCari.getText().trim()+"%' or "+
+                       "pengajuan_cuti.tanggal_awal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and peg2.nama like '%"+TCari.getText().trim()+"%' or "+
+                       "pengajuan_cuti.tanggal_awal between '"+Valid.SetTgl(DTPCari1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(DTPCari2.getSelectedItem()+"")+"' and pengajuan_cuti.status like '%"+TCari.getText().trim()+"%' order by pengajuan_cuti.tanggal",param);
            }
                 
         }
@@ -1167,6 +1203,53 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
         Sequel.cariIsi("select to_days('"+Valid.SetTgl(Tgl1.getSelectedItem()+"")+"')-to_days('"+Valid.SetTgl(Tgl2.getSelectedItem()+"")+"')",Jumlah); 
     }//GEN-LAST:event_Tgl2ItemStateChanged
 
+    private void MnCetakCutiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MnCetakCutiActionPerformed
+        if(NoPengajuan.getText().trim().equals("")){
+            JOptionPane.showMessageDialog(null,"Maaf, Silahkan anda pilih dulu data cuti yang mana");
+            }else{
+            // ##### PENGECEKAN BARU DIMULAI DI SINI #####
+            // Ambil nilai waktu persetujuan HRD dari database
+            String waktuDisetujuiHRD = Sequel.cariIsi("select waktu_disetujui_HRD from pengajuan_cuti where no_pengajuan=?", NoPengajuan.getText());
+
+        // Cek apakah nilainya null atau kosong
+        if (waktuDisetujuiHRD == null || waktuDisetujuiHRD.trim().isEmpty()) {
+            // Jika kosong, tampilkan pesan error dan hentikan proses
+            JOptionPane.showMessageDialog(null, "Surat tidak bisa dicetak karena belum dilakukan approval oleh HRD");
+            return; // Hentikan eksekusi metode
+        }
+        // ##### AKHIR DARI PENGECEKAN #####
+
+        // Jika pengecekan lolos, lanjutkan proses cetak seperti biasa
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            Map<String, Object> param = new HashMap<>();
+            param.put("NoPengajuan",NoPengajuan.getText());  //ambil nomor surat cuti
+            param.put("nippetugas",KdPetugas.getText());  //ambil NIP pengaju cuti
+            param.put("namapetugas",NmPetugas.getText());  //ambil nama pengaju cuti
+            param.put("namaatasan",NmPetugasPJ.getText());  //ambil nama Atasan cuti
+            param.put("TanggalAwal",Sequel.cariIsi("select tanggal_awal from pengajuan_cuti where no_pengajuan=? LIMIT 1", NoPengajuan.getText())); //ambil tgl awal cuti
+            param.put("TanggalAkhir",Sequel.cariIsi("select tanggal_akhir from pengajuan_cuti where no_pengajuan=? LIMIT 1", NoPengajuan.getText())); //ambil tgl akhir cuti
+            param.put("lamacuti",Jumlah.getText());  //jumlah cuti berapa hari
+            param.put("kepentingan",Kepentingan.getText());  //Keterangan / alasan cuti
+            param.put("status",Sequel.cariIsi("select status_persetujuan_HRD from pengajuan_cuti where no_pengajuan=? LIMIT 1", NoPengajuan.getText())); //status approval hrd
+            param.put("TanggalApproval",Sequel.cariIsi("select DATE_FORMAT(pengajuan_cuti.waktu_disetujui_HRD,'%d-%m-%Y') from pengajuan_cuti where no_pengajuan=? LIMIT 1", NoPengajuan.getText())); //ambil tgl approval hRD
+            param.put("namars",akses.getnamars());
+            param.put("alamatrs",akses.getalamatrs());
+            param.put("kotars",akses.getkabupatenrs());
+            param.put("propinsirs",akses.getpropinsirs());
+            param.put("kontakrs",akses.getkontakrs());
+            param.put("emailrs",akses.getemailrs());
+            param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh Unit HRD \n "+Sequel.cariIsi("select DATE_FORMAT(pengajuan_cuti.waktu_disetujui_HRD,'%d-%m-%Y') from pengajuan_cuti where pengajuan_cuti.no_pengajuan=?",NoPengajuan.getText()));
+            param.put("logo",Sequel.cariGambar("select setting.logo from setting"));
+            Valid.MyReportqry("rptApprovalCuti.jasper","report","::[ Approval Cuti ]::",
+                          "select * from pengajuan_cuti where pengajuan_cuti.no_pengajuan='"+NoPengajuan.getText()+"' ",param);
+            this.setCursor(Cursor.getDefaultCursor());
+   }
+    }//GEN-LAST:event_MnCetakCutiActionPerformed
+
+    private void Tgl1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Tgl1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_Tgl1ActionPerformed
+
     /**
     * @param args the command line arguments
     */
@@ -1205,6 +1288,7 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
     private widget.TextBox Kepentingan;
     private widget.Label LCount;
     private widget.Label LCount1;
+    private javax.swing.JMenuItem MnCetakCuti;
     private widget.TextBox NmPetugas;
     private widget.TextBox NmPetugasPJ;
     private widget.TextBox NoPengajuan;
@@ -1239,6 +1323,7 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
     private widget.Label jLabel8;
     private widget.Label jLabel9;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPopupMenu jPopupMenu1;
     private widget.panelisi panelGlass8;
     private widget.panelisi panelGlass9;
     private widget.ScrollPane scrollPane1;
@@ -1504,4 +1589,170 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
     }
     
     
+    private void CreatePDFWA(String FileName) {
+    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            Map<String, Object> param = new HashMap<>();
+            param.put("NoPengajuan",NoPengajuan.getText());  //ambil nomor surat cuti
+            param.put("nippetugas",KdPetugas.getText());  //ambil NIP pengaju cuti
+            param.put("namapetugas",NmPetugas.getText());  //ambil nama pengaju cuti
+            param.put("namaatasan",NmPetugasPJ.getText());  //ambil nama Atasan cuti
+            param.put("TanggalAwal",Sequel.cariIsi("select tanggal_awal from pengajuan_cuti where no_pengajuan=? LIMIT 1", NoPengajuan.getText())); //ambil tgl awal cuti
+            param.put("TanggalAkhir",Sequel.cariIsi("select tanggal_akhir from pengajuan_cuti where no_pengajuan=? LIMIT 1", NoPengajuan.getText())); //ambil tgl akhir cuti
+            param.put("lamacuti",Jumlah.getText());  //jumlah cuti berapa hari
+            param.put("kepentingan",Kepentingan.getText());  //Keterangan / alasan cuti
+            param.put("status",Sequel.cariIsi("select status_persetujuan_HRD from pengajuan_cuti where no_pengajuan=? LIMIT 1", NoPengajuan.getText())); //status approval hrd
+            param.put("TanggalApproval",Sequel.cariIsi("select DATE_FORMAT(pengajuan_cuti.waktu_disetujui_HRD,'%d-%m-%Y') from pengajuan_cuti where no_pengajuan=? LIMIT 1", NoPengajuan.getText())); //ambil tgl approval hRD
+            param.put("namars",akses.getnamars());
+            param.put("alamatrs",akses.getalamatrs());
+            param.put("kotars",akses.getkabupatenrs());
+            param.put("propinsirs",akses.getpropinsirs());
+            param.put("kontakrs",akses.getkontakrs());
+            param.put("emailrs",akses.getemailrs());
+            param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh Unit HRD \n "+Sequel.cariIsi("select DATE_FORMAT(pengajuan_cuti.waktu_disetujui_HRD,'%d-%m-%Y') from pengajuan_cuti where pengajuan_cuti.no_pengajuan=?",NoPengajuan.getText()));
+            param.put("logo",Sequel.cariGambar("select setting.logo from setting"));
+            Valid.MyReportPDFqryUpload("rptApprovalCuti.jasper","report","::[ Approval Cuti ]::",
+                          "select * from pengajuan_cuti where pengajuan_cuti.no_pengajuan='"+NoPengajuan.getText()+"' ",FileName, param);
+    
+        }
+    
+    private void UploadPDF2(String FileName, String docpath) {
+     try {
+        //koneksiwa = koneksiDBWa_mgm.condb();  //buat koneksi baru untuk persiapan mengirim values ke dalam wa_outbox di database lain
+        // Ambil no_pengajuan dari baris tabel yang sedang dipilih
+        String noPengajuan = tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString();
+        
+        // Variabel untuk menampung data pegawai
+        String nmPegawai = "";
+        String noHpPegawai = "";
+        String jk = "";
+
+        // Step 1: Perbaiki query untuk mengambil data pegawai dengan lebih andal
+        try (PreparedStatement ps1 = koneksi.prepareStatement(
+            "SELECT p.nama, p.jk, COALESCE(pet.no_telp, dok.no_telp) as no_hp " +
+            "FROM pengajuan_cuti pc " +
+            "JOIN pegawai p ON pc.nik = p.nik " +
+            "LEFT JOIN petugas pet ON p.nik = pet.nip " +
+            "LEFT JOIN dokter dok ON p.nik = dok.kd_dokter " +
+            "WHERE pc.no_pengajuan = ?")) {
+            
+            ps1.setString(1, noPengajuan);
+            try (ResultSet rs1 = ps1.executeQuery()) {
+                if (rs1.next()) {
+                    nmPegawai = rs1.getString("nama");
+                    noHpPegawai = rs1.getString("no_hp");
+                    jk = rs1.getString("jk");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error saat mengambil data pegawai: " + e);
+            JOptionPane.showMessageDialog(null, "Gagal mengambil data nomor HP pegawai.", "Kesalahan", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Step 2: Validasi nomor HP
+        if (noHpPegawai == null || noHpPegawai.trim().isEmpty() || noHpPegawai.length() < 9 || !noHpPegawai.trim().matches("\\d+")) {
+            JOptionPane.showMessageDialog(null, "Nomor HP pegawai tidak valid atau tidak ditemukan! (" + (noHpPegawai == null ? "NULL" : noHpPegawai) + ")", "Kesalahan", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Konversi nomor HP ke format internasional
+        if (noHpPegawai.startsWith("0")) {
+            noHpPegawai = "62" + noHpPegawai.substring(1);
+        }
+
+        // Step 3: Upload file (logika ini sudah benar)
+        File file = new File("tmpPDF/" + FileName + ".pdf");
+        if (!file.exists()) {
+            System.out.println("File PDF tidak ditemukan: " + file.getAbsolutePath());
+            JOptionPane.showMessageDialog(null, "File PDF Gagal Dibuat!", "Kesalahan", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        FileInputStream fis = new FileInputStream(file);
+        HttpClient httpClient = new DefaultHttpClient();
+        String uploadURL = "http://" + koneksiDBWa_mgm.IPFOLDERFILEWA1() + ":" + koneksiDBWa_mgm.PORTWEBWA1() + "/" + koneksiDBWa_mgm.FOLDERFILEWA1() + "/upload.php?doc=" + docpath;
+        HttpPost postRequest = new HttpPost(uploadURL);
+        
+        MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+        reqEntity.addPart("file", new InputStreamBody(fis, "application/pdf", FileName + ".pdf"));
+        postRequest.setEntity(reqEntity);
+        
+        HttpResponse response = httpClient.execute(postRequest);
+        fis.close();
+
+        if (response.getStatusLine().getStatusCode() != 200) {
+            System.out.println("File upload gagal. Response: " + response.getStatusLine());
+            JOptionPane.showMessageDialog(null, "File Gagal di-Upload!", "Kesalahan", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // ##### PERUBAHAN DIMULAI DI SINI #####
+        // Step 4: Kirim pesan ke wa_outbox di database managerial
+        try {
+            // Inisialisasi koneksi ke database WA managerial
+            koneksiwa = koneksiDBWa_mgm.condb();
+            
+            int currentHour = java.time.LocalTime.now().getHour();
+            String greeting = (currentHour >= 4 && currentHour <= 10) ? "Selamat Pagi" : (currentHour > 10 && currentHour <= 15) ? "Selamat Siang" : (currentHour > 15 && currentHour <= 18) ? "Selamat Sore" : "Selamat Malam";
+            
+            String sapaan = "Pria".equalsIgnoreCase(jk) ? "Bpk " : "Wanita".equalsIgnoreCase(jk) ? "Ibu " : "Bpk/Ibu ";
+            String salampembuka = greeting + ", " + sapaan + nmPegawai + "\n \n";
+            String pesan = salampembuka + "Kami lampirkan surat persetujuan cuti Anda di " + akses.getnamars() + ".\n" +
+                "Silakan unduh file terlampir. \n \n"+
+                "Terima kasih atas perhatiannya. \nSalam Sehat. \n \n" +
+                "*HRD " + akses.getnamars() + "*";      
+            
+            String waktukirim = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            
+            // Menggunakan PreparedStatement dengan koneksiwa
+            try (PreparedStatement psWa = koneksiwa.prepareStatement(
+                "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, TYPE, FILE) " +
+                "VALUES (?, ?, ?, ?, 'ANTRIAN', 'KHANZA', 'NODEJS', 'FILE', ?)")) {
+                
+                psWa.setLong(1, 0);
+                psWa.setString(2, noHpPegawai + "@c.us");
+                psWa.setString(3, pesan);
+                psWa.setString(4, waktukirim);
+                psWa.setString(5, FileName + ".pdf");
+                psWa.executeUpdate();
+            }
+        } catch (Exception e) {
+            System.out.println("Gagal menyimpan ke wa_outbox managerial: " + e);
+            JOptionPane.showMessageDialog(null, "Gagal mengirim notifikasi WA ke database managerial: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
+        }
+        // ##### AKHIR DARI PERUBAHAN #####
+        
+    } catch (Exception e) {
+        System.out.println("Upload error: " + e);
+        JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat proses kirim WA: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
+    }
+    }
+    
+    private void HapusPDF() {
+        File file = new File("tmpPDF");
+        String[] myFiles;
+        if (file.isDirectory()) {
+            myFiles = file.list();
+            for (int i = 0; i < myFiles.length; i++) {
+                File myFile = new File(file, myFiles[i]);
+                myFile.delete();
+            }
+        }
+    }
+    
+    private void kirimNotifikasiWA() {
+        reply = JOptionPane.showConfirmDialog(rootPane,"Mau memberitahukan ke pegawai via WA?","Konfirmasi",JOptionPane.YES_NO_OPTION);
+        if (reply == JOptionPane.YES_OPTION) {
+            try {
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                FileName = "Surat_Approval_Cuti_" + tbObat.getValueAt(tbObat.getSelectedRow(), 0).toString();
+                CreatePDFWA(FileName);
+                UploadPDF2(FileName, "media/");
+                HapusPDF();
+                JOptionPane.showMessageDialog(null, "OK, notifikasi WA telah dimasukkan ke dalam antrian kirim.");
+            } finally {
+                this.setCursor(Cursor.getDefaultCursor());
+            }
+        }
+    }
 }
