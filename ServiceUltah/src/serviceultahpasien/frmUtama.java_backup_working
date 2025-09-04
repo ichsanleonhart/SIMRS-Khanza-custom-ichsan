@@ -9,6 +9,7 @@ package serviceultahpasien;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fungsi.koneksiDB;
+import fungsi.koneksiDBWa;
 import fungsi.koneksiDBWa_marketing;
 import fungsi.sekuel;
 //import fungsi.akses;
@@ -143,15 +144,16 @@ public class frmUtama extends javax.swing.JFrame {
 
     private void tombolstartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tombolstartActionPerformed
         // Method ini akan dipanggil ketika tombol 'Start Kirim Data!' diklik
+        TeksArea.setText("Memulai proses pengiriman manual...\n");
         tombolstart.setEnabled(false); // Menonaktifkan tombol selama proses berjalan
 
         // Menjalankan proses di thread terpisah agar GUI tidak 'freeze'
         new Thread(() -> {
             try {
-                // Memanggil method utama untuk pengiriman dengan tanggal dari UI
-                kirimUcapanUlangTahun(Tanggal1.getText(), Tanggal2.getText());
+                // Memanggil method utama untuk pengiriman
+                kirimUcapanUlangTahun();
             } finally {
-                // Mengaktifkan kembali tombol setelah proses selesai
+                // Mengaktifkan kembali tombol setelah proses selesai, baik berhasil maupun gagal
                 SwingUtilities.invokeLater(() -> tombolstart.setEnabled(true));
             }
         }).start();
@@ -255,18 +257,44 @@ public class frmUtama extends javax.swing.JFrame {
     private void jam(){
         ActionListener taskPerformer = new ActionListener(){
             public void actionPerformed(ActionEvent e) {
+                nol_jam = "";
+                nol_menit = "";
+                nol_detik = "";
                 Date now = Calendar.getInstance().getTime();
+                // Mengambil nilaj JAM, MENIT, dan DETIK Sekarang
+                int nilai_jam = now.getHours();
                 int nilai_menit = now.getMinutes();
                 int nilai_detik = now.getSeconds();
+                // Jika nilai JAM lebih kecil dari 10 (hanya 1 digit)
+                if (nilai_jam <= 9) {
+                    nol_jam = "0";
+                }
+                // Jika nilai MENIT lebih kecil dari 10 (hanya 1 digit)
+                if (nilai_menit <= 9) {
+                    nol_menit = "0";
+                }
+                // Jika nilai DETIK lebih kecil dari 10 (hanya 1 digit)
+                if (nilai_detik <= 9) {
+                    nol_detik = "0";
+                }
+                // Membuat String JAM, MENIT, DETIK
+                jam = nol_jam + Integer.toString(nilai_jam);
+                menit = nol_menit + Integer.toString(nilai_menit);
+                detik = nol_detik + Integer.toString(nilai_detik);
+
+                if(jam.equals("01")&&menit.equals("01")&&detik.equals("01")){
+                    TeksArea.setText("");
+                    date = new Date();
+                    Tanggal1.setText(tanggalFormat.format(date));
+                    Tanggal2.setText(tanggalFormat.format(date));
+                }
 
                 // Timer akan memicu pengiriman setiap 5 menit, pada detik ke-1
-                // if(nilai_detik == 1 && (nilai_menit % 5) == 0){  //kode berjalan setiap 5 menit sekali
-                if(nilai_detik == 1 && nilai_menit == 0 && (now.getHours() % 2) == 0){ //kode berjalan setiap 2 jam sekali
-                    String tanggalHariIni = tanggalFormat.format(new Date());
-                    // Memanggil method utama hanya untuk tanggal hari ini
-                    new Thread(() -> {
-                        kirimUcapanUlangTahun(tanggalHariIni, tanggalHariIni);
-                    }).start();
+                if(detik.equals("01")&&((nilai_menit%5)==0)){
+                    System.out.println("Timer berjalan, memulai proses pengiriman ucapan ulang tahun...");
+                    TeksArea.append("Timer berjalan, memulai proses pengiriman ucapan ulang tahun...\n");
+                    // Memanggil method utama untuk pengiriman
+                    kirimUcapanUlangTahun();
                 }
             }
         };
@@ -275,21 +303,15 @@ public class frmUtama extends javax.swing.JFrame {
     }
 
     /**
-     * Method ini berisi logika utama untuk mencari, memvalidasi, dan mengirim ucapan ulang tahun
-     * berdasarkan rentang tanggal yang diberikan.
-     * @param tanggalMulai Tanggal awal pencarian (format yyyy-MM-dd)
-     * @param tanggalAkhir Tanggal akhir pencarian (format yyyy-MM-dd)
+     * Method ini berisi logika utama untuk mencari, memvalidasi, dan mengirim ucapan ulang tahun.
+     * Dapat dipanggil oleh tombol manual atau timer otomatis.
      */
-    private void kirimUcapanUlangTahun(String tanggalMulai, String tanggalAkhir) {
-        // Menampilkan pesan awal di TeksArea dari Event Dispatch Thread (EDT)
-        SwingUtilities.invokeLater(() -> {
-            TeksArea.setText("Memulai proses untuk rentang tanggal: " + tanggalMulai + " s/d " + tanggalAkhir + "\n");
-        });
-
+    private void kirimUcapanUlangTahun() {
         try {
+            //koneksiwa = koneksiDBWa.condb();  //aktifkan ini jika ingin menyambungkan ke settingan db WA1
             koneksiwa = koneksiDBWa_marketing.condb();
             String namafaskes = getnamafaskes();
-            String googleMapUrl = getGoogleMapUrl();
+            String googleMapUrl = getGoogleMapUrl(); // Ambil url googlemap dari kode di atas
 
             // Inisialisasi counter dan list untuk rangkuman
             int totalPasienDitemukan = 0;
@@ -298,29 +320,24 @@ public class frmUtama extends javax.swing.JFrame {
             List<String> listPasienMeninggal = new ArrayList<>();
             List<String> listNomorTidakValid = new ArrayList<>();
             List<String> listNomorKosong = new ArrayList<>();
-            List<String> listUcapanTerlambat = new ArrayList<>(); // ***** DAFTAR BARU UNTUK LAPORAN TERLAMBAT *****
+
 
             Connection connPasien = koneksiDB.condb();
-
-            String sqlQuery = "SELECT p.no_rkm_medis, p.nm_pasien, p.no_tlp, p.jk, p.tgl_lahir, " +
-                              "TIMESTAMPDIFF(YEAR, p.tgl_lahir, ?) AS usia, " +
-                              "pm.no_rkm_medis AS status_mati, cp.catatan " +
-                              "FROM pasien p " +
-                              "LEFT JOIN pasien_mati pm ON p.no_rkm_medis = pm.no_rkm_medis " +
-                              "LEFT JOIN catatan_pasien cp ON p.no_rkm_medis = cp.no_rkm_medis AND LOWER(cp.catatan) LIKE '%meninggal%' " +
-                              "WHERE DATE_FORMAT(p.tgl_lahir, '%m-%d') BETWEEN DATE_FORMAT(?, '%m-%d') AND DATE_FORMAT(?, '%m-%d')";
-
-            ps = connPasien.prepareStatement(sqlQuery);
-            ps.setString(1, tanggalAkhir);
-            ps.setString(2, tanggalMulai);
-            ps.setString(3, tanggalAkhir);
-
+            // Query untuk mengambil semua pasien yang ultah hari ini, validasi dilakukan di Java
+            PreparedStatement ps = connPasien.prepareStatement(
+                "SELECT p.no_rkm_medis, p.nm_pasien, p.no_tlp, p.jk, " +
+                "TIMESTAMPDIFF(YEAR, p.tgl_lahir, CURDATE()) AS usia, " +
+                "pm.no_rkm_medis AS status_mati, cp.catatan " +
+                "FROM pasien p " +
+                "LEFT JOIN pasien_mati pm ON p.no_rkm_medis = pm.no_rkm_medis " +
+                "LEFT JOIN catatan_pasien cp ON p.no_rkm_medis = cp.no_rkm_medis AND LOWER(cp.catatan) LIKE '%meninggal%' " +
+                "WHERE DATE_FORMAT(p.tgl_lahir, '%m-%d') = DATE_FORMAT(CURDATE(), '%m-%d')"
+            );
             ResultSet rs = ps.executeQuery();
 
             LocalDateTime waktuKirimBerikut = LocalDateTime.now();
             Random rand = new Random();
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            Date tanggalProses = tanggalFormat.parse(tanggalAkhir); // Tanggal acuan untuk cek keterlambatan
 
             while(rs.next()){
                 totalPasienDitemukan++;
@@ -329,90 +346,82 @@ public class frmUtama extends javax.swing.JFrame {
                 String status_mati = rs.getString("status_mati");
                 String catatan_meninggal = rs.getString("catatan");
 
-                // Validasi data pasien
+                // ========== START VALIDASI DATA PASIEN ==========
+
+                // 1. Cek jika pasien sudah meninggal
                 if (status_mati != null || (catatan_meninggal != null && catatan_meninggal.toLowerCase().contains("meninggal"))) {
                     listPasienMeninggal.add(nm_pasien_db + " (" + (nohppasien != null ? nohppasien : "No HP tidak ada") + ")");
-                    continue;
+                    continue; // Lanjut ke pasien berikutnya
                 }
+
+                // 2. Cek jika nomor HP kosong atau tidak ada
                 if (nohppasien == null || nohppasien.trim().isEmpty()) {
                     listNomorKosong.add(nm_pasien_db);
-                    continue;
+                    continue; // Lanjut ke pasien berikutnya
                 }
-                nohppasien = nohppasien.replaceAll("\\s+", "").replaceAll("-", "");
+
+                // 3. Cek format nomor HP
+                nohppasien = nohppasien.replaceAll("\\s+", "").replaceAll("-", ""); // Bersihkan spasi dan strip
                 if (!nohppasien.matches("^(\\+62|62|0)8[0-9]{8,13}$")) {
                     listNomorTidakValid.add(nm_pasien_db + " (" + rs.getString("no_tlp") + ")");
-                    continue;
+                    continue; // Lanjut ke pasien berikutnya
                 }
+
+                // Konversi nomor HP ke format internasional 62
                 if (nohppasien.startsWith("0")) {
                     nohppasien = "62" + nohppasien.substring(1);
                 }
 
+                // ========== END VALIDASI ==========
+
                 namapasien = nm_pasien_db;
                 String jk = rs.getString("jk");
 
+                // ========== Greeting berdasarkan waktu ==========
                 int currentHour = waktuKirimBerikut.getHour();
-                String greeting = (currentHour >= 4 && currentHour < 10) ? "Selamat Pagi" :
-                                  (currentHour >= 10 && currentHour < 15) ? "Selamat Siang" :
-                                  (currentHour >= 15 && currentHour < 18) ? "Selamat Sore" : "Selamat Malam";
+                String greeting;
+                if (currentHour >= 4 && currentHour < 10) { greeting = "Selamat Pagi"; }
+                else if (currentHour >= 10 && currentHour < 15) { greeting = "Selamat Siang"; }
+                else if (currentHour >= 15 && currentHour < 18) { greeting = "Selamat Sore"; }
+                else { greeting = "Selamat Malam"; }
 
                 int usia = rs.getInt("usia");
                 String salampembuka;
                 if (usia >= 16) {
-                    salampembuka = greeting + (("L".equalsIgnoreCase(jk)) ? ", Bpk " : (("P".equalsIgnoreCase(jk)) ? ", Ibu " : ", Bpk/Ibu ")) + namapasien;
+                    if ("L".equalsIgnoreCase(jk)) { salampembuka = greeting + ", Bpk " + namapasien; }
+                    else if ("P".equalsIgnoreCase(jk)) { salampembuka = greeting + ", Ibu " + namapasien; }
+                    else { salampembuka = greeting + ", Bpk/Ibu " + namapasien; }
                 } else {
                     salampembuka = greeting + ", " + namapasien;
                 }
 
-                java.sql.Date tglLahirDb = rs.getDate("tgl_lahir");
-                Calendar calLahir = Calendar.getInstance();
-                calLahir.setTime(tglLahirDb);
-
-                Calendar calUltahTahunIni = Calendar.getInstance();
-                calUltahTahunIni.setTime(tanggalProses);
-                calUltahTahunIni.set(Calendar.MONTH, calLahir.get(Calendar.MONTH));
-                calUltahTahunIni.set(Calendar.DAY_OF_MONTH, calLahir.get(Calendar.DAY_OF_MONTH));
-
-                boolean isTerlambat = calUltahTahunIni.getTime().before(tanggalProses);
-                
-                String pesan;
-                if (isTerlambat) {
-                    // Pesan untuk ucapan yang terlambat
-                    pesan = salampembuka + ",\n\nKami mohon maaf atas keterlambatan dalam memberikan ucapan.\n\n" +
-                            "Selamat ulang tahun yang ke-" + rs.getString("usia") + " (terlewat). \n 0xF0 0x9F 0x8E 0x82 0xF0 0x9F 0x8E 0x89 \n\n" + // ***** EMOTICON DIUBAH KE HEX *****
-                            "Semoga panjang umur, sehat selalu, dan senantiasa mendapatkan keberkahan serta kebahagiaan dalam hidup.\n\n" +
-                            "Mohon maaf mengganggu waktu Anda 0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n" +
-                            "Kami berharap pesan ini memberikan semangat positif untuk Anda \n\n" +
-                            "Salam sehat \n \n" + "*" + namafaskes + "*" +
-                            "(www.rskarinamedika.com) \n"+  //rs karina medika
-                            "untuk informasi menarik lainnya cek katalog (dibagian kanan atas) dan jangan lupa save nomor kami \n"+     //rs karina medika
-                            "\n \n Jangan lupa juga ikuti saluran WA kami untuk informasi terupdate di https://whatsapp.com/channel/0029Vb071ghBlHph2TH9de0Q \n"+ //rs karina medika
-                            "(aktifkan juga loncengnya ya sahabat sehat " //rs karina medika
-                            //" \n 0xF0 0x9F 0x8C 0x8F : " + googleMapUrl  //URL google map                   
-                            ;
-                } else {
-                    // Pesan standar (tepat waktu)
-                    pesan = salampembuka + ". Selamat ulang tahun yang ke " + rs.getString("usia") + " \n 0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
-                       "Semoga panjang umur, sehat selalu dan mendapatkan keberkahan serta kebahagiaan luar biasa dalam hidupnya. \n"+
-                       "Mohon maaf mengganggu waktu Anda 0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n" +
-                       "Kami berharap pesan ini memberikan semangat positif untuk Anda \n\n" +
-                       "Salam sehat \n \n" + "*" + namafaskes + "*" +
-                       "(www.rskarinamedika.com) \n"+  //rs karina medika
-                       "untuk informasi menarik lainnya cek katalog (dibagian kanan atas) dan jangan lupa save nomor kami \n"+     //rs karina medika
-                       "\n \n Jangan lupa juga ikuti saluran WA kami untuk informasi terupdate di https://whatsapp.com/channel/0029Vb071ghBlHph2TH9de0Q \n"+ //rs karina medika
-                       "(aktifkan juga loncengnya ya sahabat sehat " //rs karina medika
-                       //" \n 0xF0 0x9F 0x8C 0x8F : " + googleMapUrl  //URL google map                   
-                            ;                }
+                // ***** PERUBAHAN DI SINI *****
+                // Mengembalikan format pesan ke versi original yang menggunakan hex codes untuk emoji
+                String pesan = salampembuka + ". Selamat ulang tahun yang ke " + rs.getString("usia") + " \n 0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
+                   "Semoga panjang umur, sehat selalu dan mendapatkan keberkahan serta kebahagiaan luar biasa dalam hidupnya. \n"+
+                   "Mohon maaf mengganggu waktu Anda 0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n" +
+                   "Kami berharap pesan ini memberikan semangat positif untuk Anda \n\n" +
+                   "Salam sehat \n \n" + "*" + namafaskes + "*" +
+                   "(www.rskarinamedika.com) \n"+  //rs karina medika
+                   "untuk informasi menarik lainnya cek katalog (dibagian kanan atas) dan jangan lupa save nomor kami \n"+     //rs karina medika
+                   "\n \n Jangan lupa juga ikuti saluran WA kami untuk informasi terupdate di https://whatsapp.com/channel/0029Vb071ghBlHph2TH9de0Q \n"+ //rs karina medika
+                   "(aktifkan juga loncengnya ya sahabat sehat " //rs karina medika
+                   //" \n 0xF0 0x9F 0x8C 0x8F : " + googleMapUrl  //URL google map
+                    ; //end of message
+                   
 
                 // Insert ke table wa_outbox
                 try {
-                     String cekSQL = "SELECT COUNT(*) FROM wa_outbox WHERE NOWA = ? AND PESAN LIKE '%Selamat ulang tahun%' AND YEAR(TANGGAL_JAM) = YEAR(?)";
+                     // Cek duplikasi pengiriman di hari yang sama
+                     String cekSQL = "SELECT COUNT(*) FROM wa_outbox WHERE NOWA = ? AND PESAN LIKE '%Selamat ulang tahun%' AND DATE(TANGGAL_JAM) = CURDATE()";
                      PreparedStatement cekStmt = koneksiwa.prepareStatement(cekSQL);
                      cekStmt.setString(1, nohppasien + "@c.us");
-                     cekStmt.setString(2, tanggalMulai);
                      ResultSet cekRs = cekStmt.executeQuery();
 
                      if (cekRs.next() && cekRs.getInt(1) > 0) {
                          duplikatDilewati++;
+                         System.out.println("❗ Pesan sudah pernah dikirim ke " + namapasien + " hari ini.");
+                         TeksArea.append("❗ Pesan sudah pernah dikirim ke " + namapasien + " hari ini.\n");
                      } else {
                          String sql = "INSERT INTO wa_outbox (NOMOR, NOWA, PESAN, TANGGAL_JAM, STATUS, SOURCE, SENDER, TYPE) "
                                     + "VALUES (?, ?, ?, ?, 'ANTRIAN', 'KHANZA', 'NODEJS', 'TEXT')";
@@ -420,66 +429,62 @@ public class frmUtama extends javax.swing.JFrame {
                          psWa.setLong(1, 0);
                          psWa.setString(2, nohppasien + "@c.us");
                          psWa.setString(3, pesan);
-                         psWa.setString(4, dtf.format(waktuKirimBerikut));
+                         psWa.setString(4, dtf.format(waktuKirimBerikut)); // Set waktu kirim acak
                          psWa.executeUpdate();
                          psWa.close();
 
-                         waktuKirimBerikut = waktuKirimBerikut.plusSeconds(180 + rand.nextInt(181));
+                         int delayInSeconds = 180 + rand.nextInt(181); // Delay acak 3 - 6 menit
+                         waktuKirimBerikut = waktuKirimBerikut.plusSeconds(delayInSeconds);
+
                          validDikirim++;
-                         
-                         // ***** TAMBAHKAN KE LAPORAN JIKA TERLAMBAT *****
-                         if(isTerlambat) {
-                             listUcapanTerlambat.add(nm_pasien_db + " (Ultah: " + tanggalFormat.format(calUltahTahunIni.getTime()) + ")");
-                         }
+                         System.out.println("✅ Pesan ulang tahun untuk " + namapasien + " telah dimasukkan ke wa_outbox.");
+                         TeksArea.append("✅ Pesan untuk " + namapasien + " ditambahkan ke antrian.\n");
                      }
                      cekRs.close();
                      cekStmt.close();
                  } catch (Exception et) {
                      System.out.println("❌ Gagal menyimpan pesan WA ke outbox untuk " + namapasien + ": " + et);
+                     TeksArea.append("❌ Gagal menyimpan pesan ke outbox untuk " + namapasien + ": " + et.getMessage() + "\n");
                  }
             }
 
             rs.close();
             ps.close();
 
-            // Membangun string untuk rangkuman
-            final StringBuilder summary = new StringBuilder();
-            summary.append("\n=== Rangkuman Proses (" + tanggalMulai + " s/d " + tanggalAkhir + ") ===\n");
-            summary.append("Total pasien ditemukan: " + totalPasienDitemukan + "\n");
-            summary.append("✅ Berhasil masuk antrian: " + validDikirim + " pasien\n");
-            summary.append("❗ Duplikat (sudah dikirim): " + duplikatDilewati + " pasien\n");
+            // Menampilkan rangkuman proses yang detail di TeksArea
+            TeksArea.append("\n=== Rangkuman Proses Pengiriman ===\n");
+            TeksArea.append("Total pasien berulang tahun hari ini: " + totalPasienDitemukan + "\n");
+            TeksArea.append("✅ Berhasil masuk antrian: " + validDikirim + " pasien\n");
+            TeksArea.append("❗ Duplikat (dilewati): " + duplikatDilewati + " pasien\n");
             int totalGagal = listPasienMeninggal.size() + listNomorKosong.size() + listNomorTidakValid.size();
-            summary.append("❌ Gagal dikirim: " + totalGagal + " pasien\n");
-
-            // ***** LAPORAN BARU UNTUK UCAPAN TERLAMBAT *****
-            if (!listUcapanTerlambat.isEmpty()) {
-                summary.append("\n=== Detail Ucapan Terlambat yang Dikirim ===\n");
-                summary.append("Jumlah: " + listUcapanTerlambat.size() + " pasien\n");
-                listUcapanTerlambat.forEach(detail -> summary.append(" - " + detail + "\n"));
-            }
+            TeksArea.append("❌ Gagal dikirim: " + totalGagal + " pasien\n");
 
             if (totalGagal > 0) {
-                summary.append("\n=== Detail Kegagalan Pengiriman ===\n");
+                TeksArea.append("\n=== Detail Kegagalan Pengiriman ===\n");
                 if (!listPasienMeninggal.isEmpty()) {
-                    summary.append("Alasan: Pasien sudah meninggal (" + listPasienMeninggal.size() + ")\n");
-                    listPasienMeninggal.forEach(detail -> summary.append(" - " + detail + "\n"));
+                    TeksArea.append("Alasan: Pasien sudah meninggal (" + listPasienMeninggal.size() + ")\n");
+                    for (String detail : listPasienMeninggal) {
+                        TeksArea.append(" - " + detail + "\n");
+                    }
                 }
                 if (!listNomorKosong.isEmpty()) {
-                    summary.append("Alasan: Nomor HP kosong (" + listNomorKosong.size() + ")\n");
-                    listNomorKosong.forEach(detail -> summary.append(" - " + detail + "\n"));
+                    TeksArea.append("Alasan: Nomor HP kosong (" + listNomorKosong.size() + ")\n");
+                    for (String detail : listNomorKosong) {
+                        TeksArea.append(" - " + detail + "\n");
+                    }
                 }
                 if (!listNomorTidakValid.isEmpty()) {
-                    summary.append("Alasan: Format nomor HP tidak valid (" + listNomorTidakValid.size() + ")\n");
-                    listNomorTidakValid.forEach(detail -> summary.append(" - " + detail + "\n"));
+                    TeksArea.append("Alasan: Format nomor HP tidak valid (" + listNomorTidakValid.size() + ")\n");
+                    for (String detail : listNomorTidakValid) {
+                        TeksArea.append(" - " + detail + "\n");
+                    }
                 }
             }
-            summary.append("\nProses selesai.\n");
-
-            // Menampilkan rangkuman di TeksArea
-            SwingUtilities.invokeLater(() -> TeksArea.append(summary.toString()));
+            TeksArea.append("\nProses selesai.\n");
 
         } catch (Exception es) {
-            SwingUtilities.invokeLater(() -> TeksArea.append("Error pada proses utama: "+ es.getMessage() + "\n"));
+            System.out.println("Error pada proses utama kirim ulang tahun: " + es.getMessage());
+            TeksArea.append("Error pada proses utama: "+ es.getMessage() + "\n");
             es.printStackTrace();
         }
     }

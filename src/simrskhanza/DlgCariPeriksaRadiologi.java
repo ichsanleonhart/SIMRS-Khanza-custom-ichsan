@@ -397,7 +397,6 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
         label18 = new widget.Label();
         Tgl2 = new widget.Tanggal();
         NoHPWAPasien = new widget.TextBox();
-        TombolWA = new widget.Button();
         label22 = new widget.Label();
         panelisi1 = new widget.panelisi();
         label10 = new widget.Label();
@@ -425,6 +424,7 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
         btnAmbilPhoto1 = new widget.Button();
         BtnSimpan = new widget.Button();
         BtnPrint1 = new widget.Button();
+        TombolWA = new widget.Button();
         panelisi8 = new widget.panelisi();
         InformasiTambahan = new widget.TextBox();
         jLabel5 = new widget.Label();
@@ -880,22 +880,6 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
         panelisi3.add(NoHPWAPasien);
         NoHPWAPasien.setBounds(860, 10, 226, 23);
 
-        TombolWA.setBackground(new java.awt.Color(204, 204, 204));
-        TombolWA.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/wa.png"))); // NOI18N
-        TombolWA.setMnemonic('T');
-        TombolWA.setText("Kirim Foto dan Expertise ke Pasien via Whatsapp");
-        TombolWA.setToolTipText("Alt+T");
-        TombolWA.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        TombolWA.setName("TombolWA"); // NOI18N
-        TombolWA.setPreferredSize(new java.awt.Dimension(180, 30));
-        TombolWA.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                TombolWAActionPerformed(evt);
-            }
-        });
-        panelisi3.add(TombolWA);
-        TombolWA.setBounds(750, 40, 340, 30);
-
         label22.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         label22.setText("Nomor WA Pasien:");
         label22.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
@@ -1193,6 +1177,21 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
             }
         });
         panelGlass6.add(BtnPrint1);
+
+        TombolWA.setBackground(new java.awt.Color(204, 204, 204));
+        TombolWA.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/wa.png"))); // NOI18N
+        TombolWA.setMnemonic('T');
+        TombolWA.setText("Kirim Foto dan Expertise ke Pasien via Whatsapp");
+        TombolWA.setToolTipText("Alt+T");
+        TombolWA.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        TombolWA.setName("TombolWA"); // NOI18N
+        TombolWA.setPreferredSize(new java.awt.Dimension(180, 30));
+        TombolWA.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                TombolWAActionPerformed(evt);
+            }
+        });
+        panelGlass6.add(TombolWA);
 
         FormHasilRadiologi.add(panelGlass6, java.awt.BorderLayout.PAGE_END);
 
@@ -3175,17 +3174,20 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
     try {
         
         // Step 1: Fetch patient data (phone number, gender, and name)
-        String nohppasien = "";
+        //String nohppasien = ""; 
+        String nohppasien = NoHPWAPasien.getText(); 
         String jk = "";
         String noRawat = tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString();
         String noRkmMedis = "";
         String nmPasien = "";        
         try {
             PreparedStatement ps1 = koneksi.prepareStatement(
-                "SELECT pasien.no_rkm_medis, pasien.nm_pasien, pasien.no_tlp, pasien.jk " +
+              //"SELECT pasien.no_rkm_medis, pasien.nm_pasien, pasien.no_tlp, pasien.jk " +
+                "SELECT pasien.no_rkm_medis, pasien.nm_pasien, pasien.jk " +
                 "FROM reg_periksa " +
                 "INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis " +
-                "WHERE no_tlp IS NOT NULL and reg_periksa.no_rawat = ?"
+              //"WHERE no_tlp IS NOT NULL and reg_periksa.no_rawat = ?"
+                "WHERE reg_periksa.no_rawat = ?"
             );
             ps1.setString(1, noRawat);
             ResultSet rs1 = ps1.executeQuery();
@@ -3193,7 +3195,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
             if (rs1.next()) {
                 noRkmMedis = rs1.getString("no_rkm_medis");
                 nmPasien = rs1.getString("nm_pasien");
-                nohppasien = rs1.getString("no_tlp");
+                //nohppasien = rs1.getString("no_tlp");  //diubah metodenya mengambil dari textbox
                 jk = rs1.getString("jk");
                 
                 // Validation: Ensure the phone number is valid

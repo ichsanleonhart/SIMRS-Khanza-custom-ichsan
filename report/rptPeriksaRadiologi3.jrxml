@@ -39,7 +39,7 @@
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="530" splitType="Stretch">
+		<band height="802" splitType="Stretch">
 			<textField>
 				<reportElement x="2" y="14" width="520" height="25" forecolor="#000000" backcolor="#00FF00" uuid="b654a498-896c-44d7-b6c7-894efe0e8316"/>
 				<textElement textAlignment="Center">
@@ -371,12 +371,12 @@
 				<text><![CDATA[Pemeriksaan]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="232" width="89" height="15" forecolor="#000000" backcolor="#F0F0DC" uuid="638620d1-5323-4df7-a1a4-e79dad6fe1b9"/>
+				<reportElement stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="210" width="89" height="15" forecolor="#000000" backcolor="#F0F0DC" uuid="638620d1-5323-4df7-a1a4-e79dad6fe1b9"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Tahoma" size="10" isBold="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<text><![CDATA[Hasil Pemeriksaan]]></text>
+				<text><![CDATA[Foto Pemeriksaan]]></text>
 			</staticText>
 			<staticText>
 				<reportElement stretchType="RelativeToBandHeight" mode="Transparent" x="89" y="232" width="10" height="15" forecolor="#000000" backcolor="#F0F0DC" uuid="f948e243-5632-4e6a-ba7c-789ef274ecfe"/>
@@ -387,7 +387,7 @@
 				<text><![CDATA[:]]></text>
 			</staticText>
 			<image hAlign="Center">
-				<reportElement x="101" y="234" width="417" height="293" uuid="805e90e8-aea7-4fd4-9225-39f023d2e3f9">
+				<reportElement x="-1" y="236" width="520" height="565" uuid="805e90e8-aea7-4fd4-9225-39f023d2e3f9">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<imageExpression><![CDATA[$P{photo}]]></imageExpression>
@@ -395,21 +395,21 @@
 		</band>
 	</title>
 	<detail>
-		<band height="24" splitType="Stretch">
+		<band height="45" splitType="Stretch">
 			<line>
-				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="1" height="24" uuid="9f683727-3975-46e0-ba08-897fecc3426f"/>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="1" height="44" uuid="9f683727-3975-46e0-ba08-897fecc3426f"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement stretchType="RelativeToBandHeight" x="521" y="0" width="1" height="24" uuid="cf5cf342-1ba4-490d-ae91-9b387fa27128"/>
+				<reportElement stretchType="RelativeToBandHeight" x="521" y="0" width="1" height="44" uuid="cf5cf342-1ba4-490d-ae91-9b387fa27128"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" x="3" y="5" width="516" height="15" uuid="199f88fd-b71e-4036-b61d-f209b0c376a2"/>
+				<reportElement positionType="Float" x="3" y="14" width="516" height="30" uuid="199f88fd-b71e-4036-b61d-f209b0c376a2"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Tahoma" size="10"/>
 					<paragraph lineSpacing="Single"/>
@@ -417,7 +417,23 @@
 				<textFieldExpression><![CDATA[$P{hasil}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="1" y="-1" width="520" height="1" uuid="5c895935-c73f-4665-b04e-08d1026cfb5e"/>
+				<reportElement x="0" y="-1" width="522" height="1" uuid="5c895935-c73f-4665-b04e-08d1026cfb5e">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement mode="Transparent" x="3" y="-1" width="206" height="15" forecolor="#000000" backcolor="#F0F0DC" uuid="5ba9edb9-7d9d-451e-9324-898a491bfc8f"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="10" isBold="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Hasil Expertise :]]></text>
+			</staticText>
+			<line>
+				<reportElement x="1" y="14" width="520" height="1" uuid="d4383c32-5b09-478a-99e3-e324a9c63091"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
@@ -500,7 +516,9 @@
 				<textFieldExpression><![CDATA[$P{penjab}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="1" y="0" width="520" height="1" uuid="b7e18875-ab99-4884-b9ea-65c078490bdd"/>
+				<reportElement x="0" y="0" width="522" height="1" uuid="b7e18875-ab99-4884-b9ea-65c078490bdd">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
