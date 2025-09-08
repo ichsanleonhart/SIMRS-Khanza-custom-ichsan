@@ -1269,60 +1269,70 @@ private void NmPetugasKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
 
     private void tampil() {
         Valid.tabelKosong(tabMode);
-        try{
-            ps=koneksi.prepareStatement(
-                   "select pengajuan_biaya.no_pengajuan,pengajuan_biaya.tanggal,pengajuan_biaya.nik,peg1.nama as namapengaju,"+
-                   "peg1.bidang,peg1.departemen,pengajuan_biaya.urgensi,pengajuan_biaya.uraian_latar_belakang,pengajuan_biaya.tujuan_pengajuan,"+
-                   "pengajuan_biaya.target_sasaran,pengajuan_biaya.lokasi_kegiatan,pengajuan_biaya.jumlah,pengajuan_biaya.harga,"+
-                   "pengajuan_biaya.total,pengajuan_biaya.keterangan,pengajuan_biaya.nik_pj,peg2.nama as namapj,pengajuan_biaya.status "+
-                   "from pengajuan_biaya inner join pegawai as peg1 on pengajuan_biaya.nik=peg1.nik "+
-                   "inner join pegawai as peg2 on pengajuan_biaya.nik_pj=peg2.nik where pengajuan_biaya.tanggal between ? and ? "+
-                   (TCari.getText().trim().equals("")?"":"and (pengajuan_biaya.no_pengajuan like ? or pengajuan_biaya.nik like ? or peg1.nama like ? or "+
-                   "peg1.bidang like ? or peg1.departemen like ? or pengajuan_biaya.urgensi like ? or pengajuan_biaya.uraian_latar_belakang like ? or "+
-                   "pengajuan_biaya.tujuan_pengajuan like ? or pengajuan_biaya.lokasi_kegiatan like ? or pengajuan_biaya.keterangan like ? or "+
-                   "pengajuan_biaya.nik_pj like ? or peg2.nama like ? or pengajuan_biaya.status like ?)")+" order by pengajuan_biaya.tanggal");
-            try {
-                ps.setString(1,Valid.SetTgl(DTPCari1.getSelectedItem()+""));
-                ps.setString(2,Valid.SetTgl(DTPCari2.getSelectedItem()+""));
-                if(!TCari.getText().trim().equals("")){
-                    ps.setString(3,"%"+TCari.getText().trim()+"%");
-                    ps.setString(4,"%"+TCari.getText().trim()+"%");
-                    ps.setString(5,"%"+TCari.getText().trim()+"%");
-                    ps.setString(6,"%"+TCari.getText().trim()+"%");
-                    ps.setString(7,"%"+TCari.getText().trim()+"%");
-                    ps.setString(8,"%"+TCari.getText().trim()+"%");
-                    ps.setString(9,"%"+TCari.getText().trim()+"%");
-                    ps.setString(10,"%"+TCari.getText().trim()+"%");
-                    ps.setString(11,"%"+TCari.getText().trim()+"%");
-                    ps.setString(12,"%"+TCari.getText().trim()+"%");
-                    ps.setString(13,"%"+TCari.getText().trim()+"%");
-                    ps.setString(14,"%"+TCari.getText().trim()+"%");
-                    ps.setString(15,"%"+TCari.getText().trim()+"%");
-                }   
-                rs=ps.executeQuery();
-                i=1;
-                while(rs.next()){
-                    tabMode.addRow(new Object[]{
-                        rs.getString("no_pengajuan"),rs.getString("tanggal"),rs.getString("nik"),rs.getString("namapengaju"),rs.getString("bidang"),
-                        rs.getString("departemen"),rs.getString("urgensi"),rs.getString("uraian_latar_belakang"),rs.getString("tujuan_pengajuan"),rs.getString("target_sasaran"),
-                        rs.getString("lokasi_kegiatan"),rs.getDouble("jumlah"),rs.getDouble("harga"),rs.getDouble("total"),rs.getString("keterangan"),
-                        rs.getString("nik_pj"),rs.getString("namapj"),rs.getString("status")
-                    });
-                }
-            } catch (Exception e) {
-                System.out.println("Notif : "+e);
-            } finally{
-                if(rs!=null){
-                    rs.close();
-                }
-                if(ps!=null){
-                    ps.close();
-                }
-            }
-            hitung();
-        }catch(Exception e){
-            System.out.println("Notifikasi : "+e);
+    try{
+        // Variabel untuk filter tambahan berdasarkan hak akses
+        String filterUser = ""; 
+        
+        // Cek jika user yang login BUKAN 'Admin Utama'
+        if (!akses.getkode().equals("Admin Utama")) {
+            // Tambahkan filter untuk hanya menampilkan data yang diajukan oleh user tersebut
+            filterUser = " and pengajuan_biaya.nik='" + akses.getkode() + "' "; 
         }
+
+        ps=koneksi.prepareStatement(
+               "select pengajuan_biaya.no_pengajuan,pengajuan_biaya.tanggal,pengajuan_biaya.nik,peg1.nama as namapengaju,"+
+               "peg1.bidang,peg1.departemen,pengajuan_biaya.urgensi,pengajuan_biaya.uraian_latar_belakang,pengajuan_biaya.tujuan_pengajuan,"+
+               "pengajuan_biaya.target_sasaran,pengajuan_biaya.lokasi_kegiatan,pengajuan_biaya.jumlah,pengajuan_biaya.harga,"+
+               "pengajuan_biaya.total,pengajuan_biaya.keterangan,pengajuan_biaya.nik_pj,peg2.nama as namapj,pengajuan_biaya.status "+
+               "from pengajuan_biaya inner join pegawai as peg1 on pengajuan_biaya.nik=peg1.nik "+
+               "inner join pegawai as peg2 on pengajuan_biaya.nik_pj=peg2.nik where pengajuan_biaya.tanggal between ? and ? " +
+               filterUser + // Tambahkan filter di sini
+               (TCari.getText().trim().equals("")?"":"and (pengajuan_biaya.no_pengajuan like ? or pengajuan_biaya.nik like ? or peg1.nama like ? or "+
+               "peg1.bidang like ? or peg1.departemen like ? or pengajuan_biaya.urgensi like ? or pengajuan_biaya.uraian_latar_belakang like ? or "+
+               "pengajuan_biaya.tujuan_pengajuan like ? or pengajuan_biaya.lokasi_kegiatan like ? or pengajuan_biaya.keterangan like ? or "+
+               "pengajuan_biaya.nik_pj like ? or peg2.nama like ? or pengajuan_biaya.status like ?)")+" order by pengajuan_biaya.tanggal");
+        try {
+            ps.setString(1,Valid.SetTgl(DTPCari1.getSelectedItem()+""));
+            ps.setString(2,Valid.SetTgl(DTPCari2.getSelectedItem()+""));
+            if(!TCari.getText().trim().equals("")){
+                ps.setString(3,"%"+TCari.getText().trim()+"%");
+                ps.setString(4,"%"+TCari.getText().trim()+"%");
+                ps.setString(5,"%"+TCari.getText().trim()+"%");
+                ps.setString(6,"%"+TCari.getText().trim()+"%");
+                ps.setString(7,"%"+TCari.getText().trim()+"%");
+                ps.setString(8,"%"+TCari.getText().trim()+"%");
+                ps.setString(9,"%"+TCari.getText().trim()+"%");
+                ps.setString(10,"%"+TCari.getText().trim()+"%");
+                ps.setString(11,"%"+TCari.getText().trim()+"%");
+                ps.setString(12,"%"+TCari.getText().trim()+"%");
+                ps.setString(13,"%"+TCari.getText().trim()+"%");
+                ps.setString(14,"%"+TCari.getText().trim()+"%");
+                ps.setString(15,"%"+TCari.getText().trim()+"%");
+            }   
+            rs=ps.executeQuery();
+            i=1;
+            while(rs.next()){
+                tabMode.addRow(new Object[]{
+                    rs.getString("no_pengajuan"),rs.getString("tanggal"),rs.getString("nik"),rs.getString("namapengaju"),rs.getString("bidang"),
+                    rs.getString("departemen"),rs.getString("urgensi"),rs.getString("uraian_latar_belakang"),rs.getString("tujuan_pengajuan"),rs.getString("target_sasaran"),
+                    rs.getString("lokasi_kegiatan"),rs.getDouble("jumlah"),rs.getDouble("harga"),rs.getDouble("total"),rs.getString("keterangan"),
+                    rs.getString("nik_pj"),rs.getString("namapj"),rs.getString("status")
+                });
+            }
+        } catch (Exception e) {
+            System.out.println("Notif : "+e);
+        } finally{
+            if(rs!=null){
+                rs.close();
+            }
+            if(ps!=null){
+                ps.close();
+            }
+        }
+        hitung();
+    }catch(Exception e){
+        System.out.println("Notifikasi : "+e);
+    }
     }
 
     private void emptTeks() {
