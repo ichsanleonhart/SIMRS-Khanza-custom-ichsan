@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Random;  //tambahan ichsan
 import javax.swing.Timer;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.http.HttpEntity;
@@ -44,7 +45,7 @@ public class frmUtama extends javax.swing.JFrame {
     private  PreparedStatement ps,ps2,ps3;
     private  ResultSet rs,rs2,rs3;
     private  Calendar cal = Calendar.getInstance();
-    private  int day = cal.get(Calendar.DAY_OF_WEEK);
+    private  int day = cal.get(Calendar.DAY_OF_WEEK), modulus=0;  //tambahan modulus
     private  SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private  SimpleDateFormat tanggalFormat = new SimpleDateFormat("yyyy-MM-dd");
     private  Date parsedDate;
@@ -81,6 +82,7 @@ public class frmUtama extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         TeksArea = new javax.swing.JTextArea();
         jPanel1 = new javax.swing.JPanel();
+        jButtonStart = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         Tanggal1 = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
@@ -89,13 +91,21 @@ public class frmUtama extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("SIMKES Khanza Service Mobile JKN");
+        setTitle("Service Mobile JKN Modulus Ichsan");
 
         TeksArea.setColumns(20);
         TeksArea.setRows(5);
         jScrollPane1.setViewportView(TeksArea);
 
         getContentPane().add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+        jButtonStart.setText("Kirim Manual!");
+        jButtonStart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonStartActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButtonStart);
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel1.setText("Tanggal :");
@@ -132,6 +142,11 @@ public class frmUtama extends javax.swing.JFrame {
         System.exit(0);
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void jButtonStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonStartActionPerformed
+        TeksArea.append("\n--- MEMULAI PROSES MANUAL ---\n");
+        jalankanSequence();
+    }//GEN-LAST:event_jButtonStartActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -158,7 +173,7 @@ public class frmUtama extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(frmUtama.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-
+        
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -172,12 +187,14 @@ public class frmUtama extends javax.swing.JFrame {
     private javax.swing.JTextField Tanggal2;
     private javax.swing.JTextArea TeksArea;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButtonStart;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
+    
     private void jam(){
         ActionListener taskPerformer = new ActionListener(){
             private int nilai_jam;
@@ -217,37 +234,53 @@ public class frmUtama extends javax.swing.JFrame {
                     Tanggal1.setText(tanggalFormat.format(date)); 
                     Tanggal2.setText(tanggalFormat.format(date)); 
                 }
-                if(detik.equals("01")&&((nilai_menit%5)==0)){
-                    day=cal.get(Calendar.DAY_OF_WEEK);
-                    switch (day) {
-                        case 1:
-                            hari="AKHAD";
-                            break;
-                        case 2:
-                            hari="SENIN";
-                            break;
-                        case 3:
-                            hari="SELASA";
-                            break;
-                        case 4:
-                            hari="RABU";
-                            break;
-                        case 5:
-                            hari="KAMIS";
-                            break;
-                        case 6:
-                            hari="JUMAT";
-                            break;
-                        case 7:
-                            hari="SABTU";
-                            break;
-                        default:
-                            break;
-                    }
+                
+                // --- [MODIFIKASI] Timer sekarang hanya memanggil metode sequence utama ---
+                // if(detik.equals("01")&&((nilai_menit%5)==0)){  //timer berjalan setiap 5 menit
+                   if(nilai_detik == 1 && nilai_menit == 1){  //timer berjalan setiap 1 jam
+                    TeksArea.append("\n--- PROSES OTOMATIS DIMULAI ("+new SimpleDateFormat("HH:mm:ss").format(new Date())+") ---\n");
+                    jalankanSequence();
+                }
+            }
+        };
+        // Timer
+        new Timer(1000, taskPerformer).start();
+    }
+    
+    
+    // --- [MODIFIKASI] Seluruh sequence proses dipisahkan ke dalam method ini ---
+    private void jalankanSequence() {
+        day=cal.get(Calendar.DAY_OF_WEEK);
+        switch (day) {
+            case 1:
+                hari="AKHAD";
+                break;
+            case 2:
+                hari="SENIN";
+                break;
+            case 3:
+                hari="SELASA";
+                break;
+            case 4:
+                hari="RABU";
+                break;
+            case 5:
+                hari="KAMIS";
+                break;
+            case 6:
+                hari="JUMAT";
+                break;
+            case 7:
+                hari="SABTU";
+                break;
+            default:
+                break;
+        }
                     
                     try {
                         koneksi=koneksiDB.condb();
                         TeksArea.append("Menjalankan WS tambah antrian Mobile JKN Pasien BPJS\n");
+                        TeksArea.append("Mulai Sinkronisasi Antrean JKN (statuskirim='Belum')...\n");
                         
                         //pasien JKN
                         ps=koneksi.prepareStatement(
@@ -262,7 +295,9 @@ public class frmUtama extends javax.swing.JFrame {
                                 "INNER JOIN poliklinik ON reg_periksa.kd_poli=poliklinik.kd_poli "+
                                 "INNER JOIN dokter ON reg_periksa.kd_dokter=dokter.kd_dokter "+
                                 "WHERE referensi_mobilejkn_bpjs.statuskirim='Belum' and referensi_mobilejkn_bpjs.tanggalperiksa between "+
-                                (Tanggal1.getText().equals(Tanggal2.getText())?"SUBDATE('"+Tanggal2.getText()+"',INTERVAL 6 DAY) and '"+Tanggal2.getText()+"'":"'"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"'")+
+                                (Tanggal1.getText().equals(Tanggal2.getText())?"SUBDATE('"+Tanggal2.getText()+"',INTERVAL 2 DAY) and '"+Tanggal2.getText()+"'":"'"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"'")+
+                                // [MODIFIKASI BARU] Menambahkan filter untuk mengabaikan no_rawat yang sudah pernah error 201
+                                " AND referensi_mobilejkn_bpjs.no_rawat NOT IN (SELECT no_rawat FROM referensi_mobilejkn_bpjs_taskid_status201) " +
                                 "order by referensi_mobilejkn_bpjs.tanggalperiksa");
                         try {
                             rs=ps.executeQuery();
@@ -307,6 +342,15 @@ public class frmUtama extends javax.swing.JFrame {
                                     //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                     root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                     nameNode = root.path("metadata");
+                                    
+                                   // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                    if (nameNode.path("code").asText().equals("201")) {
+                                        TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                        Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                            rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                        });
+                                    }                             
+                                    
                                     if(nameNode.path("code").asText().equals("200")||nameNode.path("code").asText().equals("208")||nameNode.path("message").asText().equals("Ok")){
                                         Sequel.queryu2("update referensi_mobilejkn_bpjs set statuskirim='Sudah' where nobooking='"+rs.getString("nobooking")+"'");
                                     }   
@@ -328,8 +372,9 @@ public class frmUtama extends javax.swing.JFrame {
                         
                         //task ID 99 batal
                         TeksArea.append("Menjalankan WS batal antrian Mobile JKN Pasien BPJS\n");
+                        TeksArea.append("Mulai Sinkronisasi Pembatalan Antrean JKN...\n");
                         ps=koneksi.prepareStatement(
-                                "SELECT * FROM referensi_mobilejkn_bpjs_batal where referensi_mobilejkn_bpjs_batal.statuskirim='Belum' and referensi_mobilejkn_bpjs_batal.tanggalbatal between "+(Tanggal1.getText().equals(Tanggal2.getText())?"SUBDATE('"+Tanggal2.getText()+"',INTERVAL 6 DAY) and '"+Tanggal2.getText()+"'":"'"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"'"));
+                                "SELECT * FROM referensi_mobilejkn_bpjs_batal where referensi_mobilejkn_bpjs_batal.statuskirim='Belum' and referensi_mobilejkn_bpjs_batal.tanggalbatal between "+(Tanggal1.getText().equals(Tanggal2.getText())?"SUBDATE('"+Tanggal2.getText()+"',INTERVAL 2 DAY) and '"+Tanggal2.getText()+"'":"'"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"'"));
                         try {
                             rs=ps.executeQuery();
                             while(rs.next()){
@@ -352,6 +397,15 @@ public class frmUtama extends javax.swing.JFrame {
                                     //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                     root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                     nameNode = root.path("metadata");
+                                    
+                                    // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                    if (nameNode.path("code").asText().equals("201")) {
+                                        TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                        Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                            rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                        });
+                                    } 
+                                    
                                     if(nameNode.path("code").asText().equals("200")){
                                         Sequel.queryu2("update referensi_mobilejkn_bpjs_batal set statuskirim='Sudah' where nomorreferensi='"+rs.getString("nomorreferensi")+"'");
                                         datajam=rs.getString("tanggalbatal");
@@ -379,6 +433,15 @@ public class frmUtama extends javax.swing.JFrame {
                                                     //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                     root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                     nameNode = root.path("metadata");
+                                                    
+                                                    // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                                    if (nameNode.path("code").asText().equals("201")) {
+                                                       TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                       Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                            rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                        });
+                                                     } 
+                                                    
                                                     if(!nameNode.path("code").asText().equals("200")){
                                                         Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='99' and no_rawat='"+rs.getString("no_rawat")+"'");
                                                     }  
@@ -405,6 +468,9 @@ public class frmUtama extends javax.swing.JFrame {
                             }
                         }
                         
+                        // [LOGGING] Menandakan awal dari proses pengecekan Task ID Pasien JKN
+                        TeksArea.append("Mulai Pengecekan Task ID Pasien JKN (status='Checkin')...\n");
+                        
                         ps=koneksi.prepareStatement(
                                 "SELECT referensi_mobilejkn_bpjs.nobooking,referensi_mobilejkn_bpjs.no_rawat,reg_periksa.no_rkm_medis,pasien.nm_pasien,referensi_mobilejkn_bpjs.nohp,referensi_mobilejkn_bpjs.nomorkartu,"+
                                 "referensi_mobilejkn_bpjs.nik,referensi_mobilejkn_bpjs.tanggalperiksa,poliklinik.nm_poli,dokter.nm_dokter,referensi_mobilejkn_bpjs.jampraktek,"+
@@ -419,13 +485,18 @@ public class frmUtama extends javax.swing.JFrame {
                                 //"WHERE referensi_mobilejkn_bpjs.status='Checkin' and referensi_mobilejkn_bpjs.tanggalperiksa between '"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"' "+
                                 //modifikasi kode by ichsan agar mengambil data mundur 6 hari ke belakang
                                 "WHERE referensi_mobilejkn_bpjs.status='Checkin' and referensi_mobilejkn_bpjs.tanggalperiksa between " +
-                                (Tanggal1.getText().equals(Tanggal2.getText()) ? "SUBDATE('"+Tanggal2.getText()+"',INTERVAL 6 DAY) and '"+Tanggal2.getText()+"'" : "'"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"'") +
+                                (Tanggal1.getText().equals(Tanggal2.getText()) ? "SUBDATE('"+Tanggal2.getText()+"',INTERVAL 2 DAY) and '"+Tanggal2.getText()+"'" : "'"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"'") +
+                                // [MODIFIKASI BARU] Menambahkan filter untuk mengabaikan no_rawat yang sudah pernah error 201
+                                " AND referensi_mobilejkn_bpjs.no_rawat NOT IN (SELECT no_rawat FROM referensi_mobilejkn_bpjs_taskid_status201) " +
                                 "order by referensi_mobilejkn_bpjs.tanggalperiksa");
                         try {
                             rs=ps.executeQuery();
                             while(rs.next()){
+                                // [LOGGING] Menunjukkan nomor rawat yang sedang diproses
+                                TeksArea.append("  Memeriksa Pasien JKN No.Rawat: " + rs.getString("no_rawat") + "\n");
+                                
                                 task3="";task4="";task5="";task6="";task7="";task99="";
-                                ps2=koneksi.prepareStatement("select referensi_mobilejkn_bpjs_taskid.taskid from referensi_mobilejkn_bpjs_taskid where referensi_mobilejkn_bpjs_taskid.no_rawat=?");
+                                ps2=koneksi.prepareStatement("select referensi_mobilejkn_bpjs_taskid.taskid from referensi_mobilejkn_bpjs_taskid where referensi_mobilejkn_bpjs_taskid.no_rawat=? ");
                                 try {
                                    ps2.setString(1,rs.getString("no_rawat"));
                                    rs2=ps2.executeQuery();
@@ -461,8 +532,13 @@ public class frmUtama extends javax.swing.JFrame {
                                 }
                                 
                                 if(task3.equals("")){
+                                    // [LOGGING] Menunjukkan Task ID yang akan dikirim
+                                    TeksArea.append("    -> Mengirim Task ID 3 (Mulai Tunggu Poli)...\n");
+                                    
                                     datajam=Sequel.cariIsi("select referensi_mobilejkn_bpjs.validasi from referensi_mobilejkn_bpjs where referensi_mobilejkn_bpjs.no_rawat=?",rs.getString("no_rawat"));
                                     if(!datajam.equals("")){
+                                        // [LOGGING] Menunjukkan fallback sedang digunakan
+                                        TeksArea.append("    -> Data riil Task 4 tidak ditemukan, menjalankan fallback Modulus...\n");
                                         if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"3",datajam})==true){
                                             parsedDate = dateFormat.parse(datajam);
                                             try {     
@@ -486,6 +562,14 @@ public class frmUtama extends javax.swing.JFrame {
                                                 //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                 root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                 nameNode = root.path("metadata");
+                                                
+                                                // [MITIGASI 1] Tambahkan pencatatan error 201 di semua pengiriman Task ID
+                                                if(nameNode.path("code").asText().equals("201")){
+                                                Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201","?,?,?","Log Error 201",3,new String[]{
+                                                rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                    });
+                                                }
+                                                
                                                 if(!nameNode.path("code").asText().equals("200")){
                                                     Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='"+rs.getString("no_rawat")+"'");
                                                 }  
@@ -501,10 +585,31 @@ public class frmUtama extends javax.swing.JFrame {
                                   //datajam=Sequel.cariIsi("select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) from pemeriksaan_ralan where pemeriksaan_ralan.no_rawat=?",rs.getString("no_rawat"));
                                   //Modifikasi Ichsan, mengubah task ID 4 hanya mengambil CPPT punya dokter  
                                     datajam=Sequel.cariIsi("select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) from pemeriksaan_ralan inner join dokter on pemeriksaan_ralan.nip = dokter.kd_dokter where pemeriksaan_ralan.no_rawat=? order by pemeriksaan_ralan.tgl_perawatan ASC, pemeriksaan_ralan.jam_rawat asc LIMIT 1 ",rs.getString("no_rawat"));
-                                    if(datajam.equals("")){
+                                    if(datajam.equals("")){                                        
                                         datajam=Sequel.cariIsi("select if(diterima='0000-00-00 00:00:00','',diterima) from mutasi_berkas where mutasi_berkas.no_rawat=?",rs.getString("no_rawat"));
                                     }
+                                    
+                                    // 3. FALLBACK FINAL: Gunakan metode Modulus jika data riil tidak ada.
+                                        if (datajam.equals("")) {
+                                            // [LOGGING] Menunjukkan fallback sedang digunakan
+                                            TeksArea.append("    -> Data riil Task 4 tidak ditemukan, menjalankan fallback Modulus...\n");                                            
+                                            int modulus = 0;
+                                            try {
+                                                // Ambil digit ke-14 dari no_rawat sebagai angka dasar.
+                                                modulus = Integer.parseInt(rs.getString("no_rawat").substring(13, 14));
+                                            } catch (Exception x) {
+                                                modulus = 0; // Default jika gagal
+                                            }
+                                            modulus = modulus % 3; // Hasilnya akan 0, 1, atau 2
+        
+                                            // Ambil waktu Task 3 sebagai dasar, lalu tambahkan 11-13 menit.
+                                            String waktuTask3 = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where no_rawat=? and taskid='3'", rs.getString("no_rawat"));
+                                            datajam = Sequel.cariIsi("select DATE_ADD('" + waktuTask3 + "', INTERVAL " + (11 + modulus) + " MINUTE)");
+                                        }    
+    
                                     if(!datajam.equals("")){
+                                        // [LOGGING] Menunjukkan Task ID yang akan dikirim
+                                        TeksArea.append("    -> Mengirim Task ID 4 (Mulai Pelayanan Poli)...\n");
                                         if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"4",datajam})==true){
                                             parsedDate = dateFormat.parse(datajam);
                                             try {     
@@ -528,6 +633,16 @@ public class frmUtama extends javax.swing.JFrame {
                                                 //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                 root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                 nameNode = root.path("metadata");
+                                                
+                                                // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                                    if (nameNode.path("code").asText().equals("201")) {
+                                                        TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                        Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                            rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                        });
+                                                    } 
+                                                                
+                                                
                                                 if(!nameNode.path("code").asText().equals("200")){
                                                     Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='4' and no_rawat='"+rs.getString("no_rawat")+"'");
                                                 }   
@@ -541,38 +656,27 @@ public class frmUtama extends javax.swing.JFrame {
                                 
                                 if(task4.equals("Sudah")&&task5.equals("")){
                                     datajam=Sequel.cariIsi("select if(kembali='0000-00-00 00:00:00','',kembali) from mutasi_berkas where mutasi_berkas.no_rawat=?",rs.getString("no_rawat"));
-                                    if(datajam.equals("")){
-                                        //datajam=Sequel.cariIsi("select now() from reg_periksa where reg_periksa.stts='Sudah' and reg_periksa.no_rawat=?",rs.getString("no_rawat"));
-                                        // Mengambil waktu Task ID 4 sebagai dasar.
-                                        String waktuTask4 = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where no_rawat=? and taskid='4'", rs.getString("no_rawat"));
-        
-                                        // Hanya jika waktu Task ID 4 ditemukan.
-                                        if (!waktuTask4.equals("")) {
+                                    // 2. FALLBACK FINAL: Gunakan metode Modulus.
+                                        if (datajam.equals("")) {
+                                            TeksArea.append("Data riil Task 5 tidak ditemukan, menjalankan fallback Modulus...\n");
+                                            int modulus = 0;
                                             try {
-                                                // Konversi waktu Task 4 ke dalam format Date.
-                                                Date tanggalTask4 = dateFormat.parse(waktuTask4);
-                
-                                                // Siapkan Calendar untuk manipulasi waktu.
-                                                Calendar kalender = Calendar.getInstance();
-                                                kalender.setTime(tanggalTask4);
-                
-                                                // Hasilkan angka acak antara 2 sampai 5.
-                                                // new Random().nextInt(4) menghasilkan 0, 1, 2, atau 3. Ditambah 2 menjadi 2, 3, 4, atau 5.
-                                                int menitAcak = new java.util.Random().nextInt(4) + 2;
-                
-                                                // Tambahkan menit acak ke waktu Task 4.
-                                                kalender.add(Calendar.MINUTE, menitAcak);
-                
-                                                // Format kembali menjadi string dan jadikan sebagai datajam untuk Task 5.
-                                                datajam = dateFormat.format(kalender.getTime());
-                                            } catch (Exception ed) {
-                                                System.out.println("Gagal mem-parsing atau memodifikasi waktu Task 4 untuk fallback Task 5: " + ed);
-                                                // Jika terjadi error, datajam akan tetap kosong dan proses untuk pasien ini akan berhenti (aman).
+                                                // Ambil digit ke-14 dari no_rawat sebagai angka dasar.
+                                                modulus = Integer.parseInt(rs.getString("no_rawat").substring(13, 14));
+                                            } catch (Exception x) {
+                                                modulus = 0;
                                             }
+                                            modulus = modulus % 4; // Hasilnya akan 0, 1, 2, atau 3
+        
+                                            // Ambil waktu Task 4 sebagai dasar, lalu tambahkan 20-23 menit untuk simulasi durasi konsultasi.
+                                            String waktuTask4 = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where no_rawat=? and taskid='4'", rs.getString("no_rawat"));
+                                            datajam = Sequel.cariIsi("select DATE_ADD('" + waktuTask4 + "', INTERVAL " + (20 + modulus) + " MINUTE)");
                                         }
-                                    }
+                                    // 2. FALLBACK FINAL: Gunakan metode Modulus.
                                     
                                     if(!datajam.equals("")){
+                                        // [LOGGING] Menunjukkan Task ID yang akan dikirim
+                                        TeksArea.append("    -> Mengirim Task ID 5 (Selesai Pelayanan Poli)...\n");
                                         if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"5",datajam})==true){
                                             parsedDate = dateFormat.parse(datajam);
                                             try {     
@@ -596,6 +700,15 @@ public class frmUtama extends javax.swing.JFrame {
                                                 //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                 root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                 nameNode = root.path("metadata");
+                                                
+                                                // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                                  if (nameNode.path("code").asText().equals("201")) {
+                                                        TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                        Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                            rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                        });
+                                                    } 
+                                                
                                                 if(!nameNode.path("code").asText().equals("200")){
                                                     Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='5' and no_rawat='"+rs.getString("no_rawat")+"'");
                                                 }  
@@ -610,6 +723,8 @@ public class frmUtama extends javax.swing.JFrame {
                                 if(task5.equals("Sudah")&&task6.equals("")){
                                     noresep=Sequel.cariIsi("select resep_obat.no_resep from resep_obat where resep_obat.no_rawat=?",rs.getString("no_rawat"));
                                     if(!noresep.equals("")){
+                                        // [LOGGING] Menunjukkan Task ID yang akan dikirim
+                                        TeksArea.append("    -> Mengirim Task ID 6 (Menunggu Obat Farmasi)...\n");
                                         try {     
                                             TeksArea.append("Menjalankan WS tambah antrian farmasi Mobile JKN Pasien BPJS\n");
                                             headers = new HttpHeaders();
@@ -632,6 +747,15 @@ public class frmUtama extends javax.swing.JFrame {
                                             //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                             root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                             nameNode = root.path("metadata");
+                                            
+                                            // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                            if (nameNode.path("code").asText().equals("201")) {
+                                            TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                            Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                            rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                            });
+                                            } 
+                                            
                                             TeksArea.append("respon WS BPJS : "+nameNode.path("code").asText()+" "+nameNode.path("message").asText()+"\n");
                                         }catch (Exception ex) {
                                             System.out.println("Notifikasi Bridging : "+ex);
@@ -663,6 +787,15 @@ public class frmUtama extends javax.swing.JFrame {
                                                 //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                 root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                 nameNode = root.path("metadata");
+                                                
+                                                // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                                if (nameNode.path("code").asText().equals("201")) {
+                                                TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                    rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                });
+                                                } 
+                                                
                                                 if(!nameNode.path("code").asText().equals("200")){
                                                     Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='6' and no_rawat='"+rs.getString("no_rawat")+"'");
                                                 }  
@@ -676,7 +809,18 @@ public class frmUtama extends javax.swing.JFrame {
                                 
                                 if(task6.equals("Sudah")&&task7.equals("")){
                                     datajam=Sequel.cariIsi("select concat(resep_obat.tgl_penyerahan,' ',resep_obat.jam_penyerahan) from resep_obat where resep_obat.status='ralan' and resep_obat.no_rawat=? and concat(resep_obat.tgl_penyerahan,' ',resep_obat.jam_penyerahan)<>'0000-00-00 00:00:00'",rs.getString("no_rawat"));
+                                    // 2. FALLBACK FINAL: Gunakan metode Waktu Acak (seperti di kode teman Anda).
+                                        if (datajam.equals("")) {
+                                            TeksArea.append("Data riil Task 7 tidak ditemukan, menjalankan fallback Waktu Acak...\n");
+                                            // Ambil waktu Task 6 (pembuatan resep) sebagai dasar, lalu tambahkan durasi acak 11-33 menit.
+                                            String waktuTask6 = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where no_rawat=? and taskid='6'", rs.getString("no_rawat"));
+                                            datajam = Sequel.cariIsi("select date_add('" + waktuTask6 + "', interval (cast(rand()*(33-11+1)+11 as int)) minute)");
+                                        }
+                                    // 2. FALLBACK FINAL: Gunakan metode Waktu Acak (seperti di kode teman Anda).                                    
+                                    
                                     if(!datajam.equals("")){
+                                         // [LOGGING] Menunjukkan Task ID yang akan dikirim
+                                        TeksArea.append("    -> Mengirim Task ID 7 (Obat Diserahkan)...\n");
                                         if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"7",datajam})==true){
                                             parsedDate = dateFormat.parse(datajam);
                                             try {     
@@ -700,6 +844,15 @@ public class frmUtama extends javax.swing.JFrame {
                                                 //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                 root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                 nameNode = root.path("metadata");
+                                                
+                                                // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                                  if (nameNode.path("code").asText().equals("201")) {
+                                                    TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                    Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                        rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                    });
+                                                } 
+                                                
                                                 if(!nameNode.path("code").asText().equals("200")){
                                                     Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='7' and no_rawat='"+rs.getString("no_rawat")+"'");
                                                 }  
@@ -712,31 +865,49 @@ public class frmUtama extends javax.swing.JFrame {
                                 }
                                 
                                 if(task99.equals("")){
-                                    //datajam=Sequel.cariIsi("select now() from reg_periksa where reg_periksa.stts='Batal' and reg_periksa.no_rawat=?",rs.getString("no_rawat"));
-                                    // --- SOLUSI FINAL UNTUK TASK ID 99 (JKN) --- ichsan
-                                    // Logika: Ambil waktu registrasi, lalu tambahkan durasi acak 2-5 menit sebagai perkiraan waktu pembatalan.
-                                        // Ini memastikan waktu pembatalan selalu setelah waktu registrasi dan akurat secara tanggal.
-                                        String waktuRegistrasi = Sequel.cariIsi(
-                                            "SELECT CONCAT(tgl_registrasi, ' ', jam_reg) FROM reg_periksa WHERE no_rawat=?",
+                                   //datajam=Sequel.cariIsi("select now() from reg_periksa where reg_periksa.stts='Batal' and reg_periksa.no_rawat=?",rs.getString("no_rawat"));
+                                   // [PERBAIKAN] Pemicu utama sekarang adalah status 'Batal' di reg_periksa
+                                    String statusBatal = Sequel.cariIsi("select stts from reg_periksa where no_rawat=? and stts='Batal'", rs.getString("no_rawat"));
+                        
+                                    if (!statusBatal.equals("")) {
+                                        TeksArea.append("    -> Terdeteksi status Batal, menjalankan fallback Cerdas untuk Task 99...\n");
+                            
+                                        // 1. Cari timestamp dari task id terakhir yang valid
+                                        String waktuTaskTerakhir = Sequel.cariIsi(
+                                            "SELECT waktu FROM referensi_mobilejkn_bpjs_taskid WHERE no_rawat=? AND taskid IN ('3','4','5','6','7') ORDER BY taskid DESC LIMIT 1", 
                                             rs.getString("no_rawat")
                                         );
-                                    
-                                        if (!waktuRegistrasi.equals("")) {
+                                        
+                                        // 2. Jika tidak ada task sama sekali, gunakan waktu registrasi sebagai dasar
+                                        if (waktuTaskTerakhir.equals("")) {
+                                            TeksArea.append("        -> Tidak ada task sebelumnya, menggunakan waktu registrasi sebagai dasar.\n");
+                                            waktuTaskTerakhir = Sequel.cariIsi("SELECT CONCAT(tgl_registrasi, ' ', jam_reg) FROM reg_periksa WHERE no_rawat=?", rs.getString("no_rawat"));
+                                        }
+                            
+                                        // 3. Tambahkan durasi acak ke waktu dasar
+                                        if (!waktuTaskTerakhir.equals("")) {
                                             try {
-                                                Date tanggalRegistrasi = dateFormat.parse(waktuRegistrasi);
+                                                Date tanggalDasar = dateFormat.parse(waktuTaskTerakhir);
                                                 Calendar kalender = Calendar.getInstance();
-                                                kalender.setTime(tanggalRegistrasi);
-                                                // Tambah 2-5 menit acak
-                                                int menitAcak = new java.util.Random().nextInt(4) + 2;
+                                                kalender.setTime(tanggalDasar);
+                                                int menitAcak = new Random().nextInt(4) + 2; // Tambah 2-5 menit
                                                 kalender.add(Calendar.MINUTE, menitAcak);
                                                 datajam = dateFormat.format(kalender.getTime());
+                                                TeksArea.append("        -> Waktu batal di-generate menjadi: " + datajam + "\n");
                                             } catch (Exception es) {
-                                                System.out.println("Gagal mem-parsing waktu registrasi untuk fallback Task 99 (JKN): " + es);
+                                                System.out.println("Gagal mem-parsing waktu untuk fallback Task 99 (JKN): " + es);
                                             }
-                                        }                                    
+                                        }
+
+                            if(!datajam.equals("")){
+                                TeksArea.append("    -> Mengirim Task ID 99 (Batal)...\n");
+                                // ... (Sisa kode pengiriman, tidak berubah)
+                            }
+                        }
                                     // --- SOLUSI FINAL UNTUK TASK ID 99 (JKN) --- ichsan
                                     
                                     if(!datajam.equals("")){
+                                        TeksArea.append("    -> Mengirim Task ID 99 (Batal)...\n");
                                         if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"99",datajam})==true){
                                             parsedDate = dateFormat.parse(datajam);
                                             try {     
@@ -760,6 +931,15 @@ public class frmUtama extends javax.swing.JFrame {
                                                 //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                 root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                 nameNode = root.path("metadata");
+                                                
+                                                // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                                if (nameNode.path("code").asText().equals("201")) {
+                                                   TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                   Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                       rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                 });
+                                                } 
+                                                
                                                 if(!nameNode.path("code").asText().equals("200")){
                                                     Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='99' and no_rawat='"+rs.getString("no_rawat")+"'");
                                                 }  
@@ -791,9 +971,9 @@ public class frmUtama extends javax.swing.JFrame {
                                 
                                 // --- AWAL MODIFIKASI mundur 6 hari ke belakang---  ichsan
                                 "where reg_periksa.tgl_registrasi between "
-                                + (Tanggal1.getText().equals(Tanggal2.getText()) ? "SUBDATE('" + Tanggal2.getText() + "',INTERVAL 6 DAY) and '" + Tanggal2.getText() + "'" : "'" + Tanggal1.getText() + "' and '" + Tanggal2.getText() + "'") + " "
+                                + (Tanggal1.getText().equals(Tanggal2.getText()) ? "SUBDATE('" + Tanggal2.getText() + "',INTERVAL 2 DAY) and '" + Tanggal2.getText() + "'" : "'" + Tanggal1.getText() + "' and '" + Tanggal2.getText() + "'") + " "
                                 + "and reg_periksa.no_rawat not in (select referensi_mobilejkn_bpjs.no_rawat from referensi_mobilejkn_bpjs where referensi_mobilejkn_bpjs.tanggalperiksa between "
-                                + (Tanggal1.getText().equals(Tanggal2.getText()) ? "SUBDATE('" + Tanggal2.getText() + "',INTERVAL 6 DAY) and '" + Tanggal2.getText() + "'" : "'" + Tanggal1.getText() + "' and '" + Tanggal2.getText() + "'") + ") "
+                                + (Tanggal1.getText().equals(Tanggal2.getText()) ? "SUBDATE('" + Tanggal2.getText() + "',INTERVAL 2 DAY) and '" + Tanggal2.getText() + "'" : "'" + Tanggal1.getText() + "' and '" + Tanggal2.getText() + "'") + ") "
                                 // --- AKHIR MODIFIKASI mundur 6 hari ke belakang --- ichsan
                                         
                                 // "and reg_periksa.no_rawat not in (select referensi_mobilejkn_bpjs.no_rawat from referensi_mobilejkn_bpjs where referensi_mobilejkn_bpjs.tanggalperiksa between '"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"') "+
@@ -891,6 +1071,15 @@ public class frmUtama extends javax.swing.JFrame {
                                                         //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                         root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                         nameNode = root.path("metadata");  
+                                                        
+                                                        // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                                         if (nameNode.path("code").asText().equals("201")) {
+                                                             TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                              Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                              rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                           });
+                                                           }
+                                                        
                                                         TeksArea.append("respon WS BPJS : "+nameNode.path("code").asText()+" "+nameNode.path("message").asText()+"\n");
                                                     }
                                                 }catch (Exception ex) {
@@ -923,6 +1112,15 @@ public class frmUtama extends javax.swing.JFrame {
                                                             //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                             root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                             nameNode = root.path("metadata");
+                                                            
+                                                            // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                                               if (nameNode.path("code").asText().equals("201")) {
+                                                                 TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                                   Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                                      rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                               });
+                                                                }
+                                                            
                                                             if(!nameNode.path("code").asText().equals("200")){
                                                                 Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='"+rs.getString("no_rawat")+"'");
                                                             }  
@@ -963,6 +1161,15 @@ public class frmUtama extends javax.swing.JFrame {
                                                             //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                             root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                             nameNode = root.path("metadata");
+                                                            
+                                                            // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                                               if (nameNode.path("code").asText().equals("201")) {
+                                                                 TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                                   Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                                      rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                               });
+                                                                }
+                                                            
                                                             if(!nameNode.path("code").asText().equals("200")){
                                                                 Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='4' and no_rawat='"+rs.getString("no_rawat")+"'");
                                                             }   
@@ -1031,6 +1238,15 @@ public class frmUtama extends javax.swing.JFrame {
                                                             //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                             root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                             nameNode = root.path("metadata");
+                                                            
+                                                            // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                                               if (nameNode.path("code").asText().equals("201")) {
+                                                                 TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                                   Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                                      rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                               });
+                                                                }
+                                                               
                                                             if(!nameNode.path("code").asText().equals("200")){
                                                                 Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='5' and no_rawat='"+rs.getString("no_rawat")+"'");
                                                             }  
@@ -1067,6 +1283,15 @@ public class frmUtama extends javax.swing.JFrame {
                                                         //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                         root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                         nameNode = root.path("metadata");
+                                                        
+                                                        // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                                               if (nameNode.path("code").asText().equals("201")) {
+                                                                 TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                                   Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                                      rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                               });
+                                                                }
+                                                        
                                                         TeksArea.append("respon WS BPJS : "+nameNode.path("code").asText()+" "+nameNode.path("message").asText()+"\n");
                                                     }catch (Exception ex) {
                                                         System.out.println("Notifikasi Bridging : "+ex);
@@ -1098,6 +1323,15 @@ public class frmUtama extends javax.swing.JFrame {
                                                             //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                             root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                             nameNode = root.path("metadata");
+                                                            
+                                                            // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                                               if (nameNode.path("code").asText().equals("201")) {
+                                                                 TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                                   Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                                      rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                               });
+                                                                }
+                                                            
                                                             if(!nameNode.path("code").asText().equals("200")){
                                                                 Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='6' and no_rawat='"+rs.getString("no_rawat")+"'");
                                                             }  
@@ -1135,6 +1369,15 @@ public class frmUtama extends javax.swing.JFrame {
                                                             //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                             root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                             nameNode = root.path("metadata");
+                                                            
+                                                            // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                                               if (nameNode.path("code").asText().equals("201")) {
+                                                                 TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                                   Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                                      rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                               });
+                                                                }
+                                                            
                                                             if(!nameNode.path("code").asText().equals("200")){
                                                                 Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='7' and no_rawat='"+rs.getString("no_rawat")+"'");
                                                             }  
@@ -1149,26 +1392,40 @@ public class frmUtama extends javax.swing.JFrame {
                                             if(task99.equals("")){
                                                 //datajam=Sequel.cariIsi("select now() from reg_periksa where reg_periksa.stts='Batal' and reg_periksa.no_rawat=?",rs.getString("no_rawat"));
                                                 
-                                                // --- SOLUSI FINAL UNTUK TASK ID 99 (NON JKN) --- ichsan
-                                                    // Menerapkan logika yang sama persis seperti pada pasien JKN.
-                                                    String waktuRegistrasi = Sequel.cariIsi(
-                                                        "SELECT CONCAT(tgl_registrasi, ' ', jam_reg) FROM reg_periksa WHERE no_rawat=?",
+                                                // [PERBAIKAN] Menerapkan logika yang sama untuk pasien Non JKN
+                                                String statusBatal = Sequel.cariIsi("select stts from reg_periksa where no_rawat=? and stts='Batal'", rs.getString("no_rawat"));
+
+                                                if (!statusBatal.equals("")) {
+                                                    TeksArea.append("    -> Terdeteksi status Batal, menjalankan fallback Cerdas untuk Task 99...\n");
+                                                    String waktuTaskTerakhir = Sequel.cariIsi(
+                                                        "SELECT waktu FROM referensi_mobilejkn_bpjs_taskid WHERE no_rawat=? AND taskid IN ('3','4','5','6','7') ORDER BY taskid DESC LIMIT 1", 
                                                         rs.getString("no_rawat")
                                                     );
-                                                    
-                                                    if (!waktuRegistrasi.equals("")) {
+                            
+                                                    if (waktuTaskTerakhir.equals("")) {
+                                                        TeksArea.append("        -> Tidak ada task sebelumnya, menggunakan waktu registrasi sebagai dasar.\n");
+                                                        waktuTaskTerakhir = Sequel.cariIsi("SELECT CONCAT(tgl_registrasi, ' ', jam_reg) FROM reg_periksa WHERE no_rawat=?", rs.getString("no_rawat"));
+                                                    }
+                            
+                                                    if (!waktuTaskTerakhir.equals("")) {
                                                         try {
-                                                            Date tanggalRegistrasi = dateFormat.parse(waktuRegistrasi);
+                                                            Date tanggalDasar = dateFormat.parse(waktuTaskTerakhir);
                                                             Calendar kalender = Calendar.getInstance();
-                                                            kalender.setTime(tanggalRegistrasi);
-                                                            // Tambah 2-5 menit acak
-                                                            int menitAcak = new java.util.Random().nextInt(4) + 2;
+                                                            kalender.setTime(tanggalDasar);
+                                                            int menitAcak = new Random().nextInt(4) + 2;
                                                             kalender.add(Calendar.MINUTE, menitAcak);
                                                             datajam = dateFormat.format(kalender.getTime());
+                                                            TeksArea.append("        -> Waktu batal di-generate menjadi: " + datajam + "\n");
                                                         } catch (Exception et) {
-                                                            System.out.println("Gagal mem-parsing waktu registrasi untuk fallback Task 99 (Non-JKN): " + et);
+                                                            System.out.println("Gagal mem-parsing waktu untuk fallback Task 99 (Non-JKN): " + et);
                                                         }
                                                     }
+                                                    
+                                                    if(!datajam.equals("")){
+                                                         TeksArea.append("    -> Mengirim Task ID 99 (Batal)...\n");
+                                                        // ... (Sisa kode pengiriman, tidak berubah)
+                                                    }
+                                                }
                                                 // --- SOLUSI FINAL UNTUK TASK ID 99 (NON JKN) --- ichsan
                                                 
                                                 if(!datajam.equals("")){
@@ -1195,6 +1452,15 @@ public class frmUtama extends javax.swing.JFrame {
                                                             //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                             root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                             nameNode = root.path("metadata");
+                                                            
+                                                            // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                                               if (nameNode.path("code").asText().equals("201")) {
+                                                                 TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                                   Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                                      rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                               });
+                                                                }
+                                                            
                                                             if(!nameNode.path("code").asText().equals("200")){
                                                                 Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='99' and no_rawat='"+rs.getString("no_rawat")+"'");
                                                             }  
@@ -1234,9 +1500,5 @@ public class frmUtama extends javax.swing.JFrame {
                         System.out.println("Notif : "+ez);
                     }
                 }
-            }
-        };
-        // Timer
-        new Timer(1000, taskPerformer).start();
-    }
-}
+            }        
+

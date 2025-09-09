@@ -7086,7 +7086,7 @@ public final class DlgReg extends javax.swing.JDialog {
         // TODO add your handling code here:
     }                                  
 
-    private void BtnCheckinActionPerformed(java.awt.event.ActionEvent evt) {                                           
+    /*private void BtnCheckinActionPerformed(java.awt.event.ActionEvent evt) {                                           
         if (Sequel.mengedittf("referensi_mobilejkn_bpjs", "no_rawat=?", "status='Checkin',validasi=now()", 1, new String[]{
             TNoRw.getText()
         }) == true) {
@@ -7094,7 +7094,37 @@ public final class DlgReg extends javax.swing.JDialog {
             Sequel.queryu("update reg_periksa set jam_reg=current_time() where no_rawat='" + TNoRw.getText() + "'");
         }
         getData();
-    }                                          
+    } */
+    
+    private void BtnCheckinActionPerformed(java.awt.event.ActionEvent evt) {                                           
+    // Langkah 1: Validasi Awal sebelum melakukan aksi apapun
+    String noRawat = TNoRw.getText();
+    if (noRawat.trim().isEmpty()) {
+        JOptionPane.showMessageDialog(null, "Silakan pilih data pasien terlebih dahulu.");
+        return; // Keluar dari fungsi jika tidak ada no_rawat yang dipilih
+    }
+
+    // Cek apakah pasien ini sudah pernah divalidasi/check-in sebelumnya
+    String waktuValidasi = Sequel.cariIsi("SELECT validasi FROM referensi_mobilejkn_bpjs WHERE no_rawat=?", noRawat);
+
+    // Langkah 2: Cek Kondisi
+    // Jika waktuValidasi tidak null, tidak kosong, dan bukan '0000-00-00 00:00:00'
+    if (waktuValidasi != null && !waktuValidasi.equals("0000-00-00 00:00:00") && !waktuValidasi.trim().isEmpty()) {
+        // Tampilkan pesan bahwa sudah check-in dan hentikan proses
+        JOptionPane.showMessageDialog(null, "Pasien ini sudah melakukan check-in sebelumnya pada " + waktuValidasi + ".\nJam check-in tidak dapat diubah lagi.");
+        return; // Keluar dari fungsi, tidak ada update yang dijalankan
+    }
+
+    // Langkah 3: Proses check-in jika validasi awal lolos (kode original Anda)
+    if (Sequel.mengedittf("referensi_mobilejkn_bpjs", "no_rawat=?", "status='Checkin',validasi=now()", 1, new String[]{noRawat}) == true) {
+        Sequel.meghapus("referensi_mobilejkn_bpjs_batal", "nobooking", Booking.getText());
+        Sequel.queryu("update reg_periksa set jam_reg=current_time() where no_rawat='" + noRawat + "'");
+        JOptionPane.showMessageDialog(null, "Check-in berhasil divalidasi!"); // Notifikasi sukses
+    }
+    
+    // Refresh tampilan data
+    getData();
+}
 
     private void BtnCheckinKeyPressed(java.awt.event.KeyEvent evt) {          //ketika tombol checkin ditekan                             
         if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
