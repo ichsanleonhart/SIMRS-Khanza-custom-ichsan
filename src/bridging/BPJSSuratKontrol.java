@@ -572,7 +572,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         R1.setPreferredSize(new java.awt.Dimension(115, 23));
         panelCari.add(R1);
 
-        DTPTanggalSurat1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-05-2025" }));
+        DTPTanggalSurat1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15-09-2025" }));
         DTPTanggalSurat1.setDisplayFormat("dd-MM-yyyy");
         DTPTanggalSurat1.setName("DTPTanggalSurat1"); // NOI18N
         DTPTanggalSurat1.setOpaque(false);
@@ -595,7 +595,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         jLabel22.setPreferredSize(new java.awt.Dimension(25, 23));
         panelCari.add(jLabel22);
 
-        DTPTanggalSurat2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-05-2025" }));
+        DTPTanggalSurat2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15-09-2025" }));
         DTPTanggalSurat2.setDisplayFormat("dd-MM-yyyy");
         DTPTanggalSurat2.setName("DTPTanggalSurat2"); // NOI18N
         DTPTanggalSurat2.setOpaque(false);
@@ -621,7 +621,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         R2.setPreferredSize(new java.awt.Dimension(120, 23));
         panelCari.add(R2);
 
-        DTPTanggalKontrol1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-05-2025" }));
+        DTPTanggalKontrol1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15-09-2025" }));
         DTPTanggalKontrol1.setDisplayFormat("dd-MM-yyyy");
         DTPTanggalKontrol1.setName("DTPTanggalKontrol1"); // NOI18N
         DTPTanggalKontrol1.setOpaque(false);
@@ -644,7 +644,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         jLabel25.setPreferredSize(new java.awt.Dimension(25, 23));
         panelCari.add(jLabel25);
 
-        DTPTanggalKontrol2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-05-2025" }));
+        DTPTanggalKontrol2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15-09-2025" }));
         DTPTanggalKontrol2.setDisplayFormat("dd-MM-yyyy");
         DTPTanggalKontrol2.setName("DTPTanggalKontrol2"); // NOI18N
         DTPTanggalKontrol2.setOpaque(false);
@@ -724,7 +724,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
 
         TanggalSurat.setEditable(false);
         TanggalSurat.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalSurat.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-05-2025" }));
+        TanggalSurat.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15-09-2025" }));
         TanggalSurat.setDisplayFormat("dd-MM-yyyy");
         TanggalSurat.setName("TanggalSurat"); // NOI18N
         TanggalSurat.setOpaque(false);
@@ -804,7 +804,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         jLabel14.setBounds(491, 70, 100, 23);
 
         TanggalKontrol.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalKontrol.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-05-2025 12:01:35" }));
+        TanggalKontrol.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15-09-2025 14:06:35" }));
         TanggalKontrol.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         TanggalKontrol.setName("TanggalKontrol"); // NOI18N
         TanggalKontrol.setOpaque(false);
@@ -900,6 +900,109 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
         Valid.pindah(evt,TCari,TanggalKontrol);
 }//GEN-LAST:event_TanggalSuratKeyPressed
 
+    //modifikasi Ichsan, membuat validasi tanggal surat agar tidak bisa menyimpan mundur.
+    private void BtnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSimpanActionPerformed
+    if(NoRawat.getText().trim().equals("")||NoSEP.getText().trim().equals("")){
+        Valid.textKosong(NoRawat,"pasien");
+    }else if(NmDokter.getText().trim().equals("")||KdDokter.getText().trim().equals("")){
+        Valid.textKosong(KdDokter,"Dokter");
+    }else if(NmPoli.getText().trim().equals("")||NmPoli.getText().trim().equals("")){
+        Valid.textKosong(KdPoli,"Poli");
+    }else{
+        // --- AWAL MODIFIKASI VALIDASI TANGGAL SURAT ---
+
+        // 1. Ambil tanggal dari form dan tanggal hari ini
+        Date tanggalSuratForm = TanggalSurat.getDate();
+        Date tanggalHariIni = new Date();
+
+        // 2. Hapus komponen waktu untuk perbandingan tanggal yang akurat
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            tanggalSuratForm = sdf.parse(sdf.format(tanggalSuratForm));
+            tanggalHariIni = sdf.parse(sdf.format(tanggalHariIni));
+        } catch (Exception e) {
+            System.out.println("Error parsing tanggal: " + e);
+            // Jika terjadi error, fallback ke perbandingan dengan waktu
+            tanggalSuratForm = TanggalSurat.getDate();
+            tanggalHariIni = new Date();
+        }
+
+        // 3. Bandingkan tanggal, jika tanggal surat lebih kecil dari hari ini, beri peringatan
+        if (tanggalSuratForm.before(tanggalHariIni)) {
+            JOptionPane.showMessageDialog(null, "Tanggal surat tidak boleh diset mundur!");
+            return; // Hentikan proses
+        }
+
+        // --- AKHIR MODIFIKASI ---
+        
+        // Jika validasi tanggal lolos, lanjutkan proses yang sudah ada
+        try {
+            headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            headers.add("X-Cons-ID",koneksiDB.CONSIDAPIBPJS());
+            utc=String.valueOf(api.GetUTCdatetimeAsString());
+            headers.add("X-Timestamp",utc);
+            headers.add("X-Signature",api.getHmac(utc));
+            headers.add("user_key",koneksiDB.USERKEYAPIBPJS());
+            URL = link+"/RencanaKontrol/insert";            
+            requestJson ="{" +
+                            "\"request\": {" +
+                                "\"noSEP\":\""+NoSEP.getText()+"\"," +
+                                "\"kodeDokter\":\""+KdDokter.getText()+"\"," +
+                                "\"poliKontrol\":\""+KdPoli.getText()+"\"," +
+                                "\"tglRencanaKontrol\":\""+Valid.SetTgl(TanggalKontrol.getSelectedItem()+"")+"\"," +
+                                "\"user\":\""+user+"\"" +
+                            "}" +
+                         "}";
+            System.out.println("JSON : "+requestJson);
+            requestEntity = new HttpEntity(requestJson,headers);
+            root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
+            nameNode = root.path("metaData");
+            System.out.println("code : "+nameNode.path("code").asText());
+            System.out.println("message : "+nameNode.path("message").asText());
+            if(nameNode.path("code").asText().equals("200")){
+                response = mapper.readTree(api.Decrypt(root.path("response").asText(),utc)).path("noSuratKontrol");
+                if(Sequel.menyimpantf("bridging_surat_kontrol_bpjs","?,?,?,?,?,?,?,?","No.Surat",8,new String[]{
+                        NoSEP.getText(),Valid.SetTgl(TanggalSurat.getSelectedItem()+""),response.asText(),Valid.SetTgl(TanggalKontrol.getSelectedItem()+""),KdDokter.getText(),NmDokter.getText(),KdPoli.getText(),NmPoli.getText()
+                    })==true){
+                    
+                    // Panggil fungsi kirim WA SEBELUM emptTeks()
+                      try {
+                          if(koneksiDB.WANOTIFPASIEN().equals("yes")){
+                             System.out.println("BtnSimpan: Memanggil kirimWhatsAppMessage untuk NoRM: " + NoRM.getText());
+                             kirimWhatsAppMessage();  //kirim pesan WA by ichsan
+                             System.out.println("BtnSimpan: Memanggil kirimWhatsAppMessageReminderKontrol untuk NoRM: " + NoRM.getText());
+                             kirimWhatsAppMessageReminderKontrol() ; //kirim pesan WA reminder kontrol sehari sebelum tgl kontrol
+                             JOptionPane.showMessageDialog(null, "Surat kontrol berhasil dibuat. \n "
+                                + "WA reminder akan otomatis terkirim sekarang dan pada H-1 sebelum tanggal kontrol  ;-)");
+                           }
+                     } catch (Exception e_wa) {
+                            System.out.println("Gagal mengirim WA setelah simpan SK BPJS: " + e_wa);
+                          // Anda bisa menambahkan JOptionPane di sini jika ingin memberitahu user bahwa pengiriman WA mungkin gagal
+                          // JOptionPane.showMessageDialog(null, "Surat Kontrol berhasil dibuat, namun pengiriman notifikasi WhatsApp mungkin gagal.");
+                        }                        
+                    
+                    emptTeks();  //kosongkan form
+                    tampil();  //kosongkan form
+                    if(JADIKANBOOKINGSURATKONTROLAPIBPJS.equals("yes")){
+                        if(isBooking()==false){
+                            JOptionPane.showMessageDialog(null,"Gagal menyimpan booking, silahkan hubungi administrator...!!!!");
+                        }
+                    }
+                }
+            }else{
+                JOptionPane.showMessageDialog(null,nameNode.path("message").asText());
+            }   
+        }catch (Exception ex) {
+            System.out.println("Notifikasi Bridging : "+ex);
+            if(ex.toString().contains("UnknownHostException")){
+                JOptionPane.showMessageDialog(null,"Koneksi ke server BPJS terputus...!");
+            }
+        }
+    }
+}//GEN-LAST:event_BtnSimpanActionPerformed
+    
+    /*
     private void BtnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSimpanActionPerformed
         if(NoRawat.getText().trim().equals("")||NoSEP.getText().trim().equals("")){
             Valid.textKosong(NoRawat,"pasien");
@@ -973,7 +1076,7 @@ public class BPJSSuratKontrol extends javax.swing.JDialog {
             }
         }
 }//GEN-LAST:event_BtnSimpanActionPerformed
-
+*/
     ///////////////////////////////////////////////////////// KODE UNTUK KIRIM WA SETELAH SIMPAN SURAT KONTROL BY ICHSAN
     private void kirimWhatsAppMessage() {
     // ambil detik sekarang, lalu tambahkan + 5 detik ke depan

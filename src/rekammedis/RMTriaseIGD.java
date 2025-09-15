@@ -4794,6 +4794,82 @@ public final class RMTriaseIGD extends javax.swing.JDialog {
     }
     
     public void setNoRm(String norwt,String norm,String namapasien) {
+    emptTeks();
+    TNoRw.setText(norwt);
+    TNoRM.setText(norm);
+    TPasien.setText(namapasien);
+    TCari.setText(norwt);
+
+    // --- AWAL MODIFIKASI: Logika Fallback Data Vital ---
+    // 1. Siapkan variabel untuk menampung data dari kedua sumber
+    String keluhanIgd = "", tdIgd = "", nadiIgd = "", rrIgd = "", suhuIgd = "", spoIgd = "";
+    String keluhanRalan = "", tdRalan = "", nadiRalan = "", rrRalan = "", suhuRalan = "", spo2Ralan = "";
+
+    // 2. Ambil data dari sumber prioritas (penilaian_medis_igd)
+    try (PreparedStatement ps = koneksi.prepareStatement(
+            "SELECT keluhan_utama, td, nadi, rr, suhu, spo FROM penilaian_medis_igd WHERE no_rawat = ?")) {
+        ps.setString(1, TNoRw.getText());
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                keluhanIgd = rs.getString("keluhan_utama") == null ? "" : rs.getString("keluhan_utama");
+                tdIgd = rs.getString("td") == null ? "" : rs.getString("td");
+                nadiIgd = rs.getString("nadi") == null ? "" : rs.getString("nadi");
+                rrIgd = rs.getString("rr") == null ? "" : rs.getString("rr");
+                suhuIgd = rs.getString("suhu") == null ? "" : rs.getString("suhu");
+                spoIgd = rs.getString("spo") == null ? "" : rs.getString("spo");
+            }
+        }
+    } catch (Exception e) {
+        System.out.println("Notif (penilaian_medis_igd): " + e);
+    }
+
+    // 3. Ambil data dari sumber fallback (pemeriksaan_ralan)
+    try (PreparedStatement ps = koneksi.prepareStatement(
+            "SELECT keluhan, suhu_tubuh, tensi, nadi, spo2, respirasi FROM pemeriksaan_ralan WHERE no_rawat = ? ORDER BY tgl_perawatan DESC, jam_rawat DESC LIMIT 1")) {
+        ps.setString(1, TNoRw.getText());
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                keluhanRalan = rs.getString("keluhan") == null ? "" : rs.getString("keluhan");
+                suhuRalan = rs.getString("suhu_tubuh") == null ? "" : rs.getString("suhu_tubuh");
+                tdRalan = rs.getString("tensi") == null ? "" : rs.getString("tensi");
+                nadiRalan = rs.getString("nadi") == null ? "" : rs.getString("nadi");
+                spo2Ralan = rs.getString("spo2") == null ? "" : rs.getString("spo2");
+                rrRalan = rs.getString("respirasi") == null ? "" : rs.getString("respirasi");
+            }
+        }
+    } catch (Exception e) {
+        System.out.println("Notif (pemeriksaan_ralan): " + e);
+    }
+
+    // 4. Logika untuk memilih data yang akan ditampilkan
+    // Prioritaskan data IGD jika tidak kosong/nol, jika tidak, gunakan data Ralan.
+    String finalKeluhan = (!keluhanIgd.trim().isEmpty()) ? keluhanIgd : keluhanRalan;
+    String finalSuhu = (!suhuIgd.trim().isEmpty() && !suhuIgd.equals("0")) ? suhuIgd : suhuRalan;
+    String finalTensi = (!tdIgd.trim().isEmpty() && !tdIgd.equals("0/0") && !tdIgd.equals("-") && !tdIgd.equals("0")) ? tdIgd : tdRalan;
+    String finalNadi = (!nadiIgd.trim().isEmpty() && !nadiIgd.equals("0")) ? nadiIgd : nadiRalan;
+    String finalSaturasi = (!spoIgd.trim().isEmpty() && !spoIgd.equals("0")) ? spoIgd : spo2Ralan;
+    String finalRespirasi = (!rrIgd.trim().isEmpty() && !rrIgd.equals("0")) ? rrIgd : rrRalan;
+
+    // 5. Set nilai akhir ke komponen form
+    PrimerKeluhanUtama.setText(finalKeluhan);
+    PrimerSuhu.setText(finalSuhu);
+    PrimerTensi.setText(finalTensi);
+    PrimerNadi.setText(finalNadi);
+    PrimerSaturasi.setText(finalSaturasi);
+    PrimerRespirasi.setText(finalRespirasi);
+
+    SekunderAnamnesa.setText(finalKeluhan);
+    SekunderSuhu.setText(finalSuhu);
+    SekunderTensi.setText(finalTensi);
+    SekunderNadi.setText(finalNadi);
+    SekunderSaturasi.setText(finalSaturasi);
+    SekunderRespirasi.setText(finalRespirasi);
+    
+    // --- AKHIR MODIFIKASI ---
+}
+    
+    /*  //backup kode yang sudah berjalan bagus by ichsan (mencoba kode pengambilan data ttv yang lebih dinamis)
+    public void setNoRm(String norwt,String norm,String namapasien) {
          emptTeks();
     TNoRw.setText(norwt);
     TNoRM.setText(norm);
@@ -4808,7 +4884,7 @@ public final class RMTriaseIGD extends javax.swing.JDialog {
     ResultSet rsMedisIgd = null;
     try {
         psMedisIgd = koneksi.prepareStatement(
-                "SELECT keluhan_utama, td, nadi, rr, suhu, spo2 " +
+                "SELECT keluhan_utama, td, nadi, rr, suhu, spo " +
                 "FROM penilaian_medis_igd " +
                 "WHERE no_rawat = ?");
         
@@ -4821,7 +4897,7 @@ public final class RMTriaseIGD extends javax.swing.JDialog {
             PrimerSuhu.setText(rsMedisIgd.getString("suhu"));
             PrimerTensi.setText(rsMedisIgd.getString("td"));
             PrimerNadi.setText(rsMedisIgd.getString("nadi"));
-            PrimerSaturasi.setText(rsMedisIgd.getString("spo2"));
+            PrimerSaturasi.setText(rsMedisIgd.getString("spo"));
             PrimerRespirasi.setText(rsMedisIgd.getString("rr"));
 
             // Mengisi TextBox untuk data Sekunder dari penilaian_medis_igd
@@ -4829,7 +4905,7 @@ public final class RMTriaseIGD extends javax.swing.JDialog {
             SekunderSuhu.setText(rsMedisIgd.getString("suhu"));
             SekunderTensi.setText(rsMedisIgd.getString("td"));
             SekunderNadi.setText(rsMedisIgd.getString("nadi"));
-            SekunderSaturasi.setText(rsMedisIgd.getString("spo2"));
+            SekunderSaturasi.setText(rsMedisIgd.getString("spo"));
             SekunderRespirasi.setText(rsMedisIgd.getString("rr"));
             
             dataDitemukan = true; // Set flag karena data berhasil ditemukan
@@ -4912,7 +4988,8 @@ public final class RMTriaseIGD extends javax.swing.JDialog {
         }
     }
     // --- AKHIR MODIFIKASI ---
-    }
+    }  
+*/
     
     public void tampilPemeriksaan() {        
         Valid.tabelKosong(tabModePemeriksaan);
