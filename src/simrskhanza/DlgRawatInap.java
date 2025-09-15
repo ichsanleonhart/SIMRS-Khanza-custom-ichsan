@@ -165,6 +165,13 @@ import simrskhanza.DlgCariPasien;
 import simrskhanza.DlgCatatan;
 import simrskhanza.DlgRujuk;
 
+
+
+
+import java.util.Date;  //tambahan ichsan
+import java.text.SimpleDateFormat; //tambahan ichsan
+import javax.swing.JOptionPane; //tambahan ichsan
+
 /**
  *
  * @author perpustakaan
@@ -4674,6 +4681,7 @@ public final class DlgRawatInap extends javax.swing.JDialog {
         }
 }//GEN-LAST:event_TNoRwKeyPressed
 
+    /*
     private void BtnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSimpanActionPerformed
         if(TNoRw.getText().trim().equals("")||TPasien.getText().trim().equals("")){
             Valid.textKosong(TNoRw,"No.Rawat");
@@ -4690,6 +4698,57 @@ public final class DlgRawatInap extends javax.swing.JDialog {
             }
         }
 }//GEN-LAST:event_BtnSimpanActionPerformed
+    */
+    private void BtnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSimpanActionPerformed
+    if (TNoRw.getText().trim().equals("") || TPasien.getText().trim().equals("")) {
+        Valid.textKosong(TNoRw, "No.Rawat");
+    } else {
+        // --- AWAL MODIFIKASI ---
+        
+        // 1. Siapkan format tanggal dan dapatkan tanggal dari form & tanggal hari ini
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String tanggalForm = Valid.SetTgl(DTPTgl.getSelectedItem() + "");
+        String tanggalHariIni = dateFormat.format(new Date());
+
+        // 2. Buat fungsi lambda untuk menjalankan proses simpan agar tidak duplikat kode
+        Runnable prosesSimpan = () -> {
+            if (akses.getkode().equals("Admin Utama")) {
+                simpan();
+            } else {
+                if (TanggalRegistrasi.getText().equals("")) {
+                    TanggalRegistrasi.setText(Sequel.cariIsi("select concat(reg_periksa.tgl_registrasi,' ',reg_periksa.jam_reg) from reg_periksa where reg_periksa.no_rawat=?", TNoRw.getText()));
+                }
+                if (Sequel.cekTanggalRegistrasi(TanggalRegistrasi.getText(), Valid.SetTgl(DTPTgl.getSelectedItem() + "") + " " + cmbJam.getSelectedItem() + ":" + cmbMnt.getSelectedItem() + ":" + cmbDtk.getSelectedItem()) == true) {
+                    simpan();
+                }
+            }
+        };
+
+        // 3. Bandingkan tanggal dari form dengan tanggal hari ini
+        if (!tanggalForm.equals(tanggalHariIni)) {
+            // Jika tidak sama, tampilkan pesan konfirmasi
+            int pilihan = JOptionPane.showConfirmDialog(
+                this, 
+                "Tanggal dari data yang hendak disimpan (" + tanggalForm + ") tidak sama dengan hari ini (" + tanggalHariIni + ").\nApakah datanya tetap akan disimpan?", 
+                "Konfirmasi Tanggal", 
+                JOptionPane.YES_NO_OPTION, 
+                JOptionPane.WARNING_MESSAGE
+            );
+
+            // Jika user memilih "Yes", jalankan proses simpan
+            if (pilihan == JOptionPane.YES_OPTION) {
+                prosesSimpan.run();
+            }
+            // Jika user memilih "No", maka tidak terjadi apa-apa.
+        } else {
+            // Jika tanggalnya sama, langsung jalankan proses simpan
+            prosesSimpan.run();
+        }
+        
+        // --- AKHIR MODIFIKASI ---
+    }
+}//GEN-LAST:event_BtnSimpanActionPerformed
+    
 
     private void BtnSimpanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnSimpanKeyPressed
         if(evt.getKeyCode()==KeyEvent.VK_SPACE){
