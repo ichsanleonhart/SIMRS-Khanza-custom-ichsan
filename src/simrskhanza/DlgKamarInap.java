@@ -5847,25 +5847,34 @@ public class DlgKamarInap extends javax.swing.JDialog {
                     "select penjab.png_jawab from reg_periksa inner join penjab on reg_periksa.kd_pj = penjab.kd_pj where reg_periksa.no_rawat=?", norawat.getText()
                 );
 
-                // 2. Jika penjamin adalah BPJS, lakukan pengecekan surat kontrol
+                // 2. Jika penjamin adalah BPJS, lakukan pengecekan selanjutnya
                 if (jenisBayar.toUpperCase().contains("BPJS")) {
-                    String noSuratKontrol = Sequel.cariIsi(
-                        "select bridging_surat_kontrol_bpjs.no_surat from bridging_sep " +
-                        "inner join bridging_surat_kontrol_bpjs on bridging_sep.no_sep = bridging_surat_kontrol_bpjs.no_sep " +
-                        "where bridging_sep.no_rawat = ? limit 1", norawat.getText()
+                    
+                    // 2a. Cek apakah pasien adalah bayi baru lahir (kurang dari 4 hari)
+                    int selisihHariLahir = Sequel.cariInteger(
+                        "select DATEDIFF(current_date(), pasien.tgl_lahir) from pasien inner join reg_periksa on pasien.no_rkm_medis=reg_periksa.no_rkm_medis where reg_periksa.no_rawat=?", norawat.getText()
                     );
+                    
+                    // 2b. Jika BUKAN bayi < 4 hari, maka validasi surat kontrol
+                    if(selisihHariLahir >= 4) {
+                        String noSuratKontrol = Sequel.cariIsi(
+                            "select bridging_surat_kontrol_bpjs.no_surat from bridging_sep " +
+                            "inner join bridging_surat_kontrol_bpjs on bridging_sep.no_sep = bridging_surat_kontrol_bpjs.no_sep " +
+                            "where bridging_sep.no_rawat = ? limit 1", norawat.getText()
+                        );
 
-                    // 3. Jika surat kontrol tidak ditemukan, tampilkan peringatan dan hentikan proses
-                    if (noSuratKontrol == null || noSuratKontrol.trim().isEmpty()) {
-                        JOptionPane.showMessageDialog(null, "Surat kontrol BPJS (Bridging) belum dibuat, silakan buat SKDP terlebih dahulu!");
-                        return; // Menghentikan eksekusi method di sini
+                        // 3. Jika surat kontrol tidak ditemukan, tampilkan peringatan dan hentikan proses
+                        if (noSuratKontrol == null || noSuratKontrol.trim().isEmpty()) {
+                            JOptionPane.showMessageDialog(null, "Surat kontrol BPJS (Bridging) belum dibuat, silakan buat SKDP terlebih dahulu!");
+                            return; // Menghentikan eksekusi method di sini
+                        }
                     }
                 }
             }
             
             // --- AKHIR MODIFIKASI ---
 
-            // 4. Jika user adalah "Admin Utama" atau jika validasi berhasil, lanjutkan proses pemulangan
+            // 4. Jika semua validasi lolos, lanjutkan proses pemulangan
             norawat.setEditable(false);
             kdkamar.setEditable(false);
             i=1;
