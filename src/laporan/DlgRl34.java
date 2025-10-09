@@ -6,7 +6,7 @@
  /*
  * DlgLhtBiaya.java
  *
- * Created on 12 Jul 10, 16:21:34
+ * Created on 13 Februari 2025, 16:21:34 dr. Salim Mulyana
  */
 package laporan;
 
@@ -39,14 +39,10 @@ public final class DlgRl34 extends javax.swing.JDialog {
     private Connection koneksi = koneksiDB.condb();
     private sekuel Sequel = new sekuel();
     private validasi Valid = new validasi();
-    private PreparedStatement ps, psrujukanrs, psrujukanbidan, psrujukanpuskesmas, psrujukanfaskeslain,
-            psrujukansemua, psrujukanmati, psrujukannonmedishidup, psrujukannonmedissemua, psrujukannonmedismati, psrujukanhidup, psnonrujukhidup, psnonrujukmati,
-            psnonrujuktotal, psdirujuk;
-    private ResultSet rs, rsrujukanrs, rsrujukanbidan, rsrujukanpuskesmas, rsrujukanfaskeslain,
-            rsrujukansemua, rsrujukanmati, rsrujukanhidup, rsrujukannonmedismati, rsrujukannonmedishidup, rsnonrujukhidup, rsnonrujukmati,
-            rsnonrujuktotal, rsdirujuk;
-    private int i = 0, rujukrs = 0, rujukbidan = 0, rujukpuskesmas = 0, rujukfaskeslain = 0, rujuksemua = 0, rujukhidup = 0,
-            rujukmati = 0, rujuknonmedishidup = 0, rujuknonmedismati = 0, nonrujukhidup = 0, nonrujukmati = 0, nonrujuktotal = 0, dirujuk = 0;
+    private PreparedStatement ps;
+    private ResultSet rs;
+    private int i = 0, jumlah=0,total=0,baru = 0, lama = 0, rujukan = 0, nonrujukan = 0, dirawat = 0, dirujuk = 0, meninggallaki = 0, meninggalperempuan = 0, doalaki = 0, doaperempuan = 0, lukalaki = 0, lukaperempuan = 0, pulang = 0, falseemergency = 0,
+            ttlrujukan = 0, ttlnonrujukan = 0, ttldirawat = 0, ttldirujuk = 0, ttlmeninggallaki = 0, ttlmeninggalperempuan, ttldoalaki = 0, ttldoaperempuan, ttllukalaki = 0, ttllukaperempuan = 0, ttlpulang = 0, ttlfalseemergency = 0;
 
     /**
      * Creates new form DlgLhtBiaya
@@ -60,114 +56,50 @@ public final class DlgRl34 extends javax.swing.JDialog {
         this.setLocation(8, 1);
         setSize(885, 674);
 
-        Object[] rowRwJlDr = {"No.", "Jenis Kegiatan", "Rujukan RS", "Rujukan Bidan", "Rujukan Puskesmas",
-            "Rujukan Faskes Lain", "Rujukan Jml Hidup", "Rujukan Jml Mati", "Rujukan Jml Total", "Rujukan Non Medis Jumlah Hidup",
-            "Rujukan Non Medis Jumlah Mati", "Total Rujukan Non Medis", "Non Rjk Jml Hidup", "Non Rjk Jml Mati", "Non Rjk Jml Ttl", "Dirujuk"};
+        Object[] rowRwJlDr = {
+            "No.", "Jenis Pengunjung", "Jumlah"
+        };
+
+// Membuat model tabel dengan kolom tidak dapat diedit
         tabMode = new DefaultTableModel(null, rowRwJlDr) {
             @Override
             public boolean isCellEditable(int rowIndex, int colIndex) {
                 return false;
             }
         };
+
+// Mengatur model tabel
         tbBangsal.setModel(tabMode);
-        //tbBangsal.setDefaultRenderer(Object.class, new WarnaTable(jPanel2.getBackground(),tbBangsal.getBackground()));
+// Mengatur ukuran scroll pada tabel
         tbBangsal.setPreferredScrollableViewportSize(new Dimension(500, 500));
+// Menonaktifkan pengaturan otomatis ukuran kolom
         tbBangsal.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-        for (i = 0; i < 13; i++) {
+// Mengatur lebar kolom
+        for (int i = 0; i < rowRwJlDr.length; i++) {
             TableColumn column = tbBangsal.getColumnModel().getColumn(i);
             if (i == 0) {
-                column.setPreferredWidth(25);
+                column.setPreferredWidth(25); // Kolom "No." lebih kecil
             } else if (i == 1) {
-                column.setPreferredWidth(250);
+                column.setPreferredWidth(200); // Kolom "Jenis Pelayanan" lebih besar
             } else {
-                column.setPreferredWidth(110);
+                column.setPreferredWidth(80); // Kolom lainnya
             }
         }
+
         tbBangsal.setDefaultRenderer(Object.class, new WarnaTable());
 
         TCari.setDocument(new batasInput((byte) 100).getKata(TCari));
-
+        /*
+        SELECT CASE WHEN stts_daftar = 'Baru' THEN 'Pengunjung Baru' WHEN stts_daftar = 'Lama' THEN 'Pengunjung Lama' ELSE 'Tidak Diketahui' END AS jenis_pengunjung, COUNT(*) AS jumlah FROM reg_periksa GROUP BY jenis_pengunjung UNION ALL SELECT 'TOTAL' AS jenis_pengunjung, COUNT(*) AS jumlah FROM reg_periksa;
+        */
+              
         try {
-            ps = koneksi.prepareStatement(
-                    "select kode_paket,nm_perawatan from paket_operasi where kategori='Kebidanan' order by nm_perawatan");
-            psrujukanrs = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "where operasi.kode_paket=? and rujuk_masuk.perujuk like '%rs%' and operasi.tgl_operasi between ? and ? "
-                    + "or operasi.kode_paket=? and rujuk_masuk.perujuk like '%rumah sakit%' and operasi.tgl_operasi between ? and ?");
-
-            psrujukanbidan = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "where operasi.kode_paket=? and rujuk_masuk.perujuk like '%bidan%' and operasi.tgl_operasi between ? and ? "
-                    + "or operasi.kode_paket=? and rujuk_masuk.perujuk like '%Amd.Keb%' and operasi.tgl_operasi between ? and ?");
-
-            psrujukanpuskesmas = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "where operasi.kode_paket=? and rujuk_masuk.perujuk like '%puskesmas%' and operasi.tgl_operasi between ? and ? "
-                    + "or operasi.kode_paket=? and rujuk_masuk.perujuk like '%pkm%' and operasi.tgl_operasi between ? and ?");
-
-            psrujukanfaskeslain = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "where operasi.kode_paket=? and rujuk_masuk.perujuk like '%klinik%' and operasi.tgl_operasi between ? and ? "
-                    + "or operasi.kode_paket=? and rujuk_masuk.perujuk like '%dr%' and operasi.tgl_operasi between ? and ?");
-
-            psrujukansemua = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "where operasi.kode_paket=? and operasi.tgl_operasi between ? and ? ");
-
-            psrujukanhidup = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk "
-                    + "inner join reg_periksa inner join pasien on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "and rujuk_masuk.no_rawat=reg_periksa.no_rawat and reg_periksa.no_rkm_medis=pasien.no_rkm_medis "
-                    + "where rujuk_masuk.perujuk in ('puskesmas', 'klinik', 'bidan', 'rs','dr','pkm','bdn') and pasien.no_rkm_medis not in (select no_rkm_medis from pasien_mati) and operasi.kode_paket=? and operasi.tgl_operasi between ? and ?");
-
-            psrujukanmati = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk "
-                    + "inner join reg_periksa inner join pasien_mati on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "and rujuk_masuk.no_rawat=reg_periksa.no_rawat and reg_periksa.no_rkm_medis=pasien_mati.no_rkm_medis "
-                    + "where rujuk_masuk.perujuk in ('puskesmas', 'klinik', 'bidan', 'rs','dr','pkm','bdn') and operasi.kode_paket=? and operasi.tgl_operasi between ? and ?");
-
-            psrujukannonmedissemua = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "where operasi.kode_paket=? and operasi.tgl_operasi between ? and ? ");
-
-            psrujukannonmedishidup = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk "
-                    + "inner join reg_periksa inner join pasien on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "and rujuk_masuk.no_rawat=reg_periksa.no_rawat and reg_periksa.no_rkm_medis=pasien.no_rkm_medis "
-                    + "where rujuk_masuk.perujuk not in ('puskesmas', 'klinik', 'bidan', 'rs','dr','pkm','bdn') and pasien.no_rkm_medis not in (select no_rkm_medis from pasien_mati) and operasi.kode_paket=? and operasi.tgl_operasi between ? and ?");
-
-            psrujukannonmedismati = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi inner join rujuk_masuk "
-                    + "inner join reg_periksa inner join pasien_mati on rujuk_masuk.no_rawat=operasi.no_rawat "
-                    + "and rujuk_masuk.no_rawat=reg_periksa.no_rawat and reg_periksa.no_rkm_medis=pasien_mati.no_rkm_medis "
-                    + "where rujuk_masuk.perujuk not in ('puskesmas', 'klinik', 'bidan', 'rs','dr','pkm','bdn') and operasi.kode_paket=? and operasi.tgl_operasi between ? and ?");
-
-            psnonrujuktotal = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi where operasi.no_rawat not in(select rujuk_masuk.no_rawat from rujuk_masuk) "
-                    + "and operasi.kode_paket=? and operasi.tgl_operasi between ? and ? ");
-
-            psnonrujukmati = koneksi.prepareStatement(
-                    "select count(operasi.kode_paket) from operasi,reg_periksa,pasien_mati "
-                    + "where operasi.no_rawat not in(select rujuk_masuk.no_rawat from rujuk_masuk) "
-                    + "and reg_periksa.no_rkm_medis=pasien_mati.no_rkm_medis "
-                    + "and operasi.kode_paket=? and operasi.tgl_operasi between ? and ? ");
-
-            psnonrujukhidup = koneksi.prepareStatement(
-                    "SELECT count(operasi.kode_paket) FROM operasi INNER JOIN reg_periksa ON operasi.no_rawat = reg_periksa.no_rawat INNER JOIN "
-                    + "pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis where operasi.no_rawat not in(select rujuk_masuk.no_rawat from rujuk_masuk) "
-                    + "and pasien.no_rkm_medis not in (select no_rkm_medis from pasien_mati) and operasi.kode_paket=? and operasi.tgl_operasi between ? and ?");
-            /*   "select count(operasi.kode_paket) from operasi,reg_periksa,pasien "
-                    + "where operasi.no_rawat not in(select rujuk_masuk.no_rawat from rujuk_masuk) and pasien.no_rkm_medis not in (select no_rkm_medis from pasien_mati) "
-                    + "and reg_periksa.no_rkm_medis=pasien.no_rkm_medis "
-                    + "and operasi.kode_paket=? and operasi.tgl_operasi between ? and ? "
-            );   */
-                     psdirujuk = koneksi.prepareStatement(
-                            "select count(operasi.kode_paket) from operasi inner join rujuk on rujuk.no_rawat=operasi.no_rawat "
-                            + "where operasi.kode_paket=? and operasi.tgl_operasi between ? and ? ");
+            ps = koneksi.prepareStatement("select reg_periksa.stts_daftar from reg_periksa group by reg_periksa.stts_daftar");
         } catch (Exception e) {
             System.out.println(e);
         }
+
     }
 
     /**
@@ -207,7 +139,7 @@ public final class DlgRl34 extends javax.swing.JDialog {
             }
         });
 
-        internalFrame1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ RL 3.6 Rekapitulasi Kegiatan Pelayanan Kebidanan ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50, 50, 50))); // NOI18N
+        internalFrame1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ Formulir RL 3.4 Rekapitulasi Pengunjung ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50, 50, 50))); // NOI18N
         internalFrame1.setName("internalFrame1"); // NOI18N
         internalFrame1.setLayout(new java.awt.BorderLayout(1, 1));
 
@@ -361,25 +293,23 @@ public final class DlgRl34 extends javax.swing.JDialog {
                 if (!tbBangsal.getValueAt(r, 0).toString().contains(">>")) {
                     Sequel.menyimpan("temporary", "'" + r + "','"
                             + tabMode.getValueAt(r, 0).toString() + "','"
-                            + tabMode.getValueAt(r, 1).toString().replaceAll("'", "`") + "','"
+                            + tabMode.getValueAt(r, 1).toString() + "','"
                             + tabMode.getValueAt(r, 2).toString() + "','"
                             + tabMode.getValueAt(r, 3).toString() + "','"
                             + tabMode.getValueAt(r, 4).toString() + "','"
                             + tabMode.getValueAt(r, 5).toString() + "','"
                             + tabMode.getValueAt(r, 6).toString() + "','"
                             + tabMode.getValueAt(r, 7).toString() + "','"
-                            + tabMode.getValueAt(r, 8).toString() + "','0','0','0','"
+                            + tabMode.getValueAt(r, 8).toString() + "','"
                             + tabMode.getValueAt(r, 9).toString() + "','"
                             + tabMode.getValueAt(r, 10).toString() + "','"
                             + tabMode.getValueAt(r, 11).toString() + "','"
                             + tabMode.getValueAt(r, 12).toString() + "','"
-                            + tabMode.getValueAt(r, 13).toString() + "','"
-                            + tabMode.getValueAt(r, 14).toString() + "','"
-                            + tabMode.getValueAt(r, 15).toString() + "','','','','','','','','','','','','','','','','','','" + akses.getalamatip() + "'", "Rekap Nota Pembayaran");
+                            + tabMode.getValueAt(r, 13).toString() + "','','','','','','','','','','','','','','','','','','','','','','','" + akses.getalamatip() + "'", "Rekap Nota Pembayaran");
                 }
             }
 
-            Valid.MyReportqry("rptRl34.jasper", "report", "::[ Formulir RL 3.4 ]::", "select * from temporary where temporary.temp37='" + akses.getalamatip() + "' order by temporary.no", param);
+            Valid.MyReportqry("rptRl32.jasper", "report", "::[ Formulir RL 3.2 ]::", "select * from temporary where temporary.temp37='" + akses.getalamatip() + "' order by temporary.no", param);
         }
         this.setCursor(Cursor.getDefaultCursor());
 }//GEN-LAST:event_BtnPrintActionPerformed
@@ -488,149 +418,119 @@ private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
         try {
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             Valid.tabelKosong(tabMode);
+        //    ps.setString(1, Valid.SetTgl(Tgl1.getSelectedItem() + ""));
+        //    ps.setString(2, Valid.SetTgl(Tgl2.getSelectedItem() + ""));
+            
             rs = ps.executeQuery();
             i = 1;
+            jumlah =0;
+            total = 0;
+            rujukan = 0;
+            nonrujukan = 0;
+            dirawat = 0;
+            dirujuk = 0;
+            meninggallaki = 0;
+            meninggalperempuan = 0;
+            doalaki = 0;
+            doaperempuan = 0;
+            lukalaki = 0;
+            lukaperempuan = 0;
+            pulang = 0;
+            falseemergency = 0;
+            ttlrujukan = 0;
+            ttlnonrujukan = 0;
+            ttldirawat = 0;
+            ttldirujuk = 0;
+            ttlmeninggallaki = 0;
+            ttlmeninggalperempuan = 0;
+            ttldoalaki = 0;
+            ttldoaperempuan = 0;
+            ttllukalaki = 0;
+            ttllukaperempuan = 0;
+            ttlpulang = 0;
+            ttlfalseemergency = 0;
+            baru = 0;
+            lama = 0;
             while (rs.next()) {
-                psrujukanrs.setString(1, rs.getString("kode_paket"));
-                psrujukanrs.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukanrs.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                psrujukanrs.setString(4, rs.getString("kode_paket"));
-                psrujukanrs.setString(5, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukanrs.setString(6, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsrujukanrs = psrujukanrs.executeQuery();
-                rujukrs = 0;
-                if (rsrujukanrs.next()) {
-                    rujukrs = rsrujukanrs.getInt(1);
-                }
+                
+                jumlah = Sequel.cariInteger("select count(no_rawat) from reg_periksa where stts_daftar = '" + rs.getString("stts_daftar") + "' and tgl_registrasi between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "'");
+                total = total + jumlah;
+                /*  rujukan = Sequel.cariInteger("SELECT count(rujuk_masuk.no_rawat) FROM data_triase_igd INNER JOIN rujuk_masuk ON data_triase_igd.no_rawat = rujuk_masuk.no_rawat "
+                        + "where data_triase_igd.kode_kasus = '" + rs.getString("kode_kasus") + "' and data_triase_igd.tgl_kunjungan between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' ' 00:00:00' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' ' 23:59:59'");
+                ttlrujukan = ttlrujukan + rujukan;
+                
+                
 
-                psrujukanbidan.setString(1, rs.getString("kode_paket"));
-                psrujukanbidan.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukanbidan.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                psrujukanbidan.setString(4, rs.getString("kode_paket"));
-                psrujukanbidan.setString(5, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukanbidan.setString(6, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsrujukanbidan = psrujukanbidan.executeQuery();
-                rujukbidan = 0;
-                if (rsrujukanbidan.next()) {
-                    rujukbidan = rsrujukanbidan.getInt(1);
-                }
+                nonrujukan = Sequel.cariInteger("SELECT count(data_triase_igd.no_rawat) FROM data_triase_igd where data_triase_igd.kode_kasus = '" + rs.getString("kode_kasus") + "' "
+                        + "and data_triase_igd.tgl_kunjungan between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' ' 00:00:00' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' ' 23:59:59' and "
+                        + "data_triase_igd.no_rawat not in(select no_rawat from rujuk_masuk)");
+                ttlnonrujukan = ttlnonrujukan + nonrujukan;
 
-                psrujukanpuskesmas.setString(1, rs.getString("kode_paket"));
-                psrujukanpuskesmas.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukanpuskesmas.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                psrujukanpuskesmas.setString(4, rs.getString("kode_paket"));
-                psrujukanpuskesmas.setString(5, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukanpuskesmas.setString(6, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsrujukanpuskesmas = psrujukanpuskesmas.executeQuery();
-                rujukpuskesmas = 0;
-                if (rsrujukanpuskesmas.next()) {
-                    rujukpuskesmas = rsrujukanpuskesmas.getInt(1);
-                }
+                dirawat = Sequel.cariInteger("select count(data_triase_igd.no_rawat) from data_triase_igd inner join kamar_inap "
+                        + "on data_triase_igd.no_rawat=kamar_inap.no_rawat where data_triase_igd.kode_kasus = '" + rs.getString("kode_kasus") + "' and "
+                        + "data_triase_igd.tgl_kunjungan between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' ' 00:00:00' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' ' 23:59:59' ");
+                ttldirawat = ttldirawat + dirawat;
 
-                psrujukanfaskeslain.setString(1, rs.getString("kode_paket"));
-                psrujukanfaskeslain.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukanfaskeslain.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                psrujukanfaskeslain.setString(4, rs.getString("kode_paket"));
-                psrujukanfaskeslain.setString(5, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukanfaskeslain.setString(6, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsrujukanfaskeslain = psrujukanfaskeslain.executeQuery();
-                rujukfaskeslain = 0;
-                if (rsrujukanfaskeslain.next()) {
-                    rujukfaskeslain = rsrujukanfaskeslain.getInt(1);
-                }
+                dirujuk = Sequel.cariInteger("select count(data_triase_igd.no_rawat) from data_triase_igd inner join rujuk on rujuk.no_rawat=data_triase_igd.no_rawat "
+                        + "where data_triase_igd.kode_kasus = '" + rs.getString("kode_kasus") + "' and "
+                        + "data_triase_igd.tgl_kunjungan between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' ' 00:00:00' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' ' 23:59:59' ");
 
-                psrujukansemua.setString(1, rs.getString("kode_paket"));
-                psrujukansemua.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukansemua.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsrujukansemua = psrujukansemua.executeQuery();
-                rujuksemua = 0;
-                if (rsrujukansemua.next()) {
-                    rujuksemua = rsrujukansemua.getInt(1);
-                }
+                ttldirujuk = ttldirujuk + dirujuk;
 
-                psrujukanhidup.setString(1, rs.getString("kode_paket"));
-                psrujukanhidup.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukanhidup.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsrujukanhidup = psrujukanhidup.executeQuery();
-                rujukhidup = 0;
-                if (rsrujukanhidup.next()) {
-                    rujukhidup = rsrujukanhidup.getInt(1);
-                }
+                pulang = Sequel.cariInteger("select count(data_triase_igd.no_rawat) from data_triase_igd inner join reg_periksa "
+                        + "on reg_periksa.no_rawat=data_triase_igd.no_rawat where data_triase_igd.kode_kasus = '" + rs.getString("kode_kasus") + "' and "
+                        + "data_triase_igd.tgl_kunjungan between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' ' 00:00:00' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' ' 23:59:59' and "
+                        + "reg_periksa.stts = 'Sudah' ");
+                ttlpulang = ttlpulang + pulang;
 
-                psrujukanmati.setString(1, rs.getString("kode_paket"));
-                psrujukanmati.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukanmati.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsrujukanmati = psrujukanmati.executeQuery();
-                rujukmati = 0;
-                if (rsrujukanmati.next()) {
-                    rujukmati = rsrujukanmati.getInt(1);
-                }
+                meninggallaki = Sequel.cariInteger("select count(data_triase_igd.no_rawat) from data_triase_igd inner join reg_periksa on data_triase_igd.no_rawat = reg_periksa.no_rawat inner join pasien_mati "
+                        + "on reg_periksa.no_rkm_medis=pasien_mati.no_rkm_medis inner join pasien on pasien.no_rkm_medis = pasien_mati.no_rkm_medis where data_triase_igd.kode_kasus = '" + rs.getString("kode_kasus") + "' and "
+                        + "data_triase_igd.tgl_kunjungan between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' ' 00:00:00' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' ' 23:59:59' and pasien.jk ='L'");
+                ttlmeninggallaki = ttlmeninggallaki + meninggallaki;
 
-                psrujukannonmedishidup.setString(1, rs.getString("kode_paket"));
-                psrujukannonmedishidup.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukannonmedishidup.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsrujukannonmedishidup = psrujukannonmedishidup.executeQuery();
-                rujuknonmedishidup = 0;
-                if (rsrujukannonmedishidup.next()) {
-                    rujuknonmedishidup = rsrujukannonmedishidup.getInt(1);
-                }
+                meninggalperempuan = Sequel.cariInteger("select count(data_triase_igd.no_rawat) from data_triase_igd inner join reg_periksa on data_triase_igd.no_rawat = reg_periksa.no_rawat inner join pasien_mati "
+                        + "on reg_periksa.no_rkm_medis=pasien_mati.no_rkm_medis inner join pasien on pasien.no_rkm_medis = pasien_mati.no_rkm_medis where data_triase_igd.kode_kasus = '" + rs.getString("kode_kasus") + "' and "
+                        + "data_triase_igd.tgl_kunjungan between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' ' 00:00:00' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' ' 23:59:59' and pasien.jk ='P'");
+                ttlmeninggalperempuan = ttlmeninggalperempuan + meninggalperempuan;
 
-                psrujukannonmedismati.setString(1, rs.getString("kode_paket"));
-                psrujukannonmedismati.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psrujukannonmedismati.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsrujukannonmedismati = psrujukanmati.executeQuery();
-                rujuknonmedismati = 0;
-                if (rsrujukannonmedismati.next()) {
-                    rujuknonmedismati = rsrujukannonmedismati.getInt(1);
-                }
+                doalaki = Sequel.cariInteger("select count(data_triase_igd.no_rawat) from data_triase_igd inner join reg_periksa on data_triase_igd.no_rawat = reg_periksa.no_rawat inner join pasien_mati "
+                        + "on reg_periksa.no_rkm_medis=pasien_mati.no_rkm_medis inner join pasien on pasien.no_rkm_medis = pasien_mati.no_rkm_medis where data_triase_igd.kode_kasus = '" + rs.getString("kode_kasus") + "' and "
+                        + "data_triase_igd.tgl_kunjungan between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' ' 00:00:00' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' ' 23:59:59' and pasien.jk ='L' and pasien_mati.temp_meninggal = 'DOA'");
+                ttldoalaki = ttldoalaki + doalaki;
 
-                psnonrujuktotal.setString(1, rs.getString("kode_paket"));
-                psnonrujuktotal.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psnonrujuktotal.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsnonrujuktotal = psnonrujuktotal.executeQuery();
-                nonrujuktotal = 0;
-                if (rsnonrujuktotal.next()) {
-                    nonrujuktotal = rsnonrujuktotal.getInt(1);
-                }
+                doaperempuan = Sequel.cariInteger("select count(data_triase_igd.no_rawat) from data_triase_igd inner join reg_periksa on data_triase_igd.no_rawat = reg_periksa.no_rawat inner join pasien_mati "
+                        + "on reg_periksa.no_rkm_medis=pasien_mati.no_rkm_medis inner join pasien on pasien.no_rkm_medis = pasien_mati.no_rkm_medis where data_triase_igd.kode_kasus = '" + rs.getString("kode_kasus") + "' and "
+                        + "data_triase_igd.tgl_kunjungan between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' ' 00:00:00' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' ' 23:59:59' and pasien.jk ='P' and pasien_mati.temp_meninggal = 'DOA'");
+                ttldoaperempuan = ttldoaperempuan + doaperempuan;
 
-                psnonrujukmati.setString(1, rs.getString("kode_paket"));
-                psnonrujukmati.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psnonrujukmati.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsnonrujukmati = psnonrujukmati.executeQuery();
-                nonrujukmati = 0;
-                if (rsnonrujukmati.next()) {
-                    nonrujukmati = rsnonrujukmati.getInt(1);
-                }
+                lukalaki = Sequel.cariInteger("select count(data_triase_igd.no_rawat) from data_triase_igd inner join data_triase_igdprimer on data_triase_igdprimer.no_rawat = data_triase_igd.no_rawat inner join reg_periksa on data_triase_igd.no_rawat = reg_periksa.no_rawat "
+                        + "inner join pasien on pasien.no_rkm_medis = reg_periksa.no_rkm_medis where data_triase_igd.kode_kasus = '" + rs.getString("kode_kasus") + "' and "
+                        + "data_triase_igd.tgl_kunjungan between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' ' 00:00:00' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' ' 23:59:59' and pasien.jk ='L' and data_triase_igdprimer.keluhan_utama like '%luka%'");
+                ttllukalaki = ttllukalaki + lukalaki;
 
-                psnonrujukhidup.setString(1, rs.getString("kode_paket"));
-                psnonrujukhidup.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psnonrujukhidup.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsnonrujukhidup = psnonrujukhidup.executeQuery();
-                nonrujukhidup = 0;
-                if (rsnonrujukhidup.next()) {
-                    nonrujukhidup = rsnonrujukhidup.getInt(1);
-                }
+                lukaperempuan = Sequel.cariInteger("select count(data_triase_igd.no_rawat) from data_triase_igd inner join data_triase_igdprimer on data_triase_igdprimer.no_rawat = data_triase_igd.no_rawat inner join reg_periksa on data_triase_igd.no_rawat = reg_periksa.no_rawat "
+                        + "inner join pasien on pasien.no_rkm_medis = reg_periksa.no_rkm_medis where data_triase_igd.kode_kasus = '" + rs.getString("kode_kasus") + "' and "
+                        + "data_triase_igd.tgl_kunjungan between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' ' 00:00:00' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' ' 23:59:59' and pasien.jk ='P' and data_triase_igdprimer.keluhan_utama like '%luka%'");
+                ttllukaperempuan = ttllukaperempuan + lukaperempuan;
 
-                psdirujuk.setString(1, rs.getString("kode_paket"));
-                psdirujuk.setString(2, Valid.SetTgl(Tgl1.getSelectedItem() + "") + " 00:00:00.0");
-                psdirujuk.setString(3, Valid.SetTgl(Tgl2.getSelectedItem() + "") + " 23:59:59.0");
-                rsdirujuk = psdirujuk.executeQuery();
-                dirujuk = 0;
-                if (rsdirujuk.next()) {
-                    dirujuk = rsdirujuk.getInt(1);
-                }
+                falseemergency = Sequel.cariInteger("SELECT count(data_triase_igd.no_rawat) FROM data_triase_igd INNER JOIN data_triase_igdsekunder ON data_triase_igd.no_rawat = data_triase_igdsekunder.no_rawat "
+                        + "where data_triase_igd.kode_kasus = '" + rs.getString("kode_kasus") + "' and data_triase_igdsekunder.plan = 'Zona Hijau' and data_triase_igd.tgl_kunjungan between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' ' 00:00:00' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' ' 23:59:59'");
+                ttlfalseemergency = ttlfalseemergency + falseemergency; */
 
                 tabMode.addRow(new Object[]{
-                    i, rs.getString("nm_perawatan"), rujukrs, rujukbidan, rujukpuskesmas, rujukfaskeslain,
-                    rujukhidup, rujukmati, (rujukrs + rujukbidan + rujukpuskesmas + rujukfaskeslain),
-                    rujuknonmedishidup, rujuknonmedismati, (rujuksemua - (rujukrs + rujukbidan + rujukpuskesmas + rujukfaskeslain)),
-                    nonrujukhidup, nonrujukmati, nonrujuktotal, dirujuk
+                    i, "Pengunjung "+rs.getString("stts_daftar"), jumlah
                 });
                 i++;
             }
+            if (i > 1) {
+                tabMode.addRow(new Object[]{
+                    "", "TOTAL", total
+                });
+            }
+
             this.setCursor(Cursor.getDefaultCursor());
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("Notifikasi : " + e);
         }
     }
 

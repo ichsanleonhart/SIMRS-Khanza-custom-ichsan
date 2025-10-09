@@ -378,59 +378,79 @@ private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
         try{   
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
             Valid.tabelKosong(tabMode);  
-            ps=koneksi.prepareStatement(
-                    "select poliklinik.kd_poli,poliklinik.nm_poli from poliklinik " +
-                    "where poliklinik.nm_poli like '%rehab%' or poliklinik.nm_poli like '%fisio%' order by poliklinik.nm_poli");
+            ps = koneksi.prepareStatement(
+                "select poliklinik.kd_poli, poliklinik.nm_poli from poliklinik " +
+                "where LOWER(poliklinik.nm_poli) like '%rehab%' or LOWER(poliklinik.nm_poli) like '%fisio%' " +
+                "order by poliklinik.nm_poli"
+            );
             try {
-                rs=ps.executeQuery();
-                i=1;
-                ttl=0;
-                while(rs.next()){
-                    pstindakan=koneksi.prepareStatement("select jns_perawatan.nm_perawatan,count(jns_perawatan.nm_perawatan) from rawat_jl_pr inner join reg_periksa "+
-                        "inner join jns_perawatan on rawat_jl_pr.no_rawat=reg_periksa.no_rawat and rawat_jl_pr.kd_jenis_prw=jns_perawatan.kd_jenis_prw "+
-                        "where reg_periksa.kd_poli=? and reg_periksa.tgl_registrasi between ? and ? and jns_perawatan.nm_perawatan like ? group by jns_perawatan.nm_perawatan ");
+                rs = ps.executeQuery();
+                i = 1;
+                ttl = 0;
+                while (rs.next()) {
+                    pstindakan = koneksi.prepareStatement(
+                        "select jns_perawatan.nm_perawatan, count(jns_perawatan.nm_perawatan) from ( " +
+                        "select rawat_jl_dr.no_rawat, rawat_jl_dr.kd_jenis_prw from rawat_jl_dr " +
+                        "inner join reg_periksa on rawat_jl_dr.no_rawat = reg_periksa.no_rawat " +
+                        "inner join jns_perawatan on rawat_jl_dr.kd_jenis_prw = jns_perawatan.kd_jenis_prw " +
+                        "where reg_periksa.kd_poli = ? and reg_periksa.tgl_registrasi between ? and ? and jns_perawatan.nm_perawatan like ? " +
+                        "union all " +
+                        "select rawat_jl_pr.no_rawat, rawat_jl_pr.kd_jenis_prw from rawat_jl_pr " +
+                        "inner join reg_periksa on rawat_jl_pr.no_rawat = reg_periksa.no_rawat " +
+                        "inner join jns_perawatan on rawat_jl_pr.kd_jenis_prw = jns_perawatan.kd_jenis_prw " +
+                        "where reg_periksa.kd_poli = ? and reg_periksa.tgl_registrasi between ? and ? and jns_perawatan.nm_perawatan like ? " +
+                        "union all " +
+                        "select rawat_jl_drpr.no_rawat, rawat_jl_drpr.kd_jenis_prw from rawat_jl_drpr " +
+                        "inner join reg_periksa on rawat_jl_drpr.no_rawat = reg_periksa.no_rawat " +
+                        "inner join jns_perawatan on rawat_jl_drpr.kd_jenis_prw = jns_perawatan.kd_jenis_prw " +
+                        "where reg_periksa.kd_poli = ? and reg_periksa.tgl_registrasi between ? and ? and jns_perawatan.nm_perawatan like ? " +
+                        ") as tindakan group by jns_perawatan.nm_perawatan "
+                    );
                     try{
-                        pstindakan.setString(1,rs.getString("kd_poli"));
-                        pstindakan.setString(2,Valid.SetTgl(Tgl1.getSelectedItem()+""));
-                        pstindakan.setString(3,Valid.SetTgl(Tgl2.getSelectedItem()+""));
-                        pstindakan.setString(4,"%"+TCari.getText().trim()+"%");
-                        rstindakan=pstindakan.executeQuery();
-                        while(rstindakan.next()){
+                        // Set semua parameter (3 kali untuk masing-masing jenis rawat)
+                        for (int paramIndex = 1; paramIndex <= 9; paramIndex += 3) {
+                            pstindakan.setString(paramIndex, rs.getString("kd_poli"));
+                            pstindakan.setString(paramIndex + 1, Valid.SetTgl(Tgl1.getSelectedItem()+""));
+                            pstindakan.setString(paramIndex + 2, Valid.SetTgl(Tgl2.getSelectedItem()+""));
+                        }
+                        pstindakan.setString(4, "%" + TCari.getText().trim() + "%");
+                        rstindakan = pstindakan.executeQuery();
+                        while (rstindakan.next()) {
                             tabMode.addRow(new Object[]{
-                                i,rstindakan.getString(1),rstindakan.getInt(2)
+                                i, rstindakan.getString(1), rstindakan.getInt(2)
                             });
-                            ttl=ttl+rstindakan.getInt(2);
+                            ttl += rstindakan.getInt(2);
                             i++;                    
                         }
                     } catch (Exception e) {
-                        System.out.println("Notif : "+e);
-                    } finally{
-                        if(rstindakan!=null){
+                        System.out.println("Notif : " + e);
+                    } finally {
+                        if (rstindakan != null) {
                             rstindakan.close();
                         }
-                        if(pstindakan!=null){
+                        if (pstindakan != null) {
                             pstindakan.close();
                         }
                     }
                 }
-                if(i>1){
+                if (i > 1) {
                     tabMode.addRow(new Object[]{
-                        "","TOTAL",ttl
+                        "", "TOTAL", ttl
                     });
                 }
             } catch (Exception e) {
-                System.out.println("Notif : "+e);
-            } finally{
-                if(rs!=null){
+                System.out.println("Notif : " + e);
+            } finally {
+                if (rs != null) {
                     rs.close();
                 }
-                if(ps!=null){
+                if (ps != null) {
                     ps.close();
                 }
             }
             this.setCursor(Cursor.getDefaultCursor());
-        }catch(Exception e){
-            System.out.println("Notifikasi : "+e);
+        } catch (Exception e) {
+            System.out.println("Notifikasi : " + e);
         }
     }
 
