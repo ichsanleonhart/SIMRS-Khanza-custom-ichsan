@@ -306,7 +306,7 @@ public final class DlgRl53 extends javax.swing.JDialog {
                             + tabMode.getValueAt(r, 6).toString() + "','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','" + akses.getalamatip() + "'", "Rekap Nota Pembayaran");
                 }
             }
-            Valid.MyReportqry("rptRl35.jasper", "report", "::[ Formulir RL 3.5 ]::", "select * from temporary where temporary.temp37='" + akses.getalamatip() + "' order by temporary.no", param);
+            Valid.MyReportqry("rptRl53.jasper", "report", "::[ Formulir RL 5.3 ]::", "select * from temporary where temporary.temp37='" + akses.getalamatip() + "' order by temporary.no", param);
         }
         this.setCursor(Cursor.getDefaultCursor());
 }//GEN-LAST:event_BtnPrintActionPerformed

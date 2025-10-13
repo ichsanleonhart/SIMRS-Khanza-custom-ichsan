@@ -5824,6 +5824,96 @@ public class DlgKamarInap extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_BtnInKeyPressed
 
+
+//Modifikasi Ichsan terhadap tombol kepulangan pasien, untuk validasi apabila surat SKDP belum dibuat.
+   private void BtnOutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnOutActionPerformed
+    if(tabMode.getRowCount()==0){
+        JOptionPane.showMessageDialog(null,"Maaf, data kamar inap pasien sudah habis...!!!!");
+        BtnIn.requestFocus();
+    }else if(norawat.getText().trim().equals("")){
+        JOptionPane.showMessageDialog(null,"Maaf, Silahkan anda pilih dulu data inap pasien yang mau pulang dengan menklik data pada table...!!!");
+        tbKamIn.requestFocus();
+    }else if(TOut.getText().trim().length()>0){
+             JOptionPane.showMessageDialog(null,"Maaf, pasien ini sudah pulang pada tanggal "+TOut.getText()+" ...!!!");
+             emptTeks();
+             tbKamIn.requestFocus();
+    }else if((TOut.getText().length()==0)&&(norawat.getText().length()>0)){
+            // --- AWAL MODIFIKASI ---
+            
+            // Pengecekan hanya berlaku jika yang login BUKAN Admin Utama
+            if (!akses.getkode().equals("Admin Utama")) {
+                // 1. Cek apakah pasien menggunakan penjamin BPJS
+                String jenisBayar = Sequel.cariIsi(
+                    "select penjab.png_jawab from reg_periksa inner join penjab on reg_periksa.kd_pj = penjab.kd_pj where reg_periksa.no_rawat=?", norawat.getText()
+                );
+
+                // 2. Jika penjamin adalah BPJS, lakukan pengecekan selanjutnya
+                if (jenisBayar.toUpperCase().contains("BPJS")) {
+                    
+                    // 2a. Cek apakah pasien adalah bayi baru lahir (kurang dari 4 hari)
+                    int selisihHariLahir = Sequel.cariInteger(
+                        "select DATEDIFF(current_date(), pasien.tgl_lahir) from pasien inner join reg_periksa on pasien.no_rkm_medis=reg_periksa.no_rkm_medis where reg_periksa.no_rawat=?", norawat.getText()
+                    );
+                    
+                    // 2b. Jika BUKAN bayi < 4 hari, maka validasi surat kontrol
+                    if(selisihHariLahir >= 4) {
+                        String noSuratKontrol = Sequel.cariIsi(
+                            "select bridging_surat_kontrol_bpjs.no_surat from bridging_sep " +
+                            "inner join bridging_surat_kontrol_bpjs on bridging_sep.no_sep = bridging_surat_kontrol_bpjs.no_sep " +
+                            "where bridging_sep.no_rawat = ? limit 1", norawat.getText()
+                        );
+
+                        // 3. Jika surat kontrol tidak ditemukan, tampilkan peringatan dan hentikan proses
+                        if (noSuratKontrol == null || noSuratKontrol.trim().isEmpty()) {
+                            JOptionPane.showMessageDialog(null, "Surat kontrol BPJS (Bridging) belum dibuat, silakan buat SKDP terlebih dahulu!");
+                            return; // Menghentikan eksekusi method di sini
+                        }
+                    }
+                }
+            }
+            
+            // --- AKHIR MODIFIKASI ---
+
+            // 4. Jika semua validasi lolos, lanjutkan proses pemulangan
+            norawat.setEditable(false);
+            kdkamar.setEditable(false);
+            i=1;
+            isKmr();
+            diagnosaawal.setEditable(false);                
+            diagnosaakhir.setVisible(true);                
+            btnDiagnosa.setVisible(true);
+            jLabel23.setVisible(true);
+            diagnosaakhir.setText("");
+            cmbStatus.setVisible(true);
+            jLabel26.setVisible(true);
+            LblStts.setText("Pulang/Check Out");
+
+            btnReg.setEnabled(false);
+            btnKamar.setEnabled(false);
+            date = new Date();
+            now=dateFormat.format(date);
+            CmbTahun.setSelectedItem(now.substring(0,4));
+            CmbBln.setSelectedItem(now.substring(5,7));
+            CmbTgl.setSelectedItem(now.substring(8,10));
+            cmbJam.setSelectedItem(now.substring(11,13));
+            cmbMnt.setSelectedItem(now.substring(14,16));
+            cmbDtk.setSelectedItem(now.substring(17,19));  
+            tglmasuk=TIn.getText();
+            jammasuk=JamMasuk.getText();
+            if(hariawal.equals("Yes")){
+                Sequel.cariIsi("select (if(to_days('"+CmbTahun.getSelectedItem()+"-"+CmbBln.getSelectedItem()+"-"+CmbTgl.getSelectedItem()+" "+cmbJam.getSelectedItem()+":"+cmbMnt.getSelectedItem()+":"+cmbDtk.getSelectedItem()+"')-to_days('"+tglmasuk+" "+jammasuk+"')=0,if(time_to_sec('"+CmbTahun.getSelectedItem()+"-"+CmbBln.getSelectedItem()+"-"+CmbTgl.getSelectedItem()+" "+cmbJam.getSelectedItem()+":"+cmbMnt.getSelectedItem()+":"+cmbDtk.getSelectedItem()+"')-time_to_sec('"+tglmasuk+" "+jammasuk+"')>(3600*"+lama+"),1,0),to_days('"+CmbTahun.getSelectedItem()+"-"+CmbBln.getSelectedItem()+"-"+CmbTgl.getSelectedItem()+" "+cmbJam.getSelectedItem()+":"+cmbMnt.getSelectedItem()+":"+cmbDtk.getSelectedItem()+"')-to_days('"+tglmasuk+" "+jammasuk+"'))+1) as lama",TJmlHari);             
+            }else{
+                Sequel.cariIsi("select (if(to_days('"+CmbTahun.getSelectedItem()+"-"+CmbBln.getSelectedItem()+"-"+CmbTgl.getSelectedItem()+" "+cmbJam.getSelectedItem()+":"+cmbMnt.getSelectedItem()+":"+cmbDtk.getSelectedItem()+"')-to_days('"+tglmasuk+" "+jammasuk+"')=0,if(time_to_sec('"+CmbTahun.getSelectedItem()+"-"+CmbBln.getSelectedItem()+"-"+CmbTgl.getSelectedItem()+" "+cmbJam.getSelectedItem()+":"+cmbMnt.getSelectedItem()+":"+cmbDtk.getSelectedItem()+"')-time_to_sec('"+tglmasuk+" "+jammasuk+"')>(3600*"+lama+"),1,0),to_days('"+CmbTahun.getSelectedItem()+"-"+CmbBln.getSelectedItem()+"-"+CmbTgl.getSelectedItem()+" "+cmbJam.getSelectedItem()+":"+cmbMnt.getSelectedItem()+":"+cmbDtk.getSelectedItem()+"')-to_days('"+tglmasuk+" "+jammasuk+"'))) as lama",TJmlHari);             
+            }
+            
+            norawat.requestFocus();   
+            isjml();    
+            WindowInputKamar.setLocationRelativeTo(internalFrame1);
+            WindowInputKamar.setVisible(true);
+    }
+}//GEN-LAST:event_BtnOutActionPerformed
+    
+    /*
     private void BtnOutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnOutActionPerformed
         if(tabMode.getRowCount()==0){
             JOptionPane.showMessageDialog(null,"Maaf, data kamar inap pasien sudah habis...!!!!");
@@ -5873,6 +5963,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
                 WindowInputKamar.setVisible(true);
         }
     }//GEN-LAST:event_BtnOutActionPerformed
+    */
 
     private void BtnOutKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnOutKeyPressed
         if(evt.getKeyCode()==KeyEvent.VK_SPACE){

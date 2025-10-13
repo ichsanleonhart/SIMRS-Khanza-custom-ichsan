@@ -51,6 +51,7 @@ public class frmUtama extends javax.swing.JFrame {
      */
     public frmUtama() {
         initComponents();
+        TeksArea.setComponentPopupMenu(jPopupMenu1);
         try {
             link=koneksiDB.URLFHIRSATUSEHAT();
         } catch (Exception e) {
@@ -75,6 +76,31 @@ public class frmUtama extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPopupMenu1 = new javax.swing.JPopupMenu();
+        kirim_encounter = new javax.swing.JMenuItem();
+        kirim_observationTTV = new javax.swing.JMenuItem();
+        kirim_vaksin = new javax.swing.JMenuItem();
+        kirim_prosedur = new javax.swing.JMenuItem();
+        kirim_condition = new javax.swing.JMenuItem();
+        kirim_clinicalimpression = new javax.swing.JMenuItem();
+        kirim_dietgizi = new javax.swing.JMenuItem();
+        kirim_medicationrequest = new javax.swing.JMenuItem();
+        kirim_medicationdispense = new javax.swing.JMenuItem();
+        kirim_medicationstatement = new javax.swing.JMenuItem();
+        kirim_servicerequestradiologi = new javax.swing.JMenuItem();
+        kirim_specimenradiologi = new javax.swing.JMenuItem();
+        kirim_observationradiologi = new javax.swing.JMenuItem();
+        kirim_diagnosticreportradiologi = new javax.swing.JMenuItem();
+        kirim_servicerequestlabpk = new javax.swing.JMenuItem();
+        kirim_servicerequestlabmb = new javax.swing.JMenuItem();
+        kirim_specimenlabpk = new javax.swing.JMenuItem();
+        kirim_specimenlabmb = new javax.swing.JMenuItem();
+        kirim_observationlabpk = new javax.swing.JMenuItem();
+        kirim_observationlabmb = new javax.swing.JMenuItem();
+        kirim_diagnosticreportlabpk = new javax.swing.JMenuItem();
+        kirim_diagnosticreportlabmb = new javax.swing.JMenuItem();
+        kirim_careplan = new javax.swing.JMenuItem();
+        informasi_kirim = new javax.swing.JMenuItem();
         jScrollPane1 = new javax.swing.JScrollPane();
         TeksArea = new javax.swing.JTextArea();
         jPanel1 = new javax.swing.JPanel();
@@ -85,15 +111,219 @@ public class frmUtama extends javax.swing.JFrame {
         Tanggal2 = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+
+        kirim_encounter.setText("Kirim Data Kunjungan (Encounter)");
+        kirim_encounter.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_encounterActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_encounter);
+
+        kirim_observationTTV.setText("Kirim Tanda Vital (Observation TTV)");
+        kirim_observationTTV.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_observationTTVActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_observationTTV);
+
+        kirim_vaksin.setText("Kirim Riwayat Vaksin (Immunization)");
+        kirim_vaksin.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_vaksinActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_vaksin);
+
+        kirim_prosedur.setText("Kirim Tindakan/Prosedur (Procedure)");
+        kirim_prosedur.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_prosedurActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_prosedur);
+
+        kirim_condition.setText("Kirim Diagnosa Pasien (Condition)");
+        kirim_condition.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_conditionActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_condition);
+
+        kirim_clinicalimpression.setText("Kirim Asesmen Dokter (Clinical Impression)");
+        kirim_clinicalimpression.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_clinicalimpressionActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_clinicalimpression);
+
+        kirim_dietgizi.setText("Kirim Asuhan Gizi (ADIME)");
+        kirim_dietgizi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_dietgiziActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_dietgizi);
+
+        kirim_medicationrequest.setText("Kirim Resep Obat (Medication Request)");
+        kirim_medicationrequest.setActionCommand("Kirim Medicationrequest (Resep Dokter)");
+        kirim_medicationrequest.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_medicationrequestActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_medicationrequest);
+
+        kirim_medicationdispense.setText("Kirim Penyerahan Obat (Medication Dispense)");
+        kirim_medicationdispense.setActionCommand("Kirim Medicationdispense (Penyerahan Obat)");
+        kirim_medicationdispense.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_medicationdispenseActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_medicationdispense);
+
+        kirim_medicationstatement.setText("Kirim Prosedur");
+        kirim_medicationstatement.setActionCommand("Kirim Aturan Pakai Obat (Medication Statement)");
+        kirim_medicationstatement.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_medicationstatementActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_medicationstatement);
+
+        kirim_servicerequestradiologi.setText("Kirim Permintaan Radiologi (Service Request)");
+        kirim_servicerequestradiologi.setActionCommand("Kirim Servicerequestradiologi (Permintaan Rad)");
+        kirim_servicerequestradiologi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_servicerequestradiologiActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_servicerequestradiologi);
+
+        kirim_specimenradiologi.setText("Kirim Spesimen Radiologi (Specimen)");
+        kirim_specimenradiologi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_specimenradiologiActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_specimenradiologi);
+
+        kirim_observationradiologi.setText("Kirim Hasil Radiologi (Observation)");
+        kirim_observationradiologi.setActionCommand("Kirim Observationradiologi");
+        kirim_observationradiologi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_observationradiologiActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_observationradiologi);
+
+        kirim_diagnosticreportradiologi.setText("Kirim Kesan Radiologi (Diagnostic Report)");
+        kirim_diagnosticreportradiologi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_diagnosticreportradiologiActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_diagnosticreportradiologi);
+
+        kirim_servicerequestlabpk.setText("Kirim Permintaan Lab PK (Service Request)");
+        kirim_servicerequestlabpk.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_servicerequestlabpkActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_servicerequestlabpk);
+
+        kirim_servicerequestlabmb.setText("Kirim Permintaan Lab MB (Service Request)");
+        kirim_servicerequestlabmb.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_servicerequestlabmbActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_servicerequestlabmb);
+
+        kirim_specimenlabpk.setText("Kirim Spesimen Lab PK (Specimen)");
+        kirim_specimenlabpk.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_specimenlabpkActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_specimenlabpk);
+
+        kirim_specimenlabmb.setText("Kirim Spesimen Lab MB (Specimen)");
+        kirim_specimenlabmb.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_specimenlabmbActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_specimenlabmb);
+
+        kirim_observationlabpk.setText("Kirim Hasil Lab PK (Observation)");
+        kirim_observationlabpk.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_observationlabpkActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_observationlabpk);
+
+        kirim_observationlabmb.setText("Kirim Hasil Lab MB (Observation)");
+        kirim_observationlabmb.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_observationlabmbActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_observationlabmb);
+
+        kirim_diagnosticreportlabpk.setText("Kirim Kesan Lab PK (Diagnostic Report)");
+        kirim_diagnosticreportlabpk.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_diagnosticreportlabpkActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_diagnosticreportlabpk);
+
+        kirim_diagnosticreportlabmb.setText("Kirim Kesan Lab MB (Diagnostic Report)");
+        kirim_diagnosticreportlabmb.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_diagnosticreportlabmbActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_diagnosticreportlabmb);
+
+        kirim_careplan.setText("Kirim Rencana Rawat (Care Plan)");
+        kirim_careplan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_careplanActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_careplan);
+
+        informasi_kirim.setText("Informasi Detail");
+        informasi_kirim.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                informasi_kirimActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(informasi_kirim);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("SIMKES Khanza Service Satu Sehat");
+        setTitle("Service Satu Sehat (Ichsan)");
+
+        jScrollPane1.setMaximumSize(new java.awt.Dimension(1000, 1000));
 
         TeksArea.setColumns(20);
         TeksArea.setRows(5);
         jScrollPane1.setViewportView(TeksArea);
 
         getContentPane().add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+        jPanel1.setMinimumSize(new java.awt.Dimension(500, 200));
+        jPanel1.setName(""); // NOI18N
 
         jButtonStartKirim.setText("Start Kirim Manual!");
         jButtonStartKirim.addActionListener(new java.awt.event.ActionListener() {
@@ -131,6 +361,13 @@ public class frmUtama extends javax.swing.JFrame {
 
         getContentPane().add(jPanel1, java.awt.BorderLayout.PAGE_END);
 
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jTextArea1.setText("1. encounter(): Mengambil data Kunjungan Pasien dari tabel reg_periksa.\n2. observationTTV(): Mengambil data Pemeriksaan Tanda-Tanda Vital (suhu, tensi, nadi, respirasi, tinggi, berat, SpO2, GCS, kesadaran, lingkar perut) dari tabel pemeriksaan_ralan dan pemeriksaan_ranap.\n3. vaksin(): Mengambil data Pemberian Vaksin dari detail_pemberian_obat yang sudah dipetakan.\n4. prosedur(): Mengambil data Tindakan/Prosedur yang dicatat untuk pasien berdasarkan kode ICD-9 dari prosedur_pasien.\n5. condition(): Mengambil data Diagnosa berdasarkan kode ICD-10 dari diagnosa_pasien.\n6. clinicalimpression(): Mengambil data Asesmen/Penilaian Dokter (termasuk keluhan dan pemeriksaan fisik) dari pemeriksaan_ralan dan pemeriksaan_ranap.\n7. dietgizi(): Mengambil data Asuhan Gizi (ADIME), khususnya bagian instruksi, dari catatan_adime_gizi.\n8. medicationrequest(): Mengambil data Resep Obat (baik resep tunggal maupun racikan) dari resep_obat, resep_dokter, dan resep_dokter_racikan.\n9. medicationdispense(): Mengambil data Penyerahan Obat kepada pasien dari detail_pemberian_obat.\n10. medicationstatement(): Mengambil data Aturan Pakai Obat yang diterima pasien dari resep_dokter dan aturan_pakai.\n11. servicerequestradiologi(): Mengambil data Permintaan Pemeriksaan Radiologi dari permintaan_radiologi.\n12. specimenradiologi(): Mengambil data Spesimen (informasi pengambilan sampel/gambar) untuk pemeriksaan radiologi dari permintaan_radiologi.\n13. observationradiologi(): Mengambil data Hasil Bacaan/Observasi dari pemeriksaan radiologi dari tabel hasil_radiologi.\n14. diagnosticreportradiologi(): Mengambil data Laporan/Kesan Akhir dari pemeriksaan radiologi dari hasil_radiologi.\n15. servicerequestlabpk() & servicerequestlabmb(): Mengambil data Permintaan Pemeriksaan Laboratorium (Patologi Klinik & Mikrobiologi) dari permintaan_lab dan permintaan_labmb.\n16. specimenlabpk() & specimenlabmb(): Mengambil data Spesimen (informasi pengambilan sampel) untuk pemeriksaan lab dari permintaan_lab dan permintaan_labmb.\n17. observationlabpk() & observationlabmb(): Mengambil data Hasil per Item Pemeriksaan Lab dari detail_periksa_lab.\n18. diagnosticreportlabpk() & diagnosticreportlabmb(): Mengambil data Laporan/Kesan Akhir dari pemeriksaan lab dari saran_kesan_lab.\n19. careplan(): Mengambil data Rencana Tindak Lanjut (RTL) dari pemeriksaan_ralan dan pemeriksaan_ranap.");
+        jScrollPane2.setViewportView(jTextArea1);
+
+        getContentPane().add(jScrollPane2, java.awt.BorderLayout.PAGE_START);
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -162,6 +399,401 @@ public class frmUtama extends javax.swing.JFrame {
         }
     }.execute();
     }//GEN-LAST:event_jButtonStartKirimActionPerformed
+
+    private void kirim_encounterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_encounterActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Encounter...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                encounter();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Encounter SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_encounterActionPerformed
+
+    private void kirim_observationTTVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_observationTTVActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Observation TTV...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                observationTTV();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Observation TTV SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_observationTTVActionPerformed
+
+    private void kirim_vaksinActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_vaksinActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Vaksin...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                vaksin();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Vaksin SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_vaksinActionPerformed
+
+    private void kirim_prosedurActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_prosedurActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Prosedur...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                prosedur();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Prosedur SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_prosedurActionPerformed
+
+    private void kirim_conditionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_conditionActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Condition...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                condition();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Condition SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_conditionActionPerformed
+
+    private void kirim_clinicalimpressionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_clinicalimpressionActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Clinical Impression...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                clinicalimpression();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Clinical Impression SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_clinicalimpressionActionPerformed
+
+    private void kirim_dietgiziActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_dietgiziActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Diet Gizi...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                dietgizi();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Diet Gizi SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_dietgiziActionPerformed
+
+    private void kirim_medicationrequestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_medicationrequestActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Medication Request...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                medicationrequest();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Medication Request SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_medicationrequestActionPerformed
+
+    private void kirim_medicationdispenseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_medicationdispenseActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Medication Dispense...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                medicationdispense();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Medication Dispense SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_medicationdispenseActionPerformed
+
+    private void kirim_medicationstatementActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_medicationstatementActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Medication Statement...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                medicationstatement();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Medication Statement SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_medicationstatementActionPerformed
+
+    private void kirim_servicerequestradiologiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_servicerequestradiologiActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Service Request Radiologi...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                servicerequestradiologi();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Service Request Radiologi SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_servicerequestradiologiActionPerformed
+
+    private void kirim_specimenradiologiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_specimenradiologiActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Specimen Radiologi...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                specimenradiologi();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Specimen Radiologi SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_specimenradiologiActionPerformed
+
+    private void kirim_observationradiologiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_observationradiologiActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Observation Radiologi...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                observationradiologi();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Observation Radiologi SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_observationradiologiActionPerformed
+
+    private void kirim_diagnosticreportradiologiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_diagnosticreportradiologiActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Diagnostic Report Radiologi...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                diagnosticreportradiologi();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Diagnostic Report Radiologi SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_diagnosticreportradiologiActionPerformed
+
+    private void kirim_servicerequestlabpkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_servicerequestlabpkActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Service Request Lab PK...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                servicerequestlabpk();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Service Request Lab PK SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_servicerequestlabpkActionPerformed
+
+    private void kirim_servicerequestlabmbActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_servicerequestlabmbActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Service Request Lab MB...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                servicerequestlabmb();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Service Request Lab MB SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_servicerequestlabmbActionPerformed
+
+    private void kirim_specimenlabpkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_specimenlabpkActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Specimen Lab PK...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                specimenlabpk();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Specimen Lab PK SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_specimenlabpkActionPerformed
+
+    private void kirim_specimenlabmbActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_specimenlabmbActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Specimen Lab MB...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                specimenlabmb();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Specimen Lab MB SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_specimenlabmbActionPerformed
+
+    private void kirim_observationlabpkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_observationlabpkActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Observation Lab PK...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                observationlabpk();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Observation Lab PK SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_observationlabpkActionPerformed
+
+    private void kirim_observationlabmbActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_observationlabmbActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Observation Lab MB...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                observationlabmb();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Observation Lab MB SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_observationlabmbActionPerformed
+
+    private void kirim_diagnosticreportlabpkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_diagnosticreportlabpkActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Diagnostic Report Lab PK...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                diagnosticreportlabpk();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Diagnostic Report Lab PK SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_diagnosticreportlabpkActionPerformed
+
+    private void kirim_diagnosticreportlabmbActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_diagnosticreportlabmbActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Diagnostic Report Lab MB...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                diagnosticreportlabmb();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Diagnostic Report Lab MB SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_diagnosticreportlabmbActionPerformed
+
+    private void kirim_careplanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_careplanActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Care Plan...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                careplan();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Care Plan SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_careplanActionPerformed
+
+    private void informasi_kirimActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_informasi_kirimActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_informasi_kirimActionPerformed
 
     /**
      * @param args the command line arguments
@@ -203,13 +835,40 @@ public class frmUtama extends javax.swing.JFrame {
     private javax.swing.JTextField Tanggal1;
     private javax.swing.JTextField Tanggal2;
     private javax.swing.JTextArea TeksArea;
+    private javax.swing.JMenuItem informasi_kirim;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButtonStartKirim;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JMenuItem kirim_careplan;
+    private javax.swing.JMenuItem kirim_clinicalimpression;
+    private javax.swing.JMenuItem kirim_condition;
+    private javax.swing.JMenuItem kirim_diagnosticreportlabmb;
+    private javax.swing.JMenuItem kirim_diagnosticreportlabpk;
+    private javax.swing.JMenuItem kirim_diagnosticreportradiologi;
+    private javax.swing.JMenuItem kirim_dietgizi;
+    private javax.swing.JMenuItem kirim_encounter;
+    private javax.swing.JMenuItem kirim_medicationdispense;
+    private javax.swing.JMenuItem kirim_medicationrequest;
+    private javax.swing.JMenuItem kirim_medicationstatement;
+    private javax.swing.JMenuItem kirim_observationTTV;
+    private javax.swing.JMenuItem kirim_observationlabmb;
+    private javax.swing.JMenuItem kirim_observationlabpk;
+    private javax.swing.JMenuItem kirim_observationradiologi;
+    private javax.swing.JMenuItem kirim_prosedur;
+    private javax.swing.JMenuItem kirim_servicerequestlabmb;
+    private javax.swing.JMenuItem kirim_servicerequestlabpk;
+    private javax.swing.JMenuItem kirim_servicerequestradiologi;
+    private javax.swing.JMenuItem kirim_specimenlabmb;
+    private javax.swing.JMenuItem kirim_specimenlabpk;
+    private javax.swing.JMenuItem kirim_specimenradiologi;
+    private javax.swing.JMenuItem kirim_vaksin;
     // End of variables declaration//GEN-END:variables
     private void jam(){
         ActionListener taskPerformer = new ActionListener(){
@@ -477,7 +1136,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -596,7 +1255,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -703,7 +1362,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -804,7 +1463,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -910,7 +1569,7 @@ public class frmUtama extends javax.swing.JFrame {
                     }
                     
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -1011,7 +1670,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -1116,7 +1775,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -1217,7 +1876,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -1322,7 +1981,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -1422,7 +2081,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -1526,7 +2185,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -1625,7 +2284,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -1727,7 +2386,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -1824,7 +2483,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -1977,7 +2636,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -2125,7 +2784,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -2230,7 +2889,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -2330,7 +2989,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -2435,7 +3094,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -2535,7 +3194,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -2640,7 +3299,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -2757,7 +3416,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -2866,7 +3525,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -3016,7 +3675,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -3160,7 +3819,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -3257,7 +3916,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -3348,7 +4007,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -3450,7 +4109,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -3546,7 +4205,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -3678,7 +4337,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -3804,7 +4463,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -3900,7 +4559,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -4076,7 +4735,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -4246,7 +4905,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -4418,7 +5077,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -4590,7 +5249,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -4784,7 +5443,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -4972,7 +5631,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -5094,7 +5753,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -5214,7 +5873,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -5311,7 +5970,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -5406,7 +6065,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -5529,7 +6188,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -5650,7 +6309,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -5789,7 +6448,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -5926,7 +6585,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -6049,7 +6708,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -6170,7 +6829,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -6293,7 +6952,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -6414,7 +7073,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -6514,7 +7173,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -6612,7 +7271,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -6712,7 +7371,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -6810,7 +7469,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -6936,7 +7595,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -7060,7 +7719,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -7186,7 +7845,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -7310,7 +7969,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -7453,7 +8112,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -7594,7 +8253,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -7737,7 +8396,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -7878,7 +8537,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -7981,7 +8640,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -8078,7 +8737,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -8234,7 +8893,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -8383,7 +9042,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -8534,7 +9193,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan
@@ -8685,7 +9344,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                     }
 //------------------------------//tambahan buat rem  - ichsan
-                try { Thread.sleep(100);  }  
+                try { Thread.sleep(50);  }  
                     catch (InterruptedException ex) 
                         { System.out.println("Proses jeda gagal: " + ex); }
 //------------------------------//tambahan buat rem  - ichsan

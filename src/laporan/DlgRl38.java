@@ -41,14 +41,7 @@ public final class DlgRl38 extends javax.swing.JDialog {
     private validasi Valid = new validasi();
     private PreparedStatement pstindakan, pstindakan2;
     private ResultSet rstindakan, rstindakan2;
-    private int i = 0, a = 0, ttl = 0, jumlahl = 0, jumlahp = 0, ttljumlahl = 0, ttljumlahp = 0, nilaitotall = 0, nilaitotalp = 0, ttlnilaitotall = 0, ttnilaip = 0, jumlahpasienl = 0, jumlahpasienp = 0, ratal = 0, ratap = 0, ttlratal = 0, ttlratap = 0;
 
-    /**
-     * Creates new form DlgLhtBiaya
-     *
-     * @param parent
-     * @param modal
-     */
     public DlgRl38(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
@@ -63,11 +56,10 @@ public final class DlgRl38 extends javax.swing.JDialog {
             }
         };
         tbBangsal.setModel(tabMode);
-        //tbBangsal.setDefaultRenderer(Object.class, new WarnaTable(jPanel2.getBackground(),tbBangsal.getBackground()));
         tbBangsal.setPreferredScrollableViewportSize(new Dimension(500, 500));
         tbBangsal.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-        for (i = 0; i < 6; i++) {
+        for (int i = 0; i < 6; i++) {
             TableColumn column = tbBangsal.getColumnModel().getColumn(i);
             if (i == 0) {
                 column.setPreferredWidth(35);
@@ -81,15 +73,16 @@ public final class DlgRl38 extends javax.swing.JDialog {
 
         TCari.setDocument(new batasInput((byte) 100).getKata(TCari));
 
-        try {            
-            pstindakan = koneksi.prepareStatement("select jns_perawatan_lab.nm_perawatan,jns_perawatan_lab.kd_jenis_prw from periksa_lab "
-                    + "inner join jns_perawatan_lab on periksa_lab.kd_jenis_prw=jns_perawatan_lab.kd_jenis_prw "
-                    + "where jns_perawatan_lab.nm_perawatan like ? group by jns_perawatan_lab.nm_perawatan ");
-            pstindakan2 = koneksi.prepareStatement("select template_laboratorium.Pemeriksaan,template_laboratorium.kd_jenis_prw from detail_periksa_lab "
-                    + "inner join template_laboratorium on detail_periksa_lab.id_template=template_laboratorium.id_template "
-                    + "where template_laboratorium.Pemeriksaan like ? and template_laboratorium.kd_jenis_prw=? group by template_laboratorium.Pemeriksaan ");
+        try {
+            pstindakan = koneksi.prepareStatement("SELECT jns_perawatan_lab.nm_perawatan, jns_perawatan_lab.kd_jenis_prw FROM periksa_lab " +
+                    "INNER JOIN jns_perawatan_lab ON periksa_lab.kd_jenis_prw = jns_perawatan_lab.kd_jenis_prw " +
+                    "WHERE jns_perawatan_lab.nm_perawatan LIKE ? GROUP BY jns_perawatan_lab.nm_perawatan");
+
+            pstindakan2 = koneksi.prepareStatement("SELECT template_laboratorium.Pemeriksaan, template_laboratorium.kd_jenis_prw FROM detail_periksa_lab " +
+                    "INNER JOIN template_laboratorium ON detail_periksa_lab.id_template = template_laboratorium.id_template " +
+                    "WHERE template_laboratorium.Pemeriksaan LIKE ? AND template_laboratorium.kd_jenis_prw = ? GROUP BY template_laboratorium.Pemeriksaan");
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("PrepareStatement Error: " + e);
         }
     }
 
@@ -403,94 +396,78 @@ private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
             Valid.tabelKosong(tabMode);
             pstindakan.setString(1, "%" + TCari.getText().trim() + "%");
             rstindakan = pstindakan.executeQuery();
-            i = 1;
-            ttl = 0;
+
+            int noUtama = 1, totalL = 0, totalP = 0;
+            double totalRataL = 0, totalRataP = 0;
+
             while (rstindakan.next()) {
-                tabMode.addRow(new Object[]{
-                    i, rstindakan.getString(1), "", "", "", ""
-                });
+                String namaPerawatan = rstindakan.getString("nm_perawatan");
+                String kdJenis = rstindakan.getString("kd_jenis_prw");
+                tabMode.addRow(new Object[]{noUtama, namaPerawatan, "", "", "", ""});
+
                 pstindakan2.setString(1, "%" + TCari.getText().trim() + "%");
-                pstindakan2.setString(2, rstindakan.getString(2));
+                pstindakan2.setString(2, kdJenis);
                 rstindakan2 = pstindakan2.executeQuery();
-                a = 1;
-                jumlahl = 0;
-                jumlahp = 0;
-                ratal = 0;
-                ratap = 0;
-                ttljumlahl = 0;
-                ttljumlahp = 0;
-                nilaitotall = 0;
-                nilaitotalp = 0;
-                ttlnilaitotall = 0;
-                ttnilaip = 0;
-                ttlratal = 0;
-                ttlratap = 0;
+
+                int noSub = 1;
                 while (rstindakan2.next()) {
-                    jumlahl = Sequel.cariInteger("select count(template_laboratorium.Pemeriksaan) FROM template_laboratorium INNER JOIN detail_periksa_lab "
-                            + "ON template_laboratorium.id_template = detail_periksa_lab.id_template INNER JOIN reg_periksa ON detail_periksa_lab.no_rawat = reg_periksa.no_rawat INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis "
-                            + "where detail_periksa_lab.tgl_periksa between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' "
-                            + "and template_laboratorium.kd_jenis_prw='" + rstindakan2.getString("kd_jenis_prw") + "' and pasien.jk = 'L' group by template_laboratorium.Pemeriksaan ");
-                    ttljumlahl = ttljumlahl + jumlahl;
+                    String pemeriksaan = rstindakan2.getString("Pemeriksaan");
+                    String kdSub = rstindakan2.getString("kd_jenis_prw");
 
-                    jumlahp = Sequel.cariInteger("select count(template_laboratorium.Pemeriksaan) FROM template_laboratorium INNER JOIN detail_periksa_lab "
-                            + "ON template_laboratorium.id_template = detail_periksa_lab.id_template INNER JOIN reg_periksa ON detail_periksa_lab.no_rawat = reg_periksa.no_rawat INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis "
-                            + "where detail_periksa_lab.tgl_periksa between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' "
-                            + "and template_laboratorium.kd_jenis_prw='" + rstindakan2.getString("kd_jenis_prw") + "' and pasien.jk = 'P' group by template_laboratorium.Pemeriksaan ");
-                    ttljumlahp = ttljumlahp + jumlahp;
+                    int jumlahL = queryJumlah("L", kdSub);
+                    int jumlahP = queryJumlah("P", kdSub);
+                    int nilaiL = queryNilai("L", kdSub);
+                    int nilaiP = queryNilai("P", kdSub);
+                    int pasienL = queryPasien("L", kdSub);
+                    int pasienP = queryPasien("P", kdSub);
 
-                    nilaitotall = Sequel.cariInteger("select SUM(CAST(detail_periksa_lab.nilai AS DECIMAL(10, 2))) AS nilai FROM template_laboratorium INNER JOIN detail_periksa_lab "
-                            + "ON template_laboratorium.id_template = detail_periksa_lab.id_template INNER JOIN reg_periksa ON detail_periksa_lab.no_rawat = reg_periksa.no_rawat INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis "
-                            + "where detail_periksa_lab.tgl_periksa between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' "
-                            + "and template_laboratorium.kd_jenis_prw='" + rstindakan2.getString("kd_jenis_prw") + "' and pasien.jk = 'L' group by template_laboratorium.Pemeriksaan ");
+                    double rataL = pasienL != 0 ? (double) nilaiL / pasienL : 0;
+                    double rataP = pasienP != 0 ? (double) nilaiP / pasienP : 0;
 
-                    jumlahpasienl = Sequel.cariInteger("SELECT count(periksa_lab.no_rawat) FROM periksa_lab INNER JOIN "
-                            + "reg_periksa ON periksa_lab.no_rawat = reg_periksa.no_rawat INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis "
-                            + "where periksa_lab.tgl_periksa between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' "
-                            + "and periksa_lab.kd_jenis_prw='" + rstindakan2.getString("kd_jenis_prw") + "' and pasien.jk = 'L'");
+                    tabMode.addRow(new Object[]{noUtama + "." + noSub, pemeriksaan, jumlahL, jumlahP, Valid.SetAngka(rataL), Valid.SetAngka(rataP)});
 
-                    nilaitotalp = Sequel.cariInteger("select SUM(CAST(detail_periksa_lab.nilai AS DECIMAL(10, 2))) AS nilai FROM template_laboratorium INNER JOIN detail_periksa_lab "
-                            + "ON template_laboratorium.id_template = detail_periksa_lab.id_template INNER JOIN reg_periksa ON detail_periksa_lab.no_rawat = reg_periksa.no_rawat INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis "
-                            + "where detail_periksa_lab.tgl_periksa between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' "
-                            + "and template_laboratorium.kd_jenis_prw='" + rstindakan2.getString("kd_jenis_prw") + "' and pasien.jk = 'P' group by template_laboratorium.Pemeriksaan ");
+                    totalL += jumlahL;
+                    totalP += jumlahP;
+                    totalRataL += rataL;
+                    totalRataP += rataP;
 
-                    jumlahpasienp = Sequel.cariInteger("SELECT count(periksa_lab.no_rawat) FROM periksa_lab INNER JOIN "
-                            + "reg_periksa ON periksa_lab.no_rawat = reg_periksa.no_rawat INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis "
-                            + "where periksa_lab.tgl_periksa between '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' and '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' "
-                            + "and periksa_lab.kd_jenis_prw='" + rstindakan2.getString("kd_jenis_prw") + "' and pasien.jk = 'P'");
-
-                    if (jumlahpasienl != 0) {
-                        ratal = nilaitotall / jumlahpasienl;
-                    } else {
-                        ratal = 0; // Atur nilai default jika jumlah pasien laki-laki = 0
-                    }
-
-                    if (jumlahpasienp != 0) {
-                        ratap = nilaitotalp / jumlahpasienp;
-                    } else {
-                        ratap = 0; // Atur nilai default jika jumlah pasien perempuan = 0
-                    }
-
-                    tabMode.addRow(new Object[]{
-                        i + "." + a, rstindakan2.getString(1), jumlahl, jumlahp, ratal, ratap
-                    });
-                    //    ttl = ttl + rstindakan2.getInt(2);
-                    ttl = 0;
-                    a++;
+                    noSub++;
                 }
-                //   ttl = ttl + rstindakan.getInt(2);
-                ttl = 0;
-                i++;
+                noUtama++;
             }
 
-            if (i > 1) {
-                tabMode.addRow(new Object[]{
-                    "", "TOTAL", ttljumlahl, ttljumlahp, ttlratal, ttlratap
-                });
+            if (noUtama > 1) {
+                tabMode.addRow(new Object[]{"", "TOTAL", totalL, totalP, Valid.SetAngka(totalRataL), Valid.SetAngka(totalRataP)});
             }
             this.setCursor(Cursor.getDefaultCursor());
         } catch (Exception e) {
-            System.out.println("Notifikasi : " + e);
+            System.out.println("tampil() Error: " + e);
         }
     }
 
+    private int queryJumlah(String jk, String kdJenis) {
+        return Sequel.cariInteger("SELECT COUNT(template_laboratorium.Pemeriksaan) FROM template_laboratorium " +
+                "INNER JOIN detail_periksa_lab ON template_laboratorium.id_template = detail_periksa_lab.id_template " +
+                "INNER JOIN reg_periksa ON detail_periksa_lab.no_rawat = reg_periksa.no_rawat " +
+                "INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis " +
+                "WHERE detail_periksa_lab.tgl_periksa BETWEEN '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' AND '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' " +
+                "AND template_laboratorium.kd_jenis_prw='" + kdJenis + "' AND pasien.jk='" + jk + "'");
+    }
+
+    private int queryNilai(String jk, String kdJenis) {
+        return Sequel.cariInteger("SELECT SUM(CAST(detail_periksa_lab.nilai AS DECIMAL(10,2))) FROM template_laboratorium " +
+                "INNER JOIN detail_periksa_lab ON template_laboratorium.id_template = detail_periksa_lab.id_template " +
+                "INNER JOIN reg_periksa ON detail_periksa_lab.no_rawat = reg_periksa.no_rawat " +
+                "INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis " +
+                "WHERE detail_periksa_lab.tgl_periksa BETWEEN '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' AND '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' " +
+                "AND template_laboratorium.kd_jenis_prw='" + kdJenis + "' AND pasien.jk='" + jk + "'");
+    }
+
+    private int queryPasien(String jk, String kdJenis) {
+        return Sequel.cariInteger("SELECT COUNT(DISTINCT periksa_lab.no_rawat) FROM periksa_lab " +
+                "INNER JOIN reg_periksa ON periksa_lab.no_rawat = reg_periksa.no_rawat " +
+                "INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis " +
+                "WHERE periksa_lab.tgl_periksa BETWEEN '" + Valid.SetTgl(Tgl1.getSelectedItem() + "") + "' AND '" + Valid.SetTgl(Tgl2.getSelectedItem() + "") + "' " +
+                "AND periksa_lab.kd_jenis_prw='" + kdJenis + "' AND pasien.jk='" + jk + "'");
+    }
 }

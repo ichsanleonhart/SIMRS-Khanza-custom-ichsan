@@ -165,6 +165,13 @@ import simrskhanza.DlgCariPasien;
 import simrskhanza.DlgCatatan;
 import simrskhanza.DlgRujuk;
 
+
+
+
+import java.util.Date;  //tambahan ichsan
+import java.text.SimpleDateFormat; //tambahan ichsan
+import javax.swing.JOptionPane; //tambahan ichsan
+
 /**
  *
  * @author perpustakaan
@@ -4674,6 +4681,7 @@ public final class DlgRawatInap extends javax.swing.JDialog {
         }
 }//GEN-LAST:event_TNoRwKeyPressed
 
+    /*
     private void BtnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSimpanActionPerformed
         if(TNoRw.getText().trim().equals("")||TPasien.getText().trim().equals("")){
             Valid.textKosong(TNoRw,"No.Rawat");
@@ -4690,6 +4698,57 @@ public final class DlgRawatInap extends javax.swing.JDialog {
             }
         }
 }//GEN-LAST:event_BtnSimpanActionPerformed
+    */
+    private void BtnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSimpanActionPerformed
+    if (TNoRw.getText().trim().equals("") || TPasien.getText().trim().equals("")) {
+        Valid.textKosong(TNoRw, "No.Rawat");
+    } else {
+        // --- AWAL MODIFIKASI ---
+        
+        // 1. Siapkan format tanggal dan dapatkan tanggal dari form & tanggal hari ini
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String tanggalForm = Valid.SetTgl(DTPTgl.getSelectedItem() + "");
+        String tanggalHariIni = dateFormat.format(new Date());
+
+        // 2. Buat fungsi lambda untuk menjalankan proses simpan agar tidak duplikat kode
+        Runnable prosesSimpan = () -> {
+            if (akses.getkode().equals("Admin Utama")) {
+                simpan();
+            } else {
+                if (TanggalRegistrasi.getText().equals("")) {
+                    TanggalRegistrasi.setText(Sequel.cariIsi("select concat(reg_periksa.tgl_registrasi,' ',reg_periksa.jam_reg) from reg_periksa where reg_periksa.no_rawat=?", TNoRw.getText()));
+                }
+                if (Sequel.cekTanggalRegistrasi(TanggalRegistrasi.getText(), Valid.SetTgl(DTPTgl.getSelectedItem() + "") + " " + cmbJam.getSelectedItem() + ":" + cmbMnt.getSelectedItem() + ":" + cmbDtk.getSelectedItem()) == true) {
+                    simpan();
+                }
+            }
+        };
+
+        // 3. Bandingkan tanggal dari form dengan tanggal hari ini
+        if (!tanggalForm.equals(tanggalHariIni)) {
+            // Jika tidak sama, tampilkan pesan konfirmasi
+            int pilihan = JOptionPane.showConfirmDialog(
+                this, 
+                "Tanggal dari data yang hendak disimpan (" + tanggalForm + ") tidak sama dengan hari ini (" + tanggalHariIni + ").\nApakah datanya tetap akan disimpan?", 
+                "Konfirmasi Tanggal", 
+                JOptionPane.YES_NO_OPTION, 
+                JOptionPane.WARNING_MESSAGE
+            );
+
+            // Jika user memilih "Yes", jalankan proses simpan
+            if (pilihan == JOptionPane.YES_OPTION) {
+                prosesSimpan.run();
+            }
+            // Jika user memilih "No", maka tidak terjadi apa-apa.
+        } else {
+            // Jika tanggalnya sama, langsung jalankan proses simpan
+            prosesSimpan.run();
+        }
+        
+        // --- AKHIR MODIFIKASI ---
+    }
+}//GEN-LAST:event_BtnSimpanActionPerformed
+    
 
     private void BtnSimpanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnSimpanKeyPressed
         if(evt.getKeyCode()==KeyEvent.VK_SPACE){
@@ -10055,7 +10114,7 @@ private void BtnEditKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
         new Timer(1000, taskPerformer).start();
     }
 
-    private void tampilPemeriksaan() {
+   /* private void tampilPemeriksaan() {
         Valid.tabelKosong(tabModePemeriksaan);
         try{  
             ps4=koneksi.prepareStatement("select pemeriksaan_ranap.no_rawat,reg_periksa.no_rkm_medis,pasien.nm_pasien,"+
@@ -10114,7 +10173,117 @@ private void BtnEditKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
             System.out.println("Notifikasi : "+e);
         }
         LCount.setText(""+tabModePemeriksaan.getRowCount());
+    } */
+    
+    private void tampilPemeriksaan() {
+    Valid.tabelKosong(tabModePemeriksaan);
+    try{  
+        // --- MODIFIKASI DIMULAI (Ichsan)---
+        // Query digabungkan menggunakan UNION ALL untuk mengambil data dari pemeriksaan_ranap dan pemeriksaan_ralan
+        String query = 
+            "(select " +
+            "   pemeriksaan_ranap.no_rawat, reg_periksa.no_rkm_medis, pasien.nm_pasien, " +
+            "   pemeriksaan_ranap.tgl_perawatan, pemeriksaan_ranap.jam_rawat, pemeriksaan_ranap.suhu_tubuh, pemeriksaan_ranap.tensi, " +
+            "   pemeriksaan_ranap.nadi, pemeriksaan_ranap.respirasi, pemeriksaan_ranap.tinggi, " +
+            "   pemeriksaan_ranap.berat, pemeriksaan_ranap.spo2, pemeriksaan_ranap.gcs, pemeriksaan_ranap.kesadaran, pemeriksaan_ranap.keluhan, " +
+            "   pemeriksaan_ranap.pemeriksaan, pemeriksaan_ranap.alergi, '' as lingkar_perut, pemeriksaan_ranap.rtl as plan, pemeriksaan_ranap.penilaian as asesmen, " +
+            "   pemeriksaan_ranap.instruksi, pemeriksaan_ranap.evaluasi, pemeriksaan_ranap.nip, pegawai.nama, pegawai.jbtn " +
+            " from pasien " +
+            " inner join reg_periksa on reg_periksa.no_rkm_medis=pasien.no_rkm_medis " +
+            " inner join pemeriksaan_ranap on pemeriksaan_ranap.no_rawat=reg_periksa.no_rawat " +
+            " inner join pegawai on pemeriksaan_ranap.nip=pegawai.nik " +
+            " where " +
+            "   pemeriksaan_ranap.tgl_perawatan between ? and ? and reg_periksa.no_rkm_medis like ? " +
+            (TCari.getText().trim().equals("") ? "" : 
+             " and (pemeriksaan_ranap.no_rawat like ? or reg_periksa.no_rkm_medis like ? or pasien.nm_pasien like ? or " +
+             " pemeriksaan_ranap.alergi like ? or pemeriksaan_ranap.keluhan like ? or pemeriksaan_ranap.penilaian like ? or " +
+             " pemeriksaan_ranap.rtl like ? or pemeriksaan_ranap.pemeriksaan like ? or pegawai.nama like ?) ") +
+            ") " +
+            "UNION ALL " +
+            "(select " +
+            "   pemeriksaan_ralan.no_rawat, reg_periksa.no_rkm_medis, pasien.nm_pasien, " +
+            "   pemeriksaan_ralan.tgl_perawatan, pemeriksaan_ralan.jam_rawat, pemeriksaan_ralan.suhu_tubuh, pemeriksaan_ralan.tensi, " +
+            "   pemeriksaan_ralan.nadi, pemeriksaan_ralan.respirasi, pemeriksaan_ralan.tinggi, " +
+            "   pemeriksaan_ralan.berat, pemeriksaan_ralan.spo2, pemeriksaan_ralan.gcs, pemeriksaan_ralan.kesadaran, pemeriksaan_ralan.keluhan, " +
+            "   pemeriksaan_ralan.pemeriksaan, pemeriksaan_ralan.alergi, pemeriksaan_ralan.lingkar_perut, pemeriksaan_ralan.rtl as plan, pemeriksaan_ralan.penilaian as asesmen, " +
+            "   pemeriksaan_ralan.instruksi, pemeriksaan_ralan.evaluasi, pemeriksaan_ralan.nip, pegawai.nama, pegawai.jbtn " +
+            " from pasien " +
+            " inner join reg_periksa on reg_periksa.no_rkm_medis=pasien.no_rkm_medis " +
+            " inner join pemeriksaan_ralan on pemeriksaan_ralan.no_rawat=reg_periksa.no_rawat " +
+            " inner join pegawai on pemeriksaan_ralan.nip=pegawai.nik " +
+            " where " +
+            "   pemeriksaan_ralan.tgl_perawatan between ? and ? and reg_periksa.no_rkm_medis like ? " +
+            (TCari.getText().trim().equals("") ? "" : 
+             " and (pemeriksaan_ralan.no_rawat like ? or reg_periksa.no_rkm_medis like ? or pasien.nm_pasien like ? or " +
+             " pemeriksaan_ralan.alergi like ? or pemeriksaan_ralan.keluhan like ? or pemeriksaan_ralan.penilaian like ? or " +
+             " pemeriksaan_ralan.rtl like ? or pemeriksaan_ralan.pemeriksaan like ? or pegawai.nama like ?) ") +
+            ") " +
+            "order by tgl_perawatan desc, jam_rawat desc";
+        
+        ps4=koneksi.prepareStatement(query);
+        try{
+            int paramIndex = 1;
+            // Parameter untuk query pertama (pemeriksaan_ranap)
+            ps4.setString(paramIndex++, Valid.SetTgl(DTPCari1.getSelectedItem()+""));
+            ps4.setString(paramIndex++, Valid.SetTgl(DTPCari2.getSelectedItem()+""));
+            ps4.setString(paramIndex++, "%"+TCariPasien.getText()+"%");
+            if(!TCari.getText().trim().equals("")){
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+            }
+
+            // Parameter untuk query kedua (pemeriksaan_ralan)
+            ps4.setString(paramIndex++, Valid.SetTgl(DTPCari1.getSelectedItem()+""));
+            ps4.setString(paramIndex++, Valid.SetTgl(DTPCari2.getSelectedItem()+""));
+            ps4.setString(paramIndex++, "%"+TCariPasien.getText()+"%");
+            if(!TCari.getText().trim().equals("")){
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+                ps4.setString(paramIndex++, "%"+TCari.getText().trim()+"%");
+            }
+                
+            rs=ps4.executeQuery();
+            while(rs.next()){
+                // Sesuaikan urutan kolom dengan model tabel Anda
+                tabModePemeriksaan.addRow(new Object[]{
+                    false, rs.getString("no_rawat"), rs.getString("no_rkm_medis"), rs.getString("nm_pasien"),
+                    rs.getString("tgl_perawatan"), rs.getString("jam_rawat"), rs.getString("suhu_tubuh"), rs.getString("tensi"),
+                    rs.getString("nadi"), rs.getString("respirasi"), rs.getString("tinggi"), rs.getString("berat"),
+                    rs.getString("spo2"), rs.getString("gcs"), rs.getString("kesadaran"), rs.getString("keluhan"),
+                    rs.getString("pemeriksaan"), rs.getString("alergi"), rs.getString("asesmen"), rs.getString("plan"),
+                    rs.getString("instruksi"), rs.getString("evaluasi"), rs.getString("nip"), rs.getString("nama"),
+                    rs.getString("jbtn")
+                });
+            }
+        } catch (Exception e) {
+            System.out.println("Notifikasi : "+e);
+        } finally{
+            if(rs!=null){
+                rs.close();
+            }
+            if(ps4!=null){
+                ps4.close();
+            }
+        }
+        // --- MODIFIKASI SELESAI ---
+    }catch(Exception e){
+        System.out.println("Notifikasi : "+e);
     }
+    LCount.setText(""+tabModePemeriksaan.getRowCount());
+}
 
     private void getDataPemeriksaan() {
         if(tbPemeriksaan.getSelectedRow()!= -1){

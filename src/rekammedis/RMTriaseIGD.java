@@ -4794,53 +4794,179 @@ public final class RMTriaseIGD extends javax.swing.JDialog {
     }
     
     public void setNoRm(String norwt,String norm,String namapasien) {
-        emptTeks();
-        TNoRw.setText(norwt);
-        TNoRM.setText(norm);
-        TPasien.setText(namapasien);
-        TCari.setText(norwt);  
+    emptTeks();
+    TNoRw.setText(norwt);
+    TNoRM.setText(norm);
+    TPasien.setText(namapasien);
+    TCari.setText(norwt);
+
+    // --- AWAL MODIFIKASI: Logika Fallback Data Vital ---
+    // 1. Siapkan variabel untuk menampung data dari kedua sumber
+    String keluhanIgd = "", tdIgd = "", nadiIgd = "", rrIgd = "", suhuIgd = "", spoIgd = "";
+    String keluhanRalan = "", tdRalan = "", nadiRalan = "", rrRalan = "", suhuRalan = "", spo2Ralan = "";
+
+    // 2. Ambil data dari sumber prioritas (penilaian_medis_igd)
+    try (PreparedStatement ps = koneksi.prepareStatement(
+            "SELECT keluhan_utama, td, nadi, rr, suhu, spo FROM penilaian_medis_igd WHERE no_rawat = ?")) {
+        ps.setString(1, TNoRw.getText());
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                keluhanIgd = rs.getString("keluhan_utama") == null ? "" : rs.getString("keluhan_utama");
+                tdIgd = rs.getString("td") == null ? "" : rs.getString("td");
+                nadiIgd = rs.getString("nadi") == null ? "" : rs.getString("nadi");
+                rrIgd = rs.getString("rr") == null ? "" : rs.getString("rr");
+                suhuIgd = rs.getString("suhu") == null ? "" : rs.getString("suhu");
+                spoIgd = rs.getString("spo") == null ? "" : rs.getString("spo");
+            }
+        }
+    } catch (Exception e) {
+        System.out.println("Notif (penilaian_medis_igd): " + e);
+    }
+
+    // 3. Ambil data dari sumber fallback (pemeriksaan_ralan)
+    try (PreparedStatement ps = koneksi.prepareStatement(
+            "SELECT keluhan, suhu_tubuh, tensi, nadi, spo2, respirasi FROM pemeriksaan_ralan WHERE no_rawat = ? ORDER BY tgl_perawatan DESC, jam_rawat DESC LIMIT 1")) {
+        ps.setString(1, TNoRw.getText());
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                keluhanRalan = rs.getString("keluhan") == null ? "" : rs.getString("keluhan");
+                suhuRalan = rs.getString("suhu_tubuh") == null ? "" : rs.getString("suhu_tubuh");
+                tdRalan = rs.getString("tensi") == null ? "" : rs.getString("tensi");
+                nadiRalan = rs.getString("nadi") == null ? "" : rs.getString("nadi");
+                spo2Ralan = rs.getString("spo2") == null ? "" : rs.getString("spo2");
+                rrRalan = rs.getString("respirasi") == null ? "" : rs.getString("respirasi");
+            }
+        }
+    } catch (Exception e) {
+        System.out.println("Notif (pemeriksaan_ralan): " + e);
+    }
+
+    // 4. Logika untuk memilih data yang akan ditampilkan
+    // Prioritaskan data IGD jika tidak kosong/nol, jika tidak, gunakan data Ralan.
+    String finalKeluhan = (!keluhanIgd.trim().isEmpty()) ? keluhanIgd : keluhanRalan;
+    String finalSuhu = (!suhuIgd.trim().isEmpty() && !suhuIgd.equals("0")) ? suhuIgd : suhuRalan;
+    String finalTensi = (!tdIgd.trim().isEmpty() && !tdIgd.equals("0/0") && !tdIgd.equals("-") && !tdIgd.equals("0")) ? tdIgd : tdRalan;
+    String finalNadi = (!nadiIgd.trim().isEmpty() && !nadiIgd.equals("0")) ? nadiIgd : nadiRalan;
+    String finalSaturasi = (!spoIgd.trim().isEmpty() && !spoIgd.equals("0")) ? spoIgd : spo2Ralan;
+    String finalRespirasi = (!rrIgd.trim().isEmpty() && !rrIgd.equals("0")) ? rrIgd : rrRalan;
+
+    // 5. Set nilai akhir ke komponen form
+    PrimerKeluhanUtama.setText(finalKeluhan);
+    PrimerSuhu.setText(finalSuhu);
+    PrimerTensi.setText(finalTensi);
+    PrimerNadi.setText(finalNadi);
+    PrimerSaturasi.setText(finalSaturasi);
+    PrimerRespirasi.setText(finalRespirasi);
+
+    SekunderAnamnesa.setText(finalKeluhan);
+    SekunderSuhu.setText(finalSuhu);
+    SekunderTensi.setText(finalTensi);
+    SekunderNadi.setText(finalNadi);
+    SekunderSaturasi.setText(finalSaturasi);
+    SekunderRespirasi.setText(finalRespirasi);
+    
+    // --- AKHIR MODIFIKASI ---
+}
+    
+    /*  //backup kode yang sudah berjalan bagus by ichsan (mencoba kode pengambilan data ttv yang lebih dinamis)
+    public void setNoRm(String norwt,String norm,String namapasien) {
+         emptTeks();
+    TNoRw.setText(norwt);
+    TNoRM.setText(norm);
+    TPasien.setText(namapasien);
+    TCari.setText(norwt);
+
+    // --- AWAL MODIFIKASI ---
+    boolean dataDitemukan = false; // Flag untuk menandai jika data sudah ditemukan dari penilaian_medis_igd
+
+    // 1. Prioritas: Ambil data dari penilaian_medis_igd
+    PreparedStatement psMedisIgd = null;
+    ResultSet rsMedisIgd = null;
+    try {
+        psMedisIgd = koneksi.prepareStatement(
+                "SELECT keluhan_utama, td, nadi, rr, suhu, spo " +
+                "FROM penilaian_medis_igd " +
+                "WHERE no_rawat = ?");
         
-        // Logika untuk mengambil data CPPT dari pemeriksaan_ralan by ichsan
-        PreparedStatement psPemeriksaanRalan = null; // Deklarasikan PreparedStatement baru
-        ResultSet rsPemeriksaanRalan = null;         // Deklarasikan ResultSet baru
+        psMedisIgd.setString(1, TNoRw.getText());
+        rsMedisIgd = psMedisIgd.executeQuery();
+
+        if (rsMedisIgd.next()) {
+            // Mengisi TextBox untuk data Primer dari penilaian_medis_igd
+            PrimerKeluhanUtama.setText(rsMedisIgd.getString("keluhan_utama"));
+            PrimerSuhu.setText(rsMedisIgd.getString("suhu"));
+            PrimerTensi.setText(rsMedisIgd.getString("td"));
+            PrimerNadi.setText(rsMedisIgd.getString("nadi"));
+            PrimerSaturasi.setText(rsMedisIgd.getString("spo"));
+            PrimerRespirasi.setText(rsMedisIgd.getString("rr"));
+
+            // Mengisi TextBox untuk data Sekunder dari penilaian_medis_igd
+            SekunderAnamnesa.setText(rsMedisIgd.getString("keluhan_utama"));
+            SekunderSuhu.setText(rsMedisIgd.getString("suhu"));
+            SekunderTensi.setText(rsMedisIgd.getString("td"));
+            SekunderNadi.setText(rsMedisIgd.getString("nadi"));
+            SekunderSaturasi.setText(rsMedisIgd.getString("spo"));
+            SekunderRespirasi.setText(rsMedisIgd.getString("rr"));
+            
+            dataDitemukan = true; // Set flag karena data berhasil ditemukan
+        }
+    } catch (Exception e) {
+        System.out.println("Notif pengambilan data penilaian_medis_igd di Triase IGD : " + e.getMessage());
+    } finally {
+        try {
+            if (rsMedisIgd != null) {
+                rsMedisIgd.close();
+            }
+            if (psMedisIgd != null) {
+                psMedisIgd.close();
+            }
+        } catch (Exception ex) {
+            // Handle exception
+        }
+    }
+
+    // 2. Fallback: Jika data tidak ditemukan di penilaian_medis_igd, ambil dari pemeriksaan_ralan
+    if (!dataDitemukan) {
+        PreparedStatement psPemeriksaanRalan = null;
+        ResultSet rsPemeriksaanRalan = null;
         try {
             psPemeriksaanRalan = koneksi.prepareStatement(
-                    "SELECT keluhan, suhu_tubuh, tensi, nadi, spo2, respirasi, alergi " + // Tambahkan 'alergi' juga
+                    "SELECT keluhan, suhu_tubuh, tensi, nadi, spo2, respirasi " +
                     "FROM pemeriksaan_ralan " +
                     "WHERE no_rawat = ? " +
-                    "ORDER BY tgl_perawatan DESC, jam_rawat DESC LIMIT 1"); 
-            
+                    "ORDER BY tgl_perawatan DESC, jam_rawat DESC LIMIT 1");
+
             psPemeriksaanRalan.setString(1, TNoRw.getText());
             rsPemeriksaanRalan = psPemeriksaanRalan.executeQuery();
-            
+
             if (rsPemeriksaanRalan.next()) {
-                // Mengisi TextBox untuk data Primer
+                // Mengisi TextBox untuk data Primer dari pemeriksaan_ralan
                 PrimerKeluhanUtama.setText(rsPemeriksaanRalan.getString("keluhan"));
                 PrimerSuhu.setText(rsPemeriksaanRalan.getString("suhu_tubuh"));
                 PrimerTensi.setText(rsPemeriksaanRalan.getString("tensi"));
                 PrimerNadi.setText(rsPemeriksaanRalan.getString("nadi"));
                 PrimerSaturasi.setText(rsPemeriksaanRalan.getString("spo2"));
-                PrimerRespirasi.setText(rsPemeriksaanRalan.getString("respirasi"));                
+                PrimerRespirasi.setText(rsPemeriksaanRalan.getString("respirasi"));
 
-                // Mengisi TextBox untuk data Sekunder (duplikasi dari Primer sesuai permintaan sebelumnya)
-                SekunderAnamnesa.setText(rsPemeriksaanRalan.getString("keluhan")); 
+                // Mengisi TextBox untuk data Sekunder dari pemeriksaan_ralan
+                SekunderAnamnesa.setText(rsPemeriksaanRalan.getString("keluhan"));
                 SekunderSuhu.setText(rsPemeriksaanRalan.getString("suhu_tubuh"));
                 SekunderTensi.setText(rsPemeriksaanRalan.getString("tensi"));
                 SekunderNadi.setText(rsPemeriksaanRalan.getString("nadi"));
                 SekunderSaturasi.setText(rsPemeriksaanRalan.getString("spo2"));
                 SekunderRespirasi.setText(rsPemeriksaanRalan.getString("respirasi"));
             } else {
-                // Jika tidak ada data di pemeriksaan_ralan, kosongkan field terkait
+                // Jika tidak ada data di kedua tabel, pastikan field kosong (opsional, karena sudah ada emptTeks)
                 PrimerKeluhanUtama.setText("");
                 PrimerSuhu.setText("");
-                PrimerNyeri.setText("");
+                PrimerNyeri.setText(""); // Nyeri tidak ada di query, biarkan default
                 PrimerTensi.setText("");
                 PrimerNadi.setText("");
                 PrimerSaturasi.setText("");
                 PrimerRespirasi.setText("");
                 SekunderAnamnesa.setText("");
                 SekunderSuhu.setText("");
-                SekunderNyeri.setText("");
+                SekunderNyeri.setText(""); // Nyeri tidak ada di query, biarkan default
                 SekunderTensi.setText("");
                 SekunderNadi.setText("");
                 SekunderSaturasi.setText("");
@@ -4853,10 +4979,6 @@ public final class RMTriaseIGD extends javax.swing.JDialog {
                 if (rsPemeriksaanRalan != null) {
                     rsPemeriksaanRalan.close();
                 }
-            } catch (Exception ex) {
-                // Handle exception
-            }
-            try {
                 if (psPemeriksaanRalan != null) {
                     psPemeriksaanRalan.close();
                 }
@@ -4864,9 +4986,10 @@ public final class RMTriaseIGD extends javax.swing.JDialog {
                 // Handle exception
             }
         }
-        // === AKHIR DARI BAGIAN YANG PERLU ANDA TAMBAHKAN ===
-        
     }
+    // --- AKHIR MODIFIKASI ---
+    }  
+*/
     
     public void tampilPemeriksaan() {        
         Valid.tabelKosong(tabModePemeriksaan);

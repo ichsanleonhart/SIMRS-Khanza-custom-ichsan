@@ -250,7 +250,7 @@ public class frmUtama extends javax.swing.JFrame {
                         TeksArea.append("Menjalankan WS tambah antrian Mobile JKN Pasien BPJS\n");
                         
                         //pasien JKN
-                        /*ps=koneksi.prepareStatement(
+                        ps=koneksi.prepareStatement(
                                 "SELECT referensi_mobilejkn_bpjs.nobooking,referensi_mobilejkn_bpjs.no_rawat,reg_periksa.no_rkm_medis,pasien.nm_pasien,referensi_mobilejkn_bpjs.nohp,referensi_mobilejkn_bpjs.nomorkartu,"+
                                 "referensi_mobilejkn_bpjs.nik,referensi_mobilejkn_bpjs.tanggalperiksa,poliklinik.nm_poli,dokter.nm_dokter,referensi_mobilejkn_bpjs.jampraktek,"+
                                 "referensi_mobilejkn_bpjs.jeniskunjungan,referensi_mobilejkn_bpjs.nomorreferensi,referensi_mobilejkn_bpjs.status,referensi_mobilejkn_bpjs.validasi,"+
@@ -324,8 +324,9 @@ public class frmUtama extends javax.swing.JFrame {
                             if(ps!=null){
                                 ps.close();
                             }
-                        }*/
+                        }
                         
+                        //task ID 99 batal
                         TeksArea.append("Menjalankan WS batal antrian Mobile JKN Pasien BPJS\n");
                         ps=koneksi.prepareStatement(
                                 "SELECT * FROM referensi_mobilejkn_bpjs_batal where referensi_mobilejkn_bpjs_batal.statuskirim='Belum' and referensi_mobilejkn_bpjs_batal.tanggalbatal between "+(Tanggal1.getText().equals(Tanggal2.getText())?"SUBDATE('"+Tanggal2.getText()+"',INTERVAL 6 DAY) and '"+Tanggal2.getText()+"'":"'"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"'"));
@@ -415,7 +416,10 @@ public class frmUtama extends javax.swing.JFrame {
                                 "INNER JOIN pasien ON reg_periksa.no_rkm_medis=pasien.no_rkm_medis "+
                                 "INNER JOIN poliklinik ON reg_periksa.kd_poli=poliklinik.kd_poli "+
                                 "INNER JOIN dokter ON reg_periksa.kd_dokter=dokter.kd_dokter "+
-                                "WHERE referensi_mobilejkn_bpjs.status='Checkin' and referensi_mobilejkn_bpjs.tanggalperiksa between '"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"' "+
+                                //"WHERE referensi_mobilejkn_bpjs.status='Checkin' and referensi_mobilejkn_bpjs.tanggalperiksa between '"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"' "+
+                                //modifikasi kode by ichsan agar mengambil data mundur 6 hari ke belakang
+                                "WHERE referensi_mobilejkn_bpjs.status='Checkin' and referensi_mobilejkn_bpjs.tanggalperiksa between " +
+                                (Tanggal1.getText().equals(Tanggal2.getText()) ? "SUBDATE('"+Tanggal2.getText()+"',INTERVAL 6 DAY) and '"+Tanggal2.getText()+"'" : "'"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"'") +
                                 "order by referensi_mobilejkn_bpjs.tanggalperiksa");
                         try {
                             rs=ps.executeQuery();
@@ -494,7 +498,9 @@ public class frmUtama extends javax.swing.JFrame {
                                 }
                                 
                                 if(task3.equals("Sudah")&&task4.equals("")){
-                                    datajam=Sequel.cariIsi("select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) from pemeriksaan_ralan where pemeriksaan_ralan.no_rawat=?",rs.getString("no_rawat"));
+                                  //datajam=Sequel.cariIsi("select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) from pemeriksaan_ralan where pemeriksaan_ralan.no_rawat=?",rs.getString("no_rawat"));
+                                  //Modifikasi Ichsan, mengubah task ID 4 hanya mengambil CPPT punya dokter  
+                                    datajam=Sequel.cariIsi("select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) from pemeriksaan_ralan inner join dokter on pemeriksaan_ralan.nip = dokter.kd_dokter where pemeriksaan_ralan.no_rawat=? order by pemeriksaan_ralan.tgl_perawatan ASC, pemeriksaan_ralan.jam_rawat asc LIMIT 1 ",rs.getString("no_rawat"));
                                     if(datajam.equals("")){
                                         datajam=Sequel.cariIsi("select if(diterima='0000-00-00 00:00:00','',diterima) from mutasi_berkas where mutasi_berkas.no_rawat=?",rs.getString("no_rawat"));
                                     }
@@ -536,8 +542,36 @@ public class frmUtama extends javax.swing.JFrame {
                                 if(task4.equals("Sudah")&&task5.equals("")){
                                     datajam=Sequel.cariIsi("select if(kembali='0000-00-00 00:00:00','',kembali) from mutasi_berkas where mutasi_berkas.no_rawat=?",rs.getString("no_rawat"));
                                     if(datajam.equals("")){
-                                        datajam=Sequel.cariIsi("select now() from reg_periksa where reg_periksa.stts='Sudah' and reg_periksa.no_rawat=?",rs.getString("no_rawat"));
+                                        //datajam=Sequel.cariIsi("select now() from reg_periksa where reg_periksa.stts='Sudah' and reg_periksa.no_rawat=?",rs.getString("no_rawat"));
+                                        // Mengambil waktu Task ID 4 sebagai dasar.
+                                        String waktuTask4 = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where no_rawat=? and taskid='4'", rs.getString("no_rawat"));
+        
+                                        // Hanya jika waktu Task ID 4 ditemukan.
+                                        if (!waktuTask4.equals("")) {
+                                            try {
+                                                // Konversi waktu Task 4 ke dalam format Date.
+                                                Date tanggalTask4 = dateFormat.parse(waktuTask4);
+                
+                                                // Siapkan Calendar untuk manipulasi waktu.
+                                                Calendar kalender = Calendar.getInstance();
+                                                kalender.setTime(tanggalTask4);
+                
+                                                // Hasilkan angka acak antara 2 sampai 5.
+                                                // new Random().nextInt(4) menghasilkan 0, 1, 2, atau 3. Ditambah 2 menjadi 2, 3, 4, atau 5.
+                                                int menitAcak = new java.util.Random().nextInt(4) + 2;
+                
+                                                // Tambahkan menit acak ke waktu Task 4.
+                                                kalender.add(Calendar.MINUTE, menitAcak);
+                
+                                                // Format kembali menjadi string dan jadikan sebagai datajam untuk Task 5.
+                                                datajam = dateFormat.format(kalender.getTime());
+                                            } catch (Exception ed) {
+                                                System.out.println("Gagal mem-parsing atau memodifikasi waktu Task 4 untuk fallback Task 5: " + ed);
+                                                // Jika terjadi error, datajam akan tetap kosong dan proses untuk pasien ini akan berhenti (aman).
+                                            }
+                                        }
                                     }
+                                    
                                     if(!datajam.equals("")){
                                         if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"5",datajam})==true){
                                             parsedDate = dateFormat.parse(datajam);
@@ -678,7 +712,30 @@ public class frmUtama extends javax.swing.JFrame {
                                 }
                                 
                                 if(task99.equals("")){
-                                    datajam=Sequel.cariIsi("select now() from reg_periksa where reg_periksa.stts='Batal' and reg_periksa.no_rawat=?",rs.getString("no_rawat"));
+                                    //datajam=Sequel.cariIsi("select now() from reg_periksa where reg_periksa.stts='Batal' and reg_periksa.no_rawat=?",rs.getString("no_rawat"));
+                                    // --- SOLUSI FINAL UNTUK TASK ID 99 (JKN) --- ichsan
+                                    // Logika: Ambil waktu registrasi, lalu tambahkan durasi acak 2-5 menit sebagai perkiraan waktu pembatalan.
+                                        // Ini memastikan waktu pembatalan selalu setelah waktu registrasi dan akurat secara tanggal.
+                                        String waktuRegistrasi = Sequel.cariIsi(
+                                            "SELECT CONCAT(tgl_registrasi, ' ', jam_reg) FROM reg_periksa WHERE no_rawat=?",
+                                            rs.getString("no_rawat")
+                                        );
+                                    
+                                        if (!waktuRegistrasi.equals("")) {
+                                            try {
+                                                Date tanggalRegistrasi = dateFormat.parse(waktuRegistrasi);
+                                                Calendar kalender = Calendar.getInstance();
+                                                kalender.setTime(tanggalRegistrasi);
+                                                // Tambah 2-5 menit acak
+                                                int menitAcak = new java.util.Random().nextInt(4) + 2;
+                                                kalender.add(Calendar.MINUTE, menitAcak);
+                                                datajam = dateFormat.format(kalender.getTime());
+                                            } catch (Exception es) {
+                                                System.out.println("Gagal mem-parsing waktu registrasi untuk fallback Task 99 (JKN): " + es);
+                                            }
+                                        }                                    
+                                    // --- SOLUSI FINAL UNTUK TASK ID 99 (JKN) --- ichsan
+                                    
                                     if(!datajam.equals("")){
                                         if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"99",datajam})==true){
                                             parsedDate = dateFormat.parse(datajam);
@@ -729,9 +786,18 @@ public class frmUtama extends javax.swing.JFrame {
                         TeksArea.append("Menjalankan WS tambah antrian Mobile JKN Pasien Non BPJS/BJS Onsite\n");
                         ps=koneksi.prepareStatement(
                                 "select reg_periksa.no_reg,reg_periksa.no_rawat,reg_periksa.tgl_registrasi,reg_periksa.kd_dokter,dokter.nm_dokter,reg_periksa.kd_poli,poliklinik.nm_poli,reg_periksa.stts_daftar,reg_periksa.no_rkm_medis,reg_periksa.kd_pj "+
-                                "from reg_periksa inner join dokter on reg_periksa.kd_dokter=dokter.kd_dokter inner join poliklinik on reg_periksa.kd_poli=poliklinik.kd_poli where reg_periksa.tgl_registrasi between '"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"' "+
-                                "and reg_periksa.no_rawat not in (select referensi_mobilejkn_bpjs.no_rawat from referensi_mobilejkn_bpjs where referensi_mobilejkn_bpjs.tanggalperiksa between '"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"') "+
-                                "order by concat(reg_periksa.tgl_registrasi,' ',reg_periksa.jam_reg)");
+                                "from reg_periksa inner join dokter on reg_periksa.kd_dokter=dokter.kd_dokter inner join poliklinik on reg_periksa.kd_poli=poliklinik.kd_poli "+
+                                //"where reg_periksa.tgl_registrasi between '"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"' "+
+                                
+                                // --- AWAL MODIFIKASI mundur 6 hari ke belakang---  ichsan
+                                "where reg_periksa.tgl_registrasi between "
+                                + (Tanggal1.getText().equals(Tanggal2.getText()) ? "SUBDATE('" + Tanggal2.getText() + "',INTERVAL 6 DAY) and '" + Tanggal2.getText() + "'" : "'" + Tanggal1.getText() + "' and '" + Tanggal2.getText() + "'") + " "
+                                + "and reg_periksa.no_rawat not in (select referensi_mobilejkn_bpjs.no_rawat from referensi_mobilejkn_bpjs where referensi_mobilejkn_bpjs.tanggalperiksa between "
+                                + (Tanggal1.getText().equals(Tanggal2.getText()) ? "SUBDATE('" + Tanggal2.getText() + "',INTERVAL 6 DAY) and '" + Tanggal2.getText() + "'" : "'" + Tanggal1.getText() + "' and '" + Tanggal2.getText() + "'") + ") "
+                                // --- AKHIR MODIFIKASI mundur 6 hari ke belakang --- ichsan
+                                        
+                                // "and reg_periksa.no_rawat not in (select referensi_mobilejkn_bpjs.no_rawat from referensi_mobilejkn_bpjs where referensi_mobilejkn_bpjs.tanggalperiksa between '"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"') "+
+                                +"order by concat(reg_periksa.tgl_registrasi,' ',reg_periksa.jam_reg)");
                         try {
                             rs=ps.executeQuery();
                             while(rs.next()){
@@ -911,7 +977,35 @@ public class frmUtama extends javax.swing.JFrame {
                                             if(task4.equals("Sudah")&&task5.equals("")){
                                                 datajam=Sequel.cariIsi("select if(mutasi_berkas.kembali='0000-00-00 00:00:00','',mutasi_berkas.kembali) from mutasi_berkas where mutasi_berkas.no_rawat=?",rs.getString("no_rawat"));
                                                 if(datajam.equals("")){
-                                                    datajam=Sequel.cariIsi("select now() from reg_periksa where reg_periksa.stts='Sudah' and reg_periksa.no_rawat=?",rs.getString("no_rawat"));
+                                                    //datajam=Sequel.cariIsi("select now() from reg_periksa where reg_periksa.stts='Sudah' and reg_periksa.no_rawat=?",rs.getString("no_rawat"));                                                    
+                                                    // Mengambil waktu Task ID 4 sebagai dasar.
+                                                    String waktuTask4 = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where no_rawat=? and taskid='4'", rs.getString("no_rawat"));
+        
+                                                    // Hanya jika waktu Task ID 4 ditemukan.
+                                                    if (!waktuTask4.equals("")) {
+                                                        try {
+                                                            // Konversi waktu Task 4 ke dalam format Date.
+                                                            Date tanggalTask4 = dateFormat.parse(waktuTask4);
+                
+                                                            // Siapkan Calendar untuk manipulasi waktu.
+                                                            Calendar kalender = Calendar.getInstance();
+                                                            kalender.setTime(tanggalTask4);
+                
+                                                            // Hasilkan angka acak antara 2 sampai 5.
+                                                            // new Random().nextInt(4) menghasilkan 0, 1, 2, atau 3. Ditambah 2 menjadi 2, 3, 4, atau 5.
+                                                            int menitAcak = new java.util.Random().nextInt(4) + 2;
+                
+                                                            // Tambahkan menit acak ke waktu Task 4.
+                                                            kalender.add(Calendar.MINUTE, menitAcak);
+                
+                                                            // Format kembali menjadi string dan jadikan sebagai datajam untuk Task 5.
+                                                            datajam = dateFormat.format(kalender.getTime());
+                                                        } catch (Exception ed) {
+                                                            System.out.println("Gagal mem-parsing atau memodifikasi waktu Task 4 untuk fallback Task 5: " + ed);
+                                                            // Jika terjadi error, datajam akan tetap kosong dan proses untuk pasien ini akan berhenti (aman).
+                                                        }
+                                                    }                                       
+                                        
                                                 }
                                                 if(!datajam.equals("")){
                                                     if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"5",datajam})==true){
@@ -1053,7 +1147,30 @@ public class frmUtama extends javax.swing.JFrame {
                                             }
 
                                             if(task99.equals("")){
-                                                datajam=Sequel.cariIsi("select now() from reg_periksa where reg_periksa.stts='Batal' and reg_periksa.no_rawat=?",rs.getString("no_rawat"));
+                                                //datajam=Sequel.cariIsi("select now() from reg_periksa where reg_periksa.stts='Batal' and reg_periksa.no_rawat=?",rs.getString("no_rawat"));
+                                                
+                                                // --- SOLUSI FINAL UNTUK TASK ID 99 (NON JKN) --- ichsan
+                                                    // Menerapkan logika yang sama persis seperti pada pasien JKN.
+                                                    String waktuRegistrasi = Sequel.cariIsi(
+                                                        "SELECT CONCAT(tgl_registrasi, ' ', jam_reg) FROM reg_periksa WHERE no_rawat=?",
+                                                        rs.getString("no_rawat")
+                                                    );
+                                                    
+                                                    if (!waktuRegistrasi.equals("")) {
+                                                        try {
+                                                            Date tanggalRegistrasi = dateFormat.parse(waktuRegistrasi);
+                                                            Calendar kalender = Calendar.getInstance();
+                                                            kalender.setTime(tanggalRegistrasi);
+                                                            // Tambah 2-5 menit acak
+                                                            int menitAcak = new java.util.Random().nextInt(4) + 2;
+                                                            kalender.add(Calendar.MINUTE, menitAcak);
+                                                            datajam = dateFormat.format(kalender.getTime());
+                                                        } catch (Exception et) {
+                                                            System.out.println("Gagal mem-parsing waktu registrasi untuk fallback Task 99 (Non-JKN): " + et);
+                                                        }
+                                                    }
+                                                // --- SOLUSI FINAL UNTUK TASK ID 99 (NON JKN) --- ichsan
+                                                
                                                 if(!datajam.equals("")){
                                                     if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"99",datajam})==true){
                                                         parsedDate = dateFormat.parse(datajam);
