@@ -197,12 +197,12 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="kirim_careplanActionPerformed"/>
           </Events>
         </MenuItem>
-        <MenuItem class="javax.swing.JMenuItem" name="informasi_kirim">
+        <MenuItem class="javax.swing.JMenuItem" name="kirim_questionnaire">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Informasi Detail"/>
+            <Property name="text" type="java.lang.String" value="Kirim Questionnaire"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="informasi_kirimActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="kirim_questionnaireActionPerformed"/>
           </Events>
         </MenuItem>
       </SubComponents>

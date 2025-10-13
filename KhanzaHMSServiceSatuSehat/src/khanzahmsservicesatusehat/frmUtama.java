@@ -100,7 +100,7 @@ public class frmUtama extends javax.swing.JFrame {
         kirim_diagnosticreportlabpk = new javax.swing.JMenuItem();
         kirim_diagnosticreportlabmb = new javax.swing.JMenuItem();
         kirim_careplan = new javax.swing.JMenuItem();
-        informasi_kirim = new javax.swing.JMenuItem();
+        kirim_questionnaire = new javax.swing.JMenuItem();
         jScrollPane1 = new javax.swing.JScrollPane();
         TeksArea = new javax.swing.JTextArea();
         jPanel1 = new javax.swing.JPanel();
@@ -303,13 +303,13 @@ public class frmUtama extends javax.swing.JFrame {
         });
         jPopupMenu1.add(kirim_careplan);
 
-        informasi_kirim.setText("Informasi Detail");
-        informasi_kirim.addActionListener(new java.awt.event.ActionListener() {
+        kirim_questionnaire.setText("Kirim Questionnaire");
+        kirim_questionnaire.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                informasi_kirimActionPerformed(evt);
+                kirim_questionnaireActionPerformed(evt);
             }
         });
-        jPopupMenu1.add(informasi_kirim);
+        jPopupMenu1.add(kirim_questionnaire);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Service Satu Sehat (Ichsan)");
@@ -791,9 +791,22 @@ public class frmUtama extends javax.swing.JFrame {
         }.execute();
     }//GEN-LAST:event_kirim_careplanActionPerformed
 
-    private void informasi_kirimActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_informasi_kirimActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_informasi_kirimActionPerformed
+    private void kirim_questionnaireActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_questionnaireActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Telaah Obat (Questionnaire)...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                questionnaire();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Telaah Obat (Questionnaire) SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_questionnaireActionPerformed
 
     /**
      * @param args the command line arguments
@@ -835,7 +848,6 @@ public class frmUtama extends javax.swing.JFrame {
     private javax.swing.JTextField Tanggal1;
     private javax.swing.JTextField Tanggal2;
     private javax.swing.JTextArea TeksArea;
-    private javax.swing.JMenuItem informasi_kirim;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButtonStartKirim;
     private javax.swing.JLabel jLabel1;
@@ -862,6 +874,7 @@ public class frmUtama extends javax.swing.JFrame {
     private javax.swing.JMenuItem kirim_observationlabpk;
     private javax.swing.JMenuItem kirim_observationradiologi;
     private javax.swing.JMenuItem kirim_prosedur;
+    private javax.swing.JMenuItem kirim_questionnaire;
     private javax.swing.JMenuItem kirim_servicerequestlabmb;
     private javax.swing.JMenuItem kirim_servicerequestlabpk;
     private javax.swing.JMenuItem kirim_servicerequestradiologi;
@@ -9364,6 +9377,254 @@ public class frmUtama extends javax.swing.JFrame {
         }
     }
     
+    private void questionnaire() {
+    try {
+        // Kueri untuk Rawat Jalan
+        ps = koneksi.prepareStatement(
+            "SELECT resep_obat.no_rawat, reg_periksa.no_rkm_medis, pasien.nm_pasien, pasien.no_ktp, " +
+            "telaah_farmasi.no_resep, resep_obat.tgl_penyerahan, resep_obat.jam_penyerahan, telaah_farmasi.nip, " +
+            "pegawai.nama, pegawai.no_ktp AS aptktp, " +
+            "telaah_farmasi.resep_identifikasi_pasien, telaah_farmasi.resep_tepat_obat, telaah_farmasi.resep_tepat_waktu_pemberian, " +
+            "telaah_farmasi.resep_tepat_dosis, telaah_farmasi.resep_tepat_cara_pemberian, " +
+            "telaah_farmasi.resep_ada_tidak_duplikasi_obat, telaah_farmasi.resep_kontra_indikasi_obat, telaah_farmasi.resep_interaksi_obat, " +
+            "satu_sehat_encounter.id_encounter " +
+            "FROM resep_obat " +
+            "INNER JOIN telaah_farmasi ON resep_obat.no_resep = telaah_farmasi.no_resep " +
+            "INNER JOIN reg_periksa ON resep_obat.no_rawat = reg_periksa.no_rawat " +
+            "INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis " +
+            "INNER JOIN satu_sehat_encounter ON resep_obat.no_rawat = satu_sehat_encounter.no_rawat " +
+            "INNER JOIN pegawai ON telaah_farmasi.nip = pegawai.nik " +
+            "INNER JOIN nota_jalan ON resep_obat.no_rawat = nota_jalan.no_rawat " +
+            "LEFT JOIN satu_sehat_questionnairereq_pengkajian_obat ON telaah_farmasi.no_resep = satu_sehat_questionnairereq_pengkajian_obat.no_resep " +
+            "WHERE satu_sehat_questionnairereq_pengkajian_obat.id_questreq IS NULL " +
+            "AND resep_obat.tgl_penyerahan <> '0000-00-00' " +
+            "AND nota_jalan.tanggal BETWEEN ? AND ? " +
+            "AND LENGTH(pasien.no_ktp) = 16 AND pasien.no_ktp REGEXP '^[0-9]+$' AND pasien.no_ktp <> '0000000000000000' " +
+            "AND LENGTH(pegawai.no_ktp) = 16 AND pegawai.no_ktp REGEXP '^[0-9]+$' AND pegawai.no_ktp <> '0000000000000000' " +
+            "GROUP BY telaah_farmasi.no_resep"
+        );
+        try {
+            ps.setString(1, Tanggal1.getText());
+            ps.setString(2, Tanggal2.getText());
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                kirimQuestionnaire(rs);
+            }
+        } catch (Exception e) {
+            System.out.println("Notif Kueri Ralan: " + e);
+        } finally {
+            if(rs != null) rs.close();
+            if(ps != null) ps.close();
+        }
+
+        // Kueri untuk Rawat Inap
+        ps = koneksi.prepareStatement(
+            "SELECT resep_obat.no_rawat, reg_periksa.no_rkm_medis, pasien.nm_pasien, pasien.no_ktp, " +
+            "telaah_farmasi.no_resep, resep_obat.tgl_penyerahan, resep_obat.jam_penyerahan, telaah_farmasi.nip, " +
+            "pegawai.nama, pegawai.no_ktp AS aptktp, " +
+            "telaah_farmasi.resep_identifikasi_pasien, telaah_farmasi.resep_tepat_obat, telaah_farmasi.resep_tepat_waktu_pemberian, " +
+            "telaah_farmasi.resep_tepat_dosis, telaah_farmasi.resep_tepat_cara_pemberian, " +
+            "telaah_farmasi.resep_ada_tidak_duplikasi_obat, telaah_farmasi.resep_kontra_indikasi_obat, telaah_farmasi.resep_interaksi_obat, " +
+            "satu_sehat_encounter.id_encounter " +
+            "FROM resep_obat " +
+            "INNER JOIN telaah_farmasi ON resep_obat.no_resep = telaah_farmasi.no_resep " +
+            "INNER JOIN reg_periksa ON resep_obat.no_rawat = reg_periksa.no_rawat " +
+            "INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis " +
+            "INNER JOIN satu_sehat_encounter ON resep_obat.no_rawat = satu_sehat_encounter.no_rawat " +
+            "INNER JOIN pegawai ON telaah_farmasi.nip = pegawai.nik " +
+            "INNER JOIN nota_inap ON resep_obat.no_rawat = nota_inap.no_rawat " +
+            "LEFT JOIN satu_sehat_questionnairereq_pengkajian_obat ON telaah_farmasi.no_resep = satu_sehat_questionnairereq_pengkajian_obat.no_resep " +
+            "WHERE satu_sehat_questionnairereq_pengkajian_obat.id_questreq IS NULL " +
+            "AND resep_obat.tgl_penyerahan <> '0000-00-00' " +
+            "AND nota_inap.tanggal BETWEEN ? AND ? " +
+            "AND LENGTH(pasien.no_ktp) = 16 AND pasien.no_ktp REGEXP '^[0-9]+$' AND pasien.no_ktp <> '0000000000000000' " +
+            "AND LENGTH(pegawai.no_ktp) = 16 AND pegawai.no_ktp REGEXP '^[0-9]+$' AND pegawai.no_ktp <> '0000000000000000' " +
+            "GROUP BY telaah_farmasi.no_resep"
+        );
+        try {
+            ps.setString(1, Tanggal1.getText());
+            ps.setString(2, Tanggal2.getText());
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                kirimQuestionnaire(rs);
+            }
+        } catch (Exception e) {
+            System.out.println("Notif Kueri Ranap: " + e);
+        } finally {
+            if(rs != null) rs.close();
+            if(ps != null) ps.close();
+        }
+    } catch (Exception e) {
+        System.out.println("Notifikasi Utama Questionnaire: " + e);
+    }
+}
+
+private void kirimQuestionnaire(ResultSet rs) throws Exception {
+    try {
+        idpasien = cekViaSatuSehat.tampilIDPasien(rs.getString("no_ktp"));
+        iddokter = cekViaSatuSehat.tampilIDParktisi(rs.getString("aptktp")); // Menggunakan NIK apoteker
+
+        headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Authorization", "Bearer " + api.TokenSatuSehat());
+        
+        // Helper untuk mapping Ya/Tidak ke Kode dan Display, disesuaikan dengan kolom orisinal
+        String[] adminLengkap = mapYaTidak(rs.getString("resep_identifikasi_pasien"));
+        String[] resepJelas = mapYaTidak(rs.getString("resep_tepat_obat")); // Proxy untuk kejelasan resep
+        String[] tglResepSesuai = mapYaTidak(rs.getString("resep_tepat_waktu_pemberian"));
+        String[] unitSesuai = {"OV000052", "Sesuai"}; // Asumsi "Ruangan/Unit" selalu sesuai
+        String[] namaObatSesuai = mapYaTidak(rs.getString("resep_tepat_obat"));
+        String[] dosisSesuai = mapYaTidak(rs.getString("resep_tepat_dosis"));
+        String[] aturanPakaiSesuai = mapYaTidak(rs.getString("resep_tepat_cara_pemberian"));
+        String[] indikasiSesuai = mapYaTidak(rs.getString("resep_tepat_obat")); // Proxy untuk ketepatan indikasi
+        
+        // Helper untuk mapping Ada/Tidak ke true/false, disesuaikan dengan kolom orisinal
+        String duplikasi = mapAdaTidakKeBoolean(rs.getString("resep_ada_tidak_duplikasi_obat"));
+        String alergi = mapAdaTidakKeBoolean(rs.getString("resep_kontra_indikasi_obat")); // Proxy untuk Alergi/ROTD
+        String kontraindikasi = mapAdaTidakKeBoolean(rs.getString("resep_kontra_indikasi_obat"));
+        String interaksi = mapAdaTidakKeBoolean(rs.getString("resep_interaksi_obat"));
+
+        json = "{\n" +
+            "    \"resourceType\": \"QuestionnaireResponse\",\n" +
+            "    \"questionnaire\": \"https://fhir.kemkes.go.id/Questionnaire/Q0007\",\n" +
+            "    \"status\": \"completed\",\n" +
+            "    \"subject\": {\n" +
+            "        \"reference\": \"Patient/" + idpasien + "\",\n" +
+            "        \"display\": \"" + rs.getString("nm_pasien") + "\"\n" +
+            "    },\n" +
+            "    \"encounter\": {\n" +
+            "        \"reference\": \"Encounter/" + rs.getString("id_encounter") + "\"\n" +
+            "    },\n" +
+            "    \"authored\": \"" + rs.getString("tgl_penyerahan") + "T" + rs.getString("jam_penyerahan") + "+07:00\",\n" +
+            "    \"author\": {\n" +
+            "        \"reference\": \"Practitioner/" + iddokter + "\",\n" +
+            "        \"display\": \"" + rs.getString("nama") + "\"\n" +
+            "    },\n" +
+            "    \"source\": {\n" +
+            "        \"reference\": \"Patient/" + idpasien + "\"\n" +
+            "    },\n" +
+            "    \"item\": [\n" +
+            "        {\n" +
+            "            \"linkId\": \"1\",\n" +
+            "            \"text\": \"Persyaratan Administrasi\",\n" +
+            "            \"item\": [\n" +
+            "                {\n" +
+            "                    \"linkId\": \"1.1\",\n" +
+            "                    \"text\": \"Apakah nama, umur, jenis kelamin, berat badan dan tinggi badan pasien sudah sesuai?\",\n" +
+            "                    \"answer\": [{\"valueCoding\": {\"system\": \"http://terminology.kemkes.go.id/CodeSystem/clinical-term\", \"code\": \"" + adminLengkap[0] + "\", \"display\": \"" + adminLengkap[1] + "\"}}]\n" +
+            "                },\n" +
+            "                {\n" +
+            "                    \"linkId\": \"1.2\",\n" +
+            "                    \"text\": \"Apakah nama, nomor ijin, alamat dan paraf dokter sudah sesuai?\",\n" +
+            "                    \"answer\": [{\"valueCoding\": {\"system\": \"http://terminology.kemkes.go.id/CodeSystem/clinical-term\", \"code\": \"" + resepJelas[0] + "\", \"display\": \"" + resepJelas[1] + "\"}}]\n" +
+            "                },\n" +
+            "                {\n" +
+            "                    \"linkId\": \"1.3\",\n" +
+            "                    \"text\": \"Apakah tanggal resep sudah sesuai?\",\n" +
+            "                    \"answer\": [{\"valueCoding\": {\"system\": \"http://terminology.kemkes.go.id/CodeSystem/clinical-term\", \"code\": \"" + tglResepSesuai[0] + "\", \"display\": \"" + tglResepSesuai[1] + "\"}}]\n" +
+            "                },\n" +
+            "                {\n" +
+            "                    \"linkId\": \"1.4\",\n" +
+            "                    \"text\": \"Apakah ruangan/unit asal resep sudah sesuai?\",\n" +
+            "                    \"answer\": [{\"valueCoding\": {\"system\": \"http://terminology.kemkes.go.id/CodeSystem/clinical-term\", \"code\": \"" + unitSesuai[0] + "\", \"display\": \"" + unitSesuai[1] + "\"}}]\n" +
+            "                }\n" +
+            "            ]\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"linkId\": \"2\",\n" +
+            "            \"text\": \"Persyaratan Farmasetik\",\n" +
+            "            \"item\": [\n" +
+            "                {\n" +
+            "                    \"linkId\": \"2.1\",\n" +
+            "                    \"text\": \"Apakah nama obat, bentuk dan kekuatan sediaan sudah sesuai?\",\n" +
+            "                    \"answer\": [{\"valueCoding\": {\"system\": \"http://terminology.kemkes.go.id/CodeSystem/clinical-term\", \"code\": \"" + namaObatSesuai[0] + "\", \"display\": \"" + namaObatSesuai[1] + "\"}}]\n" +
+            "                },\n" +
+            "                {\n" +
+            "                    \"linkId\": \"2.2\",\n" +
+            "                    \"text\": \"Apakah dosis dan jumlah obat sudah sesuai?\",\n" +
+            "                    \"answer\": [{\"valueCoding\": {\"system\": \"http://terminology.kemkes.go.id/CodeSystem/clinical-term\", \"code\": \"" + dosisSesuai[0] + "\", \"display\": \"" + dosisSesuai[1] + "\"}}]\n" +
+            "                },\n" +
+            "                {\n" +
+            "                    \"linkId\": \"2.3\",\n" +
+            "                    \"text\": \"Apakah aturan dan cara penggunaan obat sudah sesuai?\",\n" +
+            "                    \"answer\": [{\"valueCoding\": {\"system\": \"http://terminology.kemkes.go.id/CodeSystem/clinical-term\", \"code\": \"" + aturanPakaiSesuai[0] + "\", \"display\": \"" + aturanPakaiSesuai[1] + "\"}}]\n" +
+            "                }\n" +
+            "            ]\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"linkId\": \"3\",\n" +
+            "            \"text\": \"Persyaratan Klinis\",\n" +
+            "            \"item\": [\n" +
+            "                {\n" +
+            "                    \"linkId\": \"3.1\",\n" +
+            "                    \"text\": \"Apakah ketepatan indikasi, dosis, dan waktu penggunaan obat sudah sesuai?\",\n" +
+            "                    \"answer\": [{\"valueCoding\": {\"system\": \"http://terminology.kemkes.go.id/CodeSystem/clinical-term\", \"code\": \"" + indikasiSesuai[0] + "\", \"display\": \"" + indikasiSesuai[1] + "\"}}]\n" +
+            "                },\n" +
+            "                {\n" +
+            "                    \"linkId\": \"3.2\",\n" +
+            "                    \"text\": \"Apakah terdapat duplikasi pengobatan?\",\n" +
+            "                    \"answer\": [{\"valueBoolean\": " + duplikasi + "}]\n" +
+            "                },\n" +
+            "                {\n" +
+            "                    \"linkId\": \"3.3\",\n" +
+            "                    \"text\": \"Apakah terdapat alergi dan reaksi obat yang tidak dikehendaki (ROTD)?\",\n" +
+            "                    \"answer\": [{\"valueBoolean\": " + alergi + "}]\n" +
+            "                },\n" +
+            "                {\n" +
+            "                    \"linkId\": \"3.4\",\n" +
+            "                    \"text\": \"Apakah terdapat kontraindikasi pengobatan?\",\n" +
+            "                    \"answer\": [{\"valueBoolean\": " + kontraindikasi + "}]\n" +
+            "                },\n" +
+            "                {\n" +
+            "                    \"linkId\": \"3.5\",\n" +
+            "                    \"text\": \"Apakah terdapat dampak interaksi obat?\",\n" +
+            "                    \"answer\": [{\"valueBoolean\": " + interaksi + "}]\n" +
+            "                }\n" +
+            "            ]\n" +
+            "        }\n" +
+            "    ]\n" +
+            "}";
+
+        TeksArea.append("URL : " + link + "/QuestionnaireResponse\n");
+        TeksArea.append("Request JSON : " + json + "\n");
+        requestEntity = new HttpEntity(json, headers);
+        json = api.getRest().exchange(link + "/QuestionnaireResponse", HttpMethod.POST, requestEntity, String.class).getBody();
+        TeksArea.append("Result JSON : " + json + "\n");
+        root = mapper.readTree(json);
+        response = root.path("id");
+        if (!response.asText().equals("")) {
+            Sequel.menyimpan2("satu_sehat_questionnairereq_pengkajian_obat", "?,?,?", "Questionnaire Telaah Obat", 3, new String[]{
+                rs.getString("no_resep"), rs.getString("no_rawat"), response.asText()
+            });
+        }
+        Thread.sleep(50);
+    } catch (Exception e) {
+        System.out.println("Notifikasi Kirim Questionnaire : " + e);
+        if (e.toString().contains("UnknownHostException") || e.toString().contains("unreachable")) {
+             System.out.println("Koneksi ke server Satu Sehat terputus. Menunggu beberapa saat sebelum mencoba lagi.");
+             Thread.sleep(5000); // Jeda 5 detik jika koneksi error
+        }
+    }
+}
+
+// Helper method untuk mapping Ya/Tidak ke Kode & Display
+private String[] mapYaTidak(String value) {
+    if ("Ya".equalsIgnoreCase(value)) {
+        return new String[]{"OV000052", "Sesuai"};
+    } else {
+        return new String[]{"OV000053", "Tidak Sesuai"};
+    }
+}
+
+// Helper method untuk mapping Ada/Tidak ke true/false
+private String mapAdaTidakKeBoolean(String value) {
+    if ("Ada".equalsIgnoreCase(value) || "Ya".equalsIgnoreCase(value)) {
+        return "true";
+    } else {
+        return "false";
+    }
+}
+    
     private void jeda() throws InterruptedException {
         Thread.sleep(300); // Jeda selama 300 milidetik (0.3 detik)
     }
@@ -9397,6 +9658,7 @@ public class frmUtama extends javax.swing.JFrame {
     diagnosticreportlabpk();
     diagnosticreportlabmb();
     careplan();
+    questionnaire();
     
     TeksArea.append("\n======================================================\n");
     TeksArea.append("PROSES BRIDGING DATA SELESAI.\n");
