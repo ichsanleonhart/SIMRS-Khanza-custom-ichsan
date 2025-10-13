@@ -5,7 +5,7 @@
             <url>src/simrskhanza/DlgCariPeriksaRadiologi.java</url>
             <bookmark id="2">
                 <name/>
-                <line>1888</line>
+                <line>1889</line>
                 <key/>
             </bookmark>
         </file>
@@ -19,6 +19,9 @@
         </file>
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/D:/WORK/GITHUB/SIMRS-Khanza-custom-ichsan/src/rekammedis/RMTriaseIGD.java</file>
+            <file>file:/D:/WORK/GITHUB/SIMRS-Khanza-custom-ichsan/src/rekammedis/RMPenilaianAwalMedisIGD.java</file>
+        </group>
     </open-files>
 </project-private>
