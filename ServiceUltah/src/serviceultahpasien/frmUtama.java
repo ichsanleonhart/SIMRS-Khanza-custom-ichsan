@@ -290,7 +290,7 @@ public class frmUtama extends javax.swing.JFrame {
                 }
 
                 // Timer akan memicu pengiriman setiap 5 menit, pada detik ke-1
-                if(detik.equals("01")&&((nilai_menit%5)==0)){
+                if(detik.equals("01")&&((nilai_menit%120)==0)){
                     System.out.println("Timer berjalan, memulai proses pengiriman ucapan ulang tahun...");
                     TeksArea.append("Timer berjalan, memulai proses pengiriman ucapan ulang tahun...\n");
                     // Memanggil method utama untuk pengiriman
