@@ -249,7 +249,11 @@ public final class akses {
             piutang_jasa_perusahaan_belum_lunas=false,checklist_kesiapan_anestesi=false,piutang_peminjaman_uang_belum_lunas=false,hasil_pemeriksaan_slit_lamp=false,
             hasil_pemeriksaan_oct=false,beban_hutang_lain=false,poli_asal_pasien_ranap=false,pemberi_hutang_lain=false,dokter_asal_pasien_ranap=false,duta_parkir_rekap_keluar=false,
             surat_keterangan_layak_terbang=false,bayar_beban_hutang_lain=false,surat_persetujuan_pemeriksaan_hiv=false,skrining_instrumen_acrs=false,surat_pernyataan_memilih_dpjp=false,
-            skrining_instrumen_mental_emosional=false,pelanggan_lab_kesehatan_lingkungan=false,kriteria_masuk_nicu=false,kriteria_keluar_nicu=false,penilaian_medis_ranap_psikiatrik=false;
+            skrining_instrumen_mental_emosional=false,pelanggan_lab_kesehatan_lingkungan=false,kriteria_masuk_nicu=false,kriteria_keluar_nicu=false,penilaian_medis_ranap_psikiatrik=false,
+            kriteria_masuk_picu=false,kriteria_keluar_picu=false,master_sampel_bakumutu=false,skrining_instrumen_amt=false,parameter_pengujian_lab_kesehatan_lingkungan=false,
+            nilai_normal_baku_mutu_lab_kesehatan_lingkungan=false,skrining_pneumonia_severity_index=false,permintaan_pengujian_sampel_lab_kesehatan_lingkungan=false,
+            penilaian_awal_medis_ralan_jantung=false,penilaian_awal_medis_ralan_urologi=false,hasil_pemeriksaan_treadmill=false,hasil_pemeriksaan_echo_pediatrik=false,
+            template_pelaksanaan_informasi_edukasi=false;
     
     public static void setData(String user, String pass) {
         try {        
@@ -1419,6 +1423,19 @@ public final class akses {
                         akses.kriteria_masuk_nicu=true;
                         akses.kriteria_keluar_nicu=true;
                         akses.penilaian_medis_ranap_psikiatrik=true;
+                        akses.kriteria_masuk_picu=true;
+                        akses.kriteria_keluar_picu=true;
+                        akses.master_sampel_bakumutu=true;
+                        akses.skrining_instrumen_amt=true;
+                        akses.parameter_pengujian_lab_kesehatan_lingkungan=true;
+                        akses.nilai_normal_baku_mutu_lab_kesehatan_lingkungan=true;
+                        akses.skrining_pneumonia_severity_index=true;
+                        akses.permintaan_pengujian_sampel_lab_kesehatan_lingkungan=true;
+                        akses.penilaian_awal_medis_ralan_jantung=true;
+                        akses.penilaian_awal_medis_ralan_urologi=true;
+                        akses.hasil_pemeriksaan_treadmill=true;
+                        akses.hasil_pemeriksaan_echo_pediatrik=true;
+                        akses.template_pelaksanaan_informasi_edukasi=true;
                     }else if(rs2.getRow()>=1){   
                         rs2.beforeFirst();
                         rs2.next();
@@ -2572,6 +2589,19 @@ public final class akses {
                         akses.kriteria_masuk_nicu=rs2.getBoolean("kriteria_masuk_nicu");
                         akses.kriteria_keluar_nicu=rs2.getBoolean("kriteria_keluar_nicu");
                         akses.penilaian_medis_ranap_psikiatrik=rs2.getBoolean("penilaian_medis_ranap_psikiatrik");
+                        akses.kriteria_masuk_picu=rs2.getBoolean("kriteria_masuk_picu");
+                        akses.kriteria_keluar_picu=rs2.getBoolean("kriteria_keluar_picu");
+                        akses.master_sampel_bakumutu=rs2.getBoolean("master_sampel_bakumutu");
+                        akses.skrining_instrumen_amt=rs2.getBoolean("skrining_instrumen_amt");
+                        akses.parameter_pengujian_lab_kesehatan_lingkungan=rs2.getBoolean("parameter_pengujian_lab_kesehatan_lingkungan");
+                        akses.nilai_normal_baku_mutu_lab_kesehatan_lingkungan=rs2.getBoolean("nilai_normal_baku_mutu_lab_kesehatan_lingkungan");
+                        akses.skrining_pneumonia_severity_index=rs2.getBoolean("skrining_pneumonia_severity_index");
+                        akses.permintaan_pengujian_sampel_lab_kesehatan_lingkungan=rs2.getBoolean("permintaan_pengujian_sampel_lab_kesehatan_lingkungan");
+                        akses.penilaian_awal_medis_ralan_jantung=rs2.getBoolean("penilaian_awal_medis_ralan_jantung");
+                        akses.penilaian_awal_medis_ralan_urologi=rs2.getBoolean("penilaian_awal_medis_ralan_urologi");
+                        akses.hasil_pemeriksaan_treadmill=rs2.getBoolean("hasil_pemeriksaan_treadmill");
+                        akses.hasil_pemeriksaan_echo_pediatrik=rs2.getBoolean("hasil_pemeriksaan_echo_pediatrik");
+                        akses.template_pelaksanaan_informasi_edukasi=rs2.getBoolean("template_pelaksanaan_informasi_edukasi");
                     }else if((rs.getRow()==0)&&(rs2.getRow()==0)){
                         setLogOut();
                     }
@@ -3748,6 +3778,19 @@ public final class akses {
         akses.kriteria_masuk_nicu=false;
         akses.kriteria_keluar_nicu=false;
         akses.penilaian_medis_ranap_psikiatrik=false;
+        akses.kriteria_masuk_picu=false;
+        akses.kriteria_keluar_picu=false;
+        akses.master_sampel_bakumutu=false;
+        akses.skrining_instrumen_amt=false;
+        akses.parameter_pengujian_lab_kesehatan_lingkungan=false;
+        akses.nilai_normal_baku_mutu_lab_kesehatan_lingkungan=false;
+        akses.skrining_pneumonia_severity_index=false;
+        akses.permintaan_pengujian_sampel_lab_kesehatan_lingkungan=false;
+        akses.penilaian_awal_medis_ralan_jantung=false;
+        akses.penilaian_awal_medis_ralan_urologi=false;
+        akses.hasil_pemeriksaan_treadmill=false;
+        akses.hasil_pemeriksaan_echo_pediatrik=false;
+        akses.template_pelaksanaan_informasi_edukasi=false;
     }
     
     public static int getjml1() {return akses.jml1;}    
@@ -4938,4 +4981,17 @@ public final class akses {
     public static boolean getkriteria_masuk_nicu(){return akses.kriteria_masuk_nicu;}
     public static boolean getkriteria_keluar_nicu(){return akses.kriteria_keluar_nicu;}
     public static boolean getpenilaian_medis_ranap_psikiatrik(){return akses.penilaian_medis_ranap_psikiatrik;}
+    public static boolean getkriteria_masuk_picu(){return akses.kriteria_masuk_picu;}
+    public static boolean getkriteria_keluar_picu(){return akses.kriteria_keluar_picu;}
+    public static boolean getmaster_sampel_bakumutu(){return akses.master_sampel_bakumutu;}
+    public static boolean getskrining_instrumen_amt(){return akses.skrining_instrumen_amt;}
+    public static boolean getparameter_pengujian_lab_kesehatan_lingkungan(){return akses.parameter_pengujian_lab_kesehatan_lingkungan;}
+    public static boolean getnilai_normal_baku_mutu_lab_kesehatan_lingkungan(){return akses.nilai_normal_baku_mutu_lab_kesehatan_lingkungan;}
+    public static boolean getskrining_pneumonia_severity_index(){return akses.skrining_pneumonia_severity_index;}
+    public static boolean getpermintaan_pengujian_sampel_lab_kesehatan_lingkungan(){return akses.permintaan_pengujian_sampel_lab_kesehatan_lingkungan;}
+    public static boolean getpenilaian_awal_medis_ralan_jantung(){return akses.penilaian_awal_medis_ralan_jantung;}
+    public static boolean getpenilaian_awal_medis_ralan_urologi(){return akses.penilaian_awal_medis_ralan_urologi;}
+    public static boolean gethasil_pemeriksaan_treadmill(){return akses.hasil_pemeriksaan_treadmill;}
+    public static boolean gethasil_pemeriksaan_echo_pediatrik(){return akses.hasil_pemeriksaan_echo_pediatrik;}
+    public static boolean gettemplate_pelaksanaan_informasi_edukasi(){return akses.template_pelaksanaan_informasi_edukasi;}
 }   
