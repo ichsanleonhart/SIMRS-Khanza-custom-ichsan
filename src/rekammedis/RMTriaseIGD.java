@@ -4807,11 +4807,11 @@ public final class RMTriaseIGD extends javax.swing.JDialog {
 
     // 2. Ambil data dari sumber prioritas (penilaian_medis_igd)
     try (PreparedStatement ps = koneksi.prepareStatement(
-            "SELECT keluhan_utama, td, nadi, rr, suhu, spo FROM penilaian_medis_igd WHERE no_rawat = ?")) {
+            "SELECT rps, td, nadi, rr, suhu, spo FROM penilaian_medis_igd WHERE no_rawat = ?")) {
         ps.setString(1, TNoRw.getText());
         try (ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
-                keluhanIgd = rs.getString("keluhan_utama") == null ? "" : rs.getString("keluhan_utama");
+                keluhanIgd = rs.getString("rps") == null ? "" : rs.getString("rps");
                 tdIgd = rs.getString("td") == null ? "" : rs.getString("td");
                 nadiIgd = rs.getString("nadi") == null ? "" : rs.getString("nadi");
                 rrIgd = rs.getString("rr") == null ? "" : rs.getString("rr");

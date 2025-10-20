@@ -943,7 +943,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
         //MnStatusMembaik = new javax.swing.JMenuItem();
         //MnStatusPulangPaksa = new javax.swing.JMenuItem();
         MnStatusMin = new javax.swing.JMenuItem();
-        MnStatusBelumLengkap = new javax.swing.JMenuItem();
+        //MnStatusBelumLengkap = new javax.swing.JMenuItem();
         MnStatusBelumPulang = new javax.swing.JMenuItem();
         MnGanti = new javax.swing.JMenu();
         MnPenjab = new javax.swing.JMenuItem();
@@ -4300,7 +4300,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
         });
         SetStatus.add(MnStatusMin);
 
-        MnStatusBelumLengkap.setBackground(new java.awt.Color(255, 255, 254));
+        /*MnStatusBelumLengkap.setBackground(new java.awt.Color(255, 255, 254));
         MnStatusBelumLengkap.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
         MnStatusBelumLengkap.setForeground(new java.awt.Color(50, 50, 50));
         MnStatusBelumLengkap.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
@@ -4314,7 +4314,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
                 MnStatusBelumLengkapActionPerformed(evt);
             }
         });
-        SetStatus.add(MnStatusBelumLengkap);
+        SetStatus.add(MnStatusBelumLengkap); */
 
         MnStatusBelumPulang.setBackground(new java.awt.Color(255, 255, 254));
         MnStatusBelumPulang.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
@@ -7917,6 +7917,44 @@ public class DlgKamarInap extends javax.swing.JDialog {
                      emptTeks();
                      tbKamIn.requestFocus();
                 }else{
+                   
+                   // --- AWAL MODIFIKASI ---
+            
+            // Pengecekan hanya berlaku jika yang login BUKAN Admin Utama
+            if (!akses.getkode().equals("Admin Utama")) {
+                // 1. Cek apakah pasien menggunakan penjamin BPJS
+                String jenisBayar = Sequel.cariIsi(
+                    "select penjab.png_jawab from reg_periksa inner join penjab on reg_periksa.kd_pj = penjab.kd_pj where reg_periksa.no_rawat=?", norawat.getText()
+                );
+
+                // 2. Jika penjamin adalah BPJS, lakukan pengecekan selanjutnya
+                if (jenisBayar.toUpperCase().contains("BPJS")) {
+                    
+                    // 2a. Cek apakah pasien adalah bayi baru lahir (kurang dari 4 hari)
+                    int selisihHariLahir = Sequel.cariInteger(
+                        "select DATEDIFF(current_date(), pasien.tgl_lahir) from pasien inner join reg_periksa on pasien.no_rkm_medis=reg_periksa.no_rkm_medis where reg_periksa.no_rawat=?", norawat.getText()
+                    );
+                    
+                    // 2b. Jika BUKAN bayi < 4 hari, maka validasi surat kontrol
+                    if(selisihHariLahir >= 4) {
+                        String noSuratKontrol = Sequel.cariIsi(
+                            "select bridging_surat_kontrol_bpjs.no_surat from bridging_sep " +
+                            "inner join bridging_surat_kontrol_bpjs on bridging_sep.no_sep = bridging_surat_kontrol_bpjs.no_sep " +
+                            "where bridging_sep.no_rawat = ? limit 1", norawat.getText()
+                        );
+
+                        // 3. Jika surat kontrol tidak ditemukan, tampilkan peringatan dan hentikan proses
+                        if (noSuratKontrol == null || noSuratKontrol.trim().isEmpty()) {
+                            JOptionPane.showMessageDialog(null, "Surat kontrol BPJS (Bridging) belum dibuat, silakan buat SKDP terlebih dahulu!");
+                            return; // Menghentikan eksekusi method di sini
+                        }
+                    }
+                }
+            }
+            
+            // --- AKHIR MODIFIKASI ---
+                   
+                   
                     Sequel.mengedit("kamar_inap","no_rawat='"+norawat.getText()+"' and kd_kamar='"+kdkamar.getText()+"' and tgl_masuk='"+TIn.getText()+"' and jam_masuk='"+JamMasuk.getText()+"'","stts_pulang='Sembuh'");
                     Sequel.mengedit("kamar","kd_kamar='"+tbKamIn.getValueAt(tbKamIn.getSelectedRow(),19).toString()+"'","status='KOSONG'");  
                     tbKamIn.setValueAt("Sembuh",tbKamIn.getSelectedRow(),16);
@@ -18718,7 +18756,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
     private javax.swing.JMenuItem MnSkorAldrettePascaAnestesi;
     private javax.swing.JMenuItem MnSkorStewardPascaAnestesi;
     private javax.swing.JMenuItem MnStatusAPS;
-    private javax.swing.JMenuItem MnStatusBelumLengkap;
+    //private javax.swing.JMenuItem MnStatusBelumLengkap;
     private javax.swing.JMenuItem MnStatusBelumPulang;
     //private javax.swing.JMenuItem MnStatusMembaik;
     private javax.swing.JMenuItem MnStatusMeninggal;
