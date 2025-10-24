@@ -5312,7 +5312,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "satu_sehat_medicationdispense.kode_brng=detail_pemberian_obat.kode_brng and "+
                    "satu_sehat_medicationdispense.no_batch=detail_pemberian_obat.no_batch and "+
                    "satu_sehat_medicationdispense.no_faktur=detail_pemberian_obat.no_faktur "+
-                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_medicationdispense.id_medicationdispense,'')='' ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_medicationdispense.id_medicationdispanse,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -5500,7 +5500,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "satu_sehat_medicationdispense.kode_brng=detail_pemberian_obat.kode_brng and "+
                    "satu_sehat_medicationdispense.no_batch=detail_pemberian_obat.no_batch and "+
                    "satu_sehat_medicationdispense.no_faktur=detail_pemberian_obat.no_faktur "+
-                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_medicationdispense.id_medicationdispense,'')='' ");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_medicationdispense.id_medicationdispanse,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -7124,7 +7124,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_lab.id_template=satu_sehat_specimen_lab.id_template "+
                    "and satu_sehat_servicerequest_lab.kd_jenis_prw=satu_sehat_specimen_lab.kd_jenis_prw "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and ifnull(satu_sehat_specimen_lab.id_speciment,'')='' ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and ifnull(satu_sehat_specimen_lab.id_specimen,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -7222,7 +7222,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_lab.id_template=satu_sehat_specimen_lab.id_template "+
                    "and satu_sehat_servicerequest_lab.kd_jenis_prw=satu_sehat_specimen_lab.kd_jenis_prw "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_specimen_lab.id_speciment,'')='' ");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_specimen_lab.id_specimen,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -7322,7 +7322,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_lab_mb.id_template=satu_sehat_specimen_lab_mb.id_template "+
                    "and satu_sehat_servicerequest_lab_mb.kd_jenis_prw=satu_sehat_specimen_lab_mb.kd_jenis_prw "+
                    "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_specimen_lab_mb.id_speciment,'')='' ");
+                   "where nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_specimen_lab_mb.id_specimen,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
@@ -7420,7 +7420,7 @@ public class frmUtama extends javax.swing.JFrame {
                    "and satu_sehat_servicerequest_lab_mb.id_template=satu_sehat_specimen_lab_mb.id_template "+
                    "and satu_sehat_servicerequest_lab_mb.kd_jenis_prw=satu_sehat_specimen_lab_mb.kd_jenis_prw "+
                    "inner join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat "+
-                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_specimen_lab_mb.id_speciment,'')='' ");
+                   "where nota_inap.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_specimen_lab_mb.id_specimen,'')='' ");
             try {
                 ps.setString(1,Tanggal1.getText());
                 ps.setString(2,Tanggal2.getText());
