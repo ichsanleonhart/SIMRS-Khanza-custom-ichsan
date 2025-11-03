@@ -76,8 +76,9 @@ try {
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <a href="index.php" class="brand-link">
        <?php if (!empty($_SESSION['settings']['logo_base64'])): ?><img src="data:image/png;base64,<?php echo $_SESSION['settings']['logo_base64']; ?>" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8"><?php endif; ?>
-      <span class="brand-text font-weight-light">Expertise App</span>
-    </a>
+	  <span class="brand-text font-weight-light"><?php echo e($_SESSION['settings']['nama_instansi']); ?></span> <br>
+      <span style="display:block; text-align:center;" class="brand-text font-weight-light">Expertise App</span>
+    </a> 
     <div class="sidebar">
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">          

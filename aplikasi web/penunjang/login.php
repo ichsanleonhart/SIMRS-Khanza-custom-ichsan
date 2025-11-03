@@ -32,38 +32,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $stmt->fetch();
 
             if ($user && $user['password'] === $password) {
-                // --- MODIFIKASI: Cek spesialisasi dokter (Radiologi atau Lab) ---
-                $sql_check_spesialis = "SELECT nm_dokter, kd_sps FROM dokter WHERE kd_dokter = :kd_dokter AND kd_sps IN ('RAD', 'LAB')";
-                $stmt_check = $pdo->prepare($sql_check_spesialis);
-                $stmt_check->execute([':kd_dokter' => $user['id_user']]);
-                $doctor = $stmt_check->fetch();
+    			$sql_check_spesialis = "
+        			SELECT d.nm_dokter, d.kd_sps, s.nm_sps 
+        			FROM dokter d
+        			JOIN spesialis s ON s.kd_sps = d.kd_sps 
+        			WHERE d.kd_dokter = :kd_dokter
+    			";
+    			$stmt_check = $pdo->prepare($sql_check_spesialis);
+    			$stmt_check->execute([':kd_dokter' => $user['id_user']]);
+			    $doctor = $stmt_check->fetch();
 
-                if ($doctor) {
-                    $settings_stmt = $pdo->query("SELECT nama_instansi, logo FROM setting LIMIT 1");
-                    $settings = $settings_stmt->fetch();
+    			if ($doctor) {
+        			$settings_stmt = $pdo->query("SELECT nama_instansi, logo FROM setting LIMIT 1");
+        			$settings = $settings_stmt->fetch();
 
-                    session_regenerate_id(true);
-                    $_SESSION['user_id'] = $user['id_user'];
-                    $_SESSION['user_name'] = $doctor['nm_dokter'];
-                    
-                    // Set user role berdasarkan spesialisasi
-                    if ($doctor['kd_sps'] == 'RAD') {
-                        $_SESSION['user_role'] = 'radiologi';
-                    } elseif ($doctor['kd_sps'] == 'LAB') {
-                        $_SESSION['user_role'] = 'laboratorium';
-                    }
+        			session_regenerate_id(true);
+        			$_SESSION['user_id']   = $user['id_user'];
+			        $_SESSION['user_name'] = $doctor['nm_dokter'];
 
-                    $_SESSION['settings'] = [
-                        'nama_instansi' => $settings['nama_instansi'] ?? 'Nama Instansi Tidak Ditemukan',
-                        'logo_base64' => isset($settings['logo']) ? base64_encode($settings['logo']) : ''
-                    ];
+        			// --- Validasi fleksibel: cek kd_sps ATAU nm_sps ---
+        			$kd_sps       = strtoupper($doctor['kd_sps']);
+			        $spesialisasi = strtolower($doctor['nm_sps']);
 
-                    header("Location: index.php");
-                    exit;
-                } else {
-                    $error_message = "Akses ditolak. Anda bukan dokter spesialis Radiologi atau Patologi Klinis.";
-                }
-            } else {
+        			if ($kd_sps === 'RAD' || strpos($spesialisasi, 'rad') !== false) {
+            			$_SESSION['user_role'] = 'radiologi';
+        			} elseif ($kd_sps === 'LAB' || strpos($spesialisasi, 'patologi') !== false) {
+            			$_SESSION['user_role'] = 'laboratorium';
+        			} else {
+			            $error_message = "Akses ditolak. Anda bukan dokter spesialis Radiologi atau Patologi Klinis.";
+			            exit;
+			        }
+
+        			$_SESSION['settings'] = [
+            			'nama_instansi' => $settings['nama_instansi'] ?? 'Nama Instansi Tidak Ditemukan',
+            			'logo_base64'   => isset($settings['logo']) ? base64_encode($settings['logo']) : ''
+        			];
+
+        			header("Location: index.php");
+        			exit;
+    			} else {
+        			$error_message = "Akses ditolak. Data dokter tidak ditemukan.";
+			    }
+			} else {
                 $error_message = "Username atau password salah.";
             }
         } catch (\PDOException $e) {

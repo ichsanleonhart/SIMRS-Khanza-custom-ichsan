@@ -581,74 +581,87 @@ public class frmUtama extends javax.swing.JFrame {
                                     TeksArea.append("        -> Tidak ditemukan bukti CPPT. Pasien diasumsikan belum dilayani. Melewati Task 3 untuk saat ini.\n");
                                     datajam = ""; // Pastikan datajam tetap kosong agar tidak ada pengiriman.
                                 }
-                                                            }
+                            }
 
                             // 3. Jika waktu berhasil ditemukan (baik riil maupun fallback), lanjutkan proses
                             if (datajam != null && !datajam.equals("")) {
+                                                                
+                                // Cek dulu apakah SEP sudah ada di tabel bridging_sep
+                                // (Menggunakan cariIsi, yang mengembalikan string kosong jika tidak ditemukan)
+                                String dataDiSEP = Sequel.cariIsi("select no_rawat from bridging_sep where no_rawat=?", rs.getString("no_rawat"));
 
-                                if (isFallback) {
-                                    TeksArea.append("        -> Sinkronisasi waktu fallback ke kolom validasi...\n");
-                                    Sequel.mengedit("referensi_mobilejkn_bpjs", "no_rawat=?", "validasi=?", 2, new String[]{
-                                        rs.getString("no_rawat"), datajam
-                                    });
-                                                                }
+                                if (dataDiSEP.equals("")) {
+                                    // Jika data SEP tidak ditemukan, jangan kirim Task 3
+                                    TeksArea.append("    -> Waktu check-in (" + datajam + ") ditemukan, TAPI data Bridging SEP BELUM ADA.\n");
+                                    TeksArea.append("    -> Melewati Task 3 untuk No.Rawat " + rs.getString("no_rawat") + " sampai SEP terbit.\n");
+                                } else {
+                                    // DATA SEP DITEMUKAN, lanjutkan proses pengiriman Task 3 seperti biasa
+                                    TeksArea.append("    -> Data Bridging SEP ditemukan. Melanjutkan proses Task 3.\n");
 
-                                TeksArea.append("    -> Mencoba mengirim Task ID 3 (Mulai Tunggu Poli) dengan waktu: " + datajam + "\n");
+                                    if (isFallback) {
+                                        TeksArea.append("-> Sinkronisasi waktu fallback ke kolom validasi...\n");
+                                        Sequel.mengedit("referensi_mobilejkn_bpjs", "no_rawat=?", "validasi=?", 2, new String[]{
+                                            rs.getString("no_rawat"), datajam
+                                        });
+                                    }
 
-                                // Simpan dulu catatannya di database lokal secara optimis
-                                if (Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid", "?,?,?", "task id", 3, new String[]{rs.getString("no_rawat"), "3", datajam}) == true) {
-                                    try {
-                                        parsedDate = dateFormat.parse(datajam);
-        
-                                        headers = new HttpHeaders();
-                                        headers.setContentType(MediaType.APPLICATION_JSON);
-                                        headers.add("x-cons-id", koneksiDB.CONSIDAPIMOBILEJKN());
-                                        utc = String.valueOf(api.GetUTCdatetimeAsString());
-                                        headers.add("x-timestamp", utc);
-                                        headers.add("x-signature", api.getHmac(utc));
-                                        headers.add("user_key", koneksiDB.USERKEYAPIMOBILEJKN());
-                                        requestJson = "{"
-                                                + "\"kodebooking\": \"" + rs.getString("nobooking") + "\","
-                                                + "\"taskid\": \"3\","
-                                                + "\"waktu\": \"" + parsedDate.getTime() + "\""
-                                                + "}";
-                                        TeksArea.append("JSON : " + requestJson + "\n");
-                                        requestEntity = new HttpEntity(requestJson, headers);
-                                        URL = link + "/antrean/updatewaktu";
-                                        
-                                        root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
-                                        nameNode = root.path("metadata");
-                        
-                                        TeksArea.append("respon WS BPJS : " + nameNode.path("code").asText() + " " + nameNode.path("message").asText() + "\n");
-                        
-                                        // --- [LOGIKA SELF-HEALING BARU] ---
-                                        if (nameNode.path("code").asText().equals("208") && nameNode.path("message").asText().toLowerCase().contains("taskid=3 sudah ada")) {
-                                            TeksArea.append("    -> SINKRONISASI: BPJS melaporkan Task 3 sudah ada. Memastikan data tersimpan lokal.\n");
-                                            // Karena data sudah ada di BPJS, kita tidak perlu menghapus catatan lokal kita.
-                                            // Cukup set task3 menjadi "Sudah" agar proses selanjutnya bisa berjalan di siklus ini.
-                                            task3 = "Sudah"; 
-                                        } else if (nameNode.path("code").asText().equals("201")) {
-                                            TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
-                                            Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
-                                                rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
-                                            });
-                                            // Hapus catatan lokal karena pengiriman gagal
-                                            Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='" + rs.getString("no_rawat") + "'");
-                                        } else if (nameNode.path("code").asText().equals("200")) {
-                                            // [PERBAIKAN #1] Jika sukses kirim, update variabel lokal
-                                            task3 = "Sudah";
-                                        } else {
-                                            // Untuk error lain selain 200, 201, 208, lakukan rollback
-                                            TeksArea.append("    -> Respon tidak dikenal ("+nameNode.path("code").asText()+"), rollback task 3.\n");
+                                    TeksArea.append("    -> Mencoba mengirim Task ID 3 (Mulai Tunggu Poli) dengan waktu: " + datajam + "\n");
+
+                                    // Simpan dulu catatannya di database lokal secara optimis
+                                    if (Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid", "?,?,?", "task id", 3, new String[]{rs.getString("no_rawat"), "3", datajam}) == true) {
+                                        try {
+                                            parsedDate = dateFormat.parse(datajam);
+            
+                                            headers = new HttpHeaders();
+                                            headers.setContentType(MediaType.APPLICATION_JSON);
+                                            headers.add("x-cons-id", koneksiDB.CONSIDAPIMOBILEJKN());
+                                            utc = String.valueOf(api.GetUTCdatetimeAsString());
+                                            headers.add("x-timestamp", utc);
+                                            headers.add("x-signature", api.getHmac(utc));
+                                            headers.add("user_key", koneksiDB.USERKEYAPIMOBILEJKN());
+                                            requestJson = "{"
+                                                    + "\"kodebooking\": \"" + rs.getString("nobooking") + "\","
+                                                    + "\"taskid\": \"3\","
+                                                    + "\"waktu\": \"" + parsedDate.getTime() + "\""
+                                                    + "}";
+                                            TeksArea.append("JSON : " + requestJson + "\n");
+                                            requestEntity = new HttpEntity(requestJson, headers);
+                                            URL = link + "/antrean/updatewaktu";
+                                            
+                                            root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
+                                            nameNode = root.path("metadata");
+                            
+                                            TeksArea.append("respon WS BPJS : " + nameNode.path("code").asText() + " " + nameNode.path("message").asText() + "\n");
+                            
+                                            // --- [LOGIKA SELF-HEALING BARU] ---
+                                            if (nameNode.path("code").asText().equals("208") && nameNode.path("message").asText().toLowerCase().contains("taskid=3 sudah ada")) {
+                                                TeksArea.append("    -> SINKRONISASI: BPJS melaporkan Task 3 sudah ada. Memastikan data tersimpan lokal.\n");
+                                                // Karena data sudah ada di BPJS, kita tidak perlu menghapus catatan lokal kita.
+                                                // Cukup set task3 menjadi "Sudah" agar proses selanjutnya bisa berjalan di siklus ini.
+                                                task3 = "Sudah"; 
+                                            } else if (nameNode.path("code").asText().equals("201")) {
+                                                TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                    rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                });
+                                                // Hapus catatan lokal karena pengiriman gagal
+                                                Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='" + rs.getString("no_rawat") + "'");
+                                            } else if (nameNode.path("code").asText().equals("200")) {
+                                                // [PERBAIKAN #1] Jika sukses kirim, update variabel lokal
+                                                task3 = "Sudah";
+                                            } else {
+                                                // Untuk error lain selain 200, 201, 208, lakukan rollback
+                                                TeksArea.append("    -> Respon tidak dikenal ("+nameNode.path("code").asText()+"), rollback task 3.\n");
+                                                Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='" + rs.getString("no_rawat") + "'");
+                                            }
+
+                                        } catch (Exception ex) {
+                                            System.out.println("Notifikasi Bridging Task 3 JKN : " + ex);
+                                            // Jika terjadi error saat pengiriman, hapus catatan task id yang sudah tersimpan agar bisa dicoba lagi
                                             Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='" + rs.getString("no_rawat") + "'");
                                         }
-
-                                    } catch (Exception ex) {
-                                        System.out.println("Notifikasi Bridging Task 3 JKN : " + ex);
-                                        // Jika terjadi error saat pengiriman, hapus catatan task id yang sudah tersimpan agar bisa dicoba lagi
-                                        Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='" + rs.getString("no_rawat") + "'");
                                     }
-                                }
+                                } // --- [AKHIR MODIFIKASI] ---
                             }
                         }
 
@@ -1186,53 +1199,113 @@ public class frmUtama extends javax.swing.JFrame {
                                         }
                                     }
                                     
-                                    if(task3.equals("Sudah")&&task4.equals("")){
-                                        datajam=Sequel.cariIsi("select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) from pemeriksaan_ralan where pemeriksaan_ralan.no_rawat=?",rs.getString("no_rawat"));
-                                        if(datajam.equals("")){
-                                            datajam=Sequel.cariIsi("select if(mutasi_berkas.diterima='0000-00-00 00:00:00','',mutasi_berkas.diterima) from mutasi_berkas where mutasi_berkas.no_rawat=?",rs.getString("no_rawat"));
+                                    if(task3.equals("")){
+                                        try {     
+                                            datajam=Sequel.cariIsi("select DATE_ADD(concat('"+rs.getString("tgl_registrasi")+"',' ','"+rs2.getString("jam_mulai")+"'),INTERVAL "+(Integer.parseInt(rs.getString("no_reg"))*5)+" MINUTE) ");
+                                            parsedDate = dateFormat.parse(datajam);
+                                            // [LOGIKA LAMA] Cek jika bukan BPJS, kirim data "NON JKN"
+                                            if(!rs.getString("kd_pj").equals(kodebpjs)){ 
+                                                headers = new HttpHeaders();
+                                                headers.setContentType(MediaType.APPLICATION_JSON);
+                                                headers.add("x-cons-id",koneksiDB.CONSIDAPIMOBILEJKN());
+                                                utc=String.valueOf(api.GetUTCdatetimeAsString());
+                                                headers.add("x-timestamp",utc);
+                                                headers.add("x-signature",api.getHmac(utc));
+                                                headers.add("user_key",koneksiDB.USERKEYAPIMOBILEJKN());
+                                                requestJson ="{" +
+                                                                "\"kodebooking\": \""+rs.getString("no_rawat")+"\"," +
+                                                                "\"jenispasien\": \"NON JKN\"," +
+                                                                // ... (sisa JSON "add") ...
+                                                                "\"keterangan\": \"Peserta harap 30 menit lebih awal guna pencatatan administrasi.\"" +
+                                                            "}";
+                                                TeksArea.append("JSON : "+requestJson+"\n");
+                                                requestEntity = new HttpEntity(requestJson,headers);
+                                                URL = link+"/antrean/add";	
+                                                System.out.println("URL : "+URL);
+                                                root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
+                                                nameNode = root.path("metadata");  
+                                                
+                                                 if (nameNode.path("code").asText().equals("201")) {
+                                                     TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                      Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                      rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                   });
+                                                   }
+                                                
+                                                TeksArea.append("respon WS BPJS : "+nameNode.path("code").asText()+" "+nameNode.path("message").asText()+"\n");
+                                            }
+                                        }catch (Exception ex) {
+                                            System.out.println("Notifikasi Bridging : "+ex);
                                         }
+
+                                        // Persiapan kirim Task 3
+                                        datajam=Sequel.cariIsi("select if(concat(reg_periksa.tgl_registrasi,' ',reg_periksa.jam_reg)>concat('"+rs.getString("tgl_registrasi")+"',' ','"+rs2.getString("jam_mulai")+"'),concat(reg_periksa.tgl_registrasi,' ',reg_periksa.jam_reg),concat('"+rs.getString("tgl_registrasi")+"',' ','"+rs2.getString("jam_mulai")+"')) as tanggal from reg_periksa where reg_periksa.no_rawat=?",rs.getString("no_rawat"));
                                         if(!datajam.equals("")){
-                                            if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"4",datajam})==true){
-                                                parsedDate = dateFormat.parse(datajam);
-                                                try {     
-                                                    TeksArea.append("Menjalankan WS taskid mulai pelayanan poli Mobile JKN Pasien Non BPJS/BPS Onsite\n");
-                                                    headers = new HttpHeaders();
-                                                    headers.setContentType(MediaType.APPLICATION_JSON);
-                                                    headers.add("x-cons-id",koneksiDB.CONSIDAPIMOBILEJKN());
-                                                    utc=String.valueOf(api.GetUTCdatetimeAsString());
-                                                    headers.add("x-timestamp",utc);
-                                                    headers.add("x-signature",api.getHmac(utc));
-                                                    headers.add("user_key",koneksiDB.USERKEYAPIMOBILEJKN());
-                                                    requestJson ="{" +
-                                                                     "\"kodebooking\": \""+rs.getString("no_rawat")+"\"," +
-                                                                     "\"taskid\": \"4\"," +
-                                                                     "\"waktu\": \""+parsedDate.getTime()+"\"" +
-                                                                  "}";
-                                                    TeksArea.append("JSON : "+requestJson+"\n");
-                                                    requestEntity = new HttpEntity(requestJson,headers);
-                                                    URL = link+"/antrean/updatewaktu";	
-                                                    System.out.println("URL : "+URL);
-                                                    //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
-                                                    root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
-                                                    nameNode = root.path("metadata");
-                                                    
-                                                    // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
-                                                       if (nameNode.path("code").asText().equals("201")) {
-                                                         TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
-                                                           Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
-                                                              rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
-                                                       });
-                                                        }
-                                                    
-                                                    if (nameNode.path("code").asText().equals("200")) {
-                                                        // [PERBAIKAN #1] Jika sukses kirim, update variabel lokal
-                                                        task4 = "Sudah";
-                                                    } else if (!nameNode.path("code").asText().equals("201")) { // Jangan rollback jika 201
-                                                        Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='4' and no_rawat='"+rs.getString("no_rawat")+"'");
-                                                    }   
-                                                    TeksArea.append("respon WS BPJS : "+nameNode.path("code").asText()+" "+nameNode.path("message").asText()+"\n");
-                                                }catch (Exception ex) {
-                                                    System.out.println("Notifikasi Bridging : "+ex);
+                                            
+                                            // --- [MODIFIKASI VALIDASI SEP BERSYARAT] ---
+                                            boolean lanjutKirim = false; // Flag untuk kontrol
+                                            boolean isPasienBPJS = rs.getString("kd_pj").equals(kodebpjs);
+
+                                            if (isPasienBPJS) {
+                                                // Ini Pasien JKN Onsite, WAJIB cek SEP
+                                                TeksArea.append("    -> Pasien JKN Onsite terdeteksi. Memeriksa SEP...\n");
+                                                String dataDiSEP = Sequel.cariIsi("select no_rawat from bridging_sep where no_rawat=?", rs.getString("no_rawat"));
+                                                if (dataDiSEP.equals("")) {
+                                                    TeksArea.append("    -> SEP BELUM ADA. Melewati Task 3 untuk saat ini.\n");
+                                                    lanjutKirim = false;
+                                                } else {
+                                                    TeksArea.append("    -> SEP ditemukan. Lanjut mengirim Task 3.\n");
+                                                    lanjutKirim = true;
+                                                }
+                                            } else {
+                                                // Ini Pasien NON JKN (Umum/Asuransi), tidak perlu cek SEP
+                                                TeksArea.append("    -> Pasien Non-JKN terdeteksi. Lanjut mengirim Task 3 (tanpa cek SEP).\n");
+                                                lanjutKirim = true;
+                                            }
+                                            // --- [AKHIR MODIFIKASI] ---
+
+                                            if (lanjutKirim) { // Hanya kirim jika flag = true
+                                                if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"3",datajam})==true){
+                                                    parsedDate = dateFormat.parse(datajam);
+                                                    try {     
+                                                        TeksArea.append("Menjalankan WS taskid mulai tunggu poli Mobile JKN Pasien Non BPJS/BPS Onsite\n");
+                                                        headers = new HttpHeaders();
+                                                        headers.setContentType(MediaType.APPLICATION_JSON);
+                                                        headers.add("x-cons-id",koneksiDB.CONSIDAPIMOBILEJKN());
+                                                        utc=String.valueOf(api.GetUTCdatetimeAsString());
+                                                        headers.add("x-timestamp",utc);
+                                                        headers.add("x-signature",api.getHmac(utc));
+                                                        headers.add("user_key",koneksiDB.USERKEYAPIMOBILEJKN());
+                                                        requestJson ="{" +
+                                                                         "\"kodebooking\": \""+rs.getString("no_rawat")+"\"," +
+                                                                         "\"taskid\": \"3\"," +
+                                                                         "\"waktu\": \""+parsedDate.getTime()+"\"" +
+                                                                      "}";
+                                                        TeksArea.append("JSON : "+requestJson+"\n");
+                                                        requestEntity = new HttpEntity(requestJson,headers);
+                                                        URL = link+"/antrean/updatewaktu";	
+                                                        System.out.println("URL : "+URL);
+                                                        root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
+                                                        nameNode = root.path("metadata");
+                                                        
+                                                           if (nameNode.path("code").asText().equals("201")) {
+                                                             TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                               Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                                  rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                           });
+                                                            }
+                                                        
+                                                        if (nameNode.path("code").asText().equals("200")) {
+                                                            task3 = "Sudah";
+                                                        } else if (!nameNode.path("code").asText().equals("201")) { 
+                                                            Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='"+rs.getString("no_rawat")+"'");
+                                                        }  
+                                                        TeksArea.append("respon WS BPJS : "+nameNode.path("code").asText()+" "+nameNode.path("message").asText()+"\n");
+                                                    }catch (Exception ex) {
+                                                        System.out.println("Notifikasi Bridging : "+ex);
+                                                        // Rollback jika error koneksi
+                                                        Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='"+rs.getString("no_rawat")+"'");
+                                                    }
                                                 }
                                             }
                                         }

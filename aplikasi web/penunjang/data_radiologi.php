@@ -76,13 +76,14 @@ try {
        <?php if (!empty($_SESSION['settings']['logo_base64'])): ?>
           <img src="data:image/png;base64,<?php echo $_SESSION['settings']['logo_base64']; ?>" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
        <?php endif; ?>
-      <span class="brand-text font-weight-light">Expertise App</span>
+	  <span class="brand-text font-weight-light"><?php echo e($_SESSION['settings']['nama_instansi'] ?? 'Radiologi'); ?></span> <br>
+      <span style="display:block; text-align:center;" class="brand-text font-weight-light">Expertise App</span>
     </a>
     <div class="sidebar">
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <li class="nav-item">
-            <a href="data_radiologi.php" class="nav-link active"><i class="nav-icon fas fa-x-ray"></i><p>Radiologi</p></a>
+            <a href="data_radiologi.php" class="nav-link active"><i class="nav-icon fas fa-x-ray"></i><p>Expertise Radiologi</p></a>
           </li>
         </ul>
       </nav>
