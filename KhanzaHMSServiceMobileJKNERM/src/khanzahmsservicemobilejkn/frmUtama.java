@@ -415,6 +415,7 @@ public class frmUtama extends javax.swing.JFrame {
                                 "INNER JOIN pasien ON reg_periksa.no_rkm_medis=pasien.no_rkm_medis "+
                                 "INNER JOIN poliklinik ON reg_periksa.kd_poli=poliklinik.kd_poli "+
                                 "INNER JOIN dokter ON reg_periksa.kd_dokter=dokter.kd_dokter "+
+                                "INNER JOIN bridging_sep ON reg_periksa.no_rawat = bridging_sep.no_rawat "+  //baris tambahan agar tidak mengirimkan yang belum punya nomor SEP
                                 "WHERE referensi_mobilejkn_bpjs.status='Checkin' and referensi_mobilejkn_bpjs.tanggalperiksa between '"+Tanggal1.getText()+"' and '"+Tanggal2.getText()+"' "+
                                 "order by referensi_mobilejkn_bpjs.tanggalperiksa");
                         try {
@@ -552,7 +553,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                                 
                                 if(task3.equals("Sudah")&&task4.equals("")){
-                                    datajam=Sequel.cariIsi("select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) from pemeriksaan_ralan where pemeriksaan_ralan.no_rawat=?",rs.getString("no_rawat"));
+                                    datajam=Sequel.cariIsi("select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) from pemeriksaan_ralan inner join dokter on pemeriksaan_ralan.nip = dokter.kd_dokter where pemeriksaan_ralan.no_rawat=?",rs.getString("no_rawat"));
                                     if(datajam.equals("")){
                                         datajam=Sequel.cariIsi("select if(diterima='0000-00-00 00:00:00','',diterima) from mutasi_berkas where mutasi_berkas.no_rawat=?",rs.getString("no_rawat"));
                                     }
@@ -976,7 +977,7 @@ public class frmUtama extends javax.swing.JFrame {
                                     }
                                             
                                             if(task3.equals("Sudah")&&task4.equals("")){
-                                                datajam=Sequel.cariIsi("select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) from pemeriksaan_ralan where pemeriksaan_ralan.no_rawat=?",rs.getString("no_rawat"));
+                                                datajam=Sequel.cariIsi("select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) inner join dokter on pemeriksaan_ralan.nip = dokter.kd_dokter from pemeriksaan_ralan where pemeriksaan_ralan.no_rawat=?",rs.getString("no_rawat"));
                                                 if(datajam.equals("")){
                                                     datajam=Sequel.cariIsi("select if(mutasi_berkas.diterima='0000-00-00 00:00:00','',mutasi_berkas.diterima) from mutasi_berkas where mutasi_berkas.no_rawat=?",rs.getString("no_rawat"));
                                                 }
