@@ -241,8 +241,8 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
             @Override
             public void windowClosed(WindowEvent e) {
                 if(carikeluhan.getTable().getSelectedRow()!= -1){
-                    Keluhan.append(carikeluhan.getTable().getValueAt(carikeluhan.getTable().getSelectedRow(),2).toString()+", ");
-                    Keluhan.requestFocus();
+                    Keluhan.append(carikeluhan.getTable().getValueAt(carikeluhan.getTable().getSelectedRow(),2).toString()+", ");                    
+                    Keluhan.requestFocus();                    
                 }
             }
             @Override
@@ -263,8 +263,10 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
             @Override
             public void windowClosed(WindowEvent e) {
                 if(caripemeriksaan.getTable().getSelectedRow()!= -1){
-                    Keluhan.append(caripemeriksaan.getTable().getValueAt(caripemeriksaan.getTable().getSelectedRow(),2).toString()+", ");
-                    Keluhan.requestFocus();
+                    //Keluhan.append(caripemeriksaan.getTable().getValueAt(caripemeriksaan.getTable().getSelectedRow(),2).toString()+", ");
+                    JalannyaPenyakit.append(caripemeriksaan.getTable().getValueAt(caripemeriksaan.getTable().getSelectedRow(),2).toString()+", ");  // mod ichsan untuk memindahkan isian ke kolom jalannya penyakit
+                    //Keluhan.requestFocus();
+                    JalannyaPenyakit.requestFocus();
                 }
             }
             @Override
@@ -769,7 +771,7 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "18-03-2025" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "06-11-2025" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -783,7 +785,7 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "18-03-2025" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "06-11-2025" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -876,7 +878,7 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
         FormInput.setPreferredSize(new java.awt.Dimension(100, 651));
         FormInput.setLayout(null);
 
-        jLabel4.setText("Keluhan Utama Riwayat Penyakit Yang Positif :");
+        jLabel4.setText("Anamnesis :");
         jLabel4.setName("jLabel4"); // NOI18N
         FormInput.add(jLabel4);
         jLabel4.setBounds(0, 70, 240, 23);
@@ -995,7 +997,7 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
         FormInput.add(jLabel5);
         jLabel5.setBounds(0, 10, 100, 23);
 
-        jLabel8.setText("Jalannya Penyakit Selama Perawatan :");
+        jLabel8.setText("Pemeriksaan Fisik :");
         jLabel8.setName("jLabel8"); // NOI18N
         FormInput.add(jLabel8);
         jLabel8.setBounds(0, 127, 240, 23);
@@ -1017,7 +1019,7 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
         FormInput.add(scrollPane3);
         scrollPane3.setBounds(244, 127, 541, 50);
 
-        jLabel9.setText("Pemeriksaan Penunjang Yang Positif :");
+        jLabel9.setText("Pemeriksaan Penunjang (Rad) :");
         jLabel9.setName("jLabel9"); // NOI18N
         FormInput.add(jLabel9);
         jLabel9.setBounds(0, 184, 240, 23);
@@ -1061,7 +1063,7 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
         FormInput.add(scrollPane5);
         scrollPane5.setBounds(244, 241, 541, 50);
 
-        jLabel11.setText("Obat-obatan Waktu Pulang/Nasihat :");
+        jLabel11.setText("Obat-obatan & Rencana Tindak Lanjut");
         jLabel11.setName("jLabel11"); // NOI18N
         FormInput.add(jLabel11);
         jLabel11.setBounds(0, 590, 240, 23);
@@ -1316,6 +1318,7 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
 
         BtnDokter1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         BtnDokter1.setMnemonic('2');
+        BtnDokter1.setText("Subjek");
         BtnDokter1.setToolTipText("Alt+2");
         BtnDokter1.setName("BtnDokter1"); // NOI18N
         BtnDokter1.setPreferredSize(new java.awt.Dimension(28, 23));
@@ -1325,7 +1328,7 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
             }
         });
         FormInput.add(BtnDokter1);
-        BtnDokter1.setBounds(180, 96, 28, 23);
+        BtnDokter1.setBounds(90, 96, 90, 23);
 
         BtnDokter2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         BtnDokter2.setMnemonic('2');
@@ -1368,6 +1371,7 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
 
         BtnDokter5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         BtnDokter5.setMnemonic('2');
+        BtnDokter5.setText("Objek");
         BtnDokter5.setToolTipText("Alt+2");
         BtnDokter5.setName("BtnDokter5"); // NOI18N
         BtnDokter5.setPreferredSize(new java.awt.Dimension(28, 23));
@@ -1377,11 +1381,13 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
             }
         });
         FormInput.add(BtnDokter5);
-        BtnDokter5.setBounds(212, 96, 28, 23);
+        BtnDokter5.setBounds(160, 96, 80, 23);
 
         BtnDokter6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         BtnDokter6.setMnemonic('2');
+        BtnDokter6.setText("Riwayat Perawatan");
         BtnDokter6.setToolTipText("Alt+2");
+        BtnDokter6.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         BtnDokter6.setName("BtnDokter6"); // NOI18N
         BtnDokter6.setPreferredSize(new java.awt.Dimension(28, 23));
         BtnDokter6.addActionListener(new java.awt.event.ActionListener() {
@@ -1390,7 +1396,7 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
             }
         });
         FormInput.add(BtnDokter6);
-        BtnDokter6.setBounds(212, 153, 28, 23);
+        BtnDokter6.setBounds(70, 153, 170, 23);
 
         scrollInput.setViewportView(FormInput);
 
@@ -2476,6 +2482,27 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
             }
         } catch (Exception e) {
             System.out.println("Notif Pengambilan Keluhan Ralan : " + e);
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
+        }
+        
+        // PENAMBAHAN BARU: Mengambil nilai Jalannya penyakit dari tabel pemeriksaan_ralan - ichsan
+        try {
+            ps = koneksi.prepareStatement(
+                "SELECT pemeriksaan FROM pemeriksaan_ralan WHERE no_rawat=? ORDER BY tgl_perawatan DESC, jam_rawat DESC LIMIT 1"
+            );
+            ps.setString(1, TNoRw.getText());
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                JalannyaPenyakit.setText(rs.getString("pemeriksaan"));
+            }
+        } catch (Exception e) {
+            System.out.println("Notif Pengambilan pemeriksaan Ralan : " + e);
         } finally {
             if (rs != null) {
                 rs.close();

@@ -457,7 +457,7 @@
                     </Property>
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                       <StringArray count="1">
-                        <StringItem index="0" value="16-06-2025"/>
+                        <StringItem index="0" value="06-11-2025"/>
                       </StringArray>
                     </Property>
                     <Property name="displayFormat" type="java.lang.String" value="dd-MM-yyyy"/>
@@ -485,7 +485,7 @@
                     </Property>
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                       <StringArray count="1">
-                        <StringItem index="0" value="16-06-2025"/>
+                        <StringItem index="0" value="06-11-2025"/>
                       </StringArray>
                     </Property>
                     <Property name="displayFormat" type="java.lang.String" value="dd-MM-yyyy"/>
@@ -641,7 +641,7 @@
                   <SubComponents>
                     <Component class="widget.Label" name="jLabel4">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Keluhan Utama Riwayat Penyakit :"/>
+                        <Property name="text" type="java.lang.String" value="Anamnesis :"/>
                         <Property name="name" type="java.lang.String" value="jLabel4" noResource="true"/>
                       </Properties>
                       <Constraints>
@@ -1362,7 +1362,9 @@
                           <Image iconType="3" name="/picture/190.png"/>
                         </Property>
                         <Property name="mnemonic" type="int" value="50"/>
+                        <Property name="text" type="java.lang.String" value="Subjek"/>
                         <Property name="toolTipText" type="java.lang.String" value="Alt+2"/>
+                        <Property name="horizontalAlignment" type="int" value="4"/>
                         <Property name="name" type="java.lang.String" value="BtnDokter1" noResource="true"/>
                         <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                           <Dimension value="[28, 23]"/>
@@ -1373,7 +1375,7 @@
                       </Events>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                          <AbsoluteConstraints x="192" y="186" width="28" height="23"/>
+                          <AbsoluteConstraints x="120" y="186" width="100" height="23"/>
                         </Constraint>
                       </Constraints>
                     </Component>
@@ -1489,7 +1491,9 @@
                           <Image iconType="3" name="/picture/190.png"/>
                         </Property>
                         <Property name="mnemonic" type="int" value="50"/>
+                        <Property name="text" type="java.lang.String" value="Objek"/>
                         <Property name="toolTipText" type="java.lang.String" value="Alt+2"/>
+                        <Property name="horizontalAlignment" type="int" value="4"/>
                         <Property name="name" type="java.lang.String" value="BtnDokter5" noResource="true"/>
                         <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                           <Dimension value="[28, 23]"/>
@@ -1500,7 +1504,7 @@
                       </Events>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                          <AbsoluteConstraints x="192" y="243" width="28" height="23"/>
+                          <AbsoluteConstraints x="140" y="243" width="80" height="23"/>
                         </Constraint>
                       </Constraints>
                     </Component>
@@ -2056,7 +2060,7 @@
                         </Property>
                         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                           <StringArray count="1">
-                            <StringItem index="0" value="16-06-2025 16:02:04"/>
+                            <StringItem index="0" value="06-11-2025 14:55:57"/>
                           </StringArray>
                         </Property>
                         <Property name="displayFormat" type="java.lang.String" value="dd-MM-yyyy HH:mm:ss"/>
@@ -2355,7 +2359,9 @@
                           <Image iconType="3" name="/picture/190.png"/>
                         </Property>
                         <Property name="mnemonic" type="int" value="50"/>
+                        <Property name="text" type="java.lang.String" value="Riwayat Perawatan"/>
                         <Property name="toolTipText" type="java.lang.String" value="Alt+2"/>
+                        <Property name="horizontalAlignment" type="int" value="4"/>
                         <Property name="name" type="java.lang.String" value="BtnDokter6" noResource="true"/>
                         <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                           <Dimension value="[28, 23]"/>
@@ -2366,7 +2372,7 @@
                       </Events>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                          <AbsoluteConstraints x="192" y="300" width="28" height="23"/>
+                          <AbsoluteConstraints x="40" y="300" width="180" height="23"/>
                         </Constraint>
                       </Constraints>
                     </Component>

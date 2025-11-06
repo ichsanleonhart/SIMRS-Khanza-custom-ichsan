@@ -2206,15 +2206,15 @@ public final class DlgRawatInap extends javax.swing.JDialog {
         panelGlass12.add(scrollPane2);
         scrollPane2.setBounds(73, 115, 360, 38);
 
-        jLabel8.setText("Subjek :");
-        jLabel8.setName("jLabel8"); // NOI18N
+        jLabel8.setText("<html><div align='right'>Subjek :<br>(Anamnesis)</div></html>");  //tambahan agar rata kanan by Ichsan
+        jLabel8.setName("jLabel8"); // NOI18N        
         panelGlass12.add(jLabel8);
-        jLabel8.setBounds(0, 70, 70, 23);
+        jLabel8.setBounds(0, 70, 70, 40);
 
-        jLabel9.setText("Objek :");
-        jLabel9.setName("jLabel9"); // NOI18N
+        jLabel9.setText("<html><div align='right'>Objek : <br>(Pemeriksaan)    </div></html>");  //tambahan agar rata kanan by Ichsan
+        jLabel9.setName("jLabel9"); // NOI18N        
         panelGlass12.add(jLabel9);
-        jLabel9.setBounds(0, 115, 70, 23);
+        jLabel9.setBounds(0, 115, 70, 40);
 
         scrollPane3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         scrollPane3.setName("scrollPane3"); // NOI18N
@@ -2233,15 +2233,15 @@ public final class DlgRawatInap extends javax.swing.JDialog {
         panelGlass12.add(scrollPane3);
         scrollPane3.setBounds(543, 40, 360, 38);
 
-        jLabel37.setText("Asesmen :");
-        jLabel37.setName("jLabel37"); // NOI18N
+        jLabel37.setText("<div align='right'><html>Asesmen :<br>(Diagnosis)   </div></html>");  //tambahan agar rata kanan by Ichsan
+        jLabel37.setName("jLabel37"); // NOI18N        
         panelGlass12.add(jLabel37);
-        jLabel37.setBounds(450, 40, 90, 23);
+        jLabel37.setBounds(450, 40, 90, 40);
 
-        jLabel26.setText("Plan :");
+        jLabel26.setText("<html><div align='right'>Plan :<br>(Tindak Lanjut)</div></html>");  //tambahan agar rata kanan by Ichsan
         jLabel26.setName("jLabel26"); // NOI18N
         panelGlass12.add(jLabel26);
-        jLabel26.setBounds(450, 85, 90, 23);
+        jLabel26.setBounds(450, 85, 90, 60);
 
         scrollPane4.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         scrollPane4.setName("scrollPane4"); // NOI18N
@@ -2304,10 +2304,10 @@ public final class DlgRawatInap extends javax.swing.JDialog {
         panelGlass12.add(jLabel54);
         jLabel54.setBounds(0, 40, 190, 23);
 
-        jLabel55.setText("Inst/Impl :");
+        jLabel55.setText("<html><div align='right'>Instruksi/ <br> Implementasi:</div><html>");  //tambahan agar rata kanan by Ichsan
         jLabel55.setName("jLabel55"); // NOI18N
         panelGlass12.add(jLabel55);
-        jLabel55.setBounds(450, 139, 90, 23);
+        jLabel55.setBounds(450, 139, 90, 40);
 
         scrollPane7.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         scrollPane7.setName("scrollPane7"); // NOI18N

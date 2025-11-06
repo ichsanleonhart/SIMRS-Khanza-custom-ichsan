@@ -2331,10 +2331,10 @@ public final class DlgRawatJalan extends javax.swing.JDialog {
         panelGlass12.setPreferredSize(new java.awt.Dimension(44, 134));
         panelGlass12.setLayout(null);
 
-        jLabel8.setText("Subjek :");
-        jLabel8.setName("jLabel8"); 
-        panelGlass12.add(jLabel8);
-        jLabel8.setBounds(0, 70, 70, 23);
+        jLabel8.setText("<html><div align='right'>Subjek :<br>(Anamnesis)   </div></html>");  //tambahan agar rata kanan by Ichsan
+        jLabel8.setName("jLabel8");         
+        panelGlass12.add(jLabel8);        
+        jLabel8.setBounds(0, 70, 70, 40);
 
         jLabel7.setText("Suhu (°C) :");
         jLabel7.setName("jLabel7"); 
@@ -2366,10 +2366,10 @@ public final class DlgRawatJalan extends javax.swing.JDialog {
         panelGlass12.add(jLabel17);
         jLabel17.setBounds(0, 190, 70, 23);
 
-        jLabel9.setText("Objek :");
-        jLabel9.setName("jLabel9"); 
+        jLabel9.setText("<html><div align='right'>Objek : <br>(Pemeriksaan)    </div></html>");  //tambahan agar rata kanan by Ichsan
+        jLabel9.setName("jLabel9");         
         panelGlass12.add(jLabel9);
-        jLabel9.setBounds(0, 115, 70, 23);
+        jLabel9.setBounds(0, 115, 70, 40);
 
         jLabel15.setText("Alergi :");
         jLabel15.setName("jLabel15"); 
@@ -2403,15 +2403,15 @@ public final class DlgRawatJalan extends javax.swing.JDialog {
         panelGlass12.add(scrollPane1);
         scrollPane1.setBounds(73, 70, 360, 38);
 
-        jLabel28.setText("Asesmen :");
-        jLabel28.setName("jLabel28"); 
+        jLabel28.setText("<html><div align='right'>Asesmen :<br>(Diagnosis)</div></html>");  //tambahan agar rata kanan by Ichsan
+        jLabel28.setName("jLabel28");         
         panelGlass12.add(jLabel28);
-        jLabel28.setBounds(450, 40, 90, 23);
+        jLabel28.setBounds(450, 40, 90, 40);
 
-        jLabel26.setText("Plan :");
+        jLabel26.setText("<html><div align='right'>Plan :<br>(Tindak Lanjut)</div></html>");  //tambahan agar rata kanan by Ichsan
         jLabel26.setName("jLabel26"); 
         panelGlass12.add(jLabel26);
-        jLabel26.setBounds(450, 85, 90, 23);
+        jLabel26.setBounds(450, 85, 90, 60);
 
         scrollPane2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         scrollPane2.setName("scrollPane2"); 
@@ -2604,10 +2604,10 @@ public final class DlgRawatJalan extends javax.swing.JDialog {
         panelGlass12.add(jLabel41);
         jLabel41.setBounds(0, 40, 190, 23);
 
-        jLabel53.setText("Inst/Impl :");
+        jLabel53.setText("<html><div align='right'>Instruksi/ <br> Implementasi:</div><html>");  //tambahan agar rata kanan by Ichsan
         jLabel53.setName("jLabel53"); 
         panelGlass12.add(jLabel53);
-        jLabel53.setBounds(450, 139, 90, 23);
+        jLabel53.setBounds(450, 139, 90, 40);
 
         scrollPane7.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         scrollPane7.setName("scrollPane7"); 

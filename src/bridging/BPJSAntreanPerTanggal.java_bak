@@ -1,3 +1,10 @@
+
+/*
+ * Kontribusi Oleh Ferry Ardiansyah - RSIAP 3326051
+ *
+ * Created on May 22, 2010, 11:58:21 PM
+ */
+
 package bridging;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -282,7 +289,7 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "06-11-2025" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "31-08-2024" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -296,7 +303,7 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "06-11-2025" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "31-08-2024" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -503,7 +510,7 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
     private void MnKirimUlangActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MnKirimUlangActionPerformed
     // 1. Ambil data booking dari tabel
     kodebooking = Sequel.cariIsi("select no_rawat from referensi_mobilejkn_bpjs where nobooking='"+tbJnsPerawatan.getValueAt(tbJnsPerawatan.getSelectedRow(), 0)+"'");
-    data = tbJnsPerawatan.getValueAt(tbJnsPerawatan.getSelectedRow(), 0).toString(); // data = MJKN nobooking
+    data = tbJnsPerawatan.getValueAt(tbJnsPerawatan.getSelectedRow(), 0).toString();
     
     // 2. Tentukan Waktu Dasar (Base Time) untuk Rekonstruksi
     // Prioritas 1: Ambil dari jam_mulai di tabel jadwal
@@ -539,38 +546,9 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
     
     System.out.println("REKONSTRUKSI " + kodebooking + ". Waktu Dasar (Base Time): " + baseTime);
 
-    // [MODIFIKASI] TAHAP 2.5: SINKRONISASI DAN HEALING SEBELUM PUSH
-    System.out.println("Memulai proses Sync/Heal untuk MJKN nobooking: " + data);
-    for (String taskId : new String[]{"3", "4", "5"}) {
-        String waktuNyataBPJS = getWaktuTaskDariBPJS(data, taskId); // 'data' adalah MJKN nobooking
-        
-        if (waktuNyataBPJS != null && !waktuNyataBPJS.isEmpty()) {
-            // BPJS Punya Data
-            System.out.println("  -> [Sync API] BPJS memiliki Task " + taskId + " pada " + waktuNyataBPJS);
-            boolean adaLokal = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where taskid=? and no_rawat=?", taskId, kodebooking).equals("");
-            if (adaLokal) {
-                // "Tambal" database lokal kita
-                Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid", "?,?,?", "Patch Task " + taskId, 3, new String[]{kodebooking, taskId, waktuNyataBPJS});
-                System.out.println("  -> HEALING SUKSES: No.Rawat " + kodebooking + " ditambal dengan waktu " + waktuNyataBPJS);
-            } else {
-                System.out.println("  -> [Sync] Data Task " + taskId + " lokal sudah sesuai.");
-            }
-        } else {
-            // BPJS Tidak Punya Data
-            System.out.println("  -> [Sync API] BPJS tidak memiliki data Task " + taskId + ".");
-            String waktuLokal = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where taskid=? and no_rawat=?", taskId, kodebooking);
-            if (!waktuLokal.equals("")) {
-                // Hapus data "zombie" di lokal
-                Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid=? and no_rawat=?", taskId, kodebooking);
-                System.out.println("  -> SINKRONISASI: Menghapus data 'zombie' Task " + taskId + " lokal (No.Rawat " + kodebooking + ").");
-            }
-        }
-    }
-    System.out.println("Proses Sync/Heal selesai.");
-
     // 3. Proses Rekonstruksi TASK ID 3 (Mulai Tunggu Poli)
     datataskid = Sequel.cariIsi("select * from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat=?", kodebooking);
-    if (datataskid.equals("")) { // Hanya jika Task ID 3 bolong (Setelah di-heal)
+    if (datataskid.equals("")) { // Hanya jika Task ID 3 bolong
         // Waktu Task 3 = Base Time + (60 s.d. 180 detik) -> (1-3 menit)
         datajam = Sequel.cariIsi("SELECT DATE_ADD('"+baseTime+"', INTERVAL (60 + (RAND() * 120)) SECOND)"); 
         
@@ -611,12 +589,12 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
             }
         }
     } else {
-        System.out.println("REKONSTRUKSI: Task ID 3 sudah ada (setelah heal), dilewati.");
+        System.out.println("REKONSTRUKSI: Task ID 3 sudah ada, dilewati.");
     }
     
     // 4. Proses Rekonstruksi TASK ID 4 (Mulai Pelayanan)
     datataskid = Sequel.cariIsi("select * from referensi_mobilejkn_bpjs_taskid where taskid='4' and no_rawat=?", kodebooking);
-    if (datataskid.equals("")) { // Hanya jika Task ID 4 bolong (Setelah di-heal)
+    if (datataskid.equals("")) { // Hanya jika Task ID 4 bolong
         // Waktu Task 4 = Base Time + (300 s.d. 900 detik) -> (5-15 menit)
         datajam = Sequel.cariIsi("SELECT DATE_ADD('"+baseTime+"', INTERVAL (300 + (RAND() * 600)) SECOND)");
         
@@ -654,12 +632,12 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
             }
         }
     } else {
-        System.out.println("REKONSTRUKSI: Task ID 4 sudah ada (setelah heal), dilewati.");
+        System.out.println("REKONSTRUKSI: Task ID 4 sudah ada, dilewati.");
     }
     
     // 5. Proses Rekonstruksi TASK ID 5 (Selesai Pelayanan)
     datataskid = Sequel.cariIsi("select * from referensi_mobilejkn_bpjs_taskid where taskid='5' and no_rawat=?", kodebooking);
-    if (datataskid.equals("")) { // Hanya jika Task ID 5 bolong (Setelah di-heal)
+    if (datataskid.equals("")) { // Hanya jika Task ID 5 bolong
         // Waktu Task 5 = Base Time + (900 s.d. 1800 detik) -> (15-30 menit)
         datajam = Sequel.cariIsi("SELECT DATE_ADD('"+baseTime+"', INTERVAL (900 + (RAND() * 900)) SECOND)");
         
@@ -697,7 +675,7 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
              }
         }
     } else {
-         System.out.println("REKONSTRUKSI: Task ID 5 sudah ada (setelah heal), dilewati.");
+         System.out.println("REKONSTRUKSI: Task ID 5 sudah ada, dilewati.");
     }
     
     System.out.println("PROSES REKONSTRUKSI UNTUK " + kodebooking + " SELESAI.");
@@ -705,7 +683,7 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
 
     private void MnKirimUlang1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MnKirimUlang1ActionPerformed
     // 1. Ambil kodebooking (no_rawat) dari tabel
-    kodebooking = tbJnsPerawatan.getValueAt(tbJnsPerawatan.getSelectedRow(), 0).toString(); // kodebooking = no_rawat
+    kodebooking = tbJnsPerawatan.getValueAt(tbJnsPerawatan.getSelectedRow(), 0).toString();
     
     // 2. Tentukan Waktu Dasar (Base Time) untuk Rekonstruksi
     // Prioritas 1: Ambil dari jam_mulai di tabel jadwal
@@ -741,38 +719,9 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
     
     System.out.println("REKONSTRUKSI NON-JKN " + kodebooking + ". Waktu Dasar (Base Time): " + baseTime);
 
-    // [MODIFIKASI] TAHAP 2.5: SINKRONISASI DAN HEALING SEBELUM PUSH
-    System.out.println("Memulai proses Sync/Heal untuk NON-JKN kodebooking: " + kodebooking);
-    for (String taskId : new String[]{"3", "4", "5"}) {
-        String waktuNyataBPJS = getWaktuTaskDariBPJS(kodebooking, taskId); // 'kodebooking' (no_rawat) digunakan sbg nobooking
-        
-        if (waktuNyataBPJS != null && !waktuNyataBPJS.isEmpty()) {
-            // BPJS Punya Data
-            System.out.println("  -> [Sync API] BPJS memiliki Task " + taskId + " pada " + waktuNyataBPJS);
-            boolean adaLokal = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where taskid=? and no_rawat=?", taskId, kodebooking).equals("");
-            if (adaLokal) {
-                // "Tambal" database lokal kita
-                Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid", "?,?,?", "Patch Task " + taskId, 3, new String[]{kodebooking, taskId, waktuNyataBPJS});
-                System.out.println("  -> HEALING SUKSES: No.Rawat " + kodebooking + " ditambal dengan waktu " + waktuNyataBPJS);
-            } else {
-                System.out.println("  -> [Sync] Data Task " + taskId + " lokal sudah sesuai.");
-            }
-        } else {
-            // BPJS Tidak Punya Data
-            System.out.println("  -> [Sync API] BPJS tidak memiliki data Task " + taskId + ".");
-            String waktuLokal = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where taskid=? and no_rawat=?", taskId, kodebooking);
-            if (!waktuLokal.equals("")) {
-                // Hapus data "zombie" di lokal
-                Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid=? and no_rawat=?", taskId, kodebooking);
-                System.out.println("  -> SINKRONISASI: Menghapus data 'zombie' Task " + taskId + " lokal (No.Rawat " + kodebooking + ").");
-            }
-        }
-    }
-    System.out.println("Proses Sync/Heal selesai.");
-
     // 3. Proses Rekonstruksi TASK ID 3 (Mulai Tunggu Poli)
     datataskid = Sequel.cariIsi("select * from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat=?", kodebooking);
-    if (datataskid.equals("")) { // Hanya jika Task ID 3 bolong (Setelah di-heal)
+    if (datataskid.equals("")) { // Hanya jika Task ID 3 bolong
         // Waktu Task 3 = Base Time + (60 s.d. 180 detik) -> (1-3 menit)
         datajam = Sequel.cariIsi("SELECT DATE_ADD('"+baseTime+"', INTERVAL (60 + (RAND() * 120)) SECOND)"); 
         
@@ -813,12 +762,12 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
             }
         }
     } else {
-        System.out.println("REKONSTRUKSI: Task ID 3 sudah ada (setelah heal), dilewati.");
+        System.out.println("REKONSTRUKSI: Task ID 3 sudah ada, dilewati.");
     }
     
     // 4. Proses Rekonstruksi TASK ID 4 (Mulai Pelayanan)
     datataskid = Sequel.cariIsi("select * from referensi_mobilejkn_bpjs_taskid where taskid='4' and no_rawat=?", kodebooking);
-    if (datataskid.equals("")) { // Hanya jika Task ID 4 bolong (Setelah di-heal)
+    if (datataskid.equals("")) { // Hanya jika Task ID 4 bolong
         // Waktu Task 4 = Base Time + (300 s.d. 900 detik) -> (5-15 menit)
         datajam = Sequel.cariIsi("SELECT DATE_ADD('"+baseTime+"', INTERVAL (300 + (RAND() * 600)) SECOND)");
         
@@ -856,12 +805,12 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
             }
         }
     } else {
-        System.out.println("REKONSTRUKSI: Task ID 4 sudah ada (setelah heal), dilewati.");
+        System.out.println("REKONSTRUKSI: Task ID 4 sudah ada, dilewati.");
     }
     
     // 5. Proses Rekonstruksi TASK ID 5 (Selesai Pelayanan)
     datataskid = Sequel.cariIsi("select * from referensi_mobilejkn_bpjs_taskid where taskid='5' and no_rawat=?", kodebooking);
-    if (datataskid.equals("")) { // Hanya jika Task ID 5 bolong (Setelah di-heal)
+    if (datataskid.equals("")) { // Hanya jika Task ID 5 bolong
         // Waktu Task 5 = Base Time + (900 s.d. 1800 detik) -> (15-30 menit)
         datajam = Sequel.cariIsi("SELECT DATE_ADD('"+baseTime+"', INTERVAL (900 + (RAND() * 900)) SECOND)");
         
@@ -899,82 +848,12 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
              }
         }
     } else {
-         System.out.println("REKONSTRUKSI: Task ID 5 sudah ada (setelah heal), dilewati.");
+         System.out.println("REKONSTRUKSI: Task ID 5 sudah ada, dilewati.");
     }
     
     System.out.println("PROSES REKONSTRUKSI NON-JKN UNTUK " + kodebooking + " SELESAI.");
     }//GEN-LAST:event_MnKirimUlang1ActionPerformed
 
-    /**
-    * [HELPER BARU] Memanggil API /antrean/getlisttask untuk mengambil waktu riil BPJS.
-    * @param kodebooking Kode booking pasien
-    * @param taskIdTarget Task ID yang ingin dicari (misal "3")
-    * @return String waktuRSTask (format MySQL: "yyyy-MM-dd HH:mm:ss") atau null jika gagal.
-    */
-    private String getWaktuTaskDariBPJS(String kodebooking, String taskIdTarget) {
-        String waktuRSTask = null;         
-        
-        String utcDekripsi = String.valueOf(api.GetUTCdatetimeAsString());
-        try {
-            headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.add("x-cons-id", koneksiDB.CONSIDAPIMOBILEJKN());
-            headers.add("x-timestamp", utcDekripsi); // Pakai utc yang sama untuk timestamp
-            headers.add("x-signature", api.getHmac(utcDekripsi));
-            headers.add("user_key", koneksiDB.USERKEYAPIMOBILEJKN());
-            requestJson = "{\"kodebooking\": \"" + kodebooking + "\"}";
-            requestEntity = new HttpEntity(requestJson, headers);
-            URL = link + "/antrean/getlisttask";
-
-            System.out.println("        -> [Sync API] Memanggil getlisttask untuk kodebooking: " + kodebooking);
-            
-            // 1. Panggil API getlisttask
-            root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
-            nameNode = root.path("metadata");
-
-            if (nameNode.path("code").asText().equals("200")) {
-                // 2. Dekripsi respons
-                JsonNode response = mapper.readTree(api.Decrypt(root.path("response").asText(), utcDekripsi)); 
-                if (response.isArray()) {
-                    // 3. Loop untuk mencari taskid 
-                    for (JsonNode list : response) {
-                        if (list.path("taskid").asText().equals(taskIdTarget)) {
-                            String waktuBPJS = list.path("wakturs").asText(); // Ambil waktu riil BPJS (misal: "31-10-2025 10:00:00 WIB")
-                            System.out.println("        -> [Sync API] Ditemukan " + list.path("taskname").asText() + " pada: " + waktuBPJS);
-                            try {
-                                // 1. Hapus " WIB" dan trim spasi
-                                String waktuDibersihkan = waktuBPJS.replace("WIB", "").trim(); // Hasil: "31-10-2025 10:00:00"
-                                
-                                // 2. Siapkan formatter
-                                SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-                                // 3. Parse dan format ulang
-                                Date dateBPJS = inputFormat.parse(waktuDibersihkan);
-                                waktuRSTask = dateFormat.format(dateBPJS); // Hasil: "2025-10-31 10:00:00" (menggunakan dateFormat class)
-                                
-                                System.out.println("        -> [Sync API] Waktu dikonversi ke format MySQL: " + waktuRSTask);
-                                
-                            } catch (Exception e) {
-                                System.out.println("        -> [Sync API] GAGAL PARSING WAKTU: " + e.getMessage());
-                                System.out.println("Gagal parsing waktu BPJS ("+waktuBPJS+"): " + e);
-                                waktuRSTask = null; // Gagalkan proses jika format tidak dikenal
-                            }
-                            
-                            break; // Ditemukan, hentikan loop
-                        }
-                    }
-                }
-            } else {
-                System.out.println("        -> [Sync API] Gagal mengambil list task: " + nameNode.path("message").asText());
-            }
-        } catch (Exception ex) {
-            System.out.println("        -> [Sync API] Exception saat getlisttask: " + ex.getMessage());
-            System.out.println("Notifikasi getWaktuTaskDariBPJS : " + ex);
-        }
-        
-        // 4. Kembalikan waktunya (atau null jika tidak ditemukan/error)
-        return waktuRSTask;
-    }
-    
     /**
     * @param args the command line arguments
     */

@@ -553,10 +553,7 @@ public class frmUtama extends javax.swing.JFrame {
                         }
                                 
                                 if(task3.equals("Sudah")&&task4.equals("")){
-                                    datajam=Sequel.cariIsi("select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) from pemeriksaan_ralan inner join dokter on pemeriksaan_ralan.nip = dokter.kd_dokter where pemeriksaan_ralan.no_rawat=?",rs.getString("no_rawat"));
-                                    if(datajam.equals("")){
-                                        datajam=Sequel.cariIsi("select if(diterima='0000-00-00 00:00:00','',diterima) from mutasi_berkas where mutasi_berkas.no_rawat=?",rs.getString("no_rawat"));
-                                    }
+                                    datajam=Sequel.cariIsi("select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) from pemeriksaan_ralan inner join dokter on pemeriksaan_ralan.nip = dokter.kd_dokter where pemeriksaan_ralan.no_rawat=?",rs.getString("no_rawat"));                                    
                                     if(!datajam.equals("")){
                                         if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"4",datajam})==true){
                                             parsedDate = dateFormat.parse(datajam);
@@ -617,8 +614,7 @@ public class frmUtama extends javax.swing.JFrame {
                                                 TeksArea.append("JSON : "+requestJson+"\n");
                                                 requestEntity = new HttpEntity(requestJson,headers);
                                                 URL = link+"/antrean/updatewaktu";	
-                                                System.out.println("URL : "+URL);
-                                                //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
+                                                System.out.println("URL : "+URL);                                                
                                                 root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                 nameNode = root.path("metadata");
                                                 if(!nameNode.path("code").asText().equals("200")){
@@ -977,10 +973,7 @@ public class frmUtama extends javax.swing.JFrame {
                                     }
                                             
                                             if(task3.equals("Sudah")&&task4.equals("")){
-                                                datajam=Sequel.cariIsi("select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) inner join dokter on pemeriksaan_ralan.nip = dokter.kd_dokter from pemeriksaan_ralan where pemeriksaan_ralan.no_rawat=?",rs.getString("no_rawat"));
-                                                if(datajam.equals("")){
-                                                    datajam=Sequel.cariIsi("select if(mutasi_berkas.diterima='0000-00-00 00:00:00','',mutasi_berkas.diterima) from mutasi_berkas where mutasi_berkas.no_rawat=?",rs.getString("no_rawat"));
-                                                }
+                                                datajam=Sequel.cariIsi("select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) inner join dokter on pemeriksaan_ralan.nip = dokter.kd_dokter from pemeriksaan_ralan where pemeriksaan_ralan.no_rawat=?",rs.getString("no_rawat"));                                                
                                                 if(!datajam.equals("")){
                                                     if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"4",datajam})==true){
                                                         parsedDate = dateFormat.parse(datajam);
