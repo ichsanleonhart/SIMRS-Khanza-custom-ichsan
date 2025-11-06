@@ -147,39 +147,32 @@ public class frmUtama extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButtonStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonStartActionPerformed
-         TeksArea.append("\n--- MEMULAI PROSES MANUAL ---\n");
+        TeksArea.append("\n--- MEMULAI PROSES MANUAL ---\n");
         
-        // Panggil metode wrapper baru kita yang sudah ada logging-nya
-        jalankanProsesDenganLogging();
-    }//GEN-LAST:event_jButtonStartActionPerformed
-
-     private void jalankanProsesDenganLogging() {
-        // 1. Ambil teks di TeksArea SEBELUM proses dimulai
         String teksSebelum = TeksArea.getText();
         
         try {
-            // 2. Jalankan kedua proses utama
+            // 2. Jalankan kedua proses
             jalankanPreSyncTask3(); 
             jalankanSequence();
         } finally {
-            // 3. Blok 'finally' ini akan SELALU berjalan, baik sukses maupun error
+            // 3. Pindahkan blok 'finally' (yang tadi dihapus) ke sini
             String teksSesudah = TeksArea.getText();
             String logBaru = "";
             
-            // 4. Cek apakah ada log baru untuk ditulis
             if (teksSesudah.length() > teksSebelum.length()) {
                 logBaru = teksSesudah.substring(teksSebelum.length());
             } else if (!teksSesudah.equals(teksSebelum)) {
-                // Ini terjadi jika TeksArea di-reset (misal jam 01:01)
                 logBaru = teksSesudah;
             }
             
-            // 5. Tulis ke file log jika ada log baru
+            // 4. Tulis ke file log
             if (logBaru != null && !logBaru.isEmpty()) {
                 tulisKeLogFile(logBaru);
             }
         }
-    }
+    }//GEN-LAST:event_jButtonStartActionPerformed
+
     
     /**
      * [HELPER BARU] Memanggil API /antrean/getlisttask untuk mengambil waktu riil BPJS.
@@ -436,9 +429,13 @@ public class frmUtama extends javax.swing.JFrame {
                     Tanggal1.setText(tanggalFormat.format(date)); 
                     Tanggal2.setText(tanggalFormat.format(date)); 
                 }
+                
+                // --- [MODIFIKASI] Timer sekarang hanya memanggil metode sequence utama ---
+                // if(detik.equals("01")&&((nilai_menit%5)==0)){  //timer berjalan setiap 5 menit
                    if(nilai_detik == 1 && nilai_menit == 1 && (nilai_jam % 2 == 0)){  //timer berjalan setiap 2 jam
-                    TeksArea.append("\n--- PROSES OTOMATIS DIMULAI ("+new SimpleDateFormat("HH:mm:ss").format(new Date())+") ---\n");                                        
-                    jalankanProsesDenganLogging();                
+                    TeksArea.append("\n--- PROSES OTOMATIS DIMULAI ("+new SimpleDateFormat("HH:mm:ss").format(new Date())+") ---\n");
+                    jalankanPreSyncTask3();  //tambahan untuk menambal task ID 3 yang hilang dari khanza
+                    jalankanSequence();
                 }
             }
         };
@@ -826,15 +823,15 @@ public class frmUtama extends javax.swing.JFrame {
                                         // --- [LOGIKA SELF-HEALING BARU] ---
                                         if (nameNode.path("code").asText().equals("208") && nameNode.path("message").asText().toLowerCase().contains("taskid=3 sudah ada")) {
                                             TeksArea.append("    -> SINKRONISASI: BPJS melaporkan Task 3 sudah ada. Memastikan data tersimpan lokal.\n");                                            
-                                            task3 = "Sudah";
-                                        } else if (nameNode.path("code").asText().equals("200")) {
-                                            // [PERBAIKAN] Jika sukses kirim, update variabel lokal
-                                            task3 = "Sudah";
+                                            task3 = "Sudah"; 
                                         } else if (nameNode.path("code").asText().equals("201")) {
                                             TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
                                             Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
                                                 rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
-                                            });                                                                                    
+                                            });                                            
+                                        } else if (nameNode.path("code").asText().equals("200")) {
+                                            // [PERBAIKAN #1] Jika sukses kirim, update variabel lokal
+                                            task3 = "Sudah";
                                         } else {
                                         // [PERBAIKAN] GAGAL SEMENTARA (Error 404, 500, 401, dll)
                                         TeksArea.append("    -> Respon tidak dikenal ("+nameNode.path("code").asText()+"), rollback task 3 agar dicoba lagi nanti.\n");                                        
@@ -1177,31 +1174,33 @@ public class frmUtama extends javax.swing.JFrame {
                                                 root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                 nameNode = root.path("metadata");
                                                 
-                                                // --- [AWAL PERBAIKAN LOGIKA ERROR & SINTAKS] ---
-                                                // 1. Tambahkan logging 201
+                                                // 1. Tambahkan logging 201 (Anda sudah punya ini di loop Batal JKN, tambahkan juga di loop lain)
                                                 if (nameNode.path("code").asText().equals("201")) {
-                                                    TeksArea.append("   -> Gagal kirim Task 99, mencatat error 201...\n");
+                                                    TeksArea.append("   -> Gagal kirim Task 99, mencatat error 201...\n");
                                                     Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201 Task 99", 3, new String[]{
                                                         rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
                                                     });
                                                 }
-
                                                 // 2. Ubah logika delete/update
                                                 if (nameNode.path("code").asText().equals("200")) {
                                                     // JIKA SUKSES, UPDATE STATUS DI TABEL JEMBATAN
-                                                    TeksArea.append("   -> Sinkronisasi status: Mengubah status di referensi_mobilejkn_bpjs menjadi 'Batal'.\n");
+                                                    TeksArea.append("   -> Sinkronisasi status: Mengubah status di referensi_mobilejkn_bpjs menjadi 'Batal'.\n");
                                                     Sequel.queryu2("update referensi_mobilejkn_bpjs set status='Batal' where no_rawat='"+rs.getString("no_rawat")+"'");
-                                                } else if (!nameNode.path("code").asText().equals("201")) {
+                                                } else if (!nameNode.path("code").asText().equals("201")) { 
                                                     // JIKA GAGAL (BUKAN 201), BARU LAKUKAN ROLLBACK
                                                     Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='99' and no_rawat='"+rs.getString("no_rawat")+"'");
-                                                }    
+                                                }
+                                                // Jika error 201, maka tidak di-delete dan tidak di-update. Ini sudah benar.
                                                 
+                                                else {
+                                                     // JIKA SUKSES, UPDATE STATUS DI TABEL JEMBATAN (Modifikasi Ichsan)
+                                                    TeksArea.append("    -> Sinkronisasi status: Mengubah status di referensi_mobilejkn_bpjs menjadi 'Batal'.\n");
+                                                    Sequel.queryu2("update referensi_mobilejkn_bpjs set status='Batal' where no_rawat='"+rs.getString("no_rawat")+"'");
+                                                }  
                                                 TeksArea.append("respon WS BPJS : "+nameNode.path("code").asText()+" "+nameNode.path("message").asText()+"\n");
-                                                }catch (Exception ex) {
-                                                System.out.println("Notifikasi Bridging : "+ex);                                                
-                                                TeksArea.append("G    -> Terjadi Exception ("+ex.getMessage()+"), rollback task 99 agar dicoba lagi nanti.\n");
-                                                Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='99' and no_rawat='" + rs.getString("no_rawat") + "'");
-                                                }   
+                                            }catch (Exception ex) {
+                                                System.out.println("Notifikasi Bridging : "+ex);
+                                            }
                                         }
                                     }
                                 }
@@ -1344,7 +1343,6 @@ public class frmUtama extends javax.swing.JFrame {
                                             }
                                         }catch (Exception ex) {
                                             System.out.println("Notifikasi Bridging : "+ex);
-                                             Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='"+rs.getString("no_rawat")+"'");
                                         }
 
 
@@ -1374,25 +1372,24 @@ public class frmUtama extends javax.swing.JFrame {
                                                     root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                     nameNode = root.path("metadata");
                                                     
-                                                    if (nameNode.path("code").asText().equals("208") && nameNode.path("message").asText().toLowerCase().contains("taskid=3 sudah ada")) {
-                                                        TeksArea.append("    -> SINKRONISASI: BPJS melaporkan Task 3 sudah ada. Memastikan data tersimpan lokal.\n");
+                                                    // [MITIGASI 1] Jika ditolak (201), catat error ke tabel baru.
+                                                       if (nameNode.path("code").asText().equals("201")) {
+                                                         TeksArea.append("    -> Gagal kirim, mencatat error 201...\n");
+                                                           Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
+                                                              rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText()
+                                                       });
+                                                        }
+                                                    
+                                                    if (nameNode.path("code").asText().equals("200")) {
+                                                        // [PERBAIKAN #1] Jika sukses kirim, update variabel lokal
                                                         task3 = "Sudah";
-                                                    } else if (nameNode.path("code").asText().equals("200")) {
-                                                        task3 = "Sudah";
-                                                    } else if (nameNode.path("code").asText().equals("201")) {
-                                                    // [PERBAIKAN] GAGAL PERMANEN (DATA INVALID)
-                                                        TeksArea.append("    -> Gagal kirim, mencatat error 201 (Data Invalid). Task 3 TIDAK AKAN dicoba lagi.\n");
-                                                        Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid_status201", "?,?,?", "Log Error 201", 3, new String[]{
-                                                        rs.getString("no_rawat"), nameNode.path("message").asText(), nameNode.path("code").asText() });                                                        
-                                                    } else {
-                                                    // [PERBAIKAN] GAGAL SEMENTARA (Error 404, 500, 401, dll)
-                                                        TeksArea.append("    -> Respon tidak dikenal ("+nameNode.path("code").asText()+"), rollback task 3 agar dicoba lagi nanti.\n");
-                                                    // [PERBAIKAN] 'delete' di-uncomment agar rollback berjalan. Ini BENAR.
+                                                    } else if (!nameNode.path("code").asText().equals("201")) { // Jangan rollback jika 201
+                                                        TeksArea.append("Terkena ERROR selain 201 \n Respon WS BPJS : "+nameNode.path("code").asText()+" "+nameNode.path("message").asText()+"\n");
                                                         Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='"+rs.getString("no_rawat")+"'");
-                                                            }                                                    
+                                                    }  
+                                                    TeksArea.append("respon WS BPJS : "+nameNode.path("code").asText()+" "+nameNode.path("message").asText()+"\n");
                                                 }catch (Exception ex) {
                                                     System.out.println("Notifikasi Bridging : "+ex);
-                                                    Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='"+rs.getString("no_rawat")+"'");
                                                 }
                                             }
                                         }
@@ -1444,7 +1441,7 @@ public class frmUtama extends javax.swing.JFrame {
                                                     }   
                                                     TeksArea.append("respon WS BPJS : "+nameNode.path("code").asText()+" "+nameNode.path("message").asText()+"\n");
                                                 }catch (Exception ex) {
-                                                    System.out.println("Notifikasi Bridging : "+ex);                                                    
+                                                    System.out.println("Notifikasi Bridging : "+ex);
                                                 }
                                             }
                                         }
@@ -1477,7 +1474,8 @@ public class frmUtama extends javax.swing.JFrame {
                                                     // Format kembali menjadi string dan jadikan sebagai datajam untuk Task 5.
                                                     datajam = dateFormat.format(kalender.getTime());
                                                 } catch (Exception ed) {
-                                                    System.out.println("Gagal mem-parsing atau memodifikasi waktu Task 4 untuk fallback Task 5: " + ed);                                                    
+                                                    System.out.println("Gagal mem-parsing atau memodifikasi waktu Task 4 untuk fallback Task 5: " + ed);
+                                                    // Jika terjadi error, datajam akan tetap kosong dan proses untuk pasien ini akan berhenti (aman).
                                                 }
                                             }                                       
                                 

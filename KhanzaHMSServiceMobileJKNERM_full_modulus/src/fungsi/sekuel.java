@@ -1647,5 +1647,44 @@ public final class sekuel {
             outFile.close();
         }
     }
+     // tambahan ICHSAN
+   /**
+     * Menjalankan query update, insert, atau delete dengan 2 parameter String.
+     * @param sql kueri
+     * @param param1 parameter 1
+     * @param param2 parameter 2
+     */
+    public void queryu2(String sql, String param1, String param2) {
+        try (PreparedStatement ps = connect.prepareStatement(sql)) {
+            ps.setString(1, param1);
+            ps.setString(2, param2);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Notifikasi : " + e);
+        }
+    }
+
+    /**
+     * Mengambil satu nilai String dari query dengan 2 parameter String.
+     * @param sql kueri
+     * @param param1 parameter 1
+     * @param param2 parameter 2
+     * @return nilai String dari kolom pertama
+     */
+    public String cariIsi(String sql, String param1, String param2) {
+        String isi = "";
+        try (PreparedStatement ps = connect.prepareStatement(sql)) {
+            ps.setString(1, param1);
+            ps.setString(2, param2);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    isi = rs.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Notifikasi : " + e);
+        }
+        return isi;
+    }
 
 }
