@@ -284,20 +284,20 @@ mysqli_close($konektor);
     <header class="header">
         <div class="logo">
             <img src="<?php echo $logo_path; ?>" alt="Logo">
-            <h1><?php echo htmlspecialchars($nama_instansi, ENT_QUOTES, 'UTF-8'); ?> (Aset)</h1>
+            <h1><?php echo htmlspecialchars($nama_instansi, ENT_QUOTES, 'UTF-8'); ?> <small style="width: 100%; text-align: right;">(App Pengajuan Aset)</small></h1>			
         </div>
-        <div class="user-info">
-            Selamat datang, <strong><?php echo htmlspecialchars($nama_login, ENT_QUOTES, 'UTF-8'); ?></strong>
-            (Role: <?php echo htmlspecialchars(ucfirst($role_login), ENT_QUOTES, 'UTF-8'); ?>)
-            <a href="index.php" style="color: #007bff;">Kembali ke Dashboard</a>
-            <a href="logout.php">Logout</a>
-        </div>
-    </header>
-
+        <div class="user-info" style="width: 100%; text-align: right;">
+            Selamat datang, 
+			<br><strong><?php echo htmlspecialchars($nama_login, ENT_QUOTES, 'UTF-8'); ?></strong>
+            <br>(Role: <?php echo htmlspecialchars(ucfirst($role_login), ENT_QUOTES, 'UTF-8'); ?>)
+            <br><a href="index.php" style="color: #007bff;">Kembali ke Dashboard</a>
+            <br><a href="logout.php">Logout</a>
+        </div>		
+    </header>	
     <div class="container">
         <div class="content">
             
-            <h2>Laporan & Analitik Pengajuan Aset</h2>
+            <h2>Laporan Pengajuan Aset</h2>
             
             <div class="filter-panel">
                 <form action="laporan.php" method="GET">
@@ -413,7 +413,7 @@ mysqli_close($konektor);
                         </tbody>
                     </table>
                 </div>
-            </div>y
+            </div>
 
         </div>
         <footer class="footer">

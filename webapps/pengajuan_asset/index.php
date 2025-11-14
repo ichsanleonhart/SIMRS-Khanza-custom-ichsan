@@ -81,7 +81,7 @@ mysqli_close($konektor);
     <title>Pengajuan Aset - <?php echo htmlspecialchars($nama_instansi, ENT_QUOTES, 'UTF-8'); ?></title>
     <link rel="icon" href="<?php echo $favicon_path; ?>" type="image/png">
     
-    <link rel="stylesheet" href="style.css?v=V.13">
+    <link rel="stylesheet" href="style.css?v=V.15">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css"/>
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
     
@@ -145,10 +145,17 @@ mysqli_close($konektor);
         .modal-close {
             color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;
         }
+		/*FIX UNTUK MENGATASI TABLE OFFSIDE KE KANAN*/
+		.menu-wrapper > .form-section,
+        .menu-wrapper-3col > .form-section {
+            min-width: 0;
+        }
+		
         /* Style untuk foto di form edit */
         .current-photo { margin-top: 5px; font-size: 0.9em; }
         .current-photo a { font-weight: bold; }
-        .current-photo p { margin: 0; color: #666; }
+        .current-photo p { margin: 0; color: #666; }	
+		
     </style>
 </head>
 <body>
@@ -156,13 +163,14 @@ mysqli_close($konektor);
     <header class="header">
         <div class="logo">
             <img src="<?php echo $logo_path; ?>" alt="Logo">
-            <h1><?php echo htmlspecialchars($nama_instansi, ENT_QUOTES, 'UTF-8'); ?> (Aset)</h1>
+            <h1><?php echo htmlspecialchars($nama_instansi, ENT_QUOTES, 'UTF-8'); ?> <small style="width: 100%; text-align: right;">(App Pengajuan Aset)</small></h1>			
         </div>
-        <div class="user-info">
-            Selamat datang, <strong><?php echo htmlspecialchars($nama_login, ENT_QUOTES, 'UTF-8'); ?></strong>
-            (Role: <?php echo htmlspecialchars(ucfirst($role_login), ENT_QUOTES, 'UTF-8'); ?>)
-            <?php if ($role_login == 'direktur' || $role_login == 'logum'): ?>
-                <a href="laporan.php" style="color: #007bff;">Lihat Laporan</a>
+        <div class="user-info" style="width: 100%; text-align: right;">
+            Selamat datang, 
+			<br> <strong><?php echo htmlspecialchars($nama_login, ENT_QUOTES, 'UTF-8'); ?></strong>
+            <br>(Akses Login: <?php echo htmlspecialchars(ucfirst($role_login), ENT_QUOTES, 'UTF-8'); ?>)
+            <br><?php if ($role_login == 'direktur' || $role_login == 'logum'): ?>
+            <br><a href="laporan.php" style="color: #007bff;">Lihat Laporan</a>
             <?php endif; ?>
             <a href="logout.php">Logout</a>
         </div>
@@ -511,7 +519,7 @@ mysqli_close($konektor);
                         
                         <hr style="margin: 20px 0;">
                         
-                        <h3>Tabel 1: Detail Status Approval Item</h3>
+                        <h3>Detail Status Approval Item</h3>
                         <div class="table-container">
                              <table class="approval-table">
                                 <thead>
@@ -564,7 +572,7 @@ mysqli_close($konektor);
                         
                         <hr style="margin: 20px 0;">
                         
-                        <h3>Tabel 2: Detail Realisasi Barang (Sisa)</h3>
+                        <h3>Detail Realisasi Barang (Sisa)</h3>
                          <div class="table-container">
                              <table>
                                 <thead>
@@ -862,7 +870,7 @@ mysqli_close($konektor);
                         
                         <hr style="margin: 20px 0;">
                         
-                        <h3>Tabel 1: Detail Status Approval Item</h3>
+                        <h3>Detail Status Approval Item</h3>
                         <div class="table-container">
                              <table class="approval-table">
                                 <thead>
@@ -915,7 +923,7 @@ mysqli_close($konektor);
                         
                         <hr style="margin: 20px 0;">
                         
-                        <h3>Tabel 2: Detail Realisasi Barang (Sisa)</h3>
+                        <h3>Detail Realisasi Barang (Sisa)</h3>
                          <div class="table-container">
                              <table>
                                 <thead>
@@ -976,7 +984,7 @@ mysqli_close($konektor);
                 ?>
                     <div class="menu-wrapper-3col">
                         <div class="form-section">
-                            <h3>Menu 1: Approval (Tugas)</h3>
+                            <h3>Approval Pengajuan Logum</h3>
                             <p>Daftar pengajuan baru yang menunggu approval Anda.</p>
                             <div class="table-container">
                                 <table>
@@ -1009,8 +1017,8 @@ mysqli_close($konektor);
                         </div>
                         
                         <div class="form-section">
-                            <h3>Menu 2: Validasi (Tugas)</h3>
-                            <p>Daftar item yang sudah disetujui Direktur dan menunggu divalidasi.</p>
+                            <h3>Validasi Pengajuan</h3>
+                            <p>Daftar item yang sudah disetujui Direktur dan menunggu divalidasi (kedatangan barang).</p>
                             <div class="table-container">
                                 <table>
                                     <thead>
@@ -1048,8 +1056,8 @@ mysqli_close($konektor);
                         </div>
                         
                         <div class="form-section">
-                            <h3>Menu 3: Riwayat (Bisa Edit)</h3>
-                            <p>Daftar pengajuan yang sudah Anda proses tapi belum dikunci oleh Direktur.</p>
+                            <h3>Riwayat Yang sudah diajukan</h3>
+                            <p>Daftar pengajuan yang sudah diproses tapi belum dikunci oleh Direktur.</p>
                             <div class="table-container">
                                 <table>
                                     <thead>
@@ -1403,7 +1411,7 @@ mysqli_close($konektor);
                 ?>
                     <div class="menu-wrapper">
                         <div class="form-section">
-                            <h3>Menu 1: Approval (Tugas)</h3>
+                            <h3>Approval Pengajuan Barang</h3>
                             <p>Daftar pengajuan yang menunggu approval final Anda.</p>
                             <div class="table-container">
                                 <table>
@@ -1439,8 +1447,8 @@ mysqli_close($konektor);
                         </div>
                         
                         <div class="form-section">
-                            <h3>Menu 2: Riwayat (Bisa Diedit)</h3>
-                            <p>Daftar pengajuan yang sudah Anda proses tapi belum divalidasi Logum.</p>
+                            <h3>Riwayat yang sudah disetujui (Bisa Diedit)</h3>
+                            <p>Daftar pengajuan yang sudah Anda proses tapi belum divalidasi kedatangan barang oleh Logum.</p>
                             <div class="table-container">
                                 <table>
                                     <thead>
@@ -1498,7 +1506,7 @@ mysqli_close($konektor);
                 <input type="hidden" id="modal_no_surat" name="no_surat_pengajuan">
                 <input type="hidden" id="modal_no_urut" name="no_urut_detail">
                 
-                <h2>Validasi Barang Datang</h2>
+                <h2>Validasi Kedatangan Barang</h2>
                 
                 <div class="form-group">
                     <label>Nama Barang:</label>
