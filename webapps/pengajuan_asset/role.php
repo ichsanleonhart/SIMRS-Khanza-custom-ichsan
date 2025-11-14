@@ -1,7 +1,7 @@
 <?php
 /*
  * ==================================================================
- * ROLE.PHP (REFACTORED - V.15 / Sesi 3)
+ * ROLE.PHP (REFACTORED - V.16)
  * ==================================================================
  * [UPDATE V.15 - Sesi 3]:
  * - Mengisi logika 'action=edit' untuk Role Pengaju.
@@ -397,7 +397,19 @@ if ($action === 'detail_lengkap' && isset($_GET['id'])) {
             mysqli_stmt_close($stmt_d);
             
             // Otorisasi sukses, ambil data log validasi (realisasi)
-            $sql_v = "SELECT * FROM pengajuan_asset_validasi WHERE no_surat_pengajuan = ? ORDER BY tanggal_validasi DESC";
+            // [PERBAIKAN V.16] Ambil juga harga_realisasi_satuan
+            $sql_v = "
+                SELECT 
+                    pengajuan_asset_validasi.no_urut_detail,
+                    pengajuan_asset_validasi.tanggal_validasi,
+                    pengajuan_asset_validasi.jumlah_datang,
+                    pengajuan_asset_validasi.harga_realisasi_satuan,
+                    pengajuan_asset_validasi.catatan_validasi,
+                    pengajuan_asset_validasi.foto_bukti_datang
+                FROM pengajuan_asset_validasi 
+                WHERE pengajuan_asset_validasi.no_surat_pengajuan = ? 
+                ORDER BY pengajuan_asset_validasi.tanggal_validasi DESC
+            ";
             $stmt_v = mysqli_prepare($konektor, $sql_v);
             mysqli_stmt_bind_param($stmt_v, "s", $no_surat);
             mysqli_stmt_execute($stmt_v);

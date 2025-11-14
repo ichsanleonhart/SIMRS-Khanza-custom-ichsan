@@ -1,15 +1,12 @@
 <?php
 /*
  * ==================================================================
- * INDEX.PHP (REFACTORED - V.15 / Sesi 3)
+ * INDEX.PHP (REFACTORED - V.16)
  * ==================================================================
  * Ini adalah file "View" utama.
  *
- * [UPDATE V.15 - Sesi 3]:
- * - Mengisi logika 'action=edit' untuk Role Pengaju.
- * - Menambahkan tombol 'Edit' di dashboard Pengaju.
- * - Menambahkan JavaScript untuk 'handleFormSubmit' (mencegah double click).
- * - Menambahkan perbaikan bug 'nilai 0' di JavaScript.
+ * [UPDATE V.16 ]:
+ * - menambahkan fitur realisasi rupiah. 
  *
  * Dibuat kompatibel dengan PHP 7.3
  */
@@ -572,7 +569,7 @@ mysqli_close($konektor);
                         
                         <hr style="margin: 20px 0;">
                         
-                        <h3>Detail Realisasi Barang (Sisa)</h3>
+                        <h3>Tabel 2: Detail Realisasi Barang (Sisa)</h3>
                          <div class="table-container">
                              <table>
                                 <thead>
@@ -582,27 +579,44 @@ mysqli_close($konektor);
                                         <th>Jml Disetujui</th>
                                         <th class="col-rp">Total Disetujui (Rp)</th>
                                         <th>Jml Sudah Datang</th>
-                                        <th class="col-rp">Total Datang (Rp)</th>
+                                        <th class="col-rp">Total Realisasi (Rp)</th>
                                         <th>Sisa</th>
                                         <th class="col-sisa-rp">Nilai Sisa (Rp)</th>
                                         <th>Detail Kedatangan</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($data_detail_items as $item): 
+                                    <?php 
+                                    // [PERBAIKAN V.16] Loop dimulai di sini
+                                    foreach ($data_detail_items as $item): 
                                         if ($item['status_approval_direktur'] != 'Disetujui') continue;
-                                        $harga_satuan = (double)$item['harga_satuan'];
-                                        $sisa = $item['jumlah_disetujui_direktur'] - $item['jumlah_sudah_divalidasi'];
+                                        
+                                        $harga_satuan_estimasi = (double)$item['harga_satuan'];
+                                        $total_disetujui_rp = $item['jumlah_disetujui_direktur'] * $harga_satuan_estimasi;
+                                        $sisa_qty = $item['jumlah_disetujui_direktur'] - $item['jumlah_sudah_divalidasi'];
+                                        
+                                        // [BARU V.16] Hitung total realisasi dari log validasi
+                                        $total_realisasi_rp = 0;
+                                        if (isset($data_detail_validasi[$item['no_urut']])) {
+                                            foreach ($data_detail_validasi[$item['no_urut']] as $log) {
+                                                $total_realisasi_rp += (double)$log['jumlah_datang'] * (double)$log['harga_realisasi_satuan'];
+                                            }
+                                        }
+                                        
+                                        // [BARU V.16] Hitung sisa rupiah berdasarkan realisasi
+                                        // Sisa Rupiah = (Jml Sisa Qty * Harga Estimasi) - (Selisih Biaya Realisasi)
+                                        // Opsi 1: Sisa Nilai = Total Disetujui - Total Realisasi
+                                        $sisa_rp = $total_disetujui_rp - $total_realisasi_rp;
                                     ?>
                                     <tr>
                                         <td><?php echo htmlspecialchars($item['no_urut'], ENT_QUOTES, 'UTF-8'); ?></td>
                                         <td><?php echo htmlspecialchars($item['nama_barang'], ENT_QUOTES, 'UTF-8'); ?></td>
                                         <td class="col-qty"><?php echo number_format($item['jumlah_disetujui_direktur'], 0, ',', '.'); ?></td>
-                                        <td class="col-rp"><?php echo number_format($item['jumlah_disetujui_direktur'] * $harga_satuan, 0, ',', '.'); ?></td>
+                                        <td class="col-rp"><?php echo number_format($total_disetujui_rp, 0, ',', '.'); ?></td>
                                         <td class="col-qty"><?php echo number_format($item['jumlah_sudah_divalidasi'], 0, ',', '.'); ?></td>
-                                        <td class="col-rp"><?php echo number_format($item['jumlah_sudah_divalidasi'] * $harga_satuan, 0, ',', '.'); ?></td>
-                                        <td class="col-qty" style="background-color: #fff3cd; font-weight: bold;"><?php echo number_format($sisa, 0, ',', '.'); ?></td>
-                                        <td class="col-sisa-rp"><?php echo number_format($sisa * $harga_satuan, 0, ',', '.'); ?></td>
+                                        <td class="col-rp"><?php echo number_format($total_realisasi_rp, 0, ',', '.'); ?></td>
+                                        <td class="col-qty" style="background-color: #fff3cd; font-weight: bold;"><?php echo number_format($sisa_qty, 0, ',', '.'); ?></td>
+                                        <td class="col-sisa-rp"><?php echo number_format($sisa_rp, 0, ',', '.'); ?></td>
                                         <td>
                                             <?php if (isset($data_detail_validasi[$item['no_urut']])): ?>
                                                 <ul style="margin: 0; padding-left: 20px;">
@@ -610,6 +624,7 @@ mysqli_close($konektor);
                                                     <li>
                                                         <?php echo htmlspecialchars(date('d-m-Y', strtotime($log['tanggal_validasi'])), ENT_QUOTES, 'UTF-8'); ?>: 
                                                         <b><?php echo number_format($log['jumlah_datang'], 0, ',', '.'); ?> pcs</b>
+                                                        @ Rp <?php echo number_format($log['harga_realisasi_satuan'], 0, ',', '.'); ?>
                                                         (<?php echo htmlspecialchars($log['catatan_validasi'], ENT_QUOTES, 'UTF-8'); ?>)
                                                         <?php if (!empty($log['foto_bukti_datang'])): ?>
                                                             <a data-fancybox="validasi-<?php echo $item['no_urut']; ?>" data-src="<?php echo htmlspecialchars($log['foto_bukti_datang'], ENT_QUOTES, 'UTF-8'); ?>" data-caption="<?php echo htmlspecialchars($log['catatan_validasi'], ENT_QUOTES, 'UTF-8'); ?>" href="javascript:;">[Foto]</a>
@@ -923,7 +938,7 @@ mysqli_close($konektor);
                         
                         <hr style="margin: 20px 0;">
                         
-                        <h3>Detail Realisasi Barang (Sisa)</h3>
+                        <h3>Tabel 2: Detail Realisasi Barang (Sisa)</h3>
                          <div class="table-container">
                              <table>
                                 <thead>
@@ -933,27 +948,44 @@ mysqli_close($konektor);
                                         <th>Jml Disetujui</th>
                                         <th class="col-rp">Total Disetujui (Rp)</th>
                                         <th>Jml Sudah Datang</th>
-                                        <th class="col-rp">Total Datang (Rp)</th>
+                                        <th class="col-rp">Total Realisasi (Rp)</th>
                                         <th>Sisa</th>
                                         <th class="col-sisa-rp">Nilai Sisa (Rp)</th>
                                         <th>Detail Kedatangan</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($data_detail_items as $item): 
+                                    <?php 
+                                    // [PERBAIKAN V.16] Loop dimulai di sini
+                                    foreach ($data_detail_items as $item): 
                                         if ($item['status_approval_direktur'] != 'Disetujui') continue;
-                                        $harga_satuan = (double)$item['harga_satuan'];
-                                        $sisa = $item['jumlah_disetujui_direktur'] - $item['jumlah_sudah_divalidasi'];
+                                        
+                                        $harga_satuan_estimasi = (double)$item['harga_satuan'];
+                                        $total_disetujui_rp = $item['jumlah_disetujui_direktur'] * $harga_satuan_estimasi;
+                                        $sisa_qty = $item['jumlah_disetujui_direktur'] - $item['jumlah_sudah_divalidasi'];
+                                        
+                                        // [BARU V.16] Hitung total realisasi dari log validasi
+                                        $total_realisasi_rp = 0;
+                                        if (isset($data_detail_validasi[$item['no_urut']])) {
+                                            foreach ($data_detail_validasi[$item['no_urut']] as $log) {
+                                                $total_realisasi_rp += (double)$log['jumlah_datang'] * (double)$log['harga_realisasi_satuan'];
+                                            }
+                                        }
+                                        
+                                        // [BARU V.16] Hitung sisa rupiah berdasarkan realisasi
+                                        // Sisa Rupiah = (Jml Sisa Qty * Harga Estimasi) - (Selisih Biaya Realisasi)
+                                        // Opsi 1: Sisa Nilai = Total Disetujui - Total Realisasi
+                                        $sisa_rp = $total_disetujui_rp - $total_realisasi_rp;
                                     ?>
                                     <tr>
                                         <td><?php echo htmlspecialchars($item['no_urut'], ENT_QUOTES, 'UTF-8'); ?></td>
                                         <td><?php echo htmlspecialchars($item['nama_barang'], ENT_QUOTES, 'UTF-8'); ?></td>
                                         <td class="col-qty"><?php echo number_format($item['jumlah_disetujui_direktur'], 0, ',', '.'); ?></td>
-                                        <td class="col-rp"><?php echo number_format($item['jumlah_disetujui_direktur'] * $harga_satuan, 0, ',', '.'); ?></td>
+                                        <td class="col-rp"><?php echo number_format($total_disetujui_rp, 0, ',', '.'); ?></td>
                                         <td class="col-qty"><?php echo number_format($item['jumlah_sudah_divalidasi'], 0, ',', '.'); ?></td>
-                                        <td class="col-rp"><?php echo number_format($item['jumlah_sudah_divalidasi'] * $harga_satuan, 0, ',', '.'); ?></td>
-                                        <td class="col-qty" style="background-color: #fff3cd; font-weight: bold;"><?php echo number_format($sisa, 0, ',', '.'); ?></td>
-                                        <td class="col-sisa-rp"><?php echo number_format($sisa * $harga_satuan, 0, ',', '.'); ?></td>
+                                        <td class="col-rp"><?php echo number_format($total_realisasi_rp, 0, ',', '.'); ?></td>
+                                        <td class="col-qty" style="background-color: #fff3cd; font-weight: bold;"><?php echo number_format($sisa_qty, 0, ',', '.'); ?></td>
+                                        <td class="col-sisa-rp"><?php echo number_format($sisa_rp, 0, ',', '.'); ?></td>
                                         <td>
                                             <?php if (isset($data_detail_validasi[$item['no_urut']])): ?>
                                                 <ul style="margin: 0; padding-left: 20px;">
@@ -961,6 +993,7 @@ mysqli_close($konektor);
                                                     <li>
                                                         <?php echo htmlspecialchars(date('d-m-Y', strtotime($log['tanggal_validasi'])), ENT_QUOTES, 'UTF-8'); ?>: 
                                                         <b><?php echo number_format($log['jumlah_datang'], 0, ',', '.'); ?> pcs</b>
+                                                        @ Rp <?php echo number_format($log['harga_realisasi_satuan'], 0, ',', '.'); ?>
                                                         (<?php echo htmlspecialchars($log['catatan_validasi'], ENT_QUOTES, 'UTF-8'); ?>)
                                                         <?php if (!empty($log['foto_bukti_datang'])): ?>
                                                             <a data-fancybox="validasi-<?php echo $item['no_urut']; ?>" data-src="<?php echo htmlspecialchars($log['foto_bukti_datang'], ENT_QUOTES, 'UTF-8'); ?>" data-caption="<?php echo htmlspecialchars($log['catatan_validasi'], ENT_QUOTES, 'UTF-8'); ?>" href="javascript:;">[Foto]</a>
@@ -1360,27 +1393,44 @@ mysqli_close($konektor);
                                         <th>Jml Disetujui</th>
                                         <th class="col-rp">Total Disetujui (Rp)</th>
                                         <th>Jml Sudah Datang</th>
-                                        <th class="col-rp">Total Datang (Rp)</th>
+                                        <th class="col-rp">Total Realisasi (Rp)</th>
                                         <th>Sisa</th>
                                         <th class="col-sisa-rp">Nilai Sisa (Rp)</th>
                                         <th>Detail Kedatangan</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($data_detail_items as $item): 
+                                    <?php 
+                                    // [PERBAIKAN V.16] Loop dimulai di sini
+                                    foreach ($data_detail_items as $item): 
                                         if ($item['status_approval_direktur'] != 'Disetujui') continue;
-                                        $harga_satuan = (double)$item['harga_satuan'];
-                                        $sisa = $item['jumlah_disetujui_direktur'] - $item['jumlah_sudah_divalidasi'];
+                                        
+                                        $harga_satuan_estimasi = (double)$item['harga_satuan'];
+                                        $total_disetujui_rp = $item['jumlah_disetujui_direktur'] * $harga_satuan_estimasi;
+                                        $sisa_qty = $item['jumlah_disetujui_direktur'] - $item['jumlah_sudah_divalidasi'];
+                                        
+                                        // [BARU V.16] Hitung total realisasi dari log validasi
+                                        $total_realisasi_rp = 0;
+                                        if (isset($data_detail_validasi[$item['no_urut']])) {
+                                            foreach ($data_detail_validasi[$item['no_urut']] as $log) {
+                                                $total_realisasi_rp += (double)$log['jumlah_datang'] * (double)$log['harga_realisasi_satuan'];
+                                            }
+                                        }
+                                        
+                                        // [BARU V.16] Hitung sisa rupiah berdasarkan realisasi
+                                        // Sisa Rupiah = (Jml Sisa Qty * Harga Estimasi) - (Selisih Biaya Realisasi)
+                                        // Opsi 1: Sisa Nilai = Total Disetujui - Total Realisasi
+                                        $sisa_rp = $total_disetujui_rp - $total_realisasi_rp;
                                     ?>
                                     <tr>
                                         <td><?php echo htmlspecialchars($item['no_urut'], ENT_QUOTES, 'UTF-8'); ?></td>
                                         <td><?php echo htmlspecialchars($item['nama_barang'], ENT_QUOTES, 'UTF-8'); ?></td>
                                         <td class="col-qty"><?php echo number_format($item['jumlah_disetujui_direktur'], 0, ',', '.'); ?></td>
-                                        <td class="col-rp"><?php echo number_format($item['jumlah_disetujui_direktur'] * $harga_satuan, 0, ',', '.'); ?></td>
+                                        <td class="col-rp"><?php echo number_format($total_disetujui_rp, 0, ',', '.'); ?></td>
                                         <td class="col-qty"><?php echo number_format($item['jumlah_sudah_divalidasi'], 0, ',', '.'); ?></td>
-                                        <td class="col-rp"><?php echo number_format($item['jumlah_sudah_divalidasi'] * $harga_satuan, 0, ',', '.'); ?></td>
-                                        <td class="col-qty" style="background-color: #fff3cd; font-weight: bold;"><?php echo number_format($sisa, 0, ',', '.'); ?></td>
-                                        <td class="col-sisa-rp"><?php echo number_format($sisa * $harga_satuan, 0, ',', '.'); ?></td>
+                                        <td class="col-rp"><?php echo number_format($total_realisasi_rp, 0, ',', '.'); ?></td>
+                                        <td class="col-qty" style="background-color: #fff3cd; font-weight: bold;"><?php echo number_format($sisa_qty, 0, ',', '.'); ?></td>
+                                        <td class="col-sisa-rp"><?php echo number_format($sisa_rp, 0, ',', '.'); ?></td>
                                         <td>
                                             <?php if (isset($data_detail_validasi[$item['no_urut']])): ?>
                                                 <ul style="margin: 0; padding-left: 20px;">
@@ -1388,6 +1438,7 @@ mysqli_close($konektor);
                                                     <li>
                                                         <?php echo htmlspecialchars(date('d-m-Y', strtotime($log['tanggal_validasi'])), ENT_QUOTES, 'UTF-8'); ?>: 
                                                         <b><?php echo number_format($log['jumlah_datang'], 0, ',', '.'); ?> pcs</b>
+                                                        @ Rp <?php echo number_format($log['harga_realisasi_satuan'], 0, ',', '.'); ?>
                                                         (<?php echo htmlspecialchars($log['catatan_validasi'], ENT_QUOTES, 'UTF-8'); ?>)
                                                         <?php if (!empty($log['foto_bukti_datang'])): ?>
                                                             <a data-fancybox="validasi-<?php echo $item['no_urut']; ?>" data-src="<?php echo htmlspecialchars($log['foto_bukti_datang'], ENT_QUOTES, 'UTF-8'); ?>" data-caption="<?php echo htmlspecialchars($log['catatan_validasi'], ENT_QUOTES, 'UTF-8'); ?>" href="javascript:;">[Foto]</a>
@@ -1506,30 +1557,40 @@ mysqli_close($konektor);
                 <input type="hidden" id="modal_no_surat" name="no_surat_pengajuan">
                 <input type="hidden" id="modal_no_urut" name="no_urut_detail">
                 
-                <h2>Validasi Kedatangan Barang</h2>
+                <h2>Validasi Barang Datang</h2>
                 
-                <div class="form-group">
-                    <label>Nama Barang:</label>
-                    <input type="text" id="modal_nama_barang" readonly style="background-color: #eee;">
-                </div>
-                <div class="form-group" style="margin-top: 10px;">
-                    <label>Sisa Belum Datang:</label>
-                    <input type="text" id="modal_sisa" readonly style="background-color: #eee;">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nama Barang:</label>
+                        <input type="text" id="modal_nama_barang" readonly style="background-color: #eee;">
+                    </div>
+                    <div class="form-group">
+                        <label>Sisa Belum Datang:</label>
+                        <input type="text" id="modal_sisa" readonly style="background-color: #eee;">
+                    </div>
                 </div>
                 
                 <hr>
                 
-                <div class="form-group" style="margin-top: 10px;">
-                    <label for="modal_jumlah_datang">Jumlah Datang Saat Ini:</label>
-                    <input type="text" id="modal_jumlah_datang" name="jumlah_datang" class="format-angka" required style="border-color: #007bff;">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="modal_jumlah_datang">Jumlah Datang:</label>
+                        <input type="text" id="modal_jumlah_datang" name="jumlah_datang" class="format-angka" required style="border-color: #007bff;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modal_harga_realisasi">Harga Realisasi Satuan (Rp):</label>
+                        <input type="text" id="modal_harga_realisasi" name="harga_realisasi_satuan" class="format-rupiah" value="0" required style="border-color: #28a745;">
+                    </div>
                 </div>
+                
                 <div class="form-group" style="margin-top: 10px;">
                     <label for="modal_catatan_validasi">Catatan Validasi (No. Faktur, dll):</label>
-                    <input type="text" id="modal_catatan_validasi" name="catatan_validasi">
+                    <input type="text" id="modal_catatan_validasi" name="catatan_validasi" style="width: 100%; box-sizing: border-box;">
                 </div>
                 <div class="form-group" style="margin-top: 10px;">
                     <label for="modal_foto_bukti">Upload Foto Bukti Datang (Opsional):</label>
-                    <input type="file" id="modal_foto_bukti" name="foto_bukti_datang">
+                    <input type="file" id="modal_foto_bukti" name="foto_bukti_datang" style="width: 100%; box-sizing: border-box;">
                 </div>
                 
                 <div class="action-buttons" style="margin-top: 20px;">
@@ -1758,6 +1819,14 @@ mysqli_close($konektor);
                 if(modalJumlah) {
                      modalJumlah.addEventListener('keyup', function(e) {
                         e.target.value = formatAngkaInput(e.target.value);
+                     });
+                }
+				
+				/* [BARU V.16] Tambahkan event listener untuk input harga realisasi */
+                var modalHarga = document.getElementById('modal_harga_realisasi');
+                if(modalHarga) {
+                     modalHarga.addEventListener('keyup', function(e) {
+                        e.target.value = formatRupiahInput(e.target.value);
                      });
                 }
             }

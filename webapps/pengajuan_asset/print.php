@@ -1,7 +1,7 @@
 <?php
 /*
  * ==================================================================
- * PRINT.PHP (PENGEMBANGAN APLIKASI PENGAJUAN ASET - TAHAP 4.C / V.12)
+ * PRINT.PHP (PENGEMBANGAN APLIKASI PENGAJUAN ASET - V.16)
  * ==================================================================
  * [UPDATE V.12 - PERBAIKAN BUG]:
  * - Mengubah query $sql_v (data validasi) dari INNER JOIN ke LEFT JOIN.
@@ -102,34 +102,33 @@ while($row_d = mysqli_fetch_assoc($result_d)) {
 mysqli_stmt_close($stmt_d);
 
 // Komentar: Query data validasi (jika tipe=validasi_barang)
-$validasi = [];
-if ($tipe_cetak == 'validasi_barang') {
-    // [PERBAIKAN V.12] Mengubah INNER JOIN menjadi LEFT JOIN
-    // Ini untuk memastikan data validasi tetap muncul
-    // meskipun NIK validator (user_validasi_logum) tidak ada di tabel 'pegawai'.
-    $sql_v = "
-        SELECT 
-            pengajuan_asset_validasi.no_urut_detail,
-            pengajuan_asset_validasi.tanggal_validasi,
-            pengajuan_asset_validasi.jumlah_datang,
-            pengajuan_asset_validasi.catatan_validasi,
-            pengajuan_asset_validasi.foto_bukti_datang,
-            pegawai.nama AS nama_validator
-        FROM pengajuan_asset_validasi
-        LEFT JOIN pegawai ON pengajuan_asset_validasi.user_validasi_logum = pegawai.nik
-        WHERE pengajuan_asset_validasi.no_surat_pengajuan = ?
-        ORDER BY pengajuan_asset_validasi.no_urut_detail, pengajuan_asset_validasi.tanggal_validasi
-    ";
-    $stmt_v = mysqli_prepare($konektor, $sql_v);
-    mysqli_stmt_bind_param($stmt_v, "s", $no_surat);
-    mysqli_stmt_execute($stmt_v);
-    $result_v = mysqli_stmt_get_result($stmt_v);
-    while($row_v = mysqli_fetch_assoc($result_v)) {
-        // Kelompokkan berdasarkan no_urut
-        $validasi[$row_v['no_urut_detail']][] = $row_v;
+    $validasi = [];
+    if ($tipe_cetak == 'validasi_barang') {
+        // [PERBAIKAN V.16] Menambahkan harga_realisasi_satuan
+        $sql_v = "
+            SELECT 
+                pengajuan_asset_validasi.no_urut_detail,
+                pengajuan_asset_validasi.tanggal_validasi,
+                pengajuan_asset_validasi.jumlah_datang,
+                pengajuan_asset_validasi.harga_realisasi_satuan,
+                pengajuan_asset_validasi.catatan_validasi,
+                pengajuan_asset_validasi.foto_bukti_datang,
+                pegawai.nama AS nama_validator
+            FROM pengajuan_asset_validasi
+            LEFT JOIN pegawai ON pengajuan_asset_validasi.user_validasi_logum = pegawai.nik
+            WHERE pengajuan_asset_validasi.no_surat_pengajuan = ?
+            ORDER BY pengajuan_asset_validasi.no_urut_detail, pengajuan_asset_validasi.tanggal_validasi
+        ";
+        $stmt_v = mysqli_prepare($konektor, $sql_v);
+        mysqli_stmt_bind_param($stmt_v, "s", $no_surat);
+        mysqli_stmt_execute($stmt_v);
+        $result_v = mysqli_stmt_get_result($stmt_v);
+        while($row_v = mysqli_fetch_assoc($result_v)) {
+            // Kelompokkan berdasarkan no_urut
+            $validasi[$row_v['no_urut_detail']][] = $row_v;
+        }
+        mysqli_stmt_close($stmt_v);
     }
-    mysqli_stmt_close($stmt_v);
-}
 
 // ==================================================================
 // LOGIKA PEMBUATAN QR CODE (SESUAI REQUEST)
@@ -420,15 +419,18 @@ switch ($tipe_cetak) {
                         <td class='text-center'>" . number_format($item['jumlah_disetujui_direktur'], 0, ',', '.') . "</td>
                         <td>";
                 
-                // [PERBAIKAN V.12] Pengecekan nama validator yang mungkin null
+                // Komentar: Cek apakah ada data validasi untuk item ini
                 if (isset($validasi[$item['no_urut']])) {
                     foreach ($validasi[$item['no_urut']] as $log_validasi) {
                         $nama_validator = !empty($log_validasi['nama_validator']) ? htmlspecialchars($log_validasi['nama_validator'], ENT_QUOTES, 'UTF-8') : '<i>(NIK tidak terdaftar)</i>';
                         
+                        // [PERBAIKAN V.16] Menambahkan tampilan harga realisasi
                         $konten_html .= "
                             <div style='border-bottom: 1px dashed #ccc; padding-bottom: 5px; margin-bottom: 5px;'>
                                 <b>Tgl:</b> " . htmlspecialchars(date('d-m-Y H:i', strtotime($log_validasi['tanggal_validasi'])), ENT_QUOTES, 'UTF-8') . "<br>
                                 <b>Jml:</b> " . number_format($log_validasi['jumlah_datang'], 0, ',', '.') . " pcs<br>
+                                <b>Harga Realisasi:</b> Rp " . number_format($log_validasi['harga_realisasi_satuan'], 0, ',', '.') . " /pcs<br>
+                                <b>Subtotal Realisasi:</b> Rp " . number_format($log_validasi['jumlah_datang'] * $log_validasi['harga_realisasi_satuan'], 0, ',', '.') . "<br>
                                 <b>Oleh:</b> " . $nama_validator . "<br>
                                 <b>Catatan:</b> " . htmlspecialchars($log_validasi['catatan_validasi'], ENT_QUOTES, 'UTF-8') . "<br>";
                         if (!empty($log_validasi['foto_bukti_datang'])) {

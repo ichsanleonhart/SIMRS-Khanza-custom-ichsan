@@ -1,10 +1,13 @@
 <?php
 /*
  * ==================================================================
- * SETUP.PHP (PENGEMBANGAN APLIKASI PENGAJUAN ASET - TAHAP 1)
+ * SETUP.PHP (PENGEMBANGAN APLIKASI PENGAJUAN ASET - V.16 FINAL)
  * ==================================================================
  * Jalankan file ini sekali saja untuk membuat 4 tabel yang dibutuhkan
- * Sesuai Rancang Bangun Final V.05.
+ * Sesuai Rancang Bangun Final V.16.
+ *
+ * [UPDATE V.16]:
+ * - Menambahkan kolom 'harga_realisasi_satuan' ke tabel 'pengajuan_asset_validasi'.
  *
  * Dibuat kompatibel dengan PHP 7.3
  */
@@ -18,7 +21,7 @@ if (!$konektor) {
     die("Koneksi gagal: " . mysqli_connect_error());
 }
 
-echo "<h3>Memulai proses setup database...</h3>";
+echo "<h3>Memulai proses setup database... (V.16)</h3>";
 
 // SQL 1: Tabel Header Pengajuan Aset (pengajuan_asset)
 $sql_tabel_1 = "
@@ -56,7 +59,7 @@ CREATE TABLE IF NOT EXISTS `pengajuan_asset` (
 ";
 
 if (mysqli_query($konektor, $sql_tabel_1)) {
-    echo "<p style='color:green;'>1. Tabel 'pengajuan_asset' berhasil dibuat atau sudah ada.</p>";
+    echo "<p style='color:green;'>1. Tabel 'pengajuan_asset' berhasil dicek/dibuat.</p>";
 } else {
     echo "<p style='color:red;'>Gagal membuat tabel 'pengajuan_asset': " . mysqli_error($konektor) . "</p>";
 }
@@ -90,7 +93,7 @@ CREATE TABLE IF NOT EXISTS `pengajuan_asset_detail` (
 ";
 
 if (mysqli_query($konektor, $sql_tabel_2)) {
-    echo "<p style='color:green;'>2. Tabel 'pengajuan_asset_detail' berhasil dibuat atau sudah ada.</p>";
+    echo "<p style='color:green;'>2. Tabel 'pengajuan_asset_detail' berhasil dicek/dibuat.</p>";
 } else {
     echo "<p style='color:red;'>Gagal membuat tabel 'pengajuan_asset_detail': " . mysqli_error($konektor) . "</p>";
 }
@@ -103,6 +106,10 @@ CREATE TABLE IF NOT EXISTS `pengajuan_asset_validasi` (
   `no_urut_detail` int(4) NOT NULL,
   `tanggal_validasi` datetime NOT NULL,
   `jumlah_datang` double NOT NULL,
+  
+  -- [BARU V.16] Kolom Harga Realisasi --
+  `harga_realisasi_satuan` double NOT NULL DEFAULT '0' COMMENT 'Harga satuan real saat barang datang',
+  
   `user_validasi_logum` varchar(20) NOT NULL,
   `catatan_validasi` varchar(150) DEFAULT NULL COMMENT 'Misal: Batch 1, No. Faktur Pembelian, dll',
   `foto_bukti_datang` varchar(500) DEFAULT NULL COMMENT 'Path ke foto bukti barang datang',
@@ -121,7 +128,7 @@ CREATE TABLE IF NOT EXISTS `pengajuan_asset_validasi` (
 ";
 
 if (mysqli_query($konektor, $sql_tabel_3)) {
-    echo "<p style='color:green;'>3. Tabel 'pengajuan_asset_validasi' berhasil dibuat atau sudah ada.</p>";
+    echo "<p style='color:green;'>3. Tabel 'pengajuan_asset_validasi' berhasil dicek/dibuat.</p>";
 } else {
     echo "<p style='color:red;'>Gagal membuat tabel 'pengajuan_asset_validasi': " . mysqli_error($konektor) . "</p>";
 }
@@ -144,10 +151,31 @@ CREATE TABLE IF NOT EXISTS `pengajuan_asset_verifikasi` (
 ";
 
 if (mysqli_query($konektor, $sql_tabel_4)) {
-    echo "<p style='color:green;'>4. Tabel 'pengajuan_asset_verifikasi' berhasil dibuat atau sudah ada.</p>";
+    echo "<p style='color:green;'>4. Tabel 'pengajuan_asset_verifikasi' berhasil dicek/dibuat.</p>";
 } else {
     echo "<p style='color:red;'>Gagal membuat tabel 'pengajuan_asset_verifikasi': " . mysqli_error($konektor) . "</p>";
 }
+
+// Komentar: [BARU V.16] Logika ALTER TABLE untuk deployment di server yang sudah ada
+echo "<hr>Mengecek pembaruan V.16 (ALTER TABLE)...<br>";
+$cek_kolom_sql = "SHOW COLUMNS FROM `pengajuan_asset_validasi` LIKE 'harga_realisasi_satuan'";
+$result_cek = mysqli_query($konektor, $cek_kolom_sql);
+if (mysqli_num_rows($result_cek) == 0) {
+    $alter_sql = "
+        ALTER TABLE `pengajuan_asset_validasi` 
+        ADD COLUMN `harga_realisasi_satuan` DOUBLE NOT NULL DEFAULT '0' 
+        COMMENT 'Harga satuan real saat barang datang' 
+        AFTER `jumlah_datang`;
+    ";
+    if (mysqli_query($konektor, $alter_sql)) {
+        echo "<p style='color:blue;'>Pembaruan V.16: Kolom 'harga_realisasi_satuan' berhasil ditambahkan ke 'pengajuan_asset_validasi'.</p>";
+    } else {
+        echo "<p style='color:red;'>Gagal menambahkan kolom V.16: " . mysqli_error($konektor) . "</p>";
+    }
+} else {
+    echo "<p style='color:gray;'>Pembaruan V.16: Kolom 'harga_realisasi_satuan' sudah ada.</p>";
+}
+
 
 echo "<h4>Setup Selesai.</h4>";
 echo "<p>Silakan **HAPUS** file 'setup.php' ini dari server Anda sekarang demi keamanan.</p>";

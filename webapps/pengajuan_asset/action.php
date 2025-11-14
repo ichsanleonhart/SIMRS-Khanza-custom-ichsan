@@ -1,7 +1,7 @@
 <?php
 /*
  * ==================================================================
- * ACTION.PHP (REFACTORED - V.15 / Sesi 3)
+ * ACTION.PHP (REFACTORED - V.16)
  * ==================================================================
  * [UPDATE V.15 - Sesi 3]:
  * - Mengimplementasikan logika 'case "update":' untuk Role Pengaju.
@@ -375,16 +375,32 @@ switch ($action) {
 
     case 'validate_logum':
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && validate_csrf($_POST['csrf_token']) && $role_login == 'logum') {
+            
             $no_surat_pengajuan = $_POST['no_surat_pengajuan'];
             $no_urut_detail = $_POST['no_urut_detail'];
             $jumlah_datang = (double)str_replace(['.', ','], ['', '.'], $_POST['jumlah_datang']);
             $catatan_validasi = $_POST['catatan_validasi'];
             $nik_validator = $nik_login;
+            
+            // [BARU V.16] Ambil data harga realisasi dari modal
+            $harga_realisasi = (double)str_replace(['.', ','], ['', '.'], $_POST['harga_realisasi_satuan']);
+
+            // Keamanan & Validasi
             if ($jumlah_datang <= 0) {
-                 $error_message = "Jumlah datang tidak boleh nol atau minus."; $action = 'view'; break;
+                 $error_message = "Jumlah datang tidak boleh nol atau minus.";
+                 $action = 'view';
+                 break;
             }
+            // [BARU V.16] Validasi harga realisasi
+            if ($harga_realisasi <= 0) {
+                 $error_message = "Harga realisasi tidak boleh nol atau minus. Masukkan harga satuan barang yang sebenarnya.";
+                 $action = 'view';
+                 break;
+            }
+
             mysqli_begin_transaction($konektor);
             try {
+                // 1. Ambil data sisa barang
                 $sql_get_sisa = "
                     SELECT pengajuan_asset_detail.jumlah_disetujui_direktur, pengajuan_asset_detail.jumlah_sudah_divalidasi 
                     FROM pengajuan_asset_detail 
@@ -396,11 +412,19 @@ switch ($action) {
                 $result_sisa = mysqli_stmt_get_result($stmt_sisa);
                 $row_sisa = mysqli_fetch_assoc($result_sisa);
                 mysqli_stmt_close($stmt_sisa);
-                if (!$row_sisa) { throw new Exception("Item barang tidak ditemukan."); }
-                $sisa = (double)$row_sisa['jumlah_disetujui_direktur'] - (double)$row_sisa['jumlah_sudah_divalidasi'];
-                if ($jumlah_datang > $sisa) {
-                     throw new Exception("Jumlah datang (" . $jumlah_datang . ") melebihi sisa barang (" . $sisa . ").");
+                
+                if (!$row_sisa) {
+                     throw new Exception("Item barang tidak ditemukan.");
                 }
+
+                $sisa = (double)$row_sisa['jumlah_disetujui_direktur'] - (double)$row_sisa['jumlah_sudah_divalidasi'];
+                
+                // 2. Cek apakah jumlah datang melebihi sisa
+                if ($jumlah_datang > $sisa) {
+                     throw new Exception("Jumlah datang (" . $jumlah_datang . ") melebihi sisa barang yang belum divalidasi (" . $sisa . ").");
+                }
+
+                // 3. Handle upload foto bukti
                 $path_foto_validasi = NULL;
                 $upload_validasi = handleFileUpload($_FILES['foto_bukti_datang'], $no_surat_pengajuan, PATH_FOTO_VALIDASI, 'VALIDASI_'.$no_urut_detail.'_');
                 if ($upload_validasi['success']) {
@@ -408,19 +432,30 @@ switch ($action) {
                 } elseif (isset($upload_validasi['error'])) {
                     throw new Exception($upload_validasi['error']);
                 }
+
+                // 4. Insert ke tabel log validasi (pengajuan_asset_validasi)
+                // [PERBAIKAN V.16] Menambahkan kolom harga_realisasi_satuan
                 $sql_insert_validasi = "
                     INSERT INTO pengajuan_asset_validasi 
                     (no_surat_pengajuan, no_urut_detail, tanggal_validasi, jumlah_datang, 
+                     harga_realisasi_satuan, 
                      user_validasi_logum, catatan_validasi, foto_bukti_datang)
-                    VALUES (?, ?, NOW(), ?, ?, ?, ?)
+                    VALUES (?, ?, NOW(), ?, ?, ?, ?, ?)
                 ";
                 $stmt_val = mysqli_prepare($konektor, $sql_insert_validasi);
-                mysqli_stmt_bind_param($stmt_val, "sidsss", 
+                // [PERBAIKAN V.16] Tipe diubah ke 'siddsss'
+                mysqli_stmt_bind_param($stmt_val, "siddsss", 
                     $no_surat_pengajuan, $no_urut_detail, $jumlah_datang, 
+                    $harga_realisasi,
                     $nik_validator, $catatan_validasi, $path_foto_validasi
                 );
-                if (!mysqli_stmt_execute($stmt_val)) { throw new Exception("Gagal menyimpan log validasi."); }
+                
+                if (!mysqli_stmt_execute($stmt_val)) {
+                    throw new Exception("Gagal menyimpan log validasi: " . mysqli_stmt_error($stmt_val));
+                }
                 mysqli_stmt_close($stmt_val);
+
+                // 5. Update jumlah total yang sudah divalidasi di tabel detail
                 $sql_update_detail = "
                     UPDATE pengajuan_asset_detail 
                     SET jumlah_sudah_divalidasi = jumlah_sudah_divalidasi + ?
@@ -428,14 +463,24 @@ switch ($action) {
                 ";
                 $stmt_update_det = mysqli_prepare($konektor, $sql_update_detail);
                 mysqli_stmt_bind_param($stmt_update_det, "dsi", $jumlah_datang, $no_surat_pengajuan, $no_urut_detail);
-                if (!mysqli_stmt_execute($stmt_update_det)) { throw new Exception("Gagal mengupdate total validasi."); }
+                
+                if (!mysqli_stmt_execute($stmt_update_det)) {
+                    throw new Exception("Gagal mengupdate total validasi: " . mysqli_stmt_error($stmt_update_det));
+                }
                 mysqli_stmt_close($stmt_update_det);
+                
+                // 6. Update status header pengadaan
                 updateStatusPengadaanHeader($konektor, $no_surat_pengajuan);
+                
+                // 7. Commit
                 mysqli_commit($konektor);
                 $success_message = "Validasi barang datang berhasil disimpan.";
                 $action = 'view';
+
             } catch (Exception $e) {
-                mysqli_rollback($konektor); $error_message = $e->getMessage(); $action = 'view';
+                mysqli_rollback($konektor);
+                $error_message = $e->getMessage();
+                $action = 'view';
             }
         }
         break;

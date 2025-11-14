@@ -1,13 +1,14 @@
 <?php
 /*
  * ==================================================================
- * LAPORAN.PHP (PENGEMBANGAN APLIKASI PENGAJUAN ASET - TAHAP 4.B)
+ * LAPORAN.PHP (PENGEMBANGAN APLIKASI PENGAJUAN ASET - TAHAP 4.B / V.16)
  * ==================================================================
- * File BARU untuk V.06 (Laporan & Analitik).
- * - Menampilkan dashboard untuk Direktur dan Logum.
- * - Menampilkan KPI (Key Performance Indicators).
- * - Menampilkan Grafik (via Chart.js) untuk biaya dan status.
- * - Menampilkan data tabel historis.
+ * [UPDATE V.16]:
+ * - Menambahkan kolom harga realisasi di modal validasi.
+ * - Mengubah query KPI untuk menghitung Realisasi & Selisih.
+ * - Mengubah query Grafik Batang untuk membandingkan Estimasi vs Realisasi.
+ * - Mengubah query Tabel Historis untuk menampilkan Total Realisasi.
+ * - Mengupdate JavaScript Chart.js untuk menampilkan 2 dataset (grouped bar).
  *
  * Dibuat kompatibel dengan PHP 7.3
  */
@@ -53,7 +54,6 @@ try {
 } catch (Exception $e) { /* Biarkan default */ }
 
 // Komentar: Logika Filter (Filter Tanggal, Status, PJ Logum)
-// Default: 30 hari terakhir
 $filter_tgl_awal = isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : date('Y-m-d', strtotime('-30 days'));
 $filter_tgl_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : date('Y-m-d');
 $filter_status = isset($_GET['status_pengadaan']) ? $_GET['status_pengadaan'] : 'Semua';
@@ -70,13 +70,11 @@ if ($filter_status != 'Semua') {
     $types .= "s";
 }
 
-// Komentar: Role Logum hanya bisa lihat data yang ditujukan padanya
 if ($role_login == 'logum') {
     $where_clause .= " AND pengajuan_asset.nik_pj = ? ";
     $params[] = $nik_login;
     $types .= "s";
 } 
-// Komentar: Role Direktur bisa filter berdasarkan PJ
 elseif ($role_login == 'direktur' && $filter_pj != 'Semua') {
     $where_clause .= " AND pengajuan_asset.nik_pj = ? ";
     $params[] = $filter_pj;
@@ -86,14 +84,23 @@ elseif ($role_login == 'direktur' && $filter_pj != 'Semua') {
 // 3. PENGAMBILAN DATA UNTUK LAPORAN
 // -----------------------------------------------------------------------------
 
-// Komentar: Query 1: Data untuk KPI (Key Performance Indicators)
-$kpi = ['total_surat' => 0, 'total_nilai_disetujui' => 0, 'total_selesai' => 0];
+// Komentar: [UPDATE V.16] Query 1: Data untuk KPI (Key Performance Indicators)
+// Kita perlu JOIN dengan subquery dari validasi untuk mendapatkan total realisasi
+$kpi = ['total_surat' => 0, 'total_nilai_disetujui' => 0, 'total_realisasi' => 0, 'selisih' => 0];
 $sql_kpi = "
     SELECT 
         COUNT(pengajuan_asset.no_surat_pengajuan) AS total_surat,
         SUM(pengajuan_asset.total_disetujui) AS total_nilai_disetujui,
-        SUM(CASE WHEN pengajuan_asset.status_pengadaan = 'Selesai Penuh' THEN 1 ELSE 0 END) AS total_selesai
+        SUM(IFNULL(v.total_realisasi, 0)) AS total_realisasi,
+        (SUM(pengajuan_asset.total_disetujui) - SUM(IFNULL(v.total_realisasi, 0))) AS selisih
     FROM pengajuan_asset
+    LEFT JOIN (
+        SELECT 
+            pengajuan_asset_validasi.no_surat_pengajuan, 
+            SUM(pengajuan_asset_validasi.jumlah_datang * pengajuan_asset_validasi.harga_realisasi_satuan) AS total_realisasi
+        FROM pengajuan_asset_validasi
+        GROUP BY pengajuan_asset_validasi.no_surat_pengajuan
+    ) AS v ON pengajuan_asset.no_surat_pengajuan = v.no_surat_pengajuan
     $where_clause
 ";
 $stmt_kpi = mysqli_prepare($konektor, $sql_kpi);
@@ -122,8 +129,7 @@ while($row_donut = mysqli_fetch_assoc($result_donut)) {
 }
 mysqli_stmt_close($stmt_donut);
 
-// Komentar: Query 3: Data untuk Grafik Batang (Biaya per Bulan - 12 Bulan Terakhir)
-// Catatan: Grafik ini MENGABAIKAN filter tanggal, tapi menghormati filter PJ/Role
+// Komentar: [UPDATE V.16] Query 3: Data untuk Grafik Batang (Estimasi vs Realisasi per Bulan)
 $where_clause_grafik = " WHERE pengajuan_asset.tanggal_pengajuan >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) ";
 $params_grafik = [];
 $types_grafik = "";
@@ -140,8 +146,16 @@ if ($role_login == 'logum') {
 $sql_bar = "
     SELECT 
         DATE_FORMAT(pengajuan_asset.tanggal_pengajuan, '%Y-%m') AS bulan_tahun,
-        SUM(pengajuan_asset.total_disetujui) AS total_biaya
+        SUM(pengajuan_asset.total_disetujui) AS total_estimasi,
+        SUM(IFNULL(v.total_realisasi, 0)) AS total_realisasi
     FROM pengajuan_asset
+    LEFT JOIN (
+        SELECT 
+            pengajuan_asset_validasi.no_surat_pengajuan, 
+            SUM(pengajuan_asset_validasi.jumlah_datang * pengajuan_asset_validasi.harga_realisasi_satuan) AS total_realisasi
+        FROM pengajuan_asset_validasi
+        GROUP BY pengajuan_asset_validasi.no_surat_pengajuan
+    ) AS v ON pengajuan_asset.no_surat_pengajuan = v.no_surat_pengajuan
     $where_clause_grafik
     GROUP BY DATE_FORMAT(pengajuan_asset.tanggal_pengajuan, '%Y-%m')
     ORDER BY bulan_tahun ASC
@@ -153,15 +167,16 @@ if (!empty($params_grafik)) {
 mysqli_stmt_execute($stmt_bar);
 $result_bar = mysqli_stmt_get_result($stmt_bar);
 $chart_labels_bar = [];
-$chart_data_bar = [];
+$chart_data_bar_estimasi = [];
+$chart_data_bar_realisasi = [];
 while($row_bar = mysqli_fetch_assoc($result_bar)) {
     $chart_labels_bar[] = $row_bar['bulan_tahun'];
-    $chart_data_bar[] = $row_bar['total_biaya'];
+    $chart_data_bar_estimasi[] = $row_bar['total_estimasi'];
+    $chart_data_bar_realisasi[] = $row_bar['total_realisasi'];
 }
 mysqli_stmt_close($stmt_bar);
 
-// Komentar: Query 4: Data untuk Tabel Detail Historis (Poin 1.2)
-// Di sini kita WAJIB pakai alias karena JOIN ke 'pegawai' 2x
+// Komentar: [UPDATE V.16] Query 4: Data untuk Tabel Detail Historis
 $list_laporan_detail = [];
 $sql_table = "
     SELECT 
@@ -170,12 +185,20 @@ $sql_table = "
         pegawai_pj.nama AS nama_pj_logum,
         pengajuan_asset.total_pengajuan,
         pengajuan_asset.total_disetujui,
+        IFNULL(v.total_realisasi, 0) AS total_realisasi, -- [BARU V.16]
         pengajuan_asset.status_approval_logum,
         pengajuan_asset.status_approval_direktur,
         pengajuan_asset.status_pengadaan
     FROM pengajuan_asset
     INNER JOIN pegawai AS pegawai_pengaju ON pengajuan_asset.nik = pegawai_pengaju.nik
     INNER JOIN pegawai AS pegawai_pj ON pengajuan_asset.nik_pj = pegawai_pj.nik
+    LEFT JOIN (
+        SELECT 
+            pengajuan_asset_validasi.no_surat_pengajuan, 
+            SUM(pengajuan_asset_validasi.jumlah_datang * pengajuan_asset_validasi.harga_realisasi_satuan) AS total_realisasi
+        FROM pengajuan_asset_validasi
+        GROUP BY pengajuan_asset_validasi.no_surat_pengajuan
+    ) AS v ON pengajuan_asset.no_surat_pengajuan = v.no_surat_pengajuan
     $where_clause
     ORDER BY pengajuan_asset.tanggal_pengajuan DESC
 ";
@@ -215,12 +238,12 @@ mysqli_close($konektor);
     <title>Laporan Pengajuan Aset - <?php echo htmlspecialchars($nama_instansi, ENT_QUOTES, 'UTF-8'); ?></title>
     <link rel="icon" href="<?php echo $favicon_path; ?>" type="image/png">
     
-    <link rel="stylesheet" href="style.css?v=4.A">
+    <link rel="stylesheet" href="style.css?v=V.16">
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
     <style>
-        /* [BARU] Style untuk KPI Box */
         .kpi-wrapper {
             display: grid;
+            /* [UPDATE V.16] 4 Kolom KPI */
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 25px;
@@ -235,11 +258,15 @@ mysqli_close($konektor);
         }
         .kpi-box.green { border-left-color: #28a745; }
         .kpi-box.orange { border-left-color: #ffc107; }
+        .kpi-box.red { border-left-color: #dc3545; }
         .kpi-box .value {
             font-size: 2.2rem;
             font-weight: bold;
             color: #333;
             margin: 0 0 5px 0;
+            /* [UPDATE V.16] Kecilkan font jika terlalu besar */
+            overflow-wrap: break-word;
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
         }
         .kpi-box .title {
             font-size: 0.9rem;
@@ -248,7 +275,6 @@ mysqli_close($konektor);
             text-transform: uppercase;
         }
         
-        /* [BARU] Style untuk Chart Wrapper */
         .chart-wrapper {
             display: grid;
             grid-template-columns: 1fr;
@@ -257,7 +283,7 @@ mysqli_close($konektor);
         }
         @media (min-width: 992px) {
             .chart-wrapper {
-                grid-template-columns: 2fr 1fr; /* Grafik batang lebih besar */
+                grid-template-columns: 2fr 1fr; 
             }
         }
         .chart-container {
@@ -269,7 +295,6 @@ mysqli_close($konektor);
         }
         .chart-container h3 { margin-top: 0; }
         
-        /* Style untuk status di tabel */
         .status-ditolak { background-color: #f8d7da !important; text-decoration: line-through; }
         .status-disetujui { background-color: #d4edda !important; }
         .status-menunggu { background-color: #fff3cd !important; }
@@ -284,20 +309,20 @@ mysqli_close($konektor);
     <header class="header">
         <div class="logo">
             <img src="<?php echo $logo_path; ?>" alt="Logo">
-            <h1><?php echo htmlspecialchars($nama_instansi, ENT_QUOTES, 'UTF-8'); ?> <small style="width: 100%; text-align: right;">(App Pengajuan Aset)</small></h1>			
+            <h1><?php echo htmlspecialchars($nama_instansi, ENT_QUOTES, 'UTF-8'); ?> (Aset)</h1>
         </div>
-        <div class="user-info" style="width: 100%; text-align: right;">
-            Selamat datang, 
-			<br><strong><?php echo htmlspecialchars($nama_login, ENT_QUOTES, 'UTF-8'); ?></strong>
-            <br>(Role: <?php echo htmlspecialchars(ucfirst($role_login), ENT_QUOTES, 'UTF-8'); ?>)
-            <br><a href="index.php" style="color: #007bff;">Kembali ke Dashboard</a>
-            <br><a href="logout.php">Logout</a>
-        </div>		
-    </header>	
+        <div class="user-info">
+            Selamat datang, <strong><?php echo htmlspecialchars($nama_login, ENT_QUOTES, 'UTF-8'); ?></strong>
+            (Role: <?php echo htmlspecialchars(ucfirst($role_login), ENT_QUOTES, 'UTF-8'); ?>)
+            <a href="index.php" style="color: #007bff;">Kembali ke Dashboard</a>
+            <a href="logout.php">Logout</a>
+        </div>
+    </header>
+
     <div class="container">
         <div class="content">
             
-            <h2>Laporan Pengajuan Aset</h2>
+            <h2>Laporan & Analitik Pengajuan Aset</h2>
             
             <div class="filter-panel">
                 <form action="laporan.php" method="GET">
@@ -320,8 +345,7 @@ mysqli_close($konektor);
                         </select>
                     </div>
                     
-                    <?php // Komentar: Filter PJ Logum hanya muncul untuk Direktur
-                    if ($role_login == 'direktur'): ?>
+                    <?php if ($role_login == 'direktur'): ?>
                     <div class="form-group">
                         <label for="pj_logum">PJ Logum:</label>
                         <select id="filter_pj" name="pj_logum">
@@ -345,19 +369,23 @@ mysqli_close($konektor);
                     <p class="value"><?php echo number_format($kpi['total_surat'], 0, ',', '.'); ?></p>
                     <p class="title">Total Surat Diajukan</p>
                 </div>
-                <div class="kpi-box green">
-                    <p class="value">Rp <?php echo number_format($kpi['total_nilai_disetujui'], 0, ',', '.'); ?></p>
-                    <p class="title">Total Nilai Disetujui</p>
-                </div>
                 <div class="kpi-box orange">
-                    <p class="value"><?php echo number_format($kpi['total_selesai'], 0, ',', '.'); ?></p>
-                    <p class="title">Total Pengadaan Selesai</p>
+                    <p class="value">Rp <?php echo number_format($kpi['total_nilai_disetujui'], 0, ',', '.'); ?></p>
+                    <p class="title">Total Nilai Disetujui (Estimasi)</p>
+                </div>
+                <div class="kpi-box green">
+                    <p class="value">Rp <?php echo number_format($kpi['total_realisasi'], 0, ',', '.'); ?></p>
+                    <p class="title">Total Nilai Realisasi (Aktual)</p>
+                </div>
+                <div class="kpi-box <?php echo ($kpi['selisih'] >= 0 ? 'green' : 'red'); ?>">
+                    <p class="value">Rp <?php echo number_format($kpi['selisih'], 0, ',', '.'); ?></p>
+                    <p class="title"><?php echo ($kpi['selisih'] >= 0 ? 'Penghematan' : 'Kelebihan Biaya'); ?></p>
                 </div>
             </div>
             
             <div class="chart-wrapper">
                 <div class="chart-container">
-                    <h3>Biaya Disetujui per Bulan (12 Bulan Terakhir)</h3>
+                    <h3>Estimasi vs Realisasi Biaya (12 Bulan Terakhir)</h3>
                     <canvas id="chartBiayaBulanan"></canvas>
                 </div>
                 <div class="chart-container">
@@ -378,8 +406,8 @@ mysqli_close($konektor);
                                 <th>Tanggal</th>
                                 <th>Pengaju</th>
                                 <th>PJ Logum</th>
-                                <th>Total Diajukan (Rp)</th>
                                 <th>Total Disetujui (Rp)</th>
+                                <th>Total Realisasi (Rp)</th>
                                 <th>Status Logum</th>
                                 <th>Status Direktur</th>
                                 <th>Status Pengadaan</th>
@@ -387,7 +415,9 @@ mysqli_close($konektor);
                         </thead>
                         <tbody>
                             <?php if (empty($list_laporan_detail)): ?>
-                                <tr><td colspan="10" style="text-align: center;">Tidak ada data untuk ditampilkan berdasarkan filter ini.</td></tr>
+                                <tr>
+                                    <td colspan="10" style="text-align: center;">Tidak ada data untuk ditampilkan berdasarkan filter ini.</td>
+                                </tr>
                             <?php else: ?>
                                 <?php foreach ($list_laporan_detail as $row): ?>
                                 <tr>
@@ -402,8 +432,8 @@ mysqli_close($konektor);
                                     <td><?php echo htmlspecialchars(date('d-m-Y', strtotime($row['tanggal_pengajuan'])), ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td><?php echo htmlspecialchars($row['nama_pengaju'], ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td><?php echo htmlspecialchars($row['nama_pj_logum'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                    <td style="text-align: right;"><?php echo number_format($row['total_pengajuan'], 0, ',', '.'); ?></td>
                                     <td style="text-align: right;"><?php echo number_format($row['total_disetujui'], 0, ',', '.'); ?></td>
+                                    <td style="text-align: right;"><?php echo number_format($row['total_realisasi'], 0, ',', '.'); ?></td>
                                     <td class="status-<?php echo strtolower(str_replace(' ', '-', $row['status_approval_logum'])); ?>"><?php echo htmlspecialchars($row['status_approval_logum'], ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td class="status-<?php echo strtolower(str_replace(' ', '-', $row['status_approval_direktur'])); ?>"><?php echo htmlspecialchars($row['status_approval_direktur'], ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td class="status-<?php echo strtolower(str_replace(' ', '-', $row['status_pengadaan'])); ?>"><?php echo htmlspecialchars($row['status_pengadaan'], ENT_QUOTES, 'UTF-8'); ?></td>
@@ -427,13 +457,15 @@ mysqli_close($konektor);
     <script>
         /*
          * ==================================================================
-         * JavaScript untuk Aplikasi Pengajuan Aset (Tahap 4.B Laporan)
+         * JavaScript untuk Aplikasi Pengajuan Aset (Tahap 4.B / V.16)
          * ==================================================================
          */
         
         // Komentar: Data dari PHP di-passing ke JavaScript
         var labelsBar = <?php echo json_encode($chart_labels_bar); ?>;
-        var dataBar = <?php echo json_encode($chart_data_bar); ?>;
+        // [UPDATE V.16] Data untuk 2 bar
+        var dataBarEstimasi = <?php echo json_encode($chart_data_bar_estimasi); ?>;
+        var dataBarRealisasi = <?php echo json_encode($chart_data_bar_realisasi); ?>;
         
         var labelsDonut = <?php echo json_encode($chart_labels_donut); ?>;
         var dataDonut = <?php echo json_encode($chart_data_donut); ?>;
@@ -448,24 +480,33 @@ mysqli_close($konektor);
                 new TomSelect("#filter_pj",{ create: false });
             }
 
-            // Komentar: 1. Membuat Grafik Batang (Biaya Bulanan)
+            // [UPDATE V.16] 1. Membuat Grafik Batang (Estimasi vs Realisasi)
             var ctxBar = document.getElementById('chartBiayaBulanan');
             if (ctxBar) {
                 new Chart(ctxBar.getContext('2d'), {
                     type: 'bar',
                     data: {
                         labels: labelsBar,
-                        datasets: [{
-                            label: 'Total Biaya Disetujui (Rp)',
-                            data: dataBar,
-                            backgroundColor: 'rgba(0, 123, 255, 0.7)',
-                            borderColor: 'rgba(0, 123, 255, 1)',
-                            borderWidth: 1
-                        }]
+                        datasets: [
+                            {
+                                label: 'Total Estimasi Disetujui (Rp)',
+                                data: dataBarEstimasi,
+                                backgroundColor: 'rgba(255, 193, 7, 0.7)', // Orange
+                                borderColor: 'rgba(255, 193, 7, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Total Realisasi (Rp)',
+                                data: dataBarRealisasi,
+                                backgroundColor: 'rgba(40, 167, 69, 0.7)', // Green
+                                borderColor: 'rgba(40, 167, 69, 1)',
+                                borderWidth: 1
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
-                        legend: { display: false },
+                        legend: { position: 'bottom' },
                         scales: {
                             yAxes: [{
                                 ticks: {
