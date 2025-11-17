@@ -3,7 +3,7 @@
 // Konfigurasi lokal untuk aplikasi antrean farmasi (Standalone)
 
 // Poin 9 (Kredensial)
-$host = "192.168.196.37";
+$host = "localhost";
 $user = "client";
 $pass = "epotoransu";
 $db = "sik_master"; 
