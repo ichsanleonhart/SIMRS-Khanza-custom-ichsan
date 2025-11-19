@@ -84,7 +84,7 @@
         </MenuItem>
         <MenuItem class="javax.swing.JMenuItem" name="kirim_medicationstatement">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Kirim Prosedur"/>
+            <Property name="text" type="java.lang.String" value="Kirim Aturan Pakai Obat (Medication Statement)"/>
             <Property name="actionCommand" type="java.lang.String" value="Kirim Aturan Pakai Obat (Medication Statement)"/>
           </Properties>
           <Events>

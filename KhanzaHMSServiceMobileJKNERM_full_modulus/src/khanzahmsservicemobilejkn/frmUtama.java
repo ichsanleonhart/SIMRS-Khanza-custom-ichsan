@@ -919,7 +919,7 @@ public class frmUtama extends javax.swing.JFrame {
                                 }catch (Exception ex) {
                                     System.out.println("Notifikasi Bridging : "+ex);
                                 }
-                                
+                                /*
                                 //Task ID 1 Non Mobile JKN                                
                                     datajam=Sequel.cariIsi("select if(concat(reg_periksa.tgl_registrasi,' ',reg_periksa.jam_reg)>concat('"+rs.getString("tgl_registrasi")+"',' ','"+rs2.getString("jam_mulai")+"'), "+
                                                         "STR_TO_DATE(DATE_ADD(concat(reg_periksa.tgl_registrasi,' ',reg_periksa.jam_reg), INTERVAL (CAST(RAND()*(240-180+1)+180 AS INT)) SECOND), '%Y-%m-%d %H:%i:%s'), "+
@@ -1000,7 +1000,7 @@ public class frmUtama extends javax.swing.JFrame {
                                                 System.out.println("Notifikasi Bridging : "+ex);
                                             }
                                         }
-                                    }                                
+                                    }       */                         
                                 
                                 //Task ID 3 Non Mobile JKN
                                 // Cek variabel task3
