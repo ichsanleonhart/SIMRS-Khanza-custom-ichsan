@@ -325,10 +325,40 @@ public class frmUtama extends javax.swing.JFrame {
                                                     TeksArea.append("respon WS BPJS : "+nameNode.path("code").asText()+" "+nameNode.path("message").asText()+"\n");
                                                 }
                                                 
+                                                /*
                                                 datajam=Sequel.cariIsi("select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) from pemeriksaan_ralan where pemeriksaan_ralan.no_rawat=?",rs.getString("no_rawat"));
                                                 if(datajam.equals("")){
                                                     datajam=Sequel.cariIsi("select if(mutasi_berkas.diterima='0000-00-00 00:00:00','',mutasi_berkas.diterima) from mutasi_berkas where mutasi_berkas.no_rawat=?",rs.getString("no_rawat"));
+                                                }*/
+                                                // --- MULAI KODE MODIFIKASI TASK ID 1 (RME VERSION) ---
+
+                                                // 1. Cek Asesmen Awal oleh Petugas/Perawat (Ideal untuk Task 1 - Waktu Tunggu)
+                                                // Kita cari di pemeriksaan_ralan yang nip-nya ada di table petugas
+                                                datajam = Sequel.cariIsi(
+                                                    "select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) " +
+                                                    "from pemeriksaan_ralan inner join petugas on pemeriksaan_ralan.nip = petugas.nip " +
+                                                    "where pemeriksaan_ralan.no_rawat=? " +
+                                                    "order by pemeriksaan_ralan.tgl_perawatan ASC, pemeriksaan_ralan.jam_rawat ASC LIMIT 1", 
+                                                    rs.getString("no_rawat")
+                                                );
+
+                                                // 2. Fallback: Jika Perawat belum input, Cek CPPT Dokter (Snippet dari Kamerad)
+                                                if(datajam.equals("")){
+                                                    datajam = Sequel.cariIsi(
+                                                        "select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) " +
+                                                        "from pemeriksaan_ralan inner join dokter on pemeriksaan_ralan.nip = dokter.kd_dokter " +
+                                                        "where pemeriksaan_ralan.no_rawat=? " +
+                                                        "order by pemeriksaan_ralan.tgl_perawatan ASC, pemeriksaan_ralan.jam_rawat ASC LIMIT 1", 
+                                                        rs.getString("no_rawat")
+                                                    );
                                                 }
+
+                                                // 3. Fallback Terakhir (Opsional): Jika tetap kosong, cek mutasi berkas (biarkan saja sbg cadangan)
+                                                if(datajam.equals("")){
+                                                    datajam=Sequel.cariIsi("select if(mutasi_berkas.diterima='0000-00-00 00:00:00','',mutasi_berkas.diterima) from mutasi_berkas where mutasi_berkas.no_rawat=?",rs.getString("no_rawat"));
+                                                }
+
+                                                // --- SELESAI KODE MODIFIKASI ---
                                                 if(!datajam.equals("")){
                                                     if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"1",datajam})==true){
                                                         parsedDate = dateFormat.parse(datajam);
