@@ -21,7 +21,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // 3. Detail Koneksi Database (Sesuai info Anda)
-define('DB_HOST', '192.168.196.103');
+define('DB_HOST', '192.168.0.2');
 define('DB_USER', 'client');        
 define('DB_PASS', 'epotoransu');    
 define('DB_NAME', 'sik_master');           

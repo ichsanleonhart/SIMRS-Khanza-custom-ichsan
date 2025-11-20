@@ -25,12 +25,23 @@ if (empty($shift_times)) {
 // Kueri ini akan kita gunakan berulang kali di dalam loop nanti
 $sql_ralan = "
     SELECT 
-        reg_periksa.no_rawat, nota_jalan.no_nota, pasien.nm_pasien, 
-        nota_jalan.tanggal, nota_jalan.jam, dokter.nm_dokter, penjab.png_jawab,
-        (SELECT SUM(billing.totalbiaya) 
-         FROM billing 
-         WHERE billing.no_rawat = reg_periksa.no_rawat 
-           AND billing.status NOT IN ('Potongan', 'Retur Obat')) AS total_rupiah
+        reg_periksa.no_rawat, 
+        nota_jalan.no_nota, 
+        pasien.nm_pasien, 
+        nota_jalan.tanggal, 
+        nota_jalan.jam, 
+        dokter.nm_dokter, 
+        penjab.png_jawab,
+        (SELECT SUM(
+            CASE 
+                WHEN billing.status = 'TtlRetur Obat' THEN (billing.totalbiaya * -1)
+                WHEN billing.status = 'TtlPotongan' THEN (billing.totalbiaya * -1)
+                ELSE billing.totalbiaya 
+            END
+        ) 
+        FROM billing 
+        WHERE billing.no_rawat = reg_periksa.no_rawat
+        ) AS total_rupiah
     FROM reg_periksa 
     INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis 
     INNER JOIN penjab ON reg_periksa.kd_pj = penjab.kd_pj 
@@ -38,7 +49,9 @@ $sql_ralan = "
     INNER JOIN nota_jalan ON reg_periksa.no_rawat = nota_jalan.no_rawat 
     WHERE reg_periksa.status_lanjut = 'Ralan' 
         AND reg_periksa.no_rawat NOT IN (
-            SELECT piutang_pasien.no_rawat FROM piutang_pasien WHERE piutang_pasien.no_rawat = reg_periksa.no_rawat
+            SELECT piutang_pasien.no_rawat 
+            FROM piutang_pasien 
+            WHERE piutang_pasien.no_rawat = reg_periksa.no_rawat
         ) 
         AND CONCAT(nota_jalan.tanggal, ' ', nota_jalan.jam) BETWEEN ? AND ? 
     ORDER BY nota_jalan.tanggal, nota_jalan.jam
@@ -47,12 +60,22 @@ $stmt_ralan = $koneksi->prepare($sql_ralan);
 
 $sql_ranap = "
     SELECT 
-        reg_periksa.no_rawat, nota_inap.no_nota, pasien.nm_pasien, 
-        nota_inap.tanggal, nota_inap.jam, penjab.png_jawab,
-        (SELECT SUM(billing.totalbiaya) 
-         FROM billing 
-         WHERE billing.no_rawat = reg_periksa.no_rawat 
-           AND billing.status NOT IN ('Potongan', 'Retur Obat')) AS total_rupiah,
+        reg_periksa.no_rawat, 
+        nota_inap.no_nota, 
+        pasien.nm_pasien, 
+        nota_inap.tanggal, 
+        nota_inap.jam, 
+        penjab.png_jawab,
+        (SELECT SUM(
+            CASE 
+                WHEN billing.status = 'TtlRetur Obat' THEN (billing.totalbiaya * -1)
+                WHEN billing.status = 'TtlPotongan' THEN (billing.totalbiaya * -1)
+                ELSE billing.totalbiaya 
+            END
+        ) 
+        FROM billing 
+        WHERE billing.no_rawat = reg_periksa.no_rawat
+        ) AS total_rupiah,
         COALESCE(
             (SELECT dokter.nm_dokter 
              FROM dpjp_ranap 
@@ -69,7 +92,9 @@ $sql_ranap = "
     INNER JOIN nota_inap ON reg_periksa.no_rawat = nota_inap.no_rawat 
     WHERE reg_periksa.status_lanjut = 'Ranap' 
         AND reg_periksa.no_rawat NOT IN (
-            SELECT piutang_pasien.no_rawat FROM piutang_pasien WHERE piutang_pasien.no_rawat = reg_periksa.no_rawat
+            SELECT piutang_pasien.no_rawat 
+            FROM piutang_pasien 
+            WHERE piutang_pasien.no_rawat = reg_periksa.no_rawat
         ) 
         AND CONCAT(nota_inap.tanggal, ' ', nota_inap.jam) BETWEEN ? AND ? 
     ORDER BY nota_inap.tanggal, nota_inap.jam

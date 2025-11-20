@@ -1,36 +1,45 @@
 <?php
 /*
- * File laporan_detail.php (PEROMBAKAN TOTAL V3)
- * Menampilkan Laporan Detail Agregat per Hari, lalu per Shift.
- * Menggunakan Accordion untuk manajemen data yang besar.
+ * File laporan_piutang_detail.php (PERBAIKAN ACTION FORM)
+ * Menampilkan tabel detail transaksi PIUTANG per shift.
+ * - Menggunakan Accordion & Table Responsive
+ * - Action Form sudah diarahkan ke file ini sendiri
  * PHP 7.3 compatible.
  */
 
-// 1. Set Judul & Sertakan Header (Otomatis koneksi & session check)
-$page_title = "Laporan Detail Transaksi per Shift";
+// 1. Set Judul & Sertakan Header
+$page_title = "Laporan Detail Piutang per Shift";
 require_once('includes/header.php');
 require_once('includes/functions.php');
 
-// 2. Ambil Parameter dari URL atau set default
+// 2. Ambil Parameter
 $tgl_awal = isset($_GET['tgl_awal']) ? htmlspecialchars($_GET['tgl_awal']) : date('Y-m-d');
 $tgl_akhir = isset($_GET['tgl_akhir']) ? htmlspecialchars($_GET['tgl_akhir']) : date('Y-m-d');
 
-// 3. Ambil Info Jam Shift
+// 3. Ambil Info Shift
 $shift_times = getShiftTimes($koneksi);
 if (empty($shift_times)) {
-    die("Error: Data 'closing_kasir' tidak ditemukan. Harap isi data shift.");
+    die("Error: Data 'closing_kasir' tidak ditemukan.");
 }
 
-// 4. Siapkan Kueri SQL (Sudah termasuk permintaan kolom tambahan Anda)
-// Kueri ini akan kita gunakan berulang kali di dalam loop nanti
+// 4. Siapkan Kueri SQL (KHUSUS PIUTANG)
+// Perbedaan utama dengan laporan_detail.php adalah penggunaan "IN" pada subquery piutang_pasien
+
+// Kueri Ralan (Piutang)
 $sql_ralan = "
     SELECT 
         reg_periksa.no_rawat, nota_jalan.no_nota, pasien.nm_pasien, 
         nota_jalan.tanggal, nota_jalan.jam, dokter.nm_dokter, penjab.png_jawab,
-        (SELECT SUM(billing.totalbiaya) 
-         FROM billing 
-         WHERE billing.no_rawat = reg_periksa.no_rawat 
-           AND billing.status NOT IN ('Potongan', 'Retur Obat')) AS total_rupiah
+        (SELECT SUM(
+            CASE 
+                WHEN billing.status = 'TtlRetur Obat' THEN (billing.totalbiaya * -1)
+                WHEN billing.status = 'TtlPotongan' THEN (billing.totalbiaya * -1)
+                ELSE billing.totalbiaya 
+            END
+				) 
+			FROM billing 
+			WHERE billing.no_rawat = reg_periksa.no_rawat
+				) AS total_rupiah
     FROM reg_periksa 
     INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis 
     INNER JOIN penjab ON reg_periksa.kd_pj = penjab.kd_pj 
@@ -45,14 +54,21 @@ $sql_ralan = "
 ";
 $stmt_ralan = $koneksi->prepare($sql_ralan);
 
+// Kueri Ranap (Piutang)
 $sql_ranap = "
     SELECT 
         reg_periksa.no_rawat, nota_inap.no_nota, pasien.nm_pasien, 
         nota_inap.tanggal, nota_inap.jam, penjab.png_jawab,
-        (SELECT SUM(billing.totalbiaya) 
-         FROM billing 
-         WHERE billing.no_rawat = reg_periksa.no_rawat 
-           AND billing.status NOT IN ('Potongan', 'Retur Obat')) AS total_rupiah,
+        (SELECT SUM(
+            CASE 
+                WHEN billing.status = 'TtlRetur Obat' THEN (billing.totalbiaya * -1)
+                WHEN billing.status = 'TtlPotongan' THEN (billing.totalbiaya * -1)
+                ELSE billing.totalbiaya 
+            END
+				) 
+			FROM billing 
+			WHERE billing.no_rawat = reg_periksa.no_rawat
+				) AS total_rupiah,
         COALESCE(
             (SELECT dokter.nm_dokter 
              FROM dpjp_ranap 
@@ -76,47 +92,36 @@ $sql_ranap = "
 ";
 $stmt_ranap = $koneksi->prepare($sql_ranap);
 
-$sql_pemasukan = "
-    SELECT pemasukan_lain.tanggal, pemasukan_lain.keterangan, pemasukan_lain.besar, 
-           kategori_pemasukan_lain.nama_kategori 
-    FROM pemasukan_lain 
-    INNER JOIN kategori_pemasukan_lain ON pemasukan_lain.kode_kategori = kategori_pemasukan_lain.kode_kategori 
-    WHERE pemasukan_lain.tanggal BETWEEN ? AND ? 
-    ORDER BY pemasukan_lain.tanggal
-";
+// Kueri Pemasukan Lain & Pengeluaran (Biasanya tunai, tapi kita biarkan ada untuk kelengkapan shift)
+$sql_pemasukan = "SELECT pemasukan_lain.tanggal, pemasukan_lain.keterangan, pemasukan_lain.besar, kategori_pemasukan_lain.nama_kategori FROM pemasukan_lain INNER JOIN kategori_pemasukan_lain ON pemasukan_lain.kode_kategori = kategori_pemasukan_lain.kode_kategori WHERE pemasukan_lain.tanggal BETWEEN ? AND ? ORDER BY pemasukan_lain.tanggal";
 $stmt_pemasukan = $koneksi->prepare($sql_pemasukan);
 
-$sql_pengeluaran = "
-    SELECT pengeluaran_harian.tanggal, pengeluaran_harian.keterangan, pengeluaran_harian.biaya, 
-           kategori_pengeluaran_harian.nama_kategori 
-    FROM pengeluaran_harian 
-    INNER JOIN kategori_pengeluaran_harian 
-        ON pengeluaran_harian.kode_kategori = kategori_pengeluaran_harian.kode_kategori 
-    WHERE pengeluaran_harian.tanggal BETWEEN ? AND ? 
-    ORDER BY pengeluaran_harian.tanggal
-";
+$sql_pengeluaran = "SELECT pengeluaran_harian.tanggal, pengeluaran_harian.keterangan, pengeluaran_harian.biaya, kategori_pengeluaran_harian.nama_kategori FROM pengeluaran_harian INNER JOIN kategori_pengeluaran_harian ON pengeluaran_harian.kode_kategori = kategori_pengeluaran_harian.kode_kategori WHERE pengeluaran_harian.tanggal BETWEEN ? AND ? ORDER BY pengeluaran_harian.tanggal";
 $stmt_pengeluaran = $koneksi->prepare($sql_pengeluaran);
 
-// Cek jika ada kueri yang gagal di-prepare
 if (!$stmt_ralan || !$stmt_ranap || !$stmt_pemasukan || !$stmt_pengeluaran) {
     die("Gagal mempersiapkan kueri SQL: " . $koneksi->error);
 }
 
-// 5. Siapkan loop tanggal
+// 5. Siapkan Loop Tanggal
 $start_date = new DateTime($tgl_awal);
 $end_date = new DateTime($tgl_akhir);
 $end_date->modify('+1 day'); 
-
 $interval = new DateInterval('P1D');
 $date_range = new DatePeriod($start_date, $interval, $end_date);
-
 ?>
 
 <div class="container-fluid">
     <div class="card shadow-sm mb-4">
         <div class="card-body">
-            <h5 class="card-title">Filter Laporan Detail</h5>
-            <form action="laporan_detail.php" method="GET" class="row g-3">
+            <h5 class="card-title text-warning">Filter Laporan Detail Piutang</h5>
+            
+            <!-- 
+            =============================================================================
+            PERBAIKAN DI SINI: Action diarahkan ke laporan_piutang_detail.php
+            =============================================================================
+            -->
+            <form action="laporan_piutang_detail.php" method="GET" class="row g-3">
                 <div class="col-md-5">
                     <label for="tgl_awal" class="form-label">Dari Tanggal</label>
                     <input type="date" class="form-control" name="tgl_awal" id="tgl_awal" value="<?php echo $tgl_awal; ?>">
@@ -126,16 +131,17 @@ $date_range = new DatePeriod($start_date, $interval, $end_date);
                     <input type="date" class="form-control" name="tgl_akhir" id="tgl_akhir" value="<?php echo $tgl_akhir; ?>">
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-success w-100">Tampilkan</button>
+                    <button type="submit" class="btn btn-warning w-100 text-white">Tampilkan</button>
                 </div>
             </form>
+            
         </div>
     </div>
 
     <div class="accordion" id="accordionTanggal">
         <?php
         if ($date_range):
-            $day_index = 0; // Untuk ID unik accordion
+            $day_index = 0; 
             foreach ($date_range as $tanggal):
                 $tanggal_str = $tanggal->format('Y-m-d');
                 $day_id = 'hari-' . $tanggal->format('Ymd');
@@ -151,35 +157,30 @@ $date_range = new DatePeriod($start_date, $interval, $end_date);
                     
                     <div class="accordion" id="accordionShift-<?php echo $day_id; ?>">
                         <?php
-                        $shift_index = 0; // Untuk ID unik accordion
+                        $shift_index = 0; 
                         foreach ($shift_times as $nama_shift => $times):
                             $shift_id = $day_id . '-shift-' . $shift_index;
-                            
-                            // Dapatkan rentang datetime (Start & End) untuk shift ini
                             $range = getShiftDateTimeRange($tanggal_str, $nama_shift, $shift_times);
                             
-                            // --- Ambil Data Ralan ---
+                            // Eksekusi Kueri
                             $stmt_ralan->bind_param("ss", $range['start'], $range['end']);
                             $stmt_ralan->execute();
                             $result_ralan = $stmt_ralan->get_result();
                             $data_ralan = [];
                             while ($row = $result_ralan->fetch_assoc()) $data_ralan[] = $row;
                             
-                            // --- Ambil Data Ranap ---
                             $stmt_ranap->bind_param("ss", $range['start'], $range['end']);
                             $stmt_ranap->execute();
                             $result_ranap = $stmt_ranap->get_result();
                             $data_ranap = [];
                             while ($row = $result_ranap->fetch_assoc()) $data_ranap[] = $row;
 
-                            // --- Ambil Data Pemasukan ---
                             $stmt_pemasukan->bind_param("ss", $range['start'], $range['end']);
                             $stmt_pemasukan->execute();
                             $result_pemasukan = $stmt_pemasukan->get_result();
                             $data_pemasukan = [];
                             while ($row = $result_pemasukan->fetch_assoc()) $data_pemasukan[] = $row;
 
-                            // --- Ambil Data Pengeluaran ---
                             $stmt_pengeluaran->bind_param("ss", $range['start'], $range['end']);
                             $stmt_pengeluaran->execute();
                             $result_pengeluaran = $stmt_pengeluaran->get_result();
@@ -206,6 +207,7 @@ $date_range = new DatePeriod($start_date, $interval, $end_date);
                                                 Ranap (<?php echo count($data_ranap); ?>)
                                             </button>
                                         </li>
+                                        <!-- Tab Lain & Keluar tetap ditampilkan meski biasanya kosong di piutang -->
                                         <li class="nav-item" role="presentation">
                                             <button class="nav-link" id="pemasukan-tab-<?php echo $shift_id; ?>" data-bs-toggle="tab" data-bs-target="#pemasukan-<?php echo $shift_id; ?>" type="button">
                                                 Lain (<?php echo count($data_pemasukan); ?>)
@@ -219,159 +221,157 @@ $date_range = new DatePeriod($start_date, $interval, $end_date);
                                     </ul>
                                     
                                     <div class="tab-content" id="tab-content-<?php echo $shift_id; ?>">
+                                        <!-- TAB RALAN -->
                                         <div class="tab-pane fade show active" id="ralan-<?php echo $shift_id; ?>" role="tabpanel">
                                             <div class="card-body border border-top-0 p-3">
-											<div class="table-responsive">
-                                                <table id="tabel-ralan-<?php echo $shift_id; ?>" class="table table-striped table-bordered table-sm" style="width:100%">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Waktu Bayar</th>
-                                                            <th>No. Rawat</th>
-                                                            <th>No. Nota</th>
-                                                            <th>Nama Pasien</th>
-                                                            <th>Cara Bayar</th>
-                                                            <th>Dokter</th>
-                                                            <th class="text-end">Total (Rp)</th>
-                                                            <th>Aksi</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <?php foreach ($data_ralan as $data): ?>
-                                                        <tr>
-                                                            <td><?php echo htmlspecialchars($data['tanggal'] . ' ' . $data['jam']); ?></td>
-                                                            <td><?php echo htmlspecialchars($data['no_rawat']); ?></td>
-                                                            <td><?php echo htmlspecialchars($data['no_nota']); ?></td>
-                                                            <td><?php echo htmlspecialchars($data['nm_pasien']); ?></td>
-                                                            <td><?php echo htmlspecialchars($data['png_jawab']); ?></td>
-                                                            <td><?php echo htmlspecialchars($data['nm_dokter']); ?></td>
-                                                            <td class="text-end"><?php echo formatRupiah($data['total_rupiah']); ?></td>
-                                                            <td>
-                                                                <button type-="button" class="btn btn-success btn-sm btn-lihat-nota" data-bs-toggle="modal" data-bs-target="#modalDetailNota" data-norawat="<?php echo htmlspecialchars($data['no_rawat']); ?>" data-nonota="<?php echo htmlspecialchars($data['no_nota']); ?>">
-                                                                    Nota
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                        <?php endforeach; ?>
-                                                    </tbody>
-                                                </table>
-											</div>
+                                                <div class="table-responsive">
+                                                    <table class="table table-striped table-bordered table-sm" style="width:100%">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Waktu Bayar</th>
+                                                                <th>No. Rawat</th>
+                                                                <th>No. Nota</th>
+                                                                <th>Nama Pasien</th>
+                                                                <th>Cara Bayar</th>
+                                                                <th>Dokter</th>
+                                                                <th class="text-end">Total (Rp)</th>
+                                                                <th>Aksi</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <?php foreach ($data_ralan as $data): ?>
+                                                            <tr>
+                                                                <td><?php echo htmlspecialchars($data['tanggal'] . ' ' . $data['jam']); ?></td>
+                                                                <td><?php echo htmlspecialchars($data['no_rawat']); ?></td>
+                                                                <td><?php echo htmlspecialchars($data['no_nota']); ?></td>
+                                                                <td><?php echo htmlspecialchars($data['nm_pasien']); ?></td>
+                                                                <td><?php echo htmlspecialchars($data['png_jawab']); ?></td>
+                                                                <td><?php echo htmlspecialchars($data['nm_dokter']); ?></td>
+                                                                <td class="text-end"><?php echo formatRupiah($data['total_rupiah']); ?></td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-success btn-sm btn-lihat-nota" 
+                                                                            data-bs-toggle="modal" 
+                                                                            data-bs-target="#modalDetailNota"
+                                                                            data-norawat="<?php echo htmlspecialchars($data['no_rawat']); ?>"
+                                                                            data-nonota="<?php echo htmlspecialchars($data['no_nota']); ?>">
+                                                                        Nota
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                            <?php endforeach; ?>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
+
+                                        <!-- TAB RANAP -->
                                         <div class="tab-pane fade" id="ranap-<?php echo $shift_id; ?>" role="tabpanel">
                                             <div class="card-body border border-top-0 p-3">
-											<div class="table-responsive">
-                                                <table id="tabel-ranap-<?php echo $shift_id; ?>" class="table table-striped table-bordered table-sm" style="width:100%">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Waktu Bayar</th>
-                                                            <th>No. Rawat</th>
-                                                            <th>No. Nota</th>
-                                                            <th>Nama Pasien</th>
-                                                            <th>Cara Bayar</th>
-                                                            <th>Dokter DPJP</th>
-                                                            <th class="text-end">Total (Rp)</th>
-                                                            <th>Aksi</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <?php foreach ($data_ranap as $data): ?>
-                                                        <tr>
-                                                            <td><?php echo htmlspecialchars($data['tanggal'] . ' ' . $data['jam']); ?></td>
-                                                            <td><?php echo htmlspecialchars($data['no_rawat']); ?></td>
-                                                            <td><?php echo htmlspecialchars($data['no_nota']); ?></td>
-                                                            <td><?php echo htmlspecialchars($data['nm_pasien']); ?></td>
-                                                            <td><?php echo htmlspecialchars($data['png_jawab']); ?></td>
-                                                            <td><?php echo htmlspecialchars($data['dokter_dpjp']); ?></td>
-                                                            <td class="text-end"><?php echo formatRupiah($data['total_rupiah']); ?></td>
-                                                            <td>
-                                                                <button type="button" class="btn btn-success btn-sm btn-lihat-nota" data-bs-toggle="modal" data-bs-target="#modalDetailNota" data-norawat="<?php echo htmlspecialchars($data['no_rawat']); ?>" data-nonota="<?php echo htmlspecialchars($data['no_nota']); ?>">
-                                                                    Nota
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                        <?php endforeach; ?>
-                                                    </tbody>
-                                                </table>
-											</div>
+                                                <div class="table-responsive">
+                                                    <table class="table table-striped table-bordered table-sm" style="width:100%">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Waktu Bayar</th>
+                                                                <th>No. Rawat</th>
+                                                                <th>No. Nota</th>
+                                                                <th>Nama Pasien</th>
+                                                                <th>Cara Bayar</th>
+                                                                <th>Dokter DPJP</th>
+                                                                <th class="text-end">Total (Rp)</th>
+                                                                <th>Aksi</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <?php foreach ($data_ranap as $data): ?>
+                                                            <tr>
+                                                                <td><?php echo htmlspecialchars($data['tanggal'] . ' ' . $data['jam']); ?></td>
+                                                                <td><?php echo htmlspecialchars($data['no_rawat']); ?></td>
+                                                                <td><?php echo htmlspecialchars($data['no_nota']); ?></td>
+                                                                <td><?php echo htmlspecialchars($data['nm_pasien']); ?></td>
+                                                                <td><?php echo htmlspecialchars($data['png_jawab']); ?></td>
+                                                                <td><?php echo htmlspecialchars($data['dokter_dpjp']); ?></td>
+                                                                <td class="text-end"><?php echo formatRupiah($data['total_rupiah']); ?></td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-success btn-sm btn-lihat-nota" 
+                                                                            data-bs-toggle="modal" 
+                                                                            data-bs-target="#modalDetailNota"
+                                                                            data-norawat="<?php echo htmlspecialchars($data['no_rawat']); ?>"
+                                                                            data-nonota="<?php echo htmlspecialchars($data['no_nota']); ?>">
+                                                                        Nota
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                            <?php endforeach; ?>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
+
+                                        <!-- TAB PEMASUKAN -->
                                         <div class="tab-pane fade" id="pemasukan-<?php echo $shift_id; ?>" role="tabpanel">
                                             <div class="card-body border border-top-0 p-3">
-											<div class="table-responsive">
-                                                <table id="tabel-pemasukan-<?php echo $shift_id; ?>" class="table table-striped table-bordered table-sm" style="width:100%">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Tanggal</th>
-                                                            <th>Kategori</th>
-                                                            <th>Keterangan</th>
-                                                            <th class="text-end">Besar</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <?php foreach ($data_pemasukan as $data): ?>
-                                                        <tr>
-                                                            <td><?php echo htmlspecialchars($data['tanggal']); ?></td>
-                                                            <td><?php echo htmlspecialchars($data['nama_kategori']); ?></td>
-                                                            <td><?php echo htmlspecialchars($data['keterangan']); ?></td>
-                                                            <td class="text-end"><?php echo formatRupiah($data['besar']); ?></td>
-                                                        </tr>
-                                                        <?php endforeach; ?>
-                                                    </tbody>
-                                                </table>
-											</div>
+                                                <div class="table-responsive">
+                                                    <table class="table table-striped table-bordered table-sm" style="width:100%">
+                                                        <thead><tr><th>Tanggal</th><th>Kategori</th><th>Keterangan</th><th class="text-end">Besar</th></tr></thead>
+                                                        <tbody>
+                                                            <?php foreach ($data_pemasukan as $data): ?>
+                                                            <tr>
+                                                                <td><?php echo htmlspecialchars($data['tanggal']); ?></td>
+                                                                <td><?php echo htmlspecialchars($data['nama_kategori']); ?></td>
+                                                                <td><?php echo htmlspecialchars($data['keterangan']); ?></td>
+                                                                <td class="text-end"><?php echo formatRupiah($data['besar']); ?></td>
+                                                            </tr>
+                                                            <?php endforeach; ?>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
+
+                                        <!-- TAB PENGELUARAN -->
                                         <div class="tab-pane fade" id="pengeluaran-<?php echo $shift_id; ?>" role="tabpanel">
                                             <div class="card-body border border-top-0 p-3">
-											<div class="table-responsive">
-                                                <table id="tabel-pengeluaran-<?php echo $shift_id; ?>" class="table table-striped table-bordered table-sm" style="width:100%">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Tanggal</th>
-                                                            <th>Kategori</th>
-                                                            <th>Keterangan</th>
-                                                            <th class="text-end">Biaya</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <?php foreach ($data_pengeluaran as $data): ?>
-                                                        <tr>
-                                                            <td><?php echo htmlspecialchars($data['tanggal']); ?></td>
-                                                            <td><?php echo htmlspecialchars($data['nama_kategori']); ?></td>
-                                                            <td><?php echo htmlspecialchars($data['keterangan']); ?></td>
-                                                            <td class="text-end"><?php echo formatRupiah($data['biaya']); ?></td>
-                                                        </tr>
-                                                        <?php endforeach; ?>
-                                                    </tbody>
-                                                </table>
-											</div>
+                                                <div class="table-responsive">
+                                                    <table class="table table-striped table-bordered table-sm" style="width:100%">
+                                                        <thead><tr><th>Tanggal</th><th>Kategori</th><th>Keterangan</th><th class="text-end">Biaya</th></tr></thead>
+                                                        <tbody>
+                                                            <?php foreach ($data_pengeluaran as $data): ?>
+                                                            <tr>
+                                                                <td><?php echo htmlspecialchars($data['tanggal']); ?></td>
+                                                                <td><?php echo htmlspecialchars($data['nama_kategori']); ?></td>
+                                                                <td><?php echo htmlspecialchars($data['keterangan']); ?></td>
+                                                                <td class="text-end"><?php echo formatRupiah($data['biaya']); ?></td>
+                                                            </tr>
+                                                            <?php endforeach; ?>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
+
                                     </div>
-                                    
                                 </div>
                             </div>
                         </div>
-                        <?php
-                            $shift_index++;
-                        endforeach; // Akhir loop shift
-                        ?>
-                    </div> </div>
+                        <?php $shift_index++; endforeach; ?>
+                    </div>
+                </div>
             </div>
         </div>
-        <?php
-                $day_index++;
-            endforeach; // Akhir loop tanggal
-        endif; // Akhir if date_range
-        
-        // Tutup semua statement yang disiapkan
-        $stmt_ralan->close();
-        $stmt_ranap->close();
-        $stmt_pemasukan->close();
-        $stmt_pengeluaran->close();
-        ?>
-    </div> </div>
+        <?php $day_index++; endforeach; endif; ?>
+    </div>
+    
+    <?php
+    $stmt_ralan->close();
+    $stmt_ranap->close();
+    $stmt_pemasukan->close();
+    $stmt_pengeluaran->close();
+    ?>
+</div>
 
+<!-- Modal "Lihat Nota" (Sama dengan laporan_detail.php) -->
 <div class="modal fade" id="modalDetailNota" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
@@ -380,9 +380,7 @@ $date_range = new DatePeriod($start_date, $interval, $end_date);
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div id="isi-nota-container">
-                    <p class="text-center">Memuat data...</p>
-                </div>
+                <div id="isi-nota-container"><p class="text-center">Memuat data...</p></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -391,14 +389,8 @@ $date_range = new DatePeriod($start_date, $interval, $end_date);
     </div>
 </div>
 
-
-<?php
-// Komentar: Kita 'inject' JavaScript ini ke footer.php
-ob_start(); 
-?>
+<?php ob_start(); ?>
 <script>
-    
-    // Fungsi helper JS untuk format Rupiah
     function formatRupiah(angka) {
         if(angka == null || isNaN(angka)) return "Rp 0";
         var number_string = angka.toString().replace(/[^,\d]/g, ''),
@@ -406,36 +398,25 @@ ob_start();
             sisa = split[0].length % 3,
             rupiah = split[0].substr(0, sisa),
             ribuan = split[0].substr(sisa).match(/\d{3}/gi);
-            
         if (ribuan) {
             separator = sisa ? '.' : '';
             rupiah += separator + ribuan.join('.');
         }
-        
         rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
         return 'Rp ' + rupiah;
     }
 
-    // Komentar: Jalankan skrip saat dokumen siap
     $(document).ready(function() {
-        
-        // Komentar: Inisialisasi DataTables
-        // Kita menggunakan selector class '.table' agar semua tabel
-        // yang ada di dalam accordion ini otomatis menjadi DataTables.
-        // Ini mungkin berat jika datanya puluhan ribu, tapi kita coba dulu.
         $('table').DataTable({ 
             "responsive": true, 
             "order": [[ 0, "desc" ]],
-            "pageLength": 10, // Batasi 10 baris per halaman
-            "lengthChange": false // Sembunyikan opsi "Show X entries"
+            "pageLength": 10, 
+            "lengthChange": false 
         });
         
-        
-        // Komentar: Event handler untuk tombol "Lihat Nota"
         $(document).on('click', '.btn-lihat-nota', function() {
             var noRawat = $(this).data('norawat');
             var noNota = $(this).data('nonota');
-            
             $("#nomor-nota-modal").text(noNota + " (No. Rawat: " + noRawat + ")");
             $("#isi-nota-container").html("<p class='text-center'>Memuat data...</p>");
 
@@ -445,7 +426,6 @@ ob_start();
                 data: { no_rawat: noRawat },
                 dataType: "json",
                 success: function(response) {
-                    // Komentar: Logika Tampilan Nota V2 (dari memori)
                     var html = '<table class="table table-sm">';
                     html += '<thead style="border-bottom: 2px solid #333;"><tr>';
                     html += '<th scope="col" style="width: 5%;">Ket.</th>';
@@ -495,15 +475,8 @@ ob_start();
                 }
             });
         });
-        
     });
 </script>
-<?php
-// Komentar: Simpan semua skrip JS di atas ke variabel $page_js
-$page_js = ob_get_clean();
-?>
+<?php $page_js = ob_get_clean(); ?>
 
-<?php
-// 8. Sertakan Footer
-require_once('includes/footer.php');
-?>
+<?php require_once('includes/footer.php'); ?>
