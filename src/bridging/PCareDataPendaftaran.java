@@ -3631,11 +3631,11 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                         }else if(ex.toString().contains("401")){
                             JOptionPane.showMessageDialog(null,"Username/Password salah. Lupa password? Wani piro...!");
                         }else if(ex.toString().contains("408")){
-                            JOptionPane.showMessageDialog(null,"Time out, hayati lelah baaaang...!");
+                            JOptionPane.showMessageDialog(null,"Time out, Jaringan internet lagi down, atau Server BPJS lagi flu");
                         }else if(ex.toString().contains("424")){
                             JOptionPane.showMessageDialog(null,"Ambil data masternya yang bener dong coy...!");
                         }else if(ex.toString().contains("412")){
-                            JOptionPane.showMessageDialog(null,"Tidak sesuai kondisi. Aku, kamu end...!");
+                            JOptionPane.showMessageDialog(null,"Tidak sesuai kondisi. Cek lagi pasien harus skriining dulu, data TTV harus benar yah. :')");
                         }else if(ex.toString().contains("204")){
                             JOptionPane.showMessageDialog(null,"Data tidak ditemukan...!");
                         }
@@ -9431,131 +9431,11 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                 JOptionPane.showMessageDialog(null,"Data tidak ditemukan...!");
             }
         }
-    }
-    
-    /* 
-	public boolean SimpanAntrianOnSite(){
-        statusantrean=true;
-        try {
-            ps=koneksi.prepareStatement(
-                "select reg_periksa.no_reg,reg_periksa.tgl_registrasi,reg_periksa.kd_dokter,reg_periksa.kd_poli,reg_periksa.stts_daftar,reg_periksa.no_rkm_medis,reg_periksa.kd_pj, "+
-                "pasien.no_ktp,pasien.no_tlp,pasien.no_peserta from reg_periksa inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis where reg_periksa.no_rawat=?");
-            try {
-                ps.setString(1,TNoRw.getText());
-                rs=ps.executeQuery();
-                while(rs.next()){
-                    date = LocalDate.parse(TanggalDaftar.getSelectedItem().toString(), formatter);
-                    dow = date.getDayOfWeek();
-                    day=dow.getValue();
-                    switch (day) {
-                        case 1:
-                            hari="AKHAD";
-                            break;
-                        case 2:
-                            hari="SENIN";
-                            break;
-                        case 3:
-                            hari="SELASA";
-                            break;
-                        case 4:
-                            hari="RABU";
-                            break;
-                        case 5:
-                            hari="KAMIS";
-                            break;
-                        case 6:
-                            hari="JUMAT";
-                            break;
-                        case 7:
-                            hari="SABTU";
-                            break;
-                        default:
-                            break;
-                    }
-                    pscari=koneksi.prepareStatement("select jadwal.jam_mulai,jadwal.jam_selesai from jadwal where jadwal.hari_kerja=? and jadwal.kd_dokter=? and jadwal.kd_poli=?");
-                    try {
-                        System.out.println("Tanggal : "+TanggalDaftar.getDate());
-                        System.out.println("Hari Urut : "+day);
-                        System.out.println("Hari : "+hari);
-                        System.out.println("Kode Dokter : "+rs.getString("kd_dokter"));
-                        System.out.println("Kode Poli : "+rs.getString("kd_poli"));
-                        pscari.setString(1,hari);
-                        pscari.setString(2,rs.getString("kd_dokter"));
-                        pscari.setString(3,rs.getString("kd_poli"));
-                        rscari=pscari.executeQuery();
-                        if(rscari.next()){
-                            headers = new HttpHeaders();
-                            headers.setContentType(MediaType.APPLICATION_JSON);
-                            headers.add("X-cons-id",koneksiDB.CONSIDMOBILEJKNFKTP());
-                            utc=String.valueOf(apimobilejkn.GetUTCdatetimeAsString());
-                            headers.add("X-timestamp",utc);            
-                            headers.add("X-signature",apimobilejkn.getHmac());
-                            headers.add("X-authorization","Basic "+Base64.encodeBase64String(otorisasi.getBytes()));
-                            headers.add("user_key",koneksiDB.USERKEYMOBILEJKNFKTP());
-                            requestJson ="{" +
-                                            "\"nomorkartu\": \""+rs.getString("no_peserta")+"\"," +
-                                            "\"nik\": \""+rs.getString("no_ktp")+"\"," +
-                                            "\"nohp\": \""+rs.getString("no_tlp")+"\"," +
-                                            "\"kodepoli\": \""+KdPoliTujuan.getText()+"\"," +
-                                            "\"namapoli\": \""+NmPoliTujuan.getText()+"\"," +
-                                            "\"norm\": \""+rs.getString("no_rkm_medis")+"\"," +
-                                            "\"tanggalperiksa\": \""+rs.getString("tgl_registrasi")+"\"," +
-                                            "\"kodedokter\": "+KdTenagaMedis.getText()+"," +
-                                            "\"namadokter\": \""+NmTenagaMedis.getText()+"\"," +
-                                            "\"jampraktek\": \""+rscari.getString("jam_mulai").substring(0,5)+"-"+rscari.getString("jam_selesai").substring(0,5)+"\"," +
-                                            "\"nomorantrean\": \""+rs.getString("no_reg")+"\"," +
-                                            "\"angkaantrean\": "+Integer.parseInt(rs.getString("no_reg"))+"," +
-                                            "\"keterangan\": \"Peserta harap 30 menit lebih awal guna pencatatan administrasi.\"" +
-                                        "}";
-                            System.out.println("JSON : "+requestJson+"\n");
-                            requestEntity = new HttpEntity(requestJson,headers);
-                            System.out.println("URL : "+koneksiDB.URLMOBILEJKNFKTP()+"/antrean/add");
-                            root = mapper.readTree(apimobilejkn.getRest().exchange(koneksiDB.URLMOBILEJKNFKTP()+"/antrean/add", HttpMethod.POST, requestEntity, String.class).getBody());
-                            nameNode = root.path("metadata"); 
-                            System.out.println("respon WS BPJS Kirim Pakai NoRujukan : "+nameNode.path("code").asText()+" "+nameNode.path("message").asText()+"\n");
-                            if(nameNode.path("code").asText().equals("201")){
-                                statusantrean=false;
-                                if(nameNode.path("message").asText().toLowerCase().contains("sudah terdaftar")){
-                                    statusantrean=true;
-                                }
-                            }
-                        }else{
-                            statusantrean=false;
-                            System.out.println("Jadwal tidak ditemukan...!");
-                        }
-                    } catch (Exception ex) {
-                        statusantrean=false;
-                        System.out.println("Notif : "+ex);
-                    } finally{
-                        if(rscari!=null){
-                            rscari.close();
-                        }
-                        if(pscari!=null){
-                            pscari.close();
-                        }
-                    }
-                }
-            } catch (Exception ex) {
-                statusantrean=false;
-                System.out.println("Notif : "+ex);
-            } finally{
-                if(rs!=null){
-                    rs.close();
-                }
-                if(ps!=null){
-                    ps.close();
-                }
-            }
-        }catch (Exception ex) {
-            statusantrean=false;
-            System.out.println("Notif : "+ex);
-        }
-        return statusantrean;
-    } */
+    }  
 	
 	public boolean SimpanAntrianOnSite(){
         statusantrean=true;
-        System.out.println("\n========== MULAI BRIDGING ANTREAN (DATA REAL SANITIZED) ==========");
+        System.out.println("\n========== MULAI BRIDGING ANTREAN (DATA REAL SANITIZED + MAPPING) ==========");
         try {
             ps=koneksi.prepareStatement(
                 "select reg_periksa.no_reg,reg_periksa.tgl_registrasi,reg_periksa.kd_dokter,reg_periksa.kd_poli,reg_periksa.stts_daftar,reg_periksa.no_rkm_medis,reg_periksa.kd_pj, "+
@@ -9587,7 +9467,6 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                         rscari=pscari.executeQuery();
                         
                         if(rscari.next()){
-                            // 2. PERSIAPAN HEADER
                             headers = new HttpHeaders();
                             headers.setContentType(MediaType.APPLICATION_JSON);
                             headers.add("X-cons-id",koneksiDB.CONSIDMOBILEJKNFKTP());
@@ -9597,37 +9476,79 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                             headers.add("X-authorization","Basic "+Base64.encodeBase64String(otorisasi.getBytes()));
                             headers.add("user_key",koneksiDB.USERKEYMOBILEJKNFKTP());
 
-                            // 3. SANITASI DATA (PENTING!)
-                            // Mencegah error spasi dan format tipe data
+                            // 2. MAPPING DATA (WAJIB!)
+                            // Ambil Kode Dokter BPJS dari tabel mapping, bukan dari textbox inputan RS
+                            String kodeDokterBPJS = "";
+                            try {
+                                PreparedStatement psDok = koneksi.prepareStatement(
+                                    "SELECT kd_dokter_pcare FROM maping_dokter_pcare WHERE kd_dokter=?");
+                                psDok.setString(1, rs.getString("kd_dokter")); // Pakai kd_dokter dari reg_periksa
+                                ResultSet rsDok = psDok.executeQuery();
+                                if(rsDok.next()){
+                                    kodeDokterBPJS = rsDok.getString("kd_dokter_pcare");
+                                } else {
+                                    // Fallback jika mapping tidak ada (berbahaya, tapi untuk safety crash)
+                                    kodeDokterBPJS = KdTenagaMedis.getText();
+                                    System.out.println("WARNING: Mapping Dokter Tidak Ditemukan! Menggunakan Kode RS.");
+                                }
+                                rsDok.close();
+                                psDok.close();
+                            } catch(Exception e){
+                                System.out.println("Error Mapping Dokter: " + e);
+                                kodeDokterBPJS = KdTenagaMedis.getText();
+                            }
+
+                            // Ambil Kode Poli BPJS dari tabel mapping
+                            String kodePoliBPJS = "";
+                            try {
+                                PreparedStatement psPoli = koneksi.prepareStatement(
+                                    "SELECT kd_poli_pcare FROM maping_poliklinik_pcare WHERE kd_poli_rs=?");
+                                psPoli.setString(1, rs.getString("kd_poli")); // Pakai kd_poli dari reg_periksa
+                                ResultSet rsPoli = psPoli.executeQuery();
+                                if(rsPoli.next()){
+                                    kodePoliBPJS = rsPoli.getString("kd_poli_pcare");
+                                } else {
+                                    kodePoliBPJS = KdPoliTujuan.getText();
+                                    System.out.println("WARNING: Mapping Poli Tidak Ditemukan! Menggunakan Kode RS.");
+                                }
+                                rsPoli.close();
+                                psPoli.close();
+                            } catch(Exception e){
+                                System.out.println("Error Mapping Poli: " + e);
+                                kodePoliBPJS = KdPoliTujuan.getText();
+                            }
+
+                            // 3. SANITASI DATA & PARSING
                             String jamPraktek = rscari.getString("jam_mulai").substring(0,5)+"-"+rscari.getString("jam_selesai").substring(0,5);
                             int kodeDokterInt = 0;
                             int angkaAntreanInt = 0;
                             
                             try {
-                                // Paksa jadi Integer agar JSON tidak pakai kutip (Sesuai Postman)
-                                kodeDokterInt = Integer.parseInt(KdTenagaMedis.getText().trim()); 
-                                angkaAntreanInt = Integer.parseInt(rs.getString("no_reg").trim());
+                                // Bersihkan dari karakter non-angka
+                                String cleanKodeDokter = kodeDokterBPJS.replaceAll("[^0-9]", "");
+                                kodeDokterInt = Integer.parseInt(cleanKodeDokter); 
+                                
+                                String cleanNoReg = rs.getString("no_reg").replaceAll("[^0-9]", "");
+                                angkaAntreanInt = Integer.parseInt(cleanNoReg);
                             } catch (Exception e) {
                                 System.out.println("Error Parsing Integer: " + e);
-                                kodeDokterInt = 0; // Default saftey
                             }
 
-                            // 4. PENYUSUNAN JSON (VERSI RAPIH & BERSIH)
-                            // Perhatikan: kodedokter dan angkaantrean TIDAK diapit tanda kutip \"
-                            requestJson = "{" +
+                            // 4. PENYUSUNAN JSON (Menggunakan Variabel Mapping)
+                            requestJson ="{" +
                                             "\"nomorkartu\": \""+rs.getString("no_peserta").trim()+"\"," +
                                             "\"nik\": \""+rs.getString("no_ktp").trim()+"\"," +
                                             "\"nohp\": \""+rs.getString("no_tlp").trim()+"\"," +
-                                            "\"kodepoli\": \""+KdPoliTujuan.getText().trim()+"\"," +
+                                            "\"kodepoli\": \""+kodePoliBPJS.trim()+"\"," +      // Pakai Hasil Mapping
                                             "\"namapoli\": \""+NmPoliTujuan.getText().trim()+"\"," +
                                             "\"norm\": \""+rs.getString("no_rkm_medis").trim()+"\"," +
                                             "\"tanggalperiksa\": \""+rs.getString("tgl_registrasi").trim()+"\"," +
-                                            "\"kodedokter\": "+kodeDokterInt+"," +       // Integer (Tanpa Kutip)
+                                            "\"kodedokter\": "+kodeDokterInt+"," +               // Pakai Hasil Mapping (Integer)
                                             "\"namadokter\": \""+NmTenagaMedis.getText().trim()+"\"," +
                                             "\"jampraktek\": \""+jamPraktek+"\"," +
                                             "\"nomorantrean\": \""+rs.getString("no_reg").trim()+"\"," +
-                                            "\"angkaantrean\": "+angkaAntreanInt+"," +   // Integer (Tanpa Kutip)
-                                            "\"keterangan\": \"Peserta harap 30 menit lebih awal.\"" +
+                                            "\"angkaantrean\": "+angkaAntreanInt+"," +
+                                            "\"keterangan\": \"Peserta harap 30 menit lebih awal guna pencatatan administrasi.\"" +
                                         "}";
                             
                             System.out.println(">> MENGIRIM JSON: " + requestJson);
@@ -9635,7 +9556,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                             requestEntity = new HttpEntity(requestJson,headers);
                             String urlTarget = koneksiDB.URLMOBILEJKNFKTP()+"/antrean/add";
                             
-                            // 5. EKSEKUSI REQUEST & AMBIL RAW BODY
+                            // 5. EKSEKUSI REQUEST
                             String rawResponse = apimobilejkn.getRest().exchange(urlTarget, HttpMethod.POST, requestEntity, String.class).getBody();
                             
                             System.out.println(">> RESPON ASLI BPJS: " + rawResponse);
@@ -9647,32 +9568,25 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                             
                             // 6. LOGIKA VALIDASI RESPON
                             if(code.equals("200")){
-                                System.out.println(">> SUKSES (200 OK)");
                                 statusantrean=true;
                             } else if(code.equals("201")){
-                                System.out.println(">> WARNING (201): " + message);
-                                // Jika 201 karena sudah terdaftar, kita anggap sukses agar alur Pcare jalan
+                                statusantrean=false;
                                 if(message.toLowerCase().contains("sudah terdaftar")){
                                     statusantrean=true;
                                 } else {
-                                    // Jika 201 karena "Jadwal Tidak Ada" atau "Poli Tutup", Munculkan Error
-                                    statusantrean=false;
-                                    JOptionPane.showMessageDialog(null, "BPJS Menolak (201): " + message);
+                                    JOptionPane.showMessageDialog(null,"Gagal Antrean (201): "+message);
                                 }
                             } else {
-                                System.out.println(">> GAGAL TOTAL ("+code+"): " + message);
                                 statusantrean=false;
-                                JOptionPane.showMessageDialog(null, "Gagal Add Antrean ("+code+"): " + message);
+                                JOptionPane.showMessageDialog(null,"Gagal Antrean ("+code+"): "+message);
                             }
                         }else{
                             statusantrean=false;
-                            System.out.println(">> JADWAL TIDAK DITEMUKAN DI DATABASE LOKAL");
                             JOptionPane.showMessageDialog(null,"Jadwal Dokter tidak ditemukan di database lokal untuk hari: " + hari);
                         }
                     } catch (Exception ex) {
                         statusantrean=false;
-                        System.out.println("Notif Error Request: "+ex);
-                        ex.printStackTrace();
+                        System.out.println("Notif Bridging Antrean: "+ex);
                     } finally{
                         if(rscari!=null){ rscari.close(); }
                         if(pscari!=null){ pscari.close(); }
@@ -9680,14 +9594,14 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                 }
             } catch (Exception ex) {
                 statusantrean=false;
-                System.out.println("Notif Error Query Pasien: "+ex);
+                System.out.println("Notif Bridging Antrean: "+ex);
             } finally{
                 if(rs!=null){ rs.close(); }
                 if(ps!=null){ ps.close(); }
             }
         }catch (Exception ex) {
             statusantrean=false;
-            System.out.println("Notif Error Koneksi: "+ex);
+            System.out.println("Notif Bridging Antrean: "+ex);
         }
         return statusantrean;
     }

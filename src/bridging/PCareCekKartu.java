@@ -4670,15 +4670,15 @@ public final class PCareCekKartu extends javax.swing.JDialog {
             }else if(ex.toString().contains("401")){
                 JOptionPane.showMessageDialog(null,"Username/Password salah. Lupa password? Wani piro...!");
             }else if(ex.toString().contains("408")){
-                JOptionPane.showMessageDialog(null,"Time out, hayati lelah baaaang...!");
+                JOptionPane.showMessageDialog(null,"Time out, Jaringan internet lagi down, atau Server BPJS lagi flu");
             }else if(ex.toString().contains("424")){
                 JOptionPane.showMessageDialog(null,"Ambil data masternya yang bener dong coy...!");
             }else if(ex.toString().contains("412")){
-                JOptionPane.showMessageDialog(null,"Tidak sesuai kondisi. Aku, kamu end...!");
+                JOptionPane.showMessageDialog(null,"Tidak sesuai kondisi. Cek lagi pasien harus skriining dulu, data TTV harus benar yah. :')");
             }else if(ex.toString().contains("204")){
                 JOptionPane.showMessageDialog(null,"Data tidak ditemukan...!");
             }else if(ex.toString().contains("refused")){
-                JOptionPane.showMessageDialog(null,"BPJSe ngelu...!");
+                JOptionPane.showMessageDialog(null,"Ditolak sama BPJS nya");
             }
         }
     }  
@@ -5424,11 +5424,16 @@ public final class PCareCekKartu extends javax.swing.JDialog {
                 ps.setString(1,TNoRw.getText());
                 rs=ps.executeQuery();
                 while(rs.next()){
-                    // FIX: Ambil tanggal saja (10 digit pertama) karena format di sini dd-MM-yyyy HH:mm:ss
-                    String tglSaja = TanggalDaftar.getSelectedItem().toString().substring(0,10);
-                    date = LocalDate.parse(tglSaja, formatter);
-                    dow = date.getDayOfWeek();
-                    day = dow.getValue();
+                    // 1. LOGIKA TANGGAL & HARI
+                    try {
+                        String tglSaja = TanggalDaftar.getSelectedItem().toString().substring(0,10);
+                        date = LocalDate.parse(tglSaja, formatter);
+                        dow = date.getDayOfWeek();
+                        day = dow.getValue();
+                    } catch (Exception e) {
+                        System.out.println("Error Parsing Tanggal: " + e);
+                        day = 1; 
+                    }
                     
                     switch (day) {
                         case 1: hari="AKHAD"; break;
@@ -5458,27 +5463,65 @@ public final class PCareCekKartu extends javax.swing.JDialog {
                             headers.add("X-authorization","Basic "+Base64.encodeBase64String(otorisasi.getBytes()));
                             headers.add("user_key",koneksiDB.USERKEYMOBILEJKNFKTP());
 
-                            // Sanitasi Data Integer
+                            // 2. DATA MAPPING & SANITASI
                             String jamPraktek = rscari.getString("jam_mulai").substring(0,5)+"-"+rscari.getString("jam_selesai").substring(0,5);
+                            
+                            // A. Mapping Kode Dokter (WAJIB)
+                            String kodeDokterBPJS = KdTenagaMedis.getText(); // Default (jika gagal map)
+                            try {
+                                PreparedStatement psDok = koneksi.prepareStatement(
+                                    "SELECT kd_dokter_pcare FROM maping_dokter_pcare WHERE kd_dokter=?");
+                                psDok.setString(1, rs.getString("kd_dokter"));
+                                ResultSet rsDok = psDok.executeQuery();
+                                if(rsDok.next()){
+                                    kodeDokterBPJS = rsDok.getString("kd_dokter_pcare");
+                                }
+                                rsDok.close();
+                                psDok.close();
+                            } catch(Exception e){
+                                System.out.println("Gagal Mapping Dokter: " + e);
+                            }
+
+                            // B. Mapping Kode Poli (WAJIB)
+                            String kodePoliBPJS = KdPoliTujuan.getText(); // Default
+                            try {
+                                PreparedStatement psPoli = koneksi.prepareStatement(
+                                    "SELECT kd_poli_pcare FROM maping_poliklinik_pcare WHERE kd_poli_rs=?");
+                                psPoli.setString(1, rs.getString("kd_poli"));
+                                ResultSet rsPoli = psPoli.executeQuery();
+                                if(rsPoli.next()){
+                                    kodePoliBPJS = rsPoli.getString("kd_poli_pcare");
+                                }
+                                rsPoli.close();
+                                psPoli.close();
+                            } catch(Exception e){
+                                System.out.println("Gagal Mapping Poli: " + e);
+                            }
+
+                            // C. Konversi ke Integer untuk JSON
                             int kodeDokterInt = 0;
                             int angkaAntreanInt = 0;
                             try {
-                                kodeDokterInt = Integer.parseInt(KdTenagaMedis.getText().trim()); 
-                                angkaAntreanInt = Integer.parseInt(rs.getString("no_reg").trim());
+                                // Bersihkan kode mapping dari karakter non-angka
+                                String cleanKodeDokter = kodeDokterBPJS.replaceAll("[^0-9]", "");
+                                kodeDokterInt = Integer.parseInt(cleanKodeDokter);
+                                
+                                String cleanNoReg = rs.getString("no_reg").replaceAll("[^0-9]", "");
+                                angkaAntreanInt = Integer.parseInt(cleanNoReg);
                             } catch (Exception e) {
-                                kodeDokterInt = 0; 
+                                System.out.println("Error Parsing Integer: " + e);
                             }
 
-                            // JSON Payload V.2 (Integer tanpa kutip)
+                            // 3. PENYUSUNAN JSON (Menggunakan Data Mapping)
                             requestJson ="{" +
                                             "\"nomorkartu\": \""+rs.getString("no_peserta").trim()+"\"," +
                                             "\"nik\": \""+rs.getString("no_ktp").trim()+"\"," +
                                             "\"nohp\": \""+rs.getString("no_tlp").trim()+"\"," +
-                                            "\"kodepoli\": \""+KdPoliTujuan.getText().trim()+"\"," +
+                                            "\"kodepoli\": \""+kodePoliBPJS.trim()+"\"," +   // Pakai hasil mapping
                                             "\"namapoli\": \""+NmPoliTujuan.getText().trim()+"\"," +
                                             "\"norm\": \""+rs.getString("no_rkm_medis").trim()+"\"," +
                                             "\"tanggalperiksa\": \""+rs.getString("tgl_registrasi").trim()+"\"," +
-                                            "\"kodedokter\": "+kodeDokterInt+"," +
+                                            "\"kodedokter\": "+kodeDokterInt+"," +            // Integer Hasil Mapping
                                             "\"namadokter\": \""+NmTenagaMedis.getText().trim()+"\"," +
                                             "\"jampraktek\": \""+jamPraktek+"\"," +
                                             "\"nomorantrean\": \""+rs.getString("no_reg").trim()+"\"," +
@@ -5490,24 +5533,27 @@ public final class PCareCekKartu extends javax.swing.JDialog {
                             requestEntity = new HttpEntity(requestJson,headers);
                             
                             // Eksekusi Request
-                            root = mapper.readTree(apimobilejkn.getRest().exchange(koneksiDB.URLMOBILEJKNFKTP()+"/antrean/add", HttpMethod.POST, requestEntity, String.class).getBody());
+                            String rawResponse = apimobilejkn.getRest().exchange(koneksiDB.URLMOBILEJKNFKTP()+"/antrean/add", HttpMethod.POST, requestEntity, String.class).getBody();
+                            System.out.println(">> RESPON BPJS: " + rawResponse);
+                            
+                            root = mapper.readTree(rawResponse);
                             nameNode = root.path("metadata"); 
                             
-                            System.out.println(">> RESPON BPJS: " + nameNode.path("code").asText() + " " + nameNode.path("message").asText());
+                            String code = nameNode.path("code").asText();
+                            String message = nameNode.path("message").asText();
 
-                            if(nameNode.path("code").asText().equals("200")){
+                            if(code.equals("200")){
                                 statusantrean=true;
-                            } else if(nameNode.path("code").asText().equals("201")){
+                            } else if(code.equals("201")){
                                 statusantrean=false;
-                                if(nameNode.path("message").asText().toLowerCase().contains("sudah terdaftar")){
+                                if(message.toLowerCase().contains("sudah terdaftar")){
                                     statusantrean=true;
                                 } else {
-                                    // Tampilkan error jika gagal murni (misal jadwal tutup)
-                                    JOptionPane.showMessageDialog(null,"Gagal Antrean (201): "+nameNode.path("message").asText());
+                                    JOptionPane.showMessageDialog(null,"Gagal Antrean (201): "+message);
                                 }
                             } else {
                                 statusantrean=false;
-                                JOptionPane.showMessageDialog(null,"Gagal Antrean: "+nameNode.path("message").asText());
+                                JOptionPane.showMessageDialog(null,"Gagal Antrean ("+code+"): "+message);
                             }
                         }else{
                             statusantrean=false;
@@ -5517,12 +5563,14 @@ public final class PCareCekKartu extends javax.swing.JDialog {
                     } catch (Exception ex) {
                         statusantrean=false;
                         System.out.println("Notif Bridging Antrean: "+ex);
+                        ex.printStackTrace();
                     } 
                     pscari.close();
                 }
             } catch (Exception ex) {
                 statusantrean=false;
                 System.out.println("Notif Bridging Antrean: "+ex);
+                ex.printStackTrace();
             } finally{
                 if(rs!=null){ rs.close(); }
                 if(ps!=null){ ps.close(); }
