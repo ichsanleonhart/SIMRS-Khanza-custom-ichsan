@@ -1,343 +1,415 @@
 <?php
 /*
- * File dashboard.php (PERBAIKAN V3 - Fix Logika Retur)
- * Halaman utama untuk owner. Menampilkan filter, KPI, dan Grafik.
- * - KPI sekarang menghitung komponen pengurang (Retur/Potongan)
- * PHP 7.3 compatible.
+ * File: dashboard.php (UPDATE V5 - FINAL FIX)
+ * - Fitur: Hyperlink pada Header Chart Tren -> kunjungan_belum_closing.php.
+ * - UI: Cursor pointer pada header chart.
  */
-
-// ... (Header & Setup awal sama) ...
-$page_title = "Dashboard Keuangan";
+$page_title = "Executive Dashboard";
 require_once('includes/header.php');
-require_once('includes/functions.php');
-
-$tgl_awal = isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : date('Y-m-d');
-$tgl_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : date('Y-m-d');
-
-$total_pemasukan_tunai = 0;
-$total_pengeluaran = 0;
-$total_piutang_terbentuk = 0;
-$net_cash_flow = 0;
-
-$shift_times = getShiftTimes($koneksi);
-$start_date = new DateTime($tgl_awal);
-$end_date = new DateTime($tgl_akhir);
-$end_date->modify('+1 day');
-$interval = new DateInterval('P1D');
-$date_range = new DatePeriod($start_date, $interval, $end_date);
-
-if ($date_range) {
-    foreach ($date_range as $tanggal) {
-        $tanggal_str = $tanggal->format('Y-m-d');
-        foreach ($shift_times as $nama_shift => $times) {
-            $range = getShiftDateTimeRange($tanggal_str, $nama_shift, $shift_times);
-
-            // PERBAIKAN UTAMA DI SINI: Menggunakan CASE WHEN untuk pengurangan
-            // A. KUERI PEMASUKAN RALAN (TUNAI)
-            $sql_ralan = "
-                SELECT SUM(
-                    CASE 
-                        WHEN billing.status = 'Retur Obat' THEN (billing.totalbiaya * -1)
-                        WHEN billing.status = 'Potongan' THEN (billing.totalbiaya * -1)
-                        ELSE billing.totalbiaya 
-                    END
-                ) AS Total
-                FROM billing
-                INNER JOIN nota_jalan ON billing.no_rawat = nota_jalan.no_rawat
-                WHERE 
-                    CONCAT(nota_jalan.tanggal, ' ', nota_jalan.jam) BETWEEN ? AND ?
-                    AND billing.no_rawat NOT IN (
-                        SELECT piutang_pasien.no_rawat 
-                        FROM piutang_pasien 
-                        WHERE piutang_pasien.no_rawat = billing.no_rawat
-                    )
-            ";
-            
-            $stmt_ralan = $koneksi->prepare($sql_ralan);
-            if ($stmt_ralan) {
-                $stmt_ralan->bind_param("ss", $range['start'], $range['end']);
-                $stmt_ralan->execute();
-                $result_ralan = $stmt_ralan->get_result();
-                if ($result_ralan) {
-                    $total_pemasukan_tunai += (float) $result_ralan->fetch_assoc()['Total'];
-                }
-                $stmt_ralan->close();
-            }
-
-            // B. KUERI PEMASUKAN RANAP (TUNAI)
-            $sql_ranap = "
-                SELECT SUM(
-                    CASE 
-                        WHEN billing.status = 'Retur Obat' THEN (billing.totalbiaya * -1)
-                        WHEN billing.status = 'Potongan' THEN (billing.totalbiaya * -1)
-                        ELSE billing.totalbiaya 
-                    END
-                ) AS Total
-                FROM billing
-                INNER JOIN nota_inap ON billing.no_rawat = nota_inap.no_rawat
-                WHERE 
-                    CONCAT(nota_inap.tanggal, ' ', nota_inap.jam) BETWEEN ? AND ?
-                    AND billing.no_rawat NOT IN (
-                        SELECT piutang_pasien.no_rawat 
-                        FROM piutang_pasien 
-                        WHERE piutang_pasien.no_rawat = billing.no_rawat
-                    )
-            ";
-            
-            $stmt_ranap = $koneksi->prepare($sql_ranap);
-            if ($stmt_ranap) {
-                $stmt_ranap->bind_param("ss", $range['start'], $range['end']);
-                $stmt_ranap->execute();
-                $result_ranap = $stmt_ranap->get_result();
-                if ($result_ranap) {
-                    $total_pemasukan_tunai += (float) $result_ranap->fetch_assoc()['Total'];
-                }
-                $stmt_ranap->close();
-            }
-
-            // C. KUERI PEMASUKAN LAIN (Tetap)
-            $sql_lain = "SELECT SUM(pemasukan_lain.besar) AS Total FROM pemasukan_lain WHERE pemasukan_lain.tanggal BETWEEN ? AND ?";
-            $stmt_lain = $koneksi->prepare($sql_lain);
-            if($stmt_lain) {
-                $stmt_lain->bind_param("ss", $range['start'], $range['end']);
-                $stmt_lain->execute();
-                $result_lain = $stmt_lain->get_result();
-                if ($result_lain) {
-                    $total_pemasukan_tunai += (float) $result_lain->fetch_assoc()['Total'];
-                }
-                $stmt_lain->close();
-            }
-            
-            // D. KUERI PENGELUARAN (Tetap)
-            $sql_keluar = "SELECT SUM(pengeluaran_harian.biaya) AS Total FROM pengeluaran_harian WHERE pengeluaran_harian.tanggal BETWEEN ? AND ?";
-            $stmt_keluar = $koneksi->prepare($sql_keluar);
-            if($stmt_keluar) {
-                $stmt_keluar->bind_param("ss", $range['start'], $range['end']);
-                $stmt_keluar->execute();
-                $result_keluar = $stmt_keluar->get_result();
-                if ($result_keluar) {
-                    $total_pengeluaran += (float) $result_keluar->fetch_assoc()['Total'];
-                }
-                $stmt_keluar->close();
-            }
-        }
-    }
-}
-
-// E. KUERI PIUTANG TERBENTUK (Tetap, karena piutang biasanya sudah bersih/netto di tabel piutang_pasien)
-$sql_piutang = "SELECT SUM(piutang_pasien.totalpiutang) AS Total FROM piutang_pasien WHERE piutang_pasien.tgl_piutang BETWEEN ? AND ?";
-$stmt_piutang = $koneksi->prepare($sql_piutang);
-if ($stmt_piutang) {
-    $stmt_piutang->bind_param("ss", $tgl_awal, $tgl_akhir);
-    $stmt_piutang->execute();
-    $result_piutang = $stmt_piutang->get_result();
-    if ($result_piutang) {
-        $row_piutang = $result_piutang->fetch_assoc();
-        $total_piutang_terbentuk = (float) $row_piutang['Total'];
-    }
-    $stmt_piutang->close();
-} else {
-    $total_piutang_terbentuk = 0;
-    error_log("Gagal prepare kueri piutang: " . $koneksi->error);
-}
-
-$net_cash_flow = $total_pemasukan_tunai - $total_pengeluaran;
 ?>
-<!-- HTML BAGIAN BAWAH SAMA PERSIS -->
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <h5 class="card-title">Filter Data</h5>
-        <form action="dashboard.php" method="GET" class="row g-3">
-            <div class="col-md-5">
-                <label for="tgl_awal" class="form-label">Dari Tanggal</label>
-                <input type="date" class="form-control" name="tgl_awal" id="tgl_awal" value="<?php echo htmlspecialchars($tgl_awal); ?>">
-            </div>
-            <div class="col-md-5">
-                <label for="tgl_akhir" class="form-label">Sampai Tanggal</label>
-                <input type="date" class="form-control" name="tgl_akhir" id="tgl_akhir" value="<?php echo htmlspecialchars($tgl_akhir); ?>">
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-success w-100">Tampilkan</button>
-            </div>
-        </form>
-    </div>
-</div>
 
-<div class="row">
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1" 
-                        data-bs-toggle="tooltip" 
-                        data-bs-placement="bottom" 
-                        data-bs-title="Total uang tunai yang diterima dari Ralan, Ranap, dan Pemasukan Lain (Omzet Tunai). Sudah dikurangi Retur/Potongan.">
-                        Pemasukan Tunai
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            <?php echo formatRupiah($total_pemasukan_tunai); ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- (Sisa KPI dan Grafik sama seperti file sebelumnya) -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-danger shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Total uang tunai yang dikeluarkan untuk biaya operasional harian.">Pengeluaran Tunai</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo formatRupiah($total_pengeluaran); ?></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-info shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Kas Bersih. Pemasukan Tunai - Pengeluaran Tunai.">Nett Cash Flow (Kas Bersih)</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo formatRupiah($net_cash_flow); ?></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6 mb-4">
-        <a href="laporan_piutang_detail.php?tgl_awal=<?php echo htmlspecialchars($tgl_awal); ?>&tgl_akhir=<?php echo htmlspecialchars($tgl_akhir); ?>" style="text-decoration: none;">
-            <div class="card border-left-warning shadow h-100 py-2">
+<style>
+    .card-metric { transition: transform .2s; cursor: pointer; }
+    .card-metric:hover { transform: scale(1.03); }
+    .icon-circle {
+        height: 3rem; width: 3rem; border-radius: 50%; display: flex; 
+        align-items: center; justify-content: center; font-size: 1.5rem; color: white;
+    }
+    .bg-gradient-primary { background: linear-gradient(45deg, #4e73df, #224abe); }
+    .bg-gradient-success { background: linear-gradient(45deg, #1cc88a, #13855c); }
+    .bg-gradient-info { background: linear-gradient(45deg, #36b9cc, #258391); }
+    .bg-gradient-warning { background: linear-gradient(45deg, #f6c23e, #dda20a); }
+    .bg-gradient-danger { background: linear-gradient(45deg, #e74a3b, #be2617); }
+    .text-xs-bold { font-size: 0.75rem; font-weight: 700; }
+    
+    .bed-row:hover { background-color: #f8f9fa; cursor: pointer; }
+    
+    /* Style untuk Link Header Chart */
+    .chart-header-link { cursor: pointer; transition: color 0.2s; }
+    .chart-header-link:hover h6 { color: #2e59d9 !important; text-decoration: underline; }
+</style>
+
+<div class="container-fluid">
+
+    <div class="row mb-4">
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-4 border-primary shadow h-100 py-2 card-metric" onclick="window.location.href='laporan_billing_global.php'">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="KLIK UNTUK MELIHAT DETAIL. Total tagihan yang belum dibayar.">Piutang Terbentuk (Klik Detail)</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo formatRupiah($total_piutang_terbentuk); ?></div>
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Omzet Hari Ini</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="val-omzet-total">...</div>
+                            <div class="mt-2">
+                                <span class="badge bg-success me-1" title="Tunai"><i class="fas fa-money-bill me-1"></i><span id="val-omzet-tunai">0</span></span>
+                                <span class="badge bg-warning text-dark" title="Piutang"><i class="fas fa-file-invoice me-1"></i><span id="val-omzet-piutang">0</span></span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon-circle bg-gradient-primary"><i class="fas fa-cash-register"></i></div>
                         </div>
                     </div>
                 </div>
             </div>
-        </a>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-xl-8 col-lg-7">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Grafik Tren Pemasukan vs Pengeluaran Harian</h6></div>
-            <div class="card-body"><canvas id="chartTrenHarian"></canvas></div>
         </div>
-    </div>
-    <div class="col-xl-4 col-lg-5">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Total Pemasukan Tunai per Shift</h6></div>
-            <div class="card-body">
-                <canvas id="chartPerShift"></canvas>
-                <hr class="mt-4">
-                <h6 class="text-center">Lihat Detail Laporan per Shift</h6>
-                <div class="d-grid gap-2 mt-4">
-                    <a class="btn btn-info" href="laporan_detail.php?tgl_awal=<?php echo htmlspecialchars($tgl_awal); ?>&tgl_akhir=<?php echo htmlspecialchars($tgl_akhir); ?>">Lihat Laporan Detail (Per Tanggal & Per Shift)</a>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-4 border-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Pasien Registrasi Masuk</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="val-visit-total">...</div>
+                            <div class="row mt-2 text-xs-bold text-muted">
+                                <div class="col-6 border-end">Ralan: <span id="val-visit-ralan" class="text-success">0</span></div>
+                                <div class="col-6">Ranap: <span id="val-visit-ranap" class="text-warning">0</span></div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon-circle bg-gradient-success"><i class="fas fa-user-plus"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-4 border-info shadow h-100 py-2 card-metric" onclick="window.location.href='laporan_indikator_ranap.php'">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">BOR Bulan Ini (Global)</div>
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800" id="val-bor">...%</div>
+                                </div>
+                                <div class="col">
+                                    <div class="progress progress-sm mr-2">
+                                        <div class="progress-bar bg-info" role="progressbar" id="bar-bor" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon-circle bg-gradient-info"><i class="fas fa-procedures"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-4 border-danger shadow h-100 py-2 card-metric" onclick="window.location.href='kunjungan_belum_closing.php'">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Kunjungan Aktif (Blm Bayar)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="val-aktif">...</div>
+                            <div class="small text-muted mt-1">Pasien belum closing kasir</div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon-circle bg-gradient-danger"><i class="fas fa-file-invoice-dollar"></i></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="row mb-4">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between chart-header-link" 
+                     onclick="window.location.href='kunjungan_belum_closing.php'" title="Klik untuk lihat detail kunjungan">
+                    <h6 class="m-0 font-weight-bold text-primary">Tren Kunjungan Tahun Ini <i class="fas fa-external-link-alt ms-2 small text-gray-400"></i></h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area" style="height: 320px;">
+                        <canvas id="chartTren"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Sumber Omzet Hari Ini</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2" style="height: 250px; cursor: pointer;" onclick="window.location.href='laporan_billing_global.php'">
+                        <canvas id="chartOmzet"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small text-muted">
+                        *Klik chart untuk laporan detail
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4 h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Top 5 Poliklinik Hari Ini (Live Queue)</h6>
+                </div>
+                <div class="card-body" id="container-top-poli">
+                    <div class="text-center p-3">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4 h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Ketersediaan Bed per Kelas (Realtime)</h6>
+                </div>
+                <div class="card-body" id="container-bed">
+                    <div class="text-center p-3">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
-<div class="row">
-    <div class="col-lg-6"><div class="card shadow mb-4"><div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Komposisi Pengeluaran</h6></div><div class="card-body"><canvas id="chartPengeluaran"></canvas></div></div></div>
-    <div class="col-lg-6"><div class="card shadow mb-4"><div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Komposisi Pemasukan Tunai</h6></div><div class="card-body"><canvas id="chartKomposisiPemasukan"></canvas></div></div></div>
+
+<div class="modal fade" id="modalDetailBed" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="fas fa-procedures me-2"></i>Pasien Rawat Inap: <span id="modalTitleKelas" class="fw-bold"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table id="tableDetailBed" class="table table-bordered table-striped table-sm w-100">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Masuk</th>
+                                <th>No. RM</th>
+                                <th>Nama Pasien</th>
+                                <th>Bangsal / Kamar</th>
+                                <th>Kelas</th>
+                                <th>Penjamin</th>
+                                <th>Lama (Hari)</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalRanapAktif" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="fas fa-procedures me-2"></i>Daftar Pasien Rawat Inap Aktif</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table id="tableRanap" class="table table-bordered table-striped table-sm w-100">
+                        <thead class="table-light">
+                            <tr>
+                                <th>No.</th>
+                                <th>Masuk</th>
+                                <th>No. RM</th>
+                                <th>Nama Pasien</th>
+                                <th>Bangsal / Kamar</th>
+                                <th>Kelas</th>
+                                <th>Penjamin</th>
+                                <th>Lama (Hari)</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <?php ob_start(); ?>
 <script>
-    var tglAwal = '<?php echo $tgl_awal; ?>';
-    var tglAkhir = '<?php echo $tgl_akhir; ?>';
-    var myChartTrenHarian, myChartPerShift, myChartPengeluaran, myChartKomposisiPemasukan;
-    var ctxTren = document.getElementById('chartTrenHarian').getContext('2d');
-    var ctxShift = document.getElementById('chartPerShift').getContext('2d');
-    var ctxKeluar = document.getElementById('chartPengeluaran').getContext('2d');
-    var ctxMasuk = document.getElementById('chartKomposisiPemasukan').getContext('2d');
+    var chartTren, chartOmzet, tableRanap, tableDetailBed;
 
     function formatRupiah(angka) {
-        if(angka == null || isNaN(angka)) return "Rp 0";
-        var number_string = angka.toString().replace(/[^,\d\-]/g, ''),
-            split = number_string.split(','),
-            sisa = split[0].length % 3,
-            rupiah = split[0].substr(0, sisa),
-            ribuan = split[0].substr(sisa).match(/\d{3}/gi);
-        if (ribuan) {
-            separator = sisa ? '.' : '';
-            rupiah += separator + ribuan.join('.');
-        }
-        rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
-        return 'Rp ' + rupiah;
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
     }
 
-    function loadAllCharts() {
-        var apiUrl = 'api/data_grafik.php?tgl_awal=' + tglAwal + '&tgl_akhir=' + tglAkhir;
-        fetch(apiUrl)
-            .then(function(response) {
-                if (!response.ok) throw new Error('API request failed');
-                return response.json();
-            })
-            .then(function(data) {
-                renderChartTren(data.tren_harian);
-                renderChartPerShift(data.per_shift);
-                renderChartPengeluaran(data.komposisi_pengeluaran);
-                renderChartKomposisiPemasukan(data.komposisi_pemasukan);
-            })
-            .catch(function(error) { console.error('Error:', error); });
+    $(document).ready(function() {
+        // Init DataTables
+        tableRanap = $('#tableRanap').DataTable({
+            "responsive": true, "pageLength": 10, "dom": 'Bfrtip', "buttons": ['excel'],
+            "columns": [
+                { "data": null, "render": function (data, type, row, meta) { return meta.row + 1; } },
+                { "data": "waktu_masuk" },
+                { "data": "no_rkm_medis" },
+                { "data": "nm_pasien" },
+                { "data": "nm_bangsal", render: function(d,t,r){ return d + ' (' + r.kd_kamar + ')'; } },
+                { "data": "kelas" },
+                { "data": "png_jawab" },
+                { "data": "lama_inap", className: "text-center fw-bold" }
+            ]
+        });
+
+        tableDetailBed = $('#tableDetailBed').DataTable({
+            "responsive": true, "pageLength": 10, "dom": 'Bfrtip', "buttons": ['excel'],
+            "columns": [
+                { "data": "waktu_masuk" },
+                { "data": "no_rkm_medis" },
+                { "data": "nm_pasien" },
+                { "data": "nm_bangsal", render: function(d,t,r){ return d + ' (' + r.kd_kamar + ')'; } },
+                { "data": "kelas" },
+                { "data": "png_jawab" },
+                { "data": "lama_hari", className: "text-center fw-bold" }
+            ]
+        });
+
+        loadDashboardData();
+    });
+
+    function loadDashboardData() {
+        $.ajax({
+            url: 'api/data_dashboard.php', type: 'GET', dataType: 'json',
+            success: function(res) {
+                // 1. Omzet
+                $('#val-omzet-total').text(formatRupiah(res.omzet.total));
+                $('#val-omzet-tunai').text(formatRupiah(res.omzet.tunai));
+                $('#val-omzet-piutang').text(formatRupiah(res.omzet.piutang));
+
+                // 2. Kunjungan
+                $('#val-visit-total').text(res.kunjungan.Total);
+                $('#val-visit-ralan').text(res.kunjungan.Ralan);
+                $('#val-visit-ranap').text(res.kunjungan.Ranap);
+                
+                // 3. BOR
+                $('#val-bor').text(res.bed.bor_global + '%');
+                $('#bar-bor').css('width', res.bed.bor_global + '%');
+                
+                // 4. Pasien Aktif
+                $('#val-aktif').text(res.kunjungan_aktif.toLocaleString());
+
+                // 5. Charts & Widgets
+                renderChartTren(res.tren);
+                renderChartOmzet(res.omzet);
+                renderTopPoli(res.top_poli, res.kunjungan.Total);
+                renderBedMonitor(res.bed.per_kelas);
+            },
+            error: function() { console.error("Gagal memuat data dashboard"); }
+        });
     }
-    // ... (Fungsi renderChart sama seperti sebelumnya, copy paste dari file lama) ...
-    // UNTUK KEPRAKTISAN, SAYA HARAP ANDA SUDAH PUNYA FUNGSI RENDER CHART DI FILE LAMA
-    // JIKA TIDAK, SAYA BISA TULISKAN ULANG SECARA LENGKAP
-    
+
+    function renderTopPoli(data, totalKunjungan) {
+        var html = '';
+        if(data.length > 0) {
+            data.forEach(function(item) {
+                var pct = (totalKunjungan > 0) ? (item.jumlah / totalKunjungan) * 100 : 0;
+                html += `
+                    <h4 class="small font-weight-bold">${item.nm_poli} <span class="float-end">${item.jumlah}</span></h4>
+                    <div class="progress mb-4">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: ${pct}%"></div>
+                    </div>
+                `;
+            });
+        } else { html = '<div class="text-center text-muted">Belum ada kunjungan hari ini</div>'; }
+        $('#container-top-poli').html(html);
+    }
+
+    function renderBedMonitor(data) {
+        var html = '';
+        if(data.length > 0) {
+            data.forEach(function(item) {
+                var bor = (item.total > 0) ? (item.terisi / item.total) * 100 : 0;
+                var kosong = item.total - item.terisi;
+                var color = bor > 85 ? 'bg-danger' : (bor > 60 ? 'bg-warning' : 'bg-success');
+                
+                html += `
+                    <div class="mb-3 p-2 rounded bed-row" onclick="showBedDetail('${item.kelas}')">
+                        <div class="d-flex justify-content-between small font-weight-bold">
+                            <span class="text-primary">${item.kelas}</span>
+                            <span>Terisi ${item.terisi} dari ${item.total} (${Math.round(bor)}%)</span>
+                        </div>
+                        <div class="progress mt-1" style="height: 10px;">
+                            <div class="progress-bar ${color}" role="progressbar" style="width: ${bor}%"></div>
+                        </div>
+                        <div class="text-end mt-1" style="font-size: 0.75rem;">
+                            <span class="text-success fw-bold">Kosong: ${kosong} Bed</span>
+                        </div>
+                    </div>
+                `;
+            });
+        } else { html = '<div class="text-center text-muted">Data bed tidak tersedia</div>'; }
+        $('#container-bed').html(html);
+    }
+
+    function showBedDetail(kelas) {
+        $('#modalTitleKelas').text(kelas);
+        $('#modalDetailBed').modal('show');
+        
+        $.ajax({
+            url: 'api/data_detail_bed.php', type: 'GET', data: {kelas: kelas}, dataType: 'json',
+            success: function(res) {
+                tableDetailBed.clear().rows.add(res.data).draw();
+            },
+            error: function() { console.error("Gagal memuat detail bed"); }
+        });
+    }
+
+    function showRanapAktif() {
+        $('#modalRanapAktif').modal('show');
+        $.ajax({
+            url: 'api/data_pasien_ranap_aktif.php', type: 'GET', dataType: 'json',
+            success: function(res) {
+                tableRanap.clear().rows.add(res.data).draw();
+            }
+        });
+    }
+
     function renderChartTren(data) {
-        if (myChartTrenHarian) myChartTrenHarian.destroy(); 
-        myChartTrenHarian = new Chart(ctxTren, {
+        var ctx = document.getElementById("chartTren").getContext('2d');
+        if(chartTren) chartTren.destroy();
+        
+        chartTren = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: data.labels, 
-                datasets: [{label: 'Pemasukan Tunai', data: data.pemasukan, borderColor: 'rgb(25, 135, 84)', backgroundColor: 'rgba(25, 135, 84, 0.1)', fill: true, tension: 0.1}, {label: 'Pengeluaran Tunai', data: data.pengeluaran, borderColor: 'rgb(220, 53, 69)', backgroundColor: 'rgba(220, 53, 69, 0.1)', fill: true, tension: 0.1}]
+                labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
+                datasets: [
+                    { label: "Total", data: data.total, borderColor: "#4e73df", borderWidth: 4, tension: 0.3, pointRadius: 0 },
+                    { label: "Rawat Jalan", data: data.ralan, borderColor: "rgba(246, 194, 62, 0.5)", borderWidth: 2, borderDash: [5, 5], tension: 0.3, pointRadius: 0 },
+                    { label: "Rawat Inap", data: data.ranap, borderColor: "rgba(28, 200, 138, 0.5)", borderWidth: 2, borderDash: [5, 5], tension: 0.3, pointRadius: 0 }
+                ],
             },
-            options: { responsive: true, plugins: { tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + formatRupiah(context.parsed.y); } } } }, scales: { y: { ticks: { callback: function(value) { return formatRupiah(value); } } } } }
-        });
-    }
-    function renderChartPerShift(data) {
-        if (myChartPerShift) myChartPerShift.destroy();
-        myChartPerShift = new Chart(ctxShift, {
-            type: 'bar',
-            data: {
-                labels: data.labels, 
-                datasets: [{label: 'Total Pemasukan Tunai', data: data.data, backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)'], borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)'], borderWidth: 1}]
-            },
-            options: { responsive: true, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return 'Total: ' + formatRupiah(context.parsed.y); } } } }, scales: { y: { ticks: { callback: function(value) { return formatRupiah(value); } } } } }
-        });
-    }
-    function renderChartPengeluaran(data) {
-        if (myChartPengeluaran) myChartPengeluaran.destroy();
-        myChartPengeluaran = new Chart(ctxKeluar, {
-            type: 'doughnut',
-            data: { labels: data.labels, datasets: [{data: data.data, backgroundColor: ['#e74c3c', '#f1c40f', '#9b59b6', '#3498db', '#2ecc71', '#e67e22']}] },
-            options: { responsive: true, plugins: { tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatRupiah(context.parsed); } } } } }
-        });
-    }
-    function renderChartKomposisiPemasukan(data) {
-        if (myChartKomposisiPemasukan) myChartKomposisiPemasukan.destroy();
-        myChartKomposisiPemasukan = new Chart(ctxMasuk, {
-            type: 'pie',
-            data: { labels: data.labels, datasets: [{data: data.data, backgroundColor: ['#2ecc71', '#3498db', '#e67e22']}] },
-            options: { responsive: true, plugins: { tooltip: { callbacks: { label: function(context) { return context.label + ': ' + formatRupiah(context.parsed); } } } } }
+            options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: {display: true} } }
         });
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl) })
-        loadAllCharts();
-    });
+    function renderChartOmzet(dataObj) {
+        var ctx = document.getElementById("chartOmzet").getContext('2d');
+        if(chartOmzet) chartOmzet.destroy();
+        chartOmzet = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: dataObj.labels,
+                datasets: [{
+                    data: dataObj.data,
+                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }],
+            },
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '70%' }
+        });
+    }
 </script>
 <?php $page_js = ob_get_clean(); ?>
 <?php require_once('includes/footer.php'); ?>

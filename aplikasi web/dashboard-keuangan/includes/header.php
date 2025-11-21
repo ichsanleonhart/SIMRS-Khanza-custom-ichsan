@@ -205,19 +205,32 @@ $current_page = basename($_SERVER['PHP_SELF']);
 		<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
           <span>Kendali Biaya</span>
         </h6>
-		<ul class="nav flex-column mb-2">
+		<ul class="nav flex-column mb-2">		  
 		  <li class="nav-item">
-            <a class="nav-link <?php echo ($current_page == 'kunjungan_belum_closing.php') ? 'active' : ''; ?>" href="kunjungan_belum_closing.php">
+            <a class="nav-link <?php echo ($current_page == 'audit_kunjungan_belum_closing.php') ? 'active' : ''; ?>" href="audit_kunjungan_belum_closing.php">
               <i class="fas fa-user-clock me-2" style="width: 20px;"></i>
               Kunjungan Aktif
             </a>
           </li>
+		  <li class="nav-item">
+            <a class="nav-link <?php echo ($current_page == 'kunjungan_belum_closing.php') ? 'active' : ''; ?>" href="kunjungan_belum_closing.php">
+              <i class="fas fa-user-clock me-2" style="width: 20px;"></i>
+              Billing Sementara Ranap
+            </a>
+          </li>
+		  
 		</ul>
 
         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
           <span>Laporan Keuangan</span>
         </h6>
-        <ul class="nav flex-column mb-2">		
+        <ul class="nav flex-column mb-2">
+			  <li class="nav-item">
+				<a class="nav-link <?php echo ($current_page == 'laporan_kas.php') ? 'active' : ''; ?>" href="laporan_kas.php">
+              <i class="fas fa-home me-2" style="width: 20px;"></i>
+              Laporan Kas
+            </a>
+          </li>		
           <li class="nav-item">
             <a class="nav-link <?php echo ($current_page == 'laporan_billing_global.php') ? 'active' : ''; ?>" href="laporan_billing_global.php">
               <i class="fas fa-file-invoice-dollar me-2" style="width: 20px;"></i>
@@ -236,6 +249,18 @@ $current_page = basename($_SERVER['PHP_SELF']);
               Laporan Tunai/Shift
             </a>
           </li>
+		  <li class="nav-item">
+			<a class="nav-link <?php echo ($current_page == 'laporan_tindakan.php') ? 'active' : ''; ?>" href="laporan_tindakan.php">
+			<i class="fas fa-stethoscope me-2" style="width: 20px;"></i>
+			Laporan Keuangan Tindakan Medis
+		  </a>
+		  </li>
+		  <li class="nav-item">
+			<a class="nav-link <?php echo ($current_page == 'laporan_jasa_medis.php') ? 'active' : ''; ?>" href="laporan_jasa_medis.php">
+			<i class="fas fa-user-tie me-2" style="width: 20px;"></i>
+			Jasa Medis Dokter
+			</a>
+		  </li>
         </ul>
 		
 		<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -271,7 +296,50 @@ $current_page = basename($_SERVER['PHP_SELF']);
 		  <i class="fas fa-user-md me-2" style="width: 20px;"></i>
 			Kinerja Dokter
 		    </a>
-		  </li>
+		  </li>		  
+		</ul>
+		<ul class="nav flex-column mb-2">
+		  <li class="nav-item">
+			<a class="nav-link <?php echo ($current_page == 'laporan_operasi_view.php') ? 'active' : ''; ?>" href="laporan_operasi_view.php">
+		  <i class="fas fa-user-md me-2" style="width: 20px;"></i>
+			Laporan Operasi
+		    </a>
+		  </li>		  
+		</ul>
+		<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+			<span>Manajemen Farmasi</span>
+		</h6>
+		<ul class="nav flex-column mb-2">
+			<li class="nav-item">
+				<a class="nav-link <?php echo ($current_page == 'laporan_stok_farmasi.php') ? 'active' : ''; ?>" href="laporan_stok_farmasi.php">
+				<i class="fas fa-capsules me-2" style="width: 20px;"></i>
+				Monitoring Stok Aktif
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link <?php echo ($current_page == 'laporan_stok_opname.php') ? 'active' : ''; ?>" href="laporan_stok_opname.php">
+				<i class="fas fa-clipboard-check me-2" style="width: 20px;"></i>
+				Hasil Stok Opname
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link <?php echo ($current_page == 'laporan_proyeksi_keuntungan.php') ? 'active' : ''; ?>" href="laporan_proyeksi_keuntungan.php">
+				<i class="fas fa-hand-holding-usd me-2" style="width: 20px;"></i>
+				Proyeksi Keuntungan
+				</a>
+			</li>
+		</ul>
+		
+		<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+			<span>System & Utility</span>
+		</h6>
+		<ul class="nav flex-column mb-2">
+			<li class="nav-item">
+				<a class="nav-link <?php echo ($current_page == 'laporan_audit_trail.php') ? 'active' : ''; ?>" href="laporan_audit_trail.php">
+				<i class="fas fa-user-secret me-2" style="width: 20px;"></i>
+				Audit Trail Log
+				</a>
+			</li>
 		</ul>
 		
 		

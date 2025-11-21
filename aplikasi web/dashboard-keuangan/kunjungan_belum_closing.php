@@ -1,239 +1,172 @@
 <?php
 /*
- * File: kunjungan_belum_closing.php
- * Integrasi dari 'kunjungan_aktif.php'
- * Menampilkan pasien yang status bayarnya 'Belum Bayar' dan belum ada di billing.
+ * File: kunjungan_belum_closing.php (UPDATE V3 - DETAIL BILLING)
+ * - Added: Tombol Detail Billing (Icon Mata/Search).
+ * - Added: Modal Rincian Biaya per Komponen.
  */
-
-// 1. Setup Dashboard
-$page_title = "Kunjungan Belum Closing Kasir";
+$page_title = "Kunjungan Aktif (Belum Closing)";
 require_once('includes/header.php');
-require_once('includes/functions.php'); // Memuat cariIsiAngka & cariIsi
-
-// 2. Inisialisasi Variabel Filter
-// Menggunakan default awal bulan ini s/d hari ini jika tidak ada input
-$tgl_awal = isset($_POST['tgl_awal']) ? $_POST['tgl_awal'] : date('Y-m-01');
-$tgl_akhir = isset($_POST['tgl_akhir']) ? $_POST['tgl_akhir'] : date('Y-m-d');
-$data = [];
-
-// 3. Logika Pengambilan Data
-if ($koneksi) {
-    $sql = "
-        SELECT
-            reg_periksa.no_rawat,
-            reg_periksa.tgl_registrasi AS 'Tgl Reg',
-            reg_periksa.jam_reg AS 'Jam reg',
-            penjab.png_jawab AS 'Penjamin',
-            poliklinik.nm_poli AS 'Poliklinik',
-            reg_periksa.no_rkm_medis AS 'no_rm',
-            pasien.nm_pasien AS 'nama_pasien',
-            reg_periksa.status_lanjut,
-            reg_periksa.stts AS 'Status Pelayanan',
-            reg_periksa.biaya_reg
-        FROM reg_periksa
-        LEFT JOIN poliklinik ON reg_periksa.kd_poli = poliklinik.kd_poli
-        LEFT JOIN penjab ON reg_periksa.kd_pj = penjab.kd_pj
-        LEFT JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
-        WHERE
-            reg_periksa.status_bayar = 'Belum Bayar'
-            AND reg_periksa.no_rawat NOT IN (SELECT no_rawat FROM billing)
-            AND reg_periksa.tgl_registrasi BETWEEN ? AND ?
-        ORDER BY
-            reg_periksa.tgl_registrasi DESC,
-            reg_periksa.jam_reg DESC
-    ";
-    
-    $stmt = $koneksi->prepare($sql);
-    if ($stmt) {
-        $stmt->bind_param("ss", $tgl_awal, $tgl_akhir);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $no_rawat = $row['no_rawat'];
-                
-                // --- Hitung Biaya (Kalkulasi Manual seperti di DlgPerkiraanBiayaRanap.java) ---
-                // Menggunakan fungsi helper yang sudah ada di includes/functions.php
-                
-                $Registrasi = $row['biaya_reg'];
-                $Laborat = cariIsiAngka($koneksi, "select sum(biaya) from periksa_lab where no_rawat=?", $no_rawat) + cariIsiAngka($koneksi, "select sum(biaya_item) from detail_periksa_lab where no_rawat=?", $no_rawat);
-                $Radiologi = cariIsiAngka($koneksi, "select sum(biaya) from periksa_radiologi where no_rawat=?", $no_rawat);
-                $Operasi = cariIsiAngka($koneksi, "select sum(biayaoperator1+biayaoperator2+biayaoperator3+biayaasisten_operator1+biayaasisten_operator2+biayaasisten_operator3+biayainstrumen+biayadokter_anak+biayaperawaat_resusitas+biayadokter_anestesi+biayaasisten_anestesi+biayaasisten_anestesi2+biayabidan+biayabidan2+biayabidan3+biayaperawat_luar+biayaalat+biayasewaok+akomodasi+bagian_rs+biaya_omloop+biaya_omloop2+biaya_omloop3+biaya_omloop4+biaya_omloop5+biayasarpras+biaya_dokter_pjanak+biaya_dokter_umum) from operasi where no_rawat=?", $no_rawat);
-                $Obat = cariIsiAngka($koneksi, "select sum(total) from detail_pemberian_obat where no_rawat=?", $no_rawat) + cariIsiAngka($koneksi, "select sum(besar_tagihan) from tagihan_obat_langsung where no_rawat=?", $no_rawat) + cariIsiAngka($koneksi, "select sum(hargasatuan*jumlah) from beri_obat_operasi where no_rawat=?", $no_rawat);
-                $Ranap_Dokter = cariIsiAngka($koneksi, "select sum(biaya_rawat) from rawat_inap_dr where no_rawat=?", $no_rawat);
-                $Ranap_Dokter_Paramedis = cariIsiAngka($koneksi, "select sum(biaya_rawat) from rawat_inap_drpr where no_rawat=?", $no_rawat);
-                $Ranap_Paramedis = cariIsiAngka($koneksi, "select sum(biaya_rawat) from rawat_inap_pr where no_rawat=?", $no_rawat);
-                $Ralan_Dokter = cariIsiAngka($koneksi, "select sum(biaya_rawat) from rawat_jl_dr where no_rawat=?", $no_rawat);
-                $Ralan_Dokter_Paramedis = cariIsiAngka($koneksi, "select sum(biaya_rawat) from rawat_jl_drpr where no_rawat=?", $no_rawat);
-                $Ralan_Paramedis = cariIsiAngka($koneksi, "select sum(biaya_rawat) from rawat_jl_pr where no_rawat=?", $no_rawat);
-                $Tambahan = cariIsiAngka($koneksi, "select sum(besar_biaya) from tambahan_biaya where no_rawat=?", $no_rawat);
-                $Potongan = cariIsiAngka($koneksi, "select sum(besar_pengurangan) from pengurangan_biaya where no_rawat=?", $no_rawat);
-                $Kamar = cariIsiAngka($koneksi, "select sum(ttl_biaya) from kamar_inap where no_rawat=?", $no_rawat) + cariIsiAngka($koneksi, "select sum(biaya_sekali.besar_biaya) from biaya_sekali inner join kamar_inap on kamar_inap.kd_kamar=biaya_sekali.kd_kamar where kamar_inap.no_rawat=?", $no_rawat);
-                $Harian = cariIsiAngka($koneksi, "select sum(biaya_harian.jml*biaya_harian.besar_biaya*kamar_inap.lama) from kamar_inap inner join biaya_harian on kamar_inap.kd_kamar=biaya_harian.kd_kamar where kamar_inap.no_rawat=?", $no_rawat);
-                $Retur_Obat = (-1) * cariIsiAngka($koneksi, "select sum(subtotal) from detreturjual where no_retur_jual like ?", "%".$no_rawat."%");
-                $Resep_Pulang = cariIsiAngka($koneksi, "select sum(total) from resep_pulang where no_rawat=?", $no_rawat);
-
-                // Logika Ranap Gabung
-                $no_rawat_gabung = cariIsi($koneksi, "select no_rawat2 from ranap_gabung where no_rawat=?", $no_rawat);
-                if (!empty($no_rawat_gabung)) {
-                    $Laborat += cariIsiAngka($koneksi, "select sum(biaya) from periksa_lab where no_rawat=?", $no_rawat_gabung) + cariIsiAngka($koneksi, "select sum(biaya_item) from detail_periksa_lab where no_rawat=?", $no_rawat_gabung);
-                    $Radiologi += cariIsiAngka($koneksi, "select sum(biaya) from periksa_radiologi where no_rawat=?", $no_rawat_gabung);
-                    $Operasi += cariIsiAngka($koneksi, "select sum(biayaoperator1+biayaoperator2+biayaoperator3+biayaasisten_operator1+biayaasisten_operator2+biayaasisten_operator3+biayainstrumen+biayadokter_anak+biayaperawaat_resusitas+biayadokter_anestesi+biayaasisten_anestesi+biayaasisten_anestesi2+biayabidan+biayabidan2+biayabidan3+biayaperawat_luar+biayaalat+biayasewaok+akomodasi+bagian_rs+biaya_omloop+biaya_omloop2+biaya_omloop3+biaya_omloop4+biaya_omloop5+biayasarpras+biaya_dokter_pjanak+biaya_dokter_umum) from operasi where no_rawat=?", $no_rawat_gabung);
-                    $Obat += cariIsiAngka($koneksi, "select sum(total) from detail_pemberian_obat where no_rawat=?", $no_rawat_gabung) + cariIsiAngka($koneksi, "select sum(besar_tagihan) from tagihan_obat_langsung where no_rawat=?", $no_rawat_gabung) + cariIsiAngka($koneksi, "select sum(hargasatuan*jumlah) from beri_obat_operasi where no_rawat=?", $no_rawat_gabung);
-                    $Ranap_Dokter += cariIsiAngka($koneksi, "select sum(biaya_rawat) from rawat_inap_dr where no_rawat=?", $no_rawat_gabung);
-                    $Ranap_Dokter_Paramedis += cariIsiAngka($koneksi, "select sum(biaya_rawat) from rawat_inap_drpr where no_rawat=?", $no_rawat_gabung);
-                    $Ranap_Paramedis += cariIsiAngka($koneksi, "select sum(biaya_rawat) from rawat_inap_pr where no_rawat=?", $no_rawat_gabung);
-                    $Ralan_Dokter += cariIsiAngka($koneksi, "select sum(biaya_rawat) from rawat_jl_dr where no_rawat=?", $no_rawat_gabung);
-                    $Ralan_Dokter_Paramedis += cariIsiAngka($koneksi, "select sum(biaya_rawat) from rawat_jl_drpr where no_rawat=?", $no_rawat_gabung);
-                    $Ralan_Paramedis += cariIsiAngka($koneksi, "select sum(biaya_rawat) from rawat_jl_pr where no_rawat=?", $no_rawat_gabung);
-                    $Tambahan += cariIsiAngka($koneksi, "select sum(besar_biaya) from tambahan_biaya where no_rawat=?", $no_rawat_gabung);
-                    $Potongan += cariIsiAngka($koneksi, "select sum(besar_pengurangan) from pengurangan_biaya where no_rawat=?", $no_rawat_gabung);
-                    $Kamar += cariIsiAngka($koneksi, "select sum(ttl_biaya) from kamar_inap where no_rawat=?", $no_rawat_gabung) + cariIsiAngka($koneksi, "select sum(biaya_sekali.besar_biaya) from biaya_sekali inner join kamar_inap on kamar_inap.kd_kamar=biaya_sekali.kd_kamar where kamar_inap.no_rawat=?", $no_rawat_gabung);
-                    $Harian += cariIsiAngka($koneksi, "select sum(biaya_harian.jml*biaya_harian.besar_biaya*kamar_inap.lama) from kamar_inap inner join biaya_harian on kamar_inap.kd_kamar=biaya_harian.kd_kamar where kamar_inap.no_rawat=?", $no_rawat_gabung);
-                    $Retur_Obat += (-1) * cariIsiAngka($koneksi, "select sum(subtotal) from detreturjual where no_retur_jual like ?", "%".$no_rawat_gabung."%");
-                    $Resep_Pulang += cariIsiAngka($koneksi, "select sum(total) from resep_pulang where no_rawat=?", $no_rawat_gabung);
-                }
-
-                $Jumlah = $Laborat + $Radiologi + $Operasi + $Obat + 
-                          $Ranap_Dokter + $Ranap_Dokter_Paramedis + $Ranap_Paramedis + 
-                          $Ralan_Dokter + $Ralan_Dokter_Paramedis + $Ralan_Paramedis + 
-                          $Tambahan + $Potongan + $Kamar + $Registrasi + 
-                          $Harian + $Retur_Obat + $Resep_Pulang;
-                
-                $row['billing_sementara_raw'] = $Jumlah;
-                $row['billing_sementara_formatted'] = number_format($Jumlah, 0, ',', '.');
-                $row['Biaya Obat_raw'] = $Obat; 
-                $row['Biaya Obat_formatted'] = number_format($Obat, 0, ',', '.');
-                
-                $data[] = $row;
-            }
-            
-            // Sorting Logic (Temuan Audit Batal tapi ada biaya ke atas)
-            function sort_audit_priority($a, $b) {
-                $a_is_audit = ($a['Status Pelayanan'] == 'Batal' && $a['Biaya Obat_raw'] > 0 && $a['billing_sementara_raw'] > 0);
-                $b_is_audit = ($b['Status Pelayanan'] == 'Batal' && $b['Biaya Obat_raw'] > 0 && $b['billing_sementara_raw'] > 0);
-
-                if ($a_is_audit == $b_is_audit) {
-                    $date_a = $a['Tgl Reg'] . ' ' . $a['Jam reg'];
-                    $date_b = $b['Tgl Reg'] . ' ' . $b['Jam reg'];
-                    return strcmp($date_b, $date_a);
-                }
-                return (int)$b_is_audit - (int)$a_is_audit;
-            }
-            usort($data, 'sort_audit_priority');
-        }
-        $stmt->close();
-    }
-}
 ?>
 
-<div class="card mb-4 shadow-sm">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Filter Data Kunjungan Belum Closing</h6>
-    </div>
-    <div class="card-body">
-        <form method="POST" action="kunjungan_belum_closing.php">
-            <div class="row">
-                <div class="col-md-5">
-                    <div class="mb-3">
-                        <label for="tgl_awal" class="form-label">Tanggal Awal Registrasi:</label>
-                        <input type="date" class="form-control" id="tgl_awal" name="tgl_awal" value="<?php echo htmlspecialchars($tgl_awal); ?>">
-                    </div>
-                </div>
-                <div class="col-md-5">
-                    <div class="mb-3">
-                        <label for="tgl_akhir" class="form-label">Tanggal Akhir Registrasi:</label>
-                        <input type="date" class="form-control" id="tgl_akhir" name="tgl_akhir" value="<?php echo htmlspecialchars($tgl_akhir); ?>">
-                    </div>
-                </div>
-                <div class="col-md-2 d-flex align-items-end mb-3">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-search me-2"></i> Filter
-                    </button>
-                </div>
+<div class="container-fluid">
+
+    <div class="alert alert-primary shadow-sm mb-4">
+        <div class="d-flex align-items-center">
+            <div class="me-3"><i class="fas fa-info-circle fa-2x"></i></div>
+            <div>
+                <h5 class="alert-heading mb-1">Estimasi Biaya Realtime</h5>
+                <p class="mb-0">Menampilkan pasien aktif (belum lunas). Klik tombol <strong>Detail</strong> untuk melihat rincian komponen biaya (Obat, Tindakan, Kamar, dll).</p>
             </div>
-        </form>
+        </div>
     </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Daftar Pasien Rawat Inap Aktif</h6>
+            <button onclick="reloadTable()" class="btn btn-sm btn-primary"><i class="fas fa-sync-alt me-2"></i>Refresh Data</button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover" id="tableKunjungan" width="100%" cellspacing="0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Tgl Masuk</th>
+                            <th>No. Rawat</th>
+                            <th>No. RM</th>
+                            <th>Nama Pasien</th>
+                            <th>Bangsal / Kelas</th>
+                            <th>Penjamin</th>
+                            <th class="text-center">Lama</th>
+                            <th class="text-end bg-warning text-dark">Est. Biaya (Rp)</th>
+                            <th class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
 
-<div class="card shadow-sm">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Hasil Data (<?php echo count($data); ?> Kunjungan)</h6>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped table-sm" id="laporanTable" width="100%" cellspacing="0">
-                <thead class="table-dark">
-                    <tr>
-                        <th>No. Kunjungan</th>
-                        <th>Tgl Reg</th>
-                        <th>Jam Reg</th>
-                        <th>Penjamin</th>
-                        <th>Poliklinik</th>
-                        <th>No. RM</th>
-                        <th>Nama Pasien</th>
-                        <th>Status Lanjut</th>
-                        <th>Status Pelayanan</th>
-                        <th class="text-end">Billing Sementara</th>
-                        <th class="text-end">Biaya Obat</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (!empty($data)): ?>
-                        <?php foreach ($data as $row):
-                            $rowClass = '';
-                            // Highlight merah jika Batal tapi ada biaya
-                            if ($row['Status Pelayanan'] == 'Batal' && $row['Biaya Obat_raw'] > 0 && $row['billing_sementara_raw'] > 0) {
-                                $rowClass = 'table-danger'; 
-                            }
-                        ?>
-                        <tr class="<?php echo $rowClass; ?>">
-                            <td><?php echo htmlspecialchars($row['no_rawat']); ?></td>
-                            <td><?php echo htmlspecialchars($row['Tgl Reg']); ?></td>
-                            <td><?php echo htmlspecialchars($row['Jam reg']); ?></td>
-                            <td><?php echo htmlspecialchars($row['Penjamin']); ?></td>
-                            <td><?php echo htmlspecialchars($row['Poliklinik']); ?></td>
-                            <td><?php echo htmlspecialchars($row['no_rm']); ?></td>
-                            <td><?php echo htmlspecialchars($row['nama_pasien']); ?></td>
-                            <td><?php echo htmlspecialchars($row['status_lanjut']); ?></td>
-                            <td><?php echo htmlspecialchars($row['Status Pelayanan']); ?></td>
-                            <td class="text-end"><?php echo htmlspecialchars($row['billing_sementara_formatted']); ?></td>
-                            <td class="text-end"><?php echo htmlspecialchars($row['Biaya Obat_formatted']); ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="11" class="text-center py-4">Tidak ada data yang ditemukan untuk rentang tanggal ini.</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+<div class="modal fade" id="modalDetailBilling" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-file-invoice-dollar me-2"></i>Rincian Billing Sementara</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3 p-2 bg-light border rounded">
+                    <strong>Pasien:</strong> <span id="lbl-pasien">-</span> <br>
+                    <strong>No. Rawat:</strong> <span id="lbl-norawat">-</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped table-hover border">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Kategori</th>
+                                <th>Nama Item / Tindakan</th>
+                                <th class="text-end">Biaya (Rp)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bodyDetailBilling">
+                            <tr><td colspan="3" class="text-center">Memuat data...</td></tr>
+                        </tbody>
+                        <tfoot class="fw-bold bg-light">
+                            <tr>
+                                <td colspan="2" class="text-end">TOTAL ESTIMASI:</td>
+                                <td class="text-end text-primary" id="lbl-total">0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
         </div>
     </div>
 </div>
 
-<?php
-// JavaScript untuk DataTables (di-inject ke footer)
-ob_start();
-?>
+<?php ob_start(); ?>
 <script>
-    $(document).ready(function() {
-        <?php if (!empty($data)): ?>
-        $('#laporanTable').DataTable({
-            "language": {
-                "url": "https://cdn.datatables.net/plug-ins/1.13.6/i18n/id.json"
-            },
-            "pageLength": 25,
-            "order": [] // Gunakan urutan dari PHP (custom sort)
-        });
-        <?php endif; ?>
-    });
-</script>
-<?php
-$page_js = ob_get_clean();
-?>
+    var tableKunjungan;
 
-<?php
-require_once('includes/footer.php');
-?>
+    function formatRupiah(angka) {
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+    }
+
+    $(document).ready(function() {
+        tableKunjungan = $('#tableKunjungan').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": "api/data_kunjungan_aktif_ssp.php",
+                "type": "GET",
+                "error": function(xhr, error, thrown) { console.error("Error DataTables:", error); }
+            },
+            "pageLength": 10,
+            "order": [[ 0, "desc" ]],
+            "columns": [
+                { "data": "waktu" },
+                { "data": "no_rawat" },
+                { "data": "rm" },
+                { "data": "pasien", "className": "fw-bold" },
+                { "data": "kamar" },
+                { "data": "penjamin" },
+                { "data": "lama", "className": "text-center" },
+                { "data": "estimasi", "className": "text-end fw-bold text-danger fs-6" },
+                { 
+                    "data": null, "className": "text-center", 
+                    "render": function(data, type, row) {
+                        return `<button class="btn btn-sm btn-info text-white" onclick="showDetailBilling('${row.no_rawat}', '${row.pasien.replace(/'/g, "\\'")}')" title="Lihat Rincian"><i class="fas fa-search"></i> Detail</button>`;
+                    }
+                }
+            ]
+        });
+    });
+
+    function reloadTable() {
+        tableKunjungan.ajax.reload();
+    }
+
+    function showDetailBilling(noRawat, namaPasien) {
+        $('#lbl-pasien').text(namaPasien);
+        $('#lbl-norawat').text(noRawat);
+        $('#bodyDetailBilling').html('<tr><td colspan="3" class="text-center"><div class="spinner-border text-primary spinner-border-sm"></div> Memuat rincian...</td></tr>');
+        $('#lbl-total').text('...');
+        
+        $('#modalDetailBilling').modal('show');
+
+        $.ajax({
+            url: 'api/data_rincian_billing.php',
+            type: 'GET',
+            data: { no_rawat: noRawat },
+            dataType: 'json',
+            success: function(res) {
+                var html = '';
+                if (res.data && res.data.length > 0) {
+                    res.data.forEach(function(item) {
+                        var colorClass = (item.biaya < 0) ? 'text-danger' : 'text-dark';
+                        html += `<tr>
+                                    <td><span class="badge bg-secondary">${item.kategori}</span></td>
+                                    <td>${item.nama}</td>
+                                    <td class="text-end ${colorClass}">${formatRupiah(item.biaya)}</td>
+                                 </tr>`;
+                    });
+                } else {
+                    html = '<tr><td colspan="3" class="text-center">Tidak ada data biaya ditemukan.</td></tr>';
+                }
+                $('#bodyDetailBilling').html(html);
+                $('#lbl-total').text(formatRupiah(res.total));
+            },
+            error: function() {
+                $('#bodyDetailBilling').html('<tr><td colspan="3" class="text-center text-danger">Gagal memuat data.</td></tr>');
+            }
+        });
+    }
+</script>
+<?php $page_js = ob_get_clean(); ?>
+
+<?php require_once('includes/footer.php'); ?>
