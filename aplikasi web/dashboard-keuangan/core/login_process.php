@@ -1,110 +1,122 @@
 <?php
 /*
- * File login_process.php
- * Memproses data login, mengecek Super Admin dan User Biasa.
- * PHP 7.3 compatible.
+ * File: core/login_process.php (UPDATE V3 - SUPER ADMIN EXCEPTION)
+ * - Super Admin (Tabel admin): Bypass validasi roles.
+ * - User Biasa (Tabel user): Wajib validasi ke tabel roles.
  */
 
-// 1. Sertakan file koneksi (yang akan otomatis memulai session)
-require_once('../config/koneksi.php');
+session_start();
+require_once(dirname(__DIR__) . '/config/koneksi.php');
 
-// 2. Ambil data dari form POST
-// Kita gunakan isset() untuk PHP 7.3
-$username = isset($_POST['username']) ? $_POST['username'] : '';
-$password_input = isset($_POST['password']) ? $_POST['password'] : '';
+// 1. Ambil data dari form
+$username = isset($_POST['username']) ? trim($_POST['username']) : '';
+$password_input = isset($_POST['password']) ? trim($_POST['password']) : '';
 
 if (empty($username) || empty($password_input)) {
     header('Location: ../index.php?error=1');
     exit;
 }
 
-$login_sukses = false;
-
-// 3. Cek Super Admin (Tabel 'admin')
-// Komentar: Kueri ini menggunakan AES_DECRYPT sesuai permintaan Anda.
+// -------------------------------------------------------------------------
+// A. CEK SUPER ADMIN (Tabel 'admin') - BYPASS ROLES
+// -------------------------------------------------------------------------
 $sql_admin = "
     SELECT 
-        AES_DECRYPT(admin.usere, 'nur') AS usere, 
-        AES_DECRYPT(admin.passworde, 'windi') AS passworde 
+        AES_DECRYPT(usere, 'nur') as usere, 
+        AES_DECRYPT(passworde, 'windi') as passworde 
     FROM admin 
-    WHERE AES_DECRYPT(admin.usere, 'nur') = ?
+    WHERE AES_DECRYPT(usere, 'nur') = ?
 ";
 
-// Menggunakan Prepared Statement (MySQLi) untuk keamanan
 $stmt_admin = $koneksi->prepare($sql_admin);
 $stmt_admin->bind_param("s", $username);
 $stmt_admin->execute();
-$result_admin = $stmt_admin->get_result();
+$res_admin = $stmt_admin->get_result();
 
-if ($result_admin->num_rows === 1) {
-    $row_admin = $result_admin->fetch_assoc();
+if ($res_admin->num_rows === 1) {
+    $row_admin = $res_admin->fetch_assoc();
     
-    // Komentar: Membandingkan password yang di-dekripsi dengan password inputan
+    // Verifikasi Password Admin
     if ($row_admin['passworde'] === $password_input) {
-        $login_sukses = true;
+        // Login Berhasil sebagai Super Admin
+        session_regenerate_id(true);
+        $_SESSION['user_id'] = $username;
+        $_SESSION['nama_user'] = "Super Admin";
+        $_SESSION['is_admin'] = true; // Flag khusus Super Admin
+        $_SESSION['role'] = 'Super Admin';
         
-        session_regenerate_id(true); // Mencegah session fixation
-        $_SESSION['user_id'] = $row_admin['usere'];
-        $_SESSION['nama_user'] = 'Super Admin';
-        $_SESSION['is_admin'] = true;
+        header("Location: ../dashboard.php");
+        exit; // Stop eksekusi, jangan cek user lain
     }
 }
 $stmt_admin->close();
 
 
-// 4. Jika bukan Super Admin, cek User Biasa (Tabel 'user')
-if (!$login_sukses) {
-    // Komentar: Kueri ini juga menggunakan AES_DECRYPT dan mengecek hak akses rekap_per_shift
-    $sql_user = "
-        SELECT 
-            AES_DECRYPT(user.id_user, 'nur') AS id_user, 
-            AES_DECRYPT(user.password, 'windi') AS password, 
-            user.rekap_per_shift 
-        FROM user 
-        WHERE AES_DECRYPT(user.id_user, 'nur') = ?
-    ";
+// -------------------------------------------------------------------------
+// B. CEK USER BIASA (Tabel 'user') - WAJIB CEK ROLES
+// -------------------------------------------------------------------------
+$sql_user = "
+    SELECT 
+        AES_DECRYPT(id_user, 'nur') as id_user, 
+        AES_DECRYPT(password, 'windi') as password 
+    FROM user 
+    WHERE AES_DECRYPT(id_user, 'nur') = ?
+";
 
-    $stmt_user = $koneksi->prepare($sql_user);
-    $stmt_user->bind_param("s", $username);
-    $stmt_user->execute();
-    $result_user = $stmt_user->get_result();
+$stmt_user = $koneksi->prepare($sql_user);
+$stmt_user->bind_param("s", $username);
+$stmt_user->execute();
+$res_user = $stmt_user->get_result();
 
-    if ($result_user->num_rows === 1) {
-        $row_user = $result_user->fetch_assoc();
+if ($res_user->num_rows === 1) {
+    $row_user = $res_user->fetch_assoc();
+    
+    // Verifikasi Password User
+    if ($row_user['password'] === $password_input) {
         
-        // Komentar: Cek password DAN hak akses
-        if ($row_user['password'] === $password_input) {
+        // --- VALIDASI ROLE (Hanya untuk User Biasa) ---
+        $sql_role = "SELECT role FROM roles WHERE username = ?";
+        $stmt_role = $koneksi->prepare($sql_role);
+        $stmt_role->bind_param("s", $username);
+        $stmt_role->execute();
+        $res_role = $stmt_role->get_result();
+        
+        if ($res_role->num_rows > 0) {
+            $data_role = $res_role->fetch_assoc();
             
-            if ($row_user['rekap_per_shift'] == 'true') {
-                $login_sukses = true;
-                
+            // Cek apakah Role adalah Admin
+            if ($data_role['role'] === 'Admin') {
+                // Login Berhasil sebagai User Admin
                 session_regenerate_id(true);
-                $_SESSION['user_id'] = $row_user['id_user'];
+                $_SESSION['user_id'] = $username;
+                $_SESSION['role'] = 'Admin';
+                $_SESSION['is_admin'] = false; // Bukan Super Admin
                 
-                // Ambil nama petugas/dokter untuk sapaan di dashboard
-                $nama_user = $koneksi->query("SELECT petugas.nama FROM petugas WHERE petugas.nip = '" . $koneksi->real_escape_string($row_user['id_user']) . "'")->fetch_assoc();
-                if ($nama_user) {
-                     $_SESSION['nama_user'] = $nama_user['nama'];
-                } else {
-                     $_SESSION['nama_user'] = $row_user['id_user'];
+                // Ambil Nama Asli dari Petugas/Dokter
+                $q_nama = $koneksi->query("SELECT nama FROM petugas WHERE nip = '$username'");
+                if ($q_nama->num_rows == 0) {
+                    $q_nama = $koneksi->query("SELECT nm_dokter as nama FROM dokter WHERE kd_dokter = '$username'");
                 }
                 
-                $_SESSION['is_admin'] = false; // Ini bukan super admin
+                if ($q_nama && $r_nama = $q_nama->fetch_assoc()) {
+                    $_SESSION['nama_user'] = $r_nama['nama'];
+                } else {
+                    $_SESSION['nama_user'] = $username;
+                }
+                
+                header("Location: ../dashboard.php");
+                exit;
             }
         }
+        $stmt_role->close();
     }
-    $stmt_user->close();
 }
+$stmt_user->close();
 
-// 5. Finalisasi Login
-if ($login_sukses) {
-    // Jika login berhasil, arahkan ke dashboard
-    header('Location: ../dashboard.php');
-    exit;
-} else {
-    // Jika gagal total, kembalikan ke halaman login
-    header('Location: ../index.php?error=1');
-    exit;
-}
-
+// -------------------------------------------------------------------------
+// C. GAGAL LOGIN
+// -------------------------------------------------------------------------
+// Jika sampai di sini, berarti tidak ada yang cocok
+header("Location: ../index.php?error=1");
+exit;
 ?>

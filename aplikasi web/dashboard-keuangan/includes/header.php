@@ -1,6 +1,9 @@
+
 <?php
 /*
- * File header.php (LAYOUT SIDEBAR DINAMIS & FIX NAMA INSTANSI)
+ * File header.php (FINAL FIX - STRUCTURE REFACTOR)
+ * - Fix: Menghapus container-fluid/row pembungkus agar Main bisa resize otomatis.
+ * - Fitur: Sidebar & Main sejajar (siblings), bukan parent-child dalam grid.
  */
 
 require_once(dirname(__DIR__) . '/config/koneksi.php');
@@ -10,7 +13,6 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Ambil data branding
 $nama_instansi = "Dashboard RS"; 
 $logo_src = "core/logo.php";
 
@@ -21,8 +23,17 @@ if ($result_setting && $result_setting->num_rows > 0) {
     $nama_instansi = htmlspecialchars($row_setting['nama_instansi']);
 }
 
-// Dapatkan nama file saat ini untuk menandai menu aktif
 $current_page = basename($_SERVER['PHP_SELF']);
+
+function get_collapse_class($pages, $current) {
+    return in_array($current, $pages) ? 'show' : '';
+}
+function is_active($page, $current) {
+    return ($page == $current) ? 'active' : '';
+}
+function get_arrow_class($pages, $current) {
+    return in_array($current, $pages) ? '' : 'collapsed'; 
+}
 ?>
 
 <!doctype html>
@@ -36,7 +47,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -44,14 +54,22 @@ $current_page = basename($_SERVER['PHP_SELF']);
             --sidebar-width: 260px;
             --header-height: 56px;
             --transition-speed: 0.3s;
+            --sidebar-bg: #f8f9fa;
+            --primary-color: #0d6efd;
         }
 
         body {
             font-size: .875rem;
-            overflow-x: hidden; /* Mencegah scroll horizontal saat animasi */
+            overflow-x: hidden;
+            background-color: #f4f6f9;
+            padding-top: var(--header-height); /* Body turun sesuai tinggi header */
         }
 
-        /* --- 1. HEADER STYLING --- */
+        /* --- NAVBAR (FIXED TOP) --- */
+        .navbar {
+            height: var(--header-height);
+            z-index: 1030; /* Di atas sidebar */
+        }
         .navbar-brand {
             padding-top: .75rem;
             padding-bottom: .75rem;
@@ -59,101 +77,75 @@ $current_page = basename($_SERVER['PHP_SELF']);
             background-color: rgba(0, 0, 0, .25);
             box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
             width: var(--sidebar-width);
-            transition: width var(--transition-speed);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        /* --- 2. SIDEBAR STYLING (SLIDING) --- */
+        /* --- SIDEBAR (INDEPENDENT) --- */
         .sidebar {
             position: fixed;
             top: 0;
             bottom: 0;
             left: 0;
-            z-index: 100;
-            padding: 48px 0 0;
-            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+            z-index: 1000; /* Di bawah navbar */
+            padding-top: var(--header-height); 
             width: var(--sidebar-width);
-            transition: margin-left var(--transition-speed);
-            background-color: #f8f9fa;
-        }
-
-        .sidebar-sticky {
-            position: relative;
-            top: 0;
-            height: calc(100vh - 48px);
-            padding-top: .5rem;
-            overflow-x: hidden;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid #dee2e6;
+            transition: transform var(--transition-speed) ease-in-out;
             overflow-y: auto;
         }
 
-        /* --- 3. MAIN CONTENT ADJUSTMENT --- */
+        /* --- MAIN CONTENT (DYNAMIC WIDTH) --- */
         main {
-            margin-left: var(--sidebar-width); /* Default ada margin kiri */
-            transition: margin-left var(--transition-speed);
-            padding-top: 20px;
-            min-height: 100vh;
+            /* KUNCI: Block element, bukan Flex item */
+            display: block; 
+            width: auto; 
+            /* Margin kiri sesuai lebar sidebar */
+            margin-left: var(--sidebar-width); 
+            padding: 20px;
+            min-height: calc(100vh - var(--header-height));
+            transition: margin-left var(--transition-speed) ease-in-out;
         }
 
-        /* --- 4. STATE: SIDEBAR HIDDEN (Toggled) --- */
-        /* Saat body punya class 'sidebar-closed', geser sidebar ke kiri luar layar */
+        /* --- LOGIKA TOGGLE DESKTOP --- */
+        /* Saat ditutup, Sidebar geser ke kiri (hilang), Main margin jadi 0 */
         body.sidebar-closed .sidebar {
-            margin-left: calc(var(--sidebar-width) * -1);
+            transform: translateX(-100%); /* Lebih performant daripada margin-left */
         }
-        
-        /* Saat sidebar tutup, konten utama memenuhi layar */
         body.sidebar-closed main {
-            margin-left: 0;
+            margin-left: 0; /* Konten otomatis melebar full */
         }
 
-        /* Nav Link Styling */
-        .nav-link {
-            font-weight: 500;
-            color: #333;
-            padding: 10px 20px;
-            border-radius: 0 25px 25px 0; /* Efek bulat di kanan */
-            margin-right: 10px;
-        }
-        .nav-link:hover {
-            color: #007bff;
-            background-color: #e9ecef;
-        }
-        .nav-link.active {
-            color: #fff;
-            background-color: #007bff; /* Biru Bootstrap */
-        }
-        .sidebar-heading {
-            font-size: .75rem;
-            text-transform: uppercase;
-            margin-top: 1.5rem;
-        }
-
-        /* Mobile Responsiveness */
+        /* --- LOGIKA TOGGLE MOBILE --- */
         @media (max-width: 767.98px) {
-            /* Di HP, defaultnya sidebar tertutup */
-            .sidebar {
-                margin-left: calc(var(--sidebar-width) * -1);
-            }
-            main {
-                margin-left: 0;
-            }
-            /* Jika class 'sidebar-open' ada di HP, munculkan sidebar */
-            body.sidebar-open .sidebar {
-                margin-left: 0;
-            }
-            /* Overlay hitam saat sidebar buka di HP */
+            /* Default Mobile: Sidebar sembunyi, Main full */
+            .sidebar { transform: translateX(-100%); }
+            main { margin-left: 0; }
+
+            /* Saat Mobile Open: Sidebar muncul, Main TETAP (ditimpa overlay) */
+            body.sidebar-open .sidebar { transform: translateX(0); box-shadow: 0 0 15px rgba(0,0,0,0.2); }
+            
+            /* Overlay Mobile */
             .sidebar-overlay {
                 display: none;
-                position: fixed;
-                top: 0; left: 0; right: 0; bottom: 0;
-                background: rgba(0,0,0,0.5);
-                z-index: 99;
+                position: fixed; inset: 0;
+                background: rgba(0,0,0,0.5); z-index: 999;
             }
-            body.sidebar-open .sidebar-overlay {
-                display: block;
-            }
+            body.sidebar-open .sidebar-overlay { display: block; }
         }
+
+        /* Menu Styling (Sama seperti sebelumnya) */
+        .nav-link { color: #333; padding: 8px 16px; font-weight: 500; }
+        .nav-link:hover { color: var(--primary-color); background-color: #e9ecef; }
+        .nav-link.active { color: var(--primary-color); background-color: #e7f1ff; border-left: 3px solid var(--primary-color); }
+        .sidebar-group-header { cursor: pointer; padding: 10px 15px; margin-top: 5px; color: #6c757d; font-size: 0.75rem; font-weight: 700; display: flex; justify-content: space-between; text-transform: uppercase;}
+        .sidebar-group-header:hover { color: var(--primary-color); }
+        .sidebar-group-header .fa-chevron-down { transition: transform 0.3s; }
+        .sidebar-group-header.collapsed .fa-chevron-down { transform: rotate(-90deg); }
+        .collapse .nav-flex-column { padding-left: 10px; background-color: #fff; }
+
     </style>
 </head>
 <body>
@@ -164,194 +156,119 @@ $current_page = basename($_SERVER['PHP_SELF']);
       <?php echo $nama_instansi; ?>
   </a>
   
-  <button class="btn btn-dark d-none d-md-block ms-2" id="sidebarToggleDesktop">
-      <i class="fas fa-bars"></i>
+  <button class="btn btn-link text-white d-none d-md-block ms-2" id="sidebarToggleDesktop">
+      <i class="fas fa-bars fa-lg"></i>
   </button>
   
-  <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" id="sidebarToggleMobile" style="right: 10px; top: 10px;">
+  <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" id="sidebarToggleMobile" style="right: 10px; top: 15px;">
     <span class="navbar-toggler-icon"></span>
   </button>
   
-  <div class="w-100"></div> <div class="navbar-nav">
+  <div class="w-100"></div>
+  
+  <div class="navbar-nav d-flex flex-row">
     <div class="nav-item text-nowrap">
-      <span class="nav-link px-3 text-white">Halo, <?php echo htmlspecialchars($_SESSION['nama_user']); ?></span>
+      <span class="nav-link px-3 text-white small">Halo, <?php echo htmlspecialchars($_SESSION['nama_user']); ?></span>
     </div>
-  </div>
-  <div class="navbar-nav">
     <div class="nav-item text-nowrap">
-      <a class="nav-link px-3 text-danger" href="core/logout.php"><i class="fas fa-sign-out-alt"></i> Sign out</a>
+      <a class="nav-link px-3 text-danger" href="core/logout.php" title="Keluar"><i class="fas fa-sign-out-alt"></i></a>
     </div>
   </div>
 </header>
 
-<div class="container-fluid">
-  <div class="row">
-    
-    <div class="sidebar-overlay" id="mobileOverlay"></div>
+<div class="sidebar-overlay" id="mobileOverlay"></div>
 
-    <nav id="sidebarMenu" class="sidebar bg-light">
-      <div class="sidebar-sticky pt-3">
-        <ul class="nav flex-column">
-          
-          <li class="nav-item">
-            <a class="nav-link <?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>" href="dashboard.php">
-              <i class="fas fa-home me-2" style="width: 20px;"></i>
-              Dashboard Utama
-            </a>
-          </li>
-          
+<nav id="sidebarMenu" class="sidebar">
+  <div class="pt-3 pb-5">
+    <ul class="nav flex-column mb-2">
+      <li class="nav-item">
+        <a class="nav-link <?php echo is_active('dashboard.php', $current_page); ?>" href="dashboard.php">
+          <i class="fas fa-home me-2 text-primary" style="width: 20px;"></i> Dashboard Utama
+        </a>
+      </li>
+    </ul>
+
+    <?php $grp_biaya = ['kunjungan_ralan.php', 'kunjungan_ranap.php']; ?>
+    <div class="sidebar-group-header <?php echo get_arrow_class($grp_biaya, $current_page); ?>" data-bs-toggle="collapse" data-bs-target="#menuBiaya">
+        <span>Kendali Biaya</span> <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="collapse <?php echo get_collapse_class($grp_biaya, $current_page); ?>" id="menuBiaya">
+        <ul class="nav flex-column nav-flex-column">
+            <li class="nav-item"><a class="nav-link <?php echo is_active('kunjungan_ralan.php', $current_page); ?>" href="kunjungan_ralan.php"><i class="fas fa-walking me-2" style="width: 20px;"></i> Billing Ralan</a></li>
+            <li class="nav-item"><a class="nav-link <?php echo is_active('kunjungan_ranap.php', $current_page); ?>" href="kunjungan_ranap.php"><i class="fas fa-procedures me-2" style="width: 20px;"></i> Billing Ranap</a></li>
         </ul>
-		
-		<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-          <span>Kendali Biaya</span>
-        </h6>
-		<ul class="nav flex-column mb-2">		  
-		  <li class="nav-item">
-            <a class="nav-link <?php echo ($current_page == 'audit_kunjungan_belum_closing.php') ? 'active' : ''; ?>" href="audit_kunjungan_belum_closing.php">
-              <i class="fas fa-user-clock me-2" style="width: 20px;"></i>
-              Kunjungan Aktif
-            </a>
-          </li>
-		  <li class="nav-item">
-            <a class="nav-link <?php echo ($current_page == 'kunjungan_belum_closing.php') ? 'active' : ''; ?>" href="kunjungan_belum_closing.php">
-              <i class="fas fa-user-clock me-2" style="width: 20px;"></i>
-              Billing Sementara Ranap
-            </a>
-          </li>
-		  
-		</ul>
+    </div>
 
-        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-          <span>Laporan Keuangan</span>
-        </h6>
-        <ul class="nav flex-column mb-2">
-			  <li class="nav-item">
-				<a class="nav-link <?php echo ($current_page == 'laporan_kas.php') ? 'active' : ''; ?>" href="laporan_kas.php">
-              <i class="fas fa-home me-2" style="width: 20px;"></i>
-              Laporan Kas
-            </a>
-          </li>		
-          <li class="nav-item">
-            <a class="nav-link <?php echo ($current_page == 'laporan_billing_global.php') ? 'active' : ''; ?>" href="laporan_billing_global.php">
-              <i class="fas fa-file-invoice-dollar me-2" style="width: 20px;"></i>
-              Detail Semua Billing
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link <?php echo ($current_page == 'laporan_piutang_detail.php') ? 'active' : ''; ?>" href="laporan_piutang_detail.php">
-              <i class="fas fa-file-invoice me-2" style="width: 20px;"></i>
-              Laporan Piutang/Shift
-            </a>
-          </li>
-		  <li class="nav-item">
-            <a class="nav-link <?php echo ($current_page == 'laporan_detail.php') ? 'active' : ''; ?>" href="laporan_detail.php">
-              <i class="fas fa-cash-register me-2" style="width: 20px;"></i>
-              Laporan Tunai/Shift
-            </a>
-          </li>
-		  <li class="nav-item">
-			<a class="nav-link <?php echo ($current_page == 'laporan_tindakan.php') ? 'active' : ''; ?>" href="laporan_tindakan.php">
-			<i class="fas fa-stethoscope me-2" style="width: 20px;"></i>
-			Laporan Keuangan Tindakan Medis
-		  </a>
-		  </li>
-		  <li class="nav-item">
-			<a class="nav-link <?php echo ($current_page == 'laporan_jasa_medis.php') ? 'active' : ''; ?>" href="laporan_jasa_medis.php">
-			<i class="fas fa-user-tie me-2" style="width: 20px;"></i>
-			Jasa Medis Dokter
-			</a>
-		  </li>
+    <?php $grp_keuangan = ['laporan_kas.php', 'laporan_billing_global.php', 'laporan_piutang_detail.php', 'laporan_detail.php', 'laporan_tindakan.php', 'laporan_jasa_medis.php', 'laporan_analisa_lengkap.php']; ?>
+    <div class="sidebar-group-header <?php echo get_arrow_class($grp_keuangan, $current_page); ?>" data-bs-toggle="collapse" data-bs-target="#menuKeuangan">
+        <span>Laporan Keuangan</span> <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="collapse <?php echo get_collapse_class($grp_keuangan, $current_page); ?>" id="menuKeuangan">
+        <ul class="nav flex-column nav-flex-column">
+            <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_kas.php', $current_page); ?>" href="laporan_kas.php"><i class="fas fa-wallet me-2" style="width: 20px;"></i> Laporan Kas</a></li>
+            <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_billing_global.php', $current_page); ?>" href="laporan_billing_global.php"><i class="fas fa-file-invoice-dollar me-2" style="width: 20px;"></i> Detail Billing</a></li>
+            <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_piutang_detail.php', $current_page); ?>" href="laporan_piutang_detail.php"><i class="fas fa-file-invoice me-2" style="width: 20px;"></i> Laporan Piutang</a></li>
+            <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_detail.php', $current_page); ?>" href="laporan_detail.php"><i class="fas fa-cash-register me-2" style="width: 20px;"></i> Laporan Tunai</a></li>
+            <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_tindakan.php', $current_page); ?>" href="laporan_tindakan.php"><i class="fas fa-stethoscope me-2" style="width: 20px;"></i> Analisa Tindakan</a></li>
+            <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_analisa_lengkap.php', $current_page); ?>" href="laporan_analisa_lengkap.php"><i class="fas fa-microscope me-2" style="width: 20px;"></i> Analisa Lengkap</a></li>
+            <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_jasa_medis.php', $current_page); ?>" href="laporan_jasa_medis.php"><i class="fas fa-user-tie me-2" style="width: 20px;"></i> Jasa Medis</a></li>
         </ul>
-		
-		<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-          <span>Statistik & Indikator</span>
-        </h6>
-		<ul class="nav flex-column mb-2">
-		  <li class="nav-item">
-            <a class="nav-link <?php echo ($current_page == 'laporan_kunjungan.php') ? 'active' : ''; ?>" href="laporan_kunjungan.php">
-              <i class="fas fa-users me-2" style="width: 20px;"></i>
-              Kunjungan Ralan/Ranap
-            </a>
-          </li>
-		  <li class="nav-item">
-            <a class="nav-link <?php echo ($current_page == 'laporan_indikator_ranap.php') ? 'active' : ''; ?>" href="laporan_indikator_ranap.php">
-              <i class="fas fa-chart-line me-2" style="width: 20px;"></i>
-              BOR LOS TOI NDR GDR
-            </a>
-          </li>
-		  <li class="nav-item">
-            <a class="nav-link <?php echo ($current_page == 'laporan_penyakit.php') ? 'active' : ''; ?>" href="laporan_penyakit.php">
-              <i class="fas fa-chart-line me-2" style="width: 20px;"></i>
-              Laporan Penyakit
-            </a>
-          </li>
-		</ul>
-		
-		<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-          <span>KPI</span>
-        </h6>
-		<ul class="nav flex-column mb-2">
-		  <li class="nav-item">
-			<a class="nav-link <?php echo ($current_page == 'laporan_kinerja_dokter.php') ? 'active' : ''; ?>" href="laporan_kinerja_dokter.php">
-		  <i class="fas fa-user-md me-2" style="width: 20px;"></i>
-			Kinerja Dokter
-		    </a>
-		  </li>		  
-		</ul>
-		<ul class="nav flex-column mb-2">
-		  <li class="nav-item">
-			<a class="nav-link <?php echo ($current_page == 'laporan_operasi_view.php') ? 'active' : ''; ?>" href="laporan_operasi_view.php">
-		  <i class="fas fa-user-md me-2" style="width: 20px;"></i>
-			Laporan Operasi
-		    </a>
-		  </li>		  
-		</ul>
-		<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-			<span>Manajemen Farmasi</span>
-		</h6>
-		<ul class="nav flex-column mb-2">
-			<li class="nav-item">
-				<a class="nav-link <?php echo ($current_page == 'laporan_stok_farmasi.php') ? 'active' : ''; ?>" href="laporan_stok_farmasi.php">
-				<i class="fas fa-capsules me-2" style="width: 20px;"></i>
-				Monitoring Stok Aktif
-				</a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link <?php echo ($current_page == 'laporan_stok_opname.php') ? 'active' : ''; ?>" href="laporan_stok_opname.php">
-				<i class="fas fa-clipboard-check me-2" style="width: 20px;"></i>
-				Hasil Stok Opname
-				</a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link <?php echo ($current_page == 'laporan_proyeksi_keuntungan.php') ? 'active' : ''; ?>" href="laporan_proyeksi_keuntungan.php">
-				<i class="fas fa-hand-holding-usd me-2" style="width: 20px;"></i>
-				Proyeksi Keuntungan
-				</a>
-			</li>
-		</ul>
-		
-		<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-			<span>System & Utility</span>
-		</h6>
-		<ul class="nav flex-column mb-2">
-			<li class="nav-item">
-				<a class="nav-link <?php echo ($current_page == 'laporan_audit_trail.php') ? 'active' : ''; ?>" href="laporan_audit_trail.php">
-				<i class="fas fa-user-secret me-2" style="width: 20px;"></i>
-				Audit Trail Log
-				</a>
-			</li>
-		</ul>
-		
-		
-      </div>
-    </nav>
+    </div>
 
-    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 w-100">
-      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2"><?php echo isset($page_title) ? $page_title : 'Dashboard'; ?></h1>
-      </div>
+    <?php $grp_stat = ['laporan_kunjungan.php', 'laporan_indikator_ranap.php', 'laporan_penyakit.php']; ?>
+    <div class="sidebar-group-header <?php echo get_arrow_class($grp_stat, $current_page); ?>" data-bs-toggle="collapse" data-bs-target="#menuStatistik">
+        <span>Statistik & Indikator</span> <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="collapse <?php echo get_collapse_class($grp_stat, $current_page); ?>" id="menuStatistik">
+        <ul class="nav flex-column nav-flex-column">
+            <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_kunjungan.php', $current_page); ?>" href="laporan_kunjungan.php"><i class="fas fa-users me-2" style="width: 20px;"></i> Kunjungan RS</a></li>
+            <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_indikator_ranap.php', $current_page); ?>" href="laporan_indikator_ranap.php"><i class="fas fa-chart-line me-2" style="width: 20px;"></i> BOR LOS TOI</a></li>
+            <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_penyakit.php', $current_page); ?>" href="laporan_penyakit.php"><i class="fas fa-heartbeat me-2" style="width: 20px;"></i> Laporan Penyakit</a></li>
+        </ul>
+    </div>
+
+    <?php $grp_kpi = ['laporan_kinerja_dokter.php', 'laporan_operasi_view.php']; ?>
+    <div class="sidebar-group-header <?php echo get_arrow_class($grp_kpi, $current_page); ?>" data-bs-toggle="collapse" data-bs-target="#menuKPI">
+        <span>Key Performance</span> <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="collapse <?php echo get_collapse_class($grp_kpi, $current_page); ?>" id="menuKPI">
+        <ul class="nav flex-column nav-flex-column">
+            <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_kinerja_dokter.php', $current_page); ?>" href="laporan_kinerja_dokter.php"><i class="fas fa-user-md me-2" style="width: 20px;"></i> Kinerja Dokter</a></li>
+            <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_operasi_view.php', $current_page); ?>" href="laporan_operasi_view.php"><i class="fas fa-cut me-2" style="width: 20px;"></i> Laporan Operasi</a></li>
+        </ul>
+    </div>
+
+    <?php $grp_farmasi = ['laporan_stok_farmasi.php', 'laporan_stok_opname.php', 'laporan_proyeksi_keuntungan.php']; ?>
+    <div class="sidebar-group-header <?php echo get_arrow_class($grp_farmasi, $current_page); ?>" data-bs-toggle="collapse" data-bs-target="#menuFarmasi">
+        <span>Manajemen Farmasi</span> <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="collapse <?php echo get_collapse_class($grp_farmasi, $current_page); ?>" id="menuFarmasi">
+        <ul class="nav flex-column nav-flex-column">
+            <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_stok_farmasi.php', $current_page); ?>" href="laporan_stok_farmasi.php"><i class="fas fa-capsules me-2" style="width: 20px;"></i> Monitoring Stok</a></li>
+            <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_stok_opname.php', $current_page); ?>" href="laporan_stok_opname.php"><i class="fas fa-clipboard-check me-2" style="width: 20px;"></i> Stok Opname</a></li>
+            <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_proyeksi_keuntungan.php', $current_page); ?>" href="laporan_proyeksi_keuntungan.php"><i class="fas fa-chart-pie me-2" style="width: 20px;"></i> Profit Farmasi</a></li>
+        </ul>
+    </div>
+
+    <?php $grp_sys = ['laporan_audit_trail.php']; ?>
+    <div class="sidebar-group-header <?php echo get_arrow_class($grp_sys, $current_page); ?>" data-bs-toggle="collapse" data-bs-target="#menuSystem">
+        <span>System & Utility</span> <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="collapse <?php echo get_collapse_class($grp_sys, $current_page); ?>" id="menuSystem">
+        <ul class="nav flex-column nav-flex-column">
+            <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_audit_trail.php', $current_page); ?>" href="laporan_audit_trail.php"><i class="fas fa-shield-alt me-2" style="width: 20px;"></i> Audit Trail</a></li>
+        </ul>
+    </div>
+
+    <br><br>
+  </div>
+</nav>
+
+<main>
+    <div class="container-fluid">
 
 <script>
+    // Script untuk Sidebar Toggle & Persistence
     document.addEventListener("DOMContentLoaded", function() {
         const body = document.body;
         const toggleDesktop = document.getElementById('sidebarToggleDesktop');
@@ -368,8 +285,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         if(toggleDesktop) {
             toggleDesktop.addEventListener('click', function() {
                 body.classList.toggle('sidebar-closed');
-                
-                // Simpan status ke localStorage
+                // Simpan state
                 if (body.classList.contains('sidebar-closed')) {
                     localStorage.setItem('sidebarState', 'closed');
                 } else {

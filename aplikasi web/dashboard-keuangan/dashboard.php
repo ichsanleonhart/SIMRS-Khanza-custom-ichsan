@@ -1,8 +1,10 @@
 <?php
 /*
- * File: dashboard.php (UPDATE V5 - FINAL FIX)
- * - Fitur: Hyperlink pada Header Chart Tren -> kunjungan_belum_closing.php.
- * - UI: Cursor pointer pada header chart.
+ * File: dashboard.php (UPDATE V6 - HYPERLINKS)
+ * - Fix: Link Pasien Masuk -> laporan_kunjungan.php
+ * - Fix: Widget Kunjungan Aktif -> Tombol Ralan & Ranap terpisah.
+ * - Fix: Link Tren -> laporan_kunjungan.php
+ * - Fix: Link Top Poli -> laporan_kinerja_dokter.php
  */
 $page_title = "Executive Dashboard";
 require_once('includes/header.php');
@@ -54,7 +56,7 @@ require_once('includes/header.php');
         </div>
 
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-start border-4 border-success shadow h-100 py-2">
+            <div class="card border-start border-4 border-success shadow h-100 py-2 card-metric" onclick="window.location.href='laporan_kunjungan.php'">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
@@ -99,13 +101,16 @@ require_once('includes/header.php');
         </div>
 
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-start border-4 border-danger shadow h-100 py-2 card-metric" onclick="window.location.href='kunjungan_belum_closing.php'">
+            <div class="card border-start border-4 border-danger shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Kunjungan Aktif (Blm Bayar)</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800" id="val-aktif">...</div>
-                            <div class="small text-muted mt-1">Pasien belum closing kasir</div>
+                            <div class="mt-2">
+                                <a href="kunjungan_ralan.php" class="btn btn-sm btn-outline-danger py-0" style="font-size: 0.7rem;">Ralan</a>
+                                <a href="kunjungan_ranap.php" class="btn btn-sm btn-outline-warning text-dark py-0" style="font-size: 0.7rem;">Ranap</a>
+                            </div>
                         </div>
                         <div class="col-auto">
                             <div class="icon-circle bg-gradient-danger"><i class="fas fa-file-invoice-dollar"></i></div>
@@ -120,7 +125,7 @@ require_once('includes/header.php');
         <div class="col-xl-8 col-lg-7">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between chart-header-link" 
-                     onclick="window.location.href='kunjungan_belum_closing.php'" title="Klik untuk lihat detail kunjungan">
+                     onclick="window.location.href='laporan_kunjungan.php'" title="Klik untuk lihat detail kunjungan">
                     <h6 class="m-0 font-weight-bold text-primary">Tren Kunjungan Tahun Ini <i class="fas fa-external-link-alt ms-2 small text-gray-400"></i></h6>
                 </div>
                 <div class="card-body">
@@ -149,10 +154,11 @@ require_once('includes/header.php');
     </div>
 
     <div class="row mb-4">
+        
         <div class="col-lg-6 mb-4">
             <div class="card shadow mb-4 h-100">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Top 5 Poliklinik Hari Ini (Live Queue)</h6>
+                <div class="card-header py-3 chart-header-link" onclick="window.location.href='laporan_kinerja_dokter.php'" title="Klik untuk lihat kinerja dokter">
+                    <h6 class="m-0 font-weight-bold text-primary">Top 5 Poliklinik Hari Ini (Live Queue) <i class="fas fa-external-link-alt ms-2 small text-gray-400"></i></h6>
                 </div>
                 <div class="card-body" id="container-top-poli">
                     <div class="text-center p-3">Loading...</div>
@@ -206,65 +212,19 @@ require_once('includes/header.php');
     </div>
 </div>
 
-<div class="modal fade" id="modalRanapAktif" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title"><i class="fas fa-procedures me-2"></i>Daftar Pasien Rawat Inap Aktif</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="table-responsive">
-                    <table id="tableRanap" class="table table-bordered table-striped table-sm w-100">
-                        <thead class="table-light">
-                            <tr>
-                                <th>No.</th>
-                                <th>Masuk</th>
-                                <th>No. RM</th>
-                                <th>Nama Pasien</th>
-                                <th>Bangsal / Kamar</th>
-                                <th>Kelas</th>
-                                <th>Penjamin</th>
-                                <th>Lama (Hari)</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <?php ob_start(); ?>
 <script>
-    var chartTren, chartOmzet, tableRanap, tableDetailBed;
+    var chartTren, chartOmzet, tableDetailBed;
 
     function formatRupiah(angka) {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
     }
 
     $(document).ready(function() {
-        // Init DataTables
-        tableRanap = $('#tableRanap').DataTable({
-            "responsive": true, "pageLength": 10, "dom": 'Bfrtip', "buttons": ['excel'],
-            "columns": [
-                { "data": null, "render": function (data, type, row, meta) { return meta.row + 1; } },
-                { "data": "waktu_masuk" },
-                { "data": "no_rkm_medis" },
-                { "data": "nm_pasien" },
-                { "data": "nm_bangsal", render: function(d,t,r){ return d + ' (' + r.kd_kamar + ')'; } },
-                { "data": "kelas" },
-                { "data": "png_jawab" },
-                { "data": "lama_inap", className: "text-center fw-bold" }
-            ]
-        });
-
+        // Init DataTables Modal
         tableDetailBed = $('#tableDetailBed').DataTable({
-            "responsive": true, "pageLength": 10, "dom": 'Bfrtip', "buttons": ['excel'],
+            "responsive": true, "pageLength": 10,
+            "dom": 'Bfrtip', "buttons": ['excel'],
             "columns": [
                 { "data": "waktu_masuk" },
                 { "data": "no_rkm_medis" },
@@ -297,7 +257,7 @@ require_once('includes/header.php');
                 $('#val-bor').text(res.bed.bor_global + '%');
                 $('#bar-bor').css('width', res.bed.bor_global + '%');
                 
-                // 4. Pasien Aktif
+                // 4. Kunjungan Aktif
                 $('#val-aktif').text(res.kunjungan_aktif.toLocaleString());
 
                 // 5. Charts & Widgets
@@ -366,16 +326,6 @@ require_once('includes/header.php');
         });
     }
 
-    function showRanapAktif() {
-        $('#modalRanapAktif').modal('show');
-        $.ajax({
-            url: 'api/data_pasien_ranap_aktif.php', type: 'GET', dataType: 'json',
-            success: function(res) {
-                tableRanap.clear().rows.add(res.data).draw();
-            }
-        });
-    }
-
     function renderChartTren(data) {
         var ctx = document.getElementById("chartTren").getContext('2d');
         if(chartTren) chartTren.destroy();
@@ -385,9 +335,32 @@ require_once('includes/header.php');
             data: {
                 labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
                 datasets: [
-                    { label: "Total", data: data.total, borderColor: "#4e73df", borderWidth: 4, tension: 0.3, pointRadius: 0 },
-                    { label: "Rawat Jalan", data: data.ralan, borderColor: "rgba(246, 194, 62, 0.5)", borderWidth: 2, borderDash: [5, 5], tension: 0.3, pointRadius: 0 },
-                    { label: "Rawat Inap", data: data.ranap, borderColor: "rgba(28, 200, 138, 0.5)", borderWidth: 2, borderDash: [5, 5], tension: 0.3, pointRadius: 0 }
+                    {
+                        label: "Total",
+                        data: data.total,
+                        borderColor: "#4e73df",
+                        borderWidth: 4,
+                        tension: 0.3,
+                        pointRadius: 0
+                    },
+                    {
+                        label: "Rawat Jalan",
+                        data: data.ralan,
+                        borderColor: "rgba(246, 194, 62, 0.5)",
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        tension: 0.3,
+                        pointRadius: 0
+                    },
+                    {
+                        label: "Rawat Inap",
+                        data: data.ranap,
+                        borderColor: "rgba(28, 200, 138, 0.5)",
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        tension: 0.3,
+                        pointRadius: 0
+                    }
                 ],
             },
             options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: {display: true} } }
