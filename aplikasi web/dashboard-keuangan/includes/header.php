@@ -259,6 +259,16 @@ function get_arrow_class($pages, $current) {
             <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_audit_trail.php', $current_page); ?>" href="laporan_audit_trail.php"><i class="fas fa-shield-alt me-2" style="width: 20px;"></i> Audit Trail</a></li>
         </ul>
     </div>
+	
+	
+	<?php if(isset($_SESSION['role']) && $_SESSION['role'] == 'Super Admin') { ?>
+    <div class="collapse <?php echo get_collapse_class($grp_sys, $current_page); ?>" id="menuSystem">
+		<ul class="nav flex-column nav-flex-column">
+			<li class="nav-item"><a class="nav-link <?php echo is_active('manage_users.php', $current_page); ?>" href="manage_users.php"><i class="fas fa-users-cog" style="width: 20px;"></i> Manage Users</a></li>
+		</ul>
+	</div>
+	<?php } ?>
+	
 
     <br><br>
   </div>
