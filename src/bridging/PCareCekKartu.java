@@ -48,9 +48,11 @@ import simrskhanza.DlgPilihanCetakDokumen;
 import java.time.DayOfWeek;  //tambahan Ichsan
 import java.time.LocalDate;  //tambahan Ichsan
 import java.time.format.DateTimeFormatter;  //tambahan Ichsan
+import java.time.LocalDateTime;  //tambahan Ichsan
 import java.io.FileWriter;  //tambahan Ichsan
 import java.io.PrintWriter;  //tambahan Ichsan
-import java.time.LocalDateTime; //tambahan Ichsan
+
+
 
 /**
  *
@@ -61,6 +63,16 @@ public final class PCareCekKartu extends javax.swing.JDialog {
     private sekuel Sequel=new sekuel();
     private validasi Valid=new validasi();
     private Connection koneksi=koneksiDB.condb();
+    
+    // --- VARIABEL TAMBAHAN UNTUK BRIDGING ANTREAN ---
+    private ApiMobileJKNFKTP apimobilejkn = new ApiMobileJKNFKTP();
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    private LocalDate date;
+    private DayOfWeek dow;
+    private int day;
+    private String hari = "";
+    // ------------------------------------------------
+    
     private DlgPasien pasien=new DlgPasien(null,false);
     private ApiPcare api=new ApiPcare();
     private int pilih=0,p_no_ktp=0,p_tmp_lahir=0,p_nm_ibu=0,p_alamat=0,
