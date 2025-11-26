@@ -62,7 +62,7 @@ function get_arrow_class($pages, $current) {
             font-size: .875rem;
             overflow-x: hidden;
             background-color: #f4f6f9;
-            padding-top: var(--header-height); /* Body turun sesuai tinggi header */
+            /*padding-top: var(--header-height); *//* Body turun sesuai tinggi header */
         }
 
         /* --- NAVBAR (FIXED TOP) --- */
