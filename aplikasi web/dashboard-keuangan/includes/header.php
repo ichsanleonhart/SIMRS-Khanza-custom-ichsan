@@ -249,6 +249,21 @@ function get_arrow_class($pages, $current) {
             <li class="nav-item"><a class="nav-link <?php echo is_active('laporan_proyeksi_keuntungan.php', $current_page); ?>" href="laporan_proyeksi_keuntungan.php"><i class="fas fa-chart-pie me-2" style="width: 20px;"></i> Profit Farmasi</a></li>
         </ul>
     </div>
+	
+	
+	<?php $grp_erm = ['laporan_audit_erm_full.php', 'laporan_audit_erm_full.php']; ?>
+    <div class="sidebar-group-header <?php echo get_arrow_class($grp_erm, $current_page); ?>" data-bs-toggle="collapse" data-bs-target="#menuAuditERM">
+        <span>Kelengkapan ERM</span> <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="collapse <?php echo get_collapse_class($grp_erm, $current_page); ?>" id="menuAuditERM">
+        <ul class="nav flex-column nav-flex-column">
+			<li class="nav-item"> <a class="nav-link <?php echo is_active('laporan_audit_erm_full.php', $current_page); ?>" href="laporan_audit_erm_full.php"><i class="fas fa-check-double me-2" style="width: 20px;"></i> Audit Kepatuhan ERM</a></li>
+            </a></li>
+        </ul>
+    </div>
+	
+	
+	
 
     <?php $grp_sys = ['laporan_audit_trail.php']; ?>
     <div class="sidebar-group-header <?php echo get_arrow_class($grp_sys, $current_page); ?>" data-bs-toggle="collapse" data-bs-target="#menuSystem">
