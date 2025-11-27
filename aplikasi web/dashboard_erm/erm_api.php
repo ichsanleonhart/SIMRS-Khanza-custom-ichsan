@@ -3,14 +3,16 @@
  * API BACKEND ERM MONITORING
  * Author: Kamerad (Gemini) for Alicia
  */
-include 'config.php'; // Menggunakan koneksi dari config.php
+include 'config.php';
 
 $mode = isset($_GET['mode']) ? $_GET['mode'] : 'igd';
-$today = date('Y-m-d'); 
 
-// Helper Formatter Visual
+// Ambil Tanggal dari Parameter, Default ke Hari Ini
+$tgl_awal  = isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : date('Y-m-d');
+$tgl_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : date('Y-m-d');
+
+// Helper Formatter
 function fmt($val) {
-    // Logic user: '✓' untuk Ada, 'X' untuk Kosong
     if ($val == 'X' || $val == 'Tidak Ada') {
         return "<span class='badge-kosong'>KOSONG</span>";
     } else {
@@ -21,7 +23,7 @@ function fmt($val) {
 $response = ['columns' => [], 'html' => ''];
 
 // ==========================================================
-// 1. MODE: IGD (Logic from laporan-erm-igd.php)
+// 1. MODE: IGD
 // ==========================================================
 if ($mode == 'igd') {
     $response['columns'] = [
@@ -47,34 +49,36 @@ if ($mode == 'igd') {
     FROM reg_periksa r
     JOIN pasien p ON r.no_rkm_medis = p.no_rkm_medis
     JOIN dokter d ON r.kd_dokter = d.kd_dokter
-    WHERE r.tgl_registrasi = '$today'
+    WHERE r.tgl_registrasi BETWEEN '$tgl_awal' AND '$tgl_akhir'
     AND r.stts NOT LIKE '%batal%'
     AND r.kd_poli = 'IGDK'
-    ORDER BY r.tgl_registrasi, d.nm_dokter";
+    ORDER BY r.tgl_registrasi DESC, r.jam_reg DESC";
 
     $res = $koneksi->query($sql);
-    while($row = $res->fetch_assoc()) {
-        $response['html'] .= "<tr>
-            <td class='fw-bold'>{$row['nm_dokter']}</td>
-            <td>{$row['no_rkm_medis']}</td>
-            <td>{$row['nm_pasien']}</td>
-            <td>".fmt($row['cppt'])."</td>
-            <td>".fmt($row['triase'])."</td>
-            <td>".fmt($row['asmed'])."</td>
-            <td>".fmt($row['askep'])."</td>
-            <td>".fmt($row['obs'])."</td>
-            <td>".fmt($row['resep'])."</td>
-            <td>".fmt($row['resume'])."</td>
-            <td>".fmt($row['ews_neo'])."</td>
-            <td>".fmt($row['meows'])."</td>
-            <td>".fmt($row['pews_anak'])."</td>
-            <td>".fmt($row['pews_dws'])."</td>
-            <td>".fmt($row['transfer'])."</td>
-        </tr>";
+    if($res) {
+        while($row = $res->fetch_assoc()) {
+            $response['html'] .= "<tr>
+                <td class='fw-bold'>{$row['nm_dokter']}</td>
+                <td>{$row['no_rkm_medis']}</td>
+                <td>{$row['nm_pasien']}</td>
+                <td>".fmt($row['cppt'])."</td>
+                <td>".fmt($row['triase'])."</td>
+                <td>".fmt($row['asmed'])."</td>
+                <td>".fmt($row['askep'])."</td>
+                <td>".fmt($row['obs'])."</td>
+                <td>".fmt($row['resep'])."</td>
+                <td>".fmt($row['resume'])."</td>
+                <td>".fmt($row['ews_neo'])."</td>
+                <td>".fmt($row['meows'])."</td>
+                <td>".fmt($row['pews_anak'])."</td>
+                <td>".fmt($row['pews_dws'])."</td>
+                <td>".fmt($row['transfer'])."</td>
+            </tr>";
+        }
     }
 
 // ==========================================================
-// 2. MODE: RALAN (Logic from laporan-erm-ralan.php)
+// 2. MODE: RALAN
 // ==========================================================
 } elseif ($mode == 'ralan') {
     $response['columns'] = [
@@ -94,33 +98,33 @@ if ($mode == 'igd') {
     JOIN pasien p ON r.no_rkm_medis = p.no_rkm_medis
     JOIN poliklinik poli ON r.kd_poli = poli.kd_poli
     JOIN dokter d ON r.kd_dokter = d.kd_dokter
-    WHERE r.tgl_registrasi = '$today'
+    WHERE r.tgl_registrasi BETWEEN '$tgl_awal' AND '$tgl_akhir'
     AND r.stts NOT LIKE '%batal%'
-    -- AND r.kd_poli != 'IGDK' (Opsional: biasanya laporan ralan memisahkan IGD)
     ORDER BY d.nm_dokter ASC, r.no_reg ASC";
 
     $res = $koneksi->query($sql);
-    while($row = $res->fetch_assoc()) {
-        $bg_bayar = ($row['status_bayar'] == 'Belum Bayar') ? 'bg-danger text-white' : 'bg-success text-white';
-        
-        $response['html'] .= "<tr>
-            <td>{$row['nm_poli']}</td>
-            <td class='text-center fw-bold'>{$row['no_reg']}</td>
-            <td>{$row['nm_dokter']}</td>
-            <td>{$row['no_rkm_medis']}</td>
-            <td>{$row['nm_pasien']}</td>
-            <td>".fmt($row['resep'])."</td>
-            <td>".fmt($row['cppt'])."</td>
-            <td>".fmt($row['askep'])."</td>
-            <td>".fmt($row['asmed'])."</td>
-            <td>".fmt($row['resume'])."</td>
-            <td>".fmt($row['diagnosa'])."</td>
-            <td class='text-center'><span class='badge $bg_bayar'>{$row['status_bayar']}</span></td>
-        </tr>";
+    if($res) {
+        while($row = $res->fetch_assoc()) {
+            $bg_bayar = ($row['status_bayar'] == 'Belum Bayar') ? 'bg-danger text-white' : 'bg-success text-white';
+            $response['html'] .= "<tr>
+                <td>{$row['nm_poli']}</td>
+                <td class='text-center fw-bold'>{$row['no_reg']}</td>
+                <td>{$row['nm_dokter']}</td>
+                <td>{$row['no_rkm_medis']}</td>
+                <td>{$row['nm_pasien']}</td>
+                <td>".fmt($row['resep'])."</td>
+                <td>".fmt($row['cppt'])."</td>
+                <td>".fmt($row['askep'])."</td>
+                <td>".fmt($row['asmed'])."</td>
+                <td>".fmt($row['resume'])."</td>
+                <td>".fmt($row['diagnosa'])."</td>
+                <td class='text-center'><span class='badge $bg_bayar'>{$row['status_bayar']}</span></td>
+            </tr>";
+        }
     }
 
 // ==========================================================
-// 3. MODE: RANAP (Logic from laporan-erm-ranap.php)
+// 3. MODE: RANAP
 // ==========================================================
 } elseif ($mode == 'ranap') {
     $response['columns'] = [
@@ -130,7 +134,6 @@ if ($mode == 'igd') {
         'Observasi', 'Nyeri', 'Plg', 'Resume', 'Persetujuan'
     ];
 
-    // Note: Logic asli menggunakan LEFT JOIN dpjp_ranap, dan WHERE kamar_inap.stts_pulang = '-'
     $sql = "SELECT
         d.nm_dokter, r.no_rkm_medis, p.nm_pasien, b.nm_bangsal,
         IF(EXISTS(SELECT 1 FROM penilaian_awal_keperawatan_ranap WHERE no_rawat = r.no_rawat), '✓', 'X') AS askep_umum,
@@ -162,34 +165,36 @@ if ($mode == 'igd') {
     ORDER BY b.nm_bangsal ASC, d.nm_dokter ASC";
 
     $res = $koneksi->query($sql);
-    while($row = $res->fetch_assoc()) {
-        $response['html'] .= "<tr>
-            <td>{$row['nm_dokter']}</td>
-            <td>{$row['no_rkm_medis']}</td>
-            <td>{$row['nm_pasien']}</td>
-            <td>{$row['nm_bangsal']}</td>
-            <td>".fmt($row['askep_umum'])."</td>
-            <td>".fmt($row['askep_obgyn'])."</td>
-            <td>".fmt($row['rj_neo'])."</td>
-            <td>".fmt($row['rj_anak'])."</td>
-            <td>".fmt($row['rj_dws'])."</td>
-            <td>".fmt($row['resep'])."</td>
-            <td>".fmt($row['pews'])."</td>
-            <td>".fmt($row['ews'])."</td>
-            <td>".fmt($row['ews_neo'])."</td>
-            <td>".fmt($row['cppt'])."</td>
-            <td>".fmt($row['cat_kep'])."</td>
-            <td>".fmt($row['transfer'])."</td>
-            <td>".fmt($row['obs'])."</td>
-            <td>".fmt($row['nyeri'])."</td>
-            <td>".fmt($row['pulang'])."</td>
-            <td>".fmt($row['resume'])."</td>
-            <td>".fmt($row['setuju'])."</td>
-        </tr>";
+    if($res) {
+        while($row = $res->fetch_assoc()) {
+            $response['html'] .= "<tr>
+                <td>{$row['nm_dokter']}</td>
+                <td>{$row['no_rkm_medis']}</td>
+                <td>{$row['nm_pasien']}</td>
+                <td>{$row['nm_bangsal']}</td>
+                <td>".fmt($row['askep_umum'])."</td>
+                <td>".fmt($row['askep_obgyn'])."</td>
+                <td>".fmt($row['rj_neo'])."</td>
+                <td>".fmt($row['rj_anak'])."</td>
+                <td>".fmt($row['rj_dws'])."</td>
+                <td>".fmt($row['resep'])."</td>
+                <td>".fmt($row['pews'])."</td>
+                <td>".fmt($row['ews'])."</td>
+                <td>".fmt($row['ews_neo'])."</td>
+                <td>".fmt($row['cppt'])."</td>
+                <td>".fmt($row['cat_kep'])."</td>
+                <td>".fmt($row['transfer'])."</td>
+                <td>".fmt($row['obs'])."</td>
+                <td>".fmt($row['nyeri'])."</td>
+                <td>".fmt($row['pulang'])."</td>
+                <td>".fmt($row['resume'])."</td>
+                <td>".fmt($row['setuju'])."</td>
+            </tr>";
+        }
     }
 
 // ==========================================================
-// 4. MODE: OPERASI (Logic from laporan-erm-ok.php)
+// 4. MODE: OPERASI
 // ==========================================================
 } elseif ($mode == 'operasi') {
     $response['columns'] = [
@@ -219,41 +224,43 @@ if ($mode == 'igd') {
     LEFT JOIN dokter d ON bo.kd_dokter = d.kd_dokter
     WHERE r.stts NOT LIKE '%batal%'
     AND bo.status NOT LIKE '%Selesai%'
+    AND bo.tanggal BETWEEN '$tgl_awal' AND '$tgl_akhir'
     ORDER BY b.nm_bangsal ASC";
 
     $res = $koneksi->query($sql);
-    while($row = $res->fetch_assoc()) {
-        $response['html'] .= "<tr>
-            <td>{$row['nm_dokter']}</td>
-            <td>{$row['no_rkm_medis']}</td>
-            <td>{$row['nm_pasien']}</td>
-            <td>{$row['nm_bangsal']}</td>
-            <td>".fmt($row['resep'])."</td>
-            <td>".fmt($row['pre_anestesi'])."</td>
-            <td>".fmt($row['lap_op'])."</td>
-            <td>".fmt($row['setuju'])."</td>
-            <td>".fmt($row['sign_in'])."</td>
-            <td>".fmt($row['sign_out'])."</td>
-            <td>".fmt($row['time_out'])."</td>
-            <td>".fmt($row['check_pre'])."</td>
-            <td>".fmt($row['check_post'])."</td>
-            <td>".fmt($row['bromage'])."</td>
-        </tr>";
+    if($res) {
+        while($row = $res->fetch_assoc()) {
+            $response['html'] .= "<tr>
+                <td>{$row['nm_dokter']}</td>
+                <td>{$row['no_rkm_medis']}</td>
+                <td>{$row['nm_pasien']}</td>
+                <td>{$row['nm_bangsal']}</td>
+                <td>".fmt($row['resep'])."</td>
+                <td>".fmt($row['pre_anestesi'])."</td>
+                <td>".fmt($row['lap_op'])."</td>
+                <td>".fmt($row['setuju'])."</td>
+                <td>".fmt($row['sign_in'])."</td>
+                <td>".fmt($row['sign_out'])."</td>
+                <td>".fmt($row['time_out'])."</td>
+                <td>".fmt($row['check_pre'])."</td>
+                <td>".fmt($row['check_post'])."</td>
+                <td>".fmt($row['bromage'])."</td>
+            </tr>";
+        }
     }
 
 // ==========================================================
-// 5. MODE: BPJS / CASEMIX (Updated Logic)
+// 5. MODE: BPJS / CASEMIX (Final Upgrade - Status Rawat Added)
 // ==========================================================
 } elseif ($mode == 'bpjs') {
+    // Definisi Judul Kolom
     $response['columns'] = [
-        'No. Rawat', 'No. SEP', 'Pasien', 'Tgl Reg', 'Jenis Rawat',
-        'Resume Medis', 'Laporan Operasi', 'Hasil Lab', 'Hasil Rad', 'Resep', 'CPPT', 'Status Billing'
+        'No. Rawat', 'No. SEP', 'Pasien', 'Tgl Reg', 'Status Rawat', // <-- Kolom Baru
+        'Asesmen IGD', 'Asesmen Ralan', 'Asesmen Ranap', 
+        'Resume Medis', 'Laporan Op', 'Lab', 'Rad', 'Resep', 'CPPT', 'Status Billing'
     ];
 
-    // Logic Update: 
-    // 1. Ambil dari reg_periksa berdasarkan tgl_registrasi hari ini.
-    // 2. Filter hanya pasien dengan Penjamin (PJ) mengandung kata 'BPJS' atau memiliki SEP.
-    
+    // Query
     $sql = "SELECT 
         r.no_rawat, 
         IFNULL(sep.no_sep, '-') as no_sep, 
@@ -261,51 +268,121 @@ if ($mode == 'igd') {
         r.tgl_registrasi, 
         r.status_lanjut,
         r.status_bayar,
-        -- Cek Kelengkapan Berkas
-        IF(EXISTS(SELECT 1 FROM resume_pasien WHERE no_rawat = r.no_rawat) OR EXISTS(SELECT 1 FROM resume_pasien_ranap WHERE no_rawat = r.no_rawat), '✓', 'X') AS resume,
-        IF(EXISTS(SELECT 1 FROM operasi WHERE no_rawat = r.no_rawat), '✓', 'X') AS operasi,
-        IF(EXISTS(SELECT 1 FROM periksa_lab WHERE no_rawat = r.no_rawat), '✓', 'X') AS lab,
-        IF(EXISTS(SELECT 1 FROM periksa_radiologi WHERE no_rawat = r.no_rawat), '✓', 'X') AS rad,
-        IF(EXISTS(SELECT 1 FROM resep_obat WHERE no_rawat = r.no_rawat), '✓', 'X') AS resep,
-        IF(EXISTS(SELECT 1 FROM pemeriksaan_ralan WHERE no_rawat = r.no_rawat) OR EXISTS(SELECT 1 FROM pemeriksaan_ranap WHERE no_rawat = r.no_rawat), '✓', 'X') AS cppt
+        
+        -- 1. ASESMEN MEDIS IGD
+        IF(EXISTS(SELECT 1 FROM penilaian_medis_igd WHERE no_rawat = r.no_rawat), 'Ada', 'X') AS asmed_igd,
+
+        -- 2. ASESMEN MEDIS RALAN (Cek Seluruh Tabel Spesialis)
+        COALESCE(
+            (SELECT 'Umum' FROM penilaian_medis_ralan WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Mata' FROM penilaian_medis_ralan_mata WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Anak' FROM penilaian_medis_ralan_anak WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Bedah' FROM penilaian_medis_ralan_bedah WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Bedah Mulut' FROM penilaian_medis_ralan_bedah_mulut WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Kandungan' FROM penilaian_medis_ralan_kandungan WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Peny. Dalam' FROM penilaian_medis_ralan_penyakit_dalam WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'THT' FROM penilaian_medis_ralan_tht WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Saraf' FROM penilaian_medis_ralan_neurologi WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Ortho' FROM penilaian_medis_ralan_orthopedi WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Paru' FROM penilaian_medis_ralan_paru WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Jiwa' FROM penilaian_medis_ralan_psikiatrik WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Jiwa IGD' FROM penilaian_medis_ralan_gawat_darurat_psikiatri WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Kulit' FROM penilaian_medis_ralan_kulitdankelamin WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Geriatri' FROM penilaian_medis_ralan_geriatri WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Jantung' FROM penilaian_medis_ralan_jantung WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Rehab' FROM penilaian_medis_ralan_rehab_medik WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Urologi' FROM penilaian_medis_ralan_urologi WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Hemodialisa' FROM penilaian_medis_hemodialisa WHERE no_rawat = r.no_rawat LIMIT 1),
+            NULL
+        ) AS info_asmed_ralan,
+
+        -- 3. ASESMEN MEDIS RANAP (Gabungan)
+        COALESCE(
+            (SELECT 'Umum' FROM penilaian_medis_ranap WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Kandungan' FROM penilaian_medis_ranap_kandungan WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Neonatus' FROM penilaian_medis_ranap_neonatus WHERE no_rawat = r.no_rawat LIMIT 1),
+            (SELECT 'Jiwa' FROM penilaian_medis_ranap_psikiatrik WHERE no_rawat = r.no_rawat LIMIT 1),
+            NULL
+        ) AS info_asmed_ranap,
+
+        -- Penunjang Lain
+        IF(EXISTS(SELECT 1 FROM resume_pasien WHERE no_rawat = r.no_rawat) OR EXISTS(SELECT 1 FROM resume_pasien_ranap WHERE no_rawat = r.no_rawat), 'Ada', 'X') AS resume,
+        IF(EXISTS(SELECT 1 FROM operasi WHERE no_rawat = r.no_rawat), 'Ada', 'X') AS operasi,
+        IF(EXISTS(SELECT 1 FROM periksa_lab WHERE no_rawat = r.no_rawat), 'Ada', 'X') AS lab,
+        IF(EXISTS(SELECT 1 FROM periksa_radiologi WHERE no_rawat = r.no_rawat), 'Ada', 'X') AS rad,
+        IF(EXISTS(SELECT 1 FROM resep_obat WHERE no_rawat = r.no_rawat), 'Ada', 'X') AS resep,
+        IF(EXISTS(SELECT 1 FROM pemeriksaan_ralan WHERE no_rawat = r.no_rawat) OR EXISTS(SELECT 1 FROM pemeriksaan_ranap WHERE no_rawat = r.no_rawat), 'Ada', 'X') AS cppt
+
     FROM reg_periksa r
     JOIN pasien p ON r.no_rkm_medis = p.no_rkm_medis
     JOIN penjab pj ON r.kd_pj = pj.kd_pj
     LEFT JOIN bridging_sep sep ON r.no_rawat = sep.no_rawat
-    WHERE r.tgl_registrasi = '$today' 
+    WHERE r.tgl_registrasi BETWEEN '$tgl_awal' AND '$tgl_akhir'
     AND r.stts <> 'Batal'
-    AND pj.png_jawab LIKE '%BPJS%'
+    AND (pj.png_jawab LIKE '%BPJS%' OR sep.no_sep IS NOT NULL)
     ORDER BY r.tgl_registrasi DESC, r.jam_reg DESC";
 
     $res = $koneksi->query($sql);
     
-    while($row = $res->fetch_assoc()) {
-        $bg_status = ($row['status_lanjut'] == 'Ranap') ? 'badge bg-warning text-dark' : 'badge bg-info';
-        
-        // Logic Status Billing (Open/Closed)
-        if ($row['status_bayar'] == 'Sudah Bayar') {
-            $status_billing = "<span class='badge-ada'>CLOSED</span>";
-        } else {
-            $status_billing = "<span class='badge-kosong'>OPEN</span>";
-        }
+    if ($res) {
+        while($row = $res->fetch_assoc()) {
+            // Styling Status Rawat
+            $badge_status_rawat = ($row['status_lanjut'] == 'Ranap') 
+                ? 'badge bg-warning text-dark' 
+                : 'badge bg-success';
 
-        $response['html'] .= "<tr>
-            <td>{$row['no_rawat']}</td>
-            <td class='fw-bold text-primary'>{$row['no_sep']}</td>
-            <td>{$row['nm_pasien']}</td>
-            <td>{$row['tgl_registrasi']}</td>
-            <td><span class='$bg_status'>{$row['status_lanjut']}</span></td>
-            <td>".fmt($row['resume'])."</td>
-            <td>".fmt($row['operasi'])."</td>
-            <td>".fmt($row['lab'])."</td>
-            <td>".fmt($row['rad'])."</td>
-            <td>".fmt($row['resep'])."</td>
-            <td>".fmt($row['cppt'])."</td>
-            <td>{$status_billing}</td>
-        </tr>";
+            // Logic Status Billing
+            if ($row['status_bayar'] == 'Sudah Bayar') {
+                $status_billing = "<span class='badge-ada'>CLOSED</span>";
+            } else {
+                $status_billing = "<span class='badge-kosong'>OPEN</span>";
+            }
+
+            // Logic Display Asesmen dengan Info Tambahan
+            $tampil_igd = ($row['asmed_igd'] == 'Ada') ? "<span class='badge-ada'>✓</span>" : "<span class='badge-kosong'>KOSONG</span>";
+            
+            // Ralan
+            if ($row['info_asmed_ralan'] != NULL) {
+                $tampil_ralan = "<span class='badge-ada'>✓</span> <small class='text-muted'>(" . $row['info_asmed_ralan'] . ")</small>";
+            } else {
+                $tampil_ralan = "<span class='badge-kosong'>KOSONG</span>"; 
+            }
+
+            // Ranap (Hanya dicek jika Status = Ranap)
+            if ($row['status_lanjut'] == 'Ranap') {
+                if ($row['info_asmed_ranap'] != NULL) {
+                    $tampil_ranap = "<span class='badge-ada'>✓</span> <small class='text-muted'>(" . $row['info_asmed_ranap'] . ")</small>";
+                } else {
+                    $tampil_ranap = "<span class='badge-kosong'>KOSONG</span>";
+                }
+            } else {
+                $tampil_ranap = "<span class='text-muted'>-</span>";
+            }
+
+            $response['html'] .= "<tr>
+                <td>{$row['no_rawat']}</td>
+                <td class='fw-bold text-primary'>{$row['no_sep']}</td>
+                <td>{$row['nm_pasien']}</td>
+                <td>{$row['tgl_registrasi']}</td>
+                <td class='text-center'><span class='{$badge_status_rawat}'>{$row['status_lanjut']}</span></td>
+                
+                <td class='text-center'>{$tampil_igd}</td>
+                <td class='text-center'>{$tampil_ralan}</td>
+                <td class='text-center'>{$tampil_ranap}</td>
+
+                <td class='text-center'>".fmt($row['resume'])."</td>
+                <td class='text-center'>".fmt($row['operasi'])."</td>
+                <td class='text-center'>".fmt($row['lab'])."</td>
+                <td class='text-center'>".fmt($row['rad'])."</td>
+                <td class='text-center'>".fmt($row['resep'])."</td>
+                <td class='text-center'>".fmt($row['cppt'])."</td>
+                <td class='text-center'>{$status_billing}</td>
+            </tr>";
+        }
+    } else {
+        $response['html'] = "<tr><td colspan='15' class='text-danger text-center'>Error SQL: ".$koneksi->error."</td></tr>";
     }
 }
-
 
 echo json_encode($response);
 ?>

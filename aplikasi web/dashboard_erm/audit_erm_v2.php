@@ -9,7 +9,7 @@
 // ==========================================
 // 1. KONFIGURASI & KONEKSI
 // ==========================================
-$db_host = '192.168.1.5';
+$db_host = '192.168.1.2';
 $db_user = 'client';
 $db_pass = 'epotoransu';
 $db_name = 'sik_master';

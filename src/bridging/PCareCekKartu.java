@@ -97,12 +97,7 @@ public final class PCareCekKartu extends javax.swing.JDialog {
     private JsonNode nameNode;
     private JsonNode response;
 	
-	private ApiMobileJKNFKTP apimobilejkn=new ApiMobileJKNFKTP();  //tambahan Ichsan
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");  //tambahan Ichsan
-    private LocalDate date; //tambahan Ichsan
-    private DayOfWeek dow; //tambahan Ichsan
-    private int day; //tambahan Ichsan
-    private String hari="";  //tambahan Ichsan
+
     
 
     /** Creates new form DlgKamar
