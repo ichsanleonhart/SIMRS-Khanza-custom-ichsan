@@ -5696,10 +5696,28 @@ public class frmUtama extends javax.swing.JFrame {
                                 json = "{" +
                                             "\"resourceType\": \"ServiceRequest\"," +
                                             "\"identifier\": [" +
+                                            // IDENTIFIER 1: ID Unik Resource (Untuk internal SatuSehat membedakan per tindakan)
                                                 "{" +
                                                     "\"system\": \"http://sys-ids.kemkes.go.id/servicerequest/"+koneksiDB.IDSATUSEHAT()+"\"," +
                                                     "\"value\": \""+rs.getString("noorder")+"."+rs.getString("kd_jenis_prw")+"\"" +
+                                                "}," + // <--- PERHATIKAN KOMA INI (PENTING!)
+                                                // IDENTIFIER 2: Accession Number (WAJIB SAMA PERSIS dengan DICOM Tag 0008,0050)
+                                                // Inilah yang dibaca oleh DICOM Router Kemenkes
+                                                "{" +
+                                                    "\"use\": \"official\"," +
+                                                    "\"type\": {" +
+                                                        "\"coding\": [" +
+                                                             "{" +
+                                                                "\"system\": \"http://terminology.hl7.org/CodeSystem/v2-0203\"," +
+                                                                "\"code\": \"ACSN\"," +
+                                                                "\"display\": \"Accession ID\"" +
+                                                             "}" +
+                                                        "]" +
+                                                    "}," +
+                                                    "\"system\": \"http://sys-ids.kemkes.go.id/acsn/" + koneksiDB.IDSATUSEHAT() + "\"," +
+                                                    "\"value\": \"" + rs.getString("noorder") + "\"" + // PERHATIKAN: Hanya NoOrder, tanpa kode perawatan
                                                 "}" +
+                                                // end of modification -- ichsan
                                             "]," +
                                             "\"status\": \"active\"," +
                                             "\"intent\": \"order\"," +
@@ -5816,10 +5834,29 @@ public class frmUtama extends javax.swing.JFrame {
                                 json = "{" +
                                             "\"resourceType\": \"ServiceRequest\"," +
                                             "\"identifier\": [" +
+                                                // IDENTIFIER 1: ID Unik Resource (Untuk internal SatuSehat membedakan per tindakan)
                                                 "{" +
                                                     "\"system\": \"http://sys-ids.kemkes.go.id/servicerequest/"+koneksiDB.IDSATUSEHAT()+"\"," +
                                                     "\"value\": \""+rs.getString("noorder")+"."+rs.getString("kd_jenis_prw")+"\"" +
+                                                "}," + // <--- PERHATIKAN KOMA INI (PENTING!)
+                                                // IDENTIFIER 2: Accession Number (WAJIB SAMA PERSIS dengan DICOM Tag 0008,0050)
+                                                // Inilah yang dibaca oleh DICOM Router Kemenkes
+                                                "{" +
+                                                    "\"use\": \"official\"," +
+                                                    "\"type\": {" +
+                                                        "\"coding\": [" +
+                                                             "{" +
+                                                                "\"system\": \"http://terminology.hl7.org/CodeSystem/v2-0203\"," +
+                                                                "\"code\": \"ACSN\"," +
+                                                                "\"display\": \"Accession ID\"" +
+                                                             "}" +
+                                                        "]" +
+                                                    "}," +
+                                                    "\"system\": \"http://sys-ids.kemkes.go.id/acsn/" + koneksiDB.IDSATUSEHAT() + "\"," +
+                                                    "\"value\": \"" + rs.getString("noorder") + "\"" + // PERHATIKAN: Hanya NoOrder, tanpa kode perawatan
                                                 "}" +
+                                                // end of modification -- ichsan
+                                        
                                             "]," +
                                             "\"status\": \"active\"," +
                                             "\"intent\": \"order\"," +
