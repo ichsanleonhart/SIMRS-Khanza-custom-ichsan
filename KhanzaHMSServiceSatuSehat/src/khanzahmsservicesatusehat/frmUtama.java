@@ -5667,7 +5667,7 @@ public class frmUtama extends javax.swing.JFrame {
     private void servicerequestradiologi() {
         try{
             ps=koneksi.prepareStatement(
-                   "select reg_periksa.no_rawat,reg_periksa.no_rkm_medis,pasien.nm_pasien,pasien.no_ktp,pegawai.no_ktp as ktpdokter,"+
+                   "select reg_periksa.no_rawat,reg_periksa.no_rkm_medis,pasien.nm_pasien,pasien.no_ktp,pegawai.no_ktp as ktpdokter,pegawai.nama,"+
                    "satu_sehat_encounter.id_encounter,permintaan_radiologi.noorder,permintaan_radiologi.tgl_permintaan,permintaan_radiologi.jam_permintaan,permintaan_radiologi.diagnosa_klinis,"+
                    "jns_perawatan_radiologi.nm_perawatan,satu_sehat_mapping_radiologi.code,satu_sehat_mapping_radiologi.system,satu_sehat_mapping_radiologi.display,"+
                    "ifnull(satu_sehat_servicerequest_radiologi.id_servicerequest,'') as id_servicerequest,permintaan_pemeriksaan_radiologi.kd_jenis_prw "+
@@ -5715,7 +5715,7 @@ public class frmUtama extends javax.swing.JFrame {
                                                         "]" +
                                                     "}," +
                                                     "\"system\": \"http://sys-ids.kemkes.go.id/acsn/" + koneksiDB.IDSATUSEHAT() + "\"," +
-                                                    "\"value\": \"" + rs.getString("noorder") + "\"" + // PERHATIKAN: Hanya NoOrder, tanpa kode perawatan
+                                                    "\"value\": \"" + rs.getString("noorder").trim() + "\"" + // PERHATIKAN: Hanya NoOrder, tanpa kode perawatan
                                                 "}" +
                                                 // end of modification -- ichsan
                                             "]," +
@@ -5805,7 +5805,7 @@ public class frmUtama extends javax.swing.JFrame {
         
         try{
             ps=koneksi.prepareStatement(
-                   "select reg_periksa.no_rawat,reg_periksa.no_rkm_medis,pasien.nm_pasien,pasien.no_ktp,pegawai.no_ktp as ktpdokter,"+
+                   "select reg_periksa.no_rawat,reg_periksa.no_rkm_medis,pasien.nm_pasien,pasien.no_ktp,pegawai.no_ktp as ktpdokter,pegawai.nama,"+
                    "satu_sehat_encounter.id_encounter,permintaan_radiologi.noorder,permintaan_radiologi.tgl_permintaan,permintaan_radiologi.jam_permintaan,permintaan_radiologi.diagnosa_klinis,"+
                    "jns_perawatan_radiologi.nm_perawatan,satu_sehat_mapping_radiologi.code,satu_sehat_mapping_radiologi.system,satu_sehat_mapping_radiologi.display,"+
                    "ifnull(satu_sehat_servicerequest_radiologi.id_servicerequest,'') as id_servicerequest,permintaan_pemeriksaan_radiologi.kd_jenis_prw "+
@@ -5853,7 +5853,7 @@ public class frmUtama extends javax.swing.JFrame {
                                                         "]" +
                                                     "}," +
                                                     "\"system\": \"http://sys-ids.kemkes.go.id/acsn/" + koneksiDB.IDSATUSEHAT() + "\"," +
-                                                    "\"value\": \"" + rs.getString("noorder") + "\"" + // PERHATIKAN: Hanya NoOrder, tanpa kode perawatan
+                                                    "\"value\": \"" + rs.getString("noorder").trim() + "\"" + // PERHATIKAN: Hanya NoOrder, tanpa kode perawatan
                                                 "}" +
                                                 // end of modification -- ichsan
                                         
