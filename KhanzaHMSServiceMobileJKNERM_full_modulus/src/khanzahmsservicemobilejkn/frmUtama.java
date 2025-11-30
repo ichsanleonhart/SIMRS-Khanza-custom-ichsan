@@ -1029,6 +1029,14 @@ public class frmUtama extends javax.swing.JFrame {
                                                     System.out.println("Task ID 3 Non MJKN - URL : "+URL);                                                    
                                                     root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                     nameNode = root.path("metadata");
+                                                    if (nameNode.path("code").asText().equals("200")) {
+                                                    // [PERBAIKAN] Jika sukses kirim, update variabel lokal
+                                                    task3 = "Sudah";
+                                                    // [LOGGING 200] Catat waktu sukses Task 3 ke table referensi_mobilejkn_bpjs_taskid_status200
+                                                    Sequel.queryu2("INSERT INTO referensi_mobilejkn_bpjs_taskid_status200 (no_rawat, taskid3) VALUES ('" 
+                                                            + rs.getString("no_rawat") + "', NOW()) ON DUPLICATE KEY UPDATE taskid3=NOW()");
+                                                    }
+
                                                     // FALLBACK
                                                     if(nameNode.path("code").asText().equals("201") && nameNode.path("message").asText().contains("TaskId=3 belum ada")){
                                                         Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='"+rs.getString("no_rawat")+"'");
@@ -1077,6 +1085,13 @@ public class frmUtama extends javax.swing.JFrame {
                                                     System.out.println("Task ID 4 Non MJKN - URL : "+URL);                                                            
                                                     root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                     nameNode = root.path("metadata");
+                                                    if (nameNode.path("code").asText().equals("200")) {
+                                                    // [PERBAIKAN] Jika sukses kirim, update variabel lokal
+                                                    task3 = "Sudah";
+                                                    // [LOGGING 200] Catat waktu sukses Task 4 ke table referensi_mobilejkn_bpjs_taskid_status200
+                                                    Sequel.queryu2("INSERT INTO referensi_mobilejkn_bpjs_taskid_status200 (no_rawat, taskid4) VALUES ('" 
+                                                            + rs.getString("no_rawat") + "', NOW()) ON DUPLICATE KEY UPDATE taskid4=NOW()");
+                                                    }
                                                     // *** FALLBACK DITAMBAHKAN DI SINI ***
                                                     if(nameNode.path("code").asText().equals("201") && nameNode.path("message").asText().contains("TaskId=4 belum ada")){
                                                         Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='4' and no_rawat='"+rs.getString("no_rawat")+"'");
@@ -1128,6 +1143,13 @@ public class frmUtama extends javax.swing.JFrame {
                                                     //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                     root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                     nameNode = root.path("metadata");
+                                                    if (nameNode.path("code").asText().equals("200")) {
+                                                    // [PERBAIKAN] Jika sukses kirim, update variabel lokal
+                                                    task3 = "Sudah";
+                                                    // [LOGGING 200] Catat waktu sukses Task 5 ke table referensi_mobilejkn_bpjs_taskid_status200
+                                                    Sequel.queryu2("INSERT INTO referensi_mobilejkn_bpjs_taskid_status200 (no_rawat, taskid5) VALUES ('" 
+                                                            + rs.getString("no_rawat") + "', NOW()) ON DUPLICATE KEY UPDATE taskid5=NOW()");
+                                                    }
                                                     // *** FALLBACK DITAMBAHKAN DI SINI ***
                                                     if(nameNode.path("code").asText().equals("201") && nameNode.path("message").asText().contains("TaskId=5 belum ada")){
                                                         Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='5' and no_rawat='"+rs.getString("no_rawat")+"'");
@@ -1172,6 +1194,13 @@ public class frmUtama extends javax.swing.JFrame {
                                                     //System.out.println(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                     root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                     nameNode = root.path("metadata");
+                                                    if (nameNode.path("code").asText().equals("200")) {
+                                                    // [PERBAIKAN] Jika sukses kirim, update variabel lokal
+                                                    task3 = "Sudah";
+                                                    // [LOGGING 200] Catat waktu sukses Task 6 ke table referensi_mobilejkn_bpjs_taskid_status200
+                                                    Sequel.queryu2("INSERT INTO referensi_mobilejkn_bpjs_taskid_status200 (no_rawat, taskid6) VALUES ('" 
+                                                            + rs.getString("no_rawat") + "', NOW()) ON DUPLICATE KEY UPDATE taskid6=NOW()");
+                                                    }
                                                     // *** FALLBACK DITAMBAHKAN DI SINI ***
                                                     if(nameNode.path("code").asText().equals("201") && nameNode.path("message").asText().contains("TaskId=6 belum ada")){
                                                         Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='6' and no_rawat='"+rs.getString("no_rawat")+"'");
@@ -1215,6 +1244,13 @@ public class frmUtama extends javax.swing.JFrame {
                                                     System.out.println("Task ID 7 Non MJKN - URL : "+URL);
                                                     root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                                                     nameNode = root.path("metadata");
+                                                    if (nameNode.path("code").asText().equals("200")) {
+                                                    // [PERBAIKAN] Jika sukses kirim, update variabel lokal
+                                                    task3 = "Sudah";
+                                                    // [LOGGING 200] Catat waktu sukses Task 7 ke table referensi_mobilejkn_bpjs_taskid_status200
+                                                    Sequel.queryu2("INSERT INTO referensi_mobilejkn_bpjs_taskid_status200 (no_rawat, taskid7) VALUES ('" 
+                                                            + rs.getString("no_rawat") + "', NOW()) ON DUPLICATE KEY UPDATE taskid7=NOW()");
+                                                    }
                                                     // FALLBACK 
                                                     if(nameNode.path("code").asText().equals("201") && nameNode.path("message").asText().contains("TaskId=7 belum ada")){
                                                         Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='7' and no_rawat='"+rs.getString("no_rawat")+"'");
