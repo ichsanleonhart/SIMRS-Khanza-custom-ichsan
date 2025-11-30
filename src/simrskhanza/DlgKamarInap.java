@@ -5843,7 +5843,48 @@ public class DlgKamarInap extends javax.swing.JDialog {
              tbKamIn.requestFocus();
     }else if((TOut.getText().length()==0)&&(norawat.getText().length()>0)){
             // --- AWAL MODIFIKASI ---
+            //versi baru yang lebih relaks, bisa lanjut simpan kalau petugas konfirmasi YES
+            // Pengecekan hanya berlaku jika yang login BUKAN Admin Utama
+            if (!akses.getkode().equals("Admin Utama")) {
+                // 1. Cek apakah pasien menggunakan penjamin BPJS
+                String jenisBayar = Sequel.cariIsi(
+                    "select penjab.png_jawab from reg_periksa inner join penjab on reg_periksa.kd_pj = penjab.kd_pj where reg_periksa.no_rawat=?", norawat.getText()
+                );
+
+                // 2. Jika penjamin adalah BPJS, lakukan pengecekan selanjutnya
+                if (jenisBayar.toUpperCase().contains("BPJS")) {
+                    
+                    // 2a. Cek apakah pasien adalah bayi baru lahir (kurang dari 4 hari)
+                    int selisihHariLahir = Sequel.cariInteger(
+                        "select DATEDIFF(current_date(), pasien.tgl_lahir) from pasien inner join reg_periksa on pasien.no_rkm_medis=reg_periksa.no_rkm_medis where reg_periksa.no_rawat=?", norawat.getText()
+                    );
+                    
+                    // 2b. Jika BUKAN bayi < 4 hari, maka validasi surat kontrol
+                    if(selisihHariLahir >= 4) {
+                        String noSuratKontrol = Sequel.cariIsi(
+                            "select bridging_surat_kontrol_bpjs.no_surat from bridging_sep " +
+                            "inner join bridging_surat_kontrol_bpjs on bridging_sep.no_sep = bridging_surat_kontrol_bpjs.no_sep " +
+                            "where bridging_sep.no_rawat = ? limit 1", norawat.getText()
+                        );
+
+                        // 3. Logika Validasi Diperlonggar (Confirmation Dialog)
+                        if (noSuratKontrol == null || noSuratKontrol.trim().isEmpty()) {
+                            // Tampilkan konfirmasi Yes/No
+                            reply = JOptionPane.showConfirmDialog(rootPane, 
+                                    "Surat kontrol BPJS (Bridging) belum dibuat!\nMau dilanjutkan saja update tanggal pulang?", 
+                                    "Konfirmasi", JOptionPane.YES_NO_OPTION);
+                            
+                            // Jika user pilih NO, maka hentikan proses (return)
+                            // Jika user pilih YES, kode akan lanjut ke bawah (proses pemulangan)
+                            if (reply == JOptionPane.NO_OPTION) {
+                                return; 
+                            }
+                        }
+                    }
+                }
+            }
             
+            /*  ///////////versi lama yang saklek
             // Pengecekan hanya berlaku jika yang login BUKAN Admin Utama
             if (!akses.getkode().equals("Admin Utama")) {
                 // 1. Cek apakah pasien menggunakan penjamin BPJS
@@ -5874,7 +5915,7 @@ public class DlgKamarInap extends javax.swing.JDialog {
                         }
                     }
                 }
-            }
+            }  */
             
             // --- AKHIR MODIFIKASI ---
 

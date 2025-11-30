@@ -30,6 +30,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
@@ -39,6 +41,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
@@ -3454,7 +3457,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
         }else{Valid.pindah(evt, BtnSimpan, BtnHapus);}
 }//GEN-LAST:event_BtnBatalKeyPressed
 /*  //tombol hapus lama bawaan khanza original
-    private void BtnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnHapusActionPerformed
+    private void BtnHapusActionPerformed(java.awt.event.ActionEvent evt) {                                         
         if(TabRawat.getSelectedIndex()==1){
             if(tbPendaftaran.getSelectedRow()!= -1){
                 try {
@@ -3482,7 +3485,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                 }
             }
         }
-}//GEN-LAST:event_BtnHapusActionPerformed
+}                                        
 */
     private void BtnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnHapusActionPerformed
         // Set logic based on current active tab
@@ -11126,6 +11129,31 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                             if(code.equals("200")){
                                 statusantrean=true; // SUKSES MURNI
                                 System.out.println(">> HASIL: SUKSES 200");
+                                
+                                 // ========================================================================
+                                // [TAMBAHAN] LOGGING KE TABLE TRACKERSQL  -- ichsan (20251130)
+                                // ========================================================================
+                                try {
+                                    // Gunakan PreparedStatement baru (psLog) agar tidak memutus loop rs utama
+                                    PreparedStatement psLog = koneksi.prepareStatement("insert into trackersql(tanggal, sqle, usere) values(now(),?,?)");
+                                    try {
+                                        // Isi Log: Menyebutkan sukses dan No Rawat pasien
+                                        psLog.setString(1, "Sukses Add Antrol Mobile JKN OnSite. No.Rawat: " + TNoRw.getText());
+                                        // User: Mengambil ID petugas yang sedang login saat ini
+                                        psLog.setString(2, akses.getkode());
+            
+                                        psLog.executeUpdate();
+                                    } catch (Exception e) {
+                                        System.out.println("Gagal menyimpan log trackersql: " + e);
+                                    } finally {
+                                        if(psLog != null) psLog.close();
+                                    }
+                                } catch (Exception ex) {
+                                    System.out.println("Error Log Tracker: " + ex);
+                                }
+                                // ========================================================================
+                                
+                                
                             } else if(code.equals("201")){
                                 // Handle jika sudah terdaftar = sukses (BYPASS)
                                 if(message.toLowerCase().contains("sudah terdaftar")){
@@ -11172,7 +11200,15 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
         // ========================================================================
     //  HELPER METHODS ADOPSI (UNTUK VALIDASI DATA KE BPJS)
     // ========================================================================
-
+    private void catatLog(String pesan) {
+        try {
+            // Log akan tersimpan di folder project dengan nama log_antrean_bpjs.txt
+            FileWriter fw = new FileWriter("log_antrean_bpjs.txt", true);
+            PrintWriter pw = new PrintWriter(fw);
+            pw.println(LocalDateTime.now() + " : " + pesan);
+            pw.close();
+        } catch (Exception e) { }
+    }
     // 1. Pengaman Angka (Mencegah Error jika field kosong)
     private String getSafeNumericValue(String value) {
         if (value == null || value.trim().isEmpty()) {

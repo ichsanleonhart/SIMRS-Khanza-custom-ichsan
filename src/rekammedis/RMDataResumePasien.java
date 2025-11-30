@@ -2446,7 +2446,7 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
         }
     }
 
-    private void isRawat() {
+    private void isRawat() {   //blok kode untuk menampilkan data-data awal ketika form dibuka.
         try {
         // Mengambil data registrasi pasien 
         ps=koneksi.prepareStatement(
@@ -2552,6 +2552,61 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
                 ps.close();
             }
         }
+        
+            // MODIFIKASI Mengambil Aturan Pakai dari resep_dokter            
+            try {
+                // Query join tanpa alias sesuai permintaan.
+                // Menghubungkan resep_dokter -> resep_obat (untuk no_rawat) -> databarang (nama) -> kodesatuan (satuan)
+                ps = koneksi.prepareStatement(
+                    "SELECT databarang.nama_brng, resep_dokter.jml, kodesatuan.satuan, resep_dokter.aturan_pakai " +
+                    "FROM resep_dokter " +
+                    "INNER JOIN resep_obat ON resep_dokter.no_resep = resep_obat.no_resep " +
+                    "INNER JOIN databarang ON resep_dokter.kode_brng = databarang.kode_brng " +
+                    "INNER JOIN kodesatuan ON databarang.kode_sat = kodesatuan.kode_sat " +
+                    "WHERE resep_obat.no_rawat = ?"
+                );
+                
+                ps.setString(1, TNoRw.getText());
+                rs = ps.executeQuery();
+                
+                // Menggunakan StringBuilder untuk menyusun daftar obat
+                StringBuilder daftarObat = new StringBuilder();
+                
+                while (rs.next()) {
+                    // Format: Nama Obat (Jumlah Satuan) - Aturan Pakai
+                    // Contoh: Amoxicillin (10 Tablet) - 3x1 Sesudah Makan
+                    daftarObat.append(rs.getString("nama_brng"))
+                              .append(" (")
+                              .append(rs.getDouble("jml")) 
+                              .append(" ")
+                              .append(rs.getString("satuan"))
+                              .append(") - ")
+                              .append(rs.getString("aturan_pakai")) // Menambahkan aturan pakai
+                              .append(", ");
+                }
+                
+                // Jika ada data obat yang ditemukan
+                if (daftarObat.length() > 0) {
+                    // Menghapus koma dan spasi terakhir ", " agar rapi
+                    daftarObat.setLength(daftarObat.length() - 2);
+                    
+                    // Set teks ke komponen Obat2an
+                    Obat2an.setText(daftarObat.toString());
+                }
+                
+            } catch (Exception e) {
+                System.out.println("Notifikasi Pengambilan Obat Resep : " + e);
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+            }
+            // ==========================================================================================
+            // AKHIR MODIFIKASI
+            // ==========================================================================================
 
     /////////////// end Modif by Ichsan
 
