@@ -21,6 +21,11 @@ if (!isset($_SESSION['user_id'])) {
 $tgl_awal = isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : date('Y-m-01');
 $tgl_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : date('Y-m-d');
 
+// --- FIX LOGIKA TANGGAL ---
+// Tambahkan jam secara eksplisit agar mencakup seluruh detik di tanggal tersebut
+$tgl_awal_sql = $tgl_awal . " 00:00:00";
+$tgl_akhir_sql = $tgl_akhir . " 23:59:59";
+
 // Hitung Total Biaya (Semua Komponen Jasa & Sarpras)
 $biaya_total = "(t.biayaoperator1 + t.biayaoperator2 + t.biayaoperator3 + t.biayaasisten_operator1 + t.biayaasisten_operator2 + t.biayainstrumen + t.biayadokter_anak + t.biayaperawaat_resusitas + t.biayadokter_anestesi + t.biayaasisten_anestesi + t.biayabidan + t.biayaperawat_luar + t.biayaalat + t.biayasewaok + t.akomodasi + t.bagian_rs + t.biaya_omloop + t.biaya_omloop2 + t.biayasarpras + t.biaya_dokter_pjanak + t.biaya_dokter_umum)";
 
@@ -49,7 +54,7 @@ $sql = "
 $stmt = $koneksi->prepare($sql);
 
 if ($stmt) {
-    $stmt->bind_param("ss", $tgl_awal, $tgl_akhir);
+    $stmt->bind_param("ss", $tgl_awal_sql, $tgl_akhir_sql);
     $stmt->execute();
     $res = $stmt->get_result();
 
