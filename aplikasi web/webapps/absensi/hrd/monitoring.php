@@ -1,0 +1,155 @@
+<?php
+session_start();
+require_once('../../conf/conf.php');
+if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Monitoring - Absensi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../js/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.dataTables.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        /* Dark Mode DataTables Override */
+        .dataTables_wrapper .dataTables_length select, 
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #4b5563;
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            background-color: #1f2937;
+            color: white;
+        }
+        table.dataTable tbody tr { background-color: #1f2937; color: #d1d5db; }
+        table.dataTable tbody tr:hover { background-color: #374151; }
+        .paginate_button.current { background: #2563eb !important; color: white !important; border: none !important; }
+        .paginate_button { color: white !important; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-4">
+
+    <div class="max-w-7xl mx-auto">
+        
+        <div class="flex justify-between items-center mb-6 bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-lg">
+            <div class="flex items-center gap-4">
+                <div class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-white">Live Monitoring</h1>
+                    <p class="text-xs text-gray-400">Pegawai yang sedang dinas saat ini</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-2 items-center">
+                <select id="dep" class="bg-gray-900 border border-gray-600 rounded p-2 text-sm focus:border-blue-500">
+                    <option value="ALL">Semua Departemen</option>
+                </select>
+                <a href="index.php" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm transition">Kembali</a>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 p-5 rounded-lg shadow-lg border border-gray-700">
+            <table id="tabelLive" class="display responsive nowrap w-full text-sm" style="width:100%">
+                <thead>
+                    <tr class="text-left text-gray-400 border-b border-gray-700">
+                        <th>Foto</th>
+                        <th>Nama Pegawai</th>
+                        <th>Unit / Dept</th>
+                        <th>Shift</th>
+                        <th>Jam Masuk</th>
+                        <th>Durasi Dinas</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
+
+    <script>
+        let table;
+        let reloadInterval;
+
+        $(document).ready(function() {
+            // 1. Load Dept
+            $.get('api_monitoring.php?act=get_dep', function(res) {
+                const data = JSON.parse(res);
+                data.forEach(d => {
+                    $('#dep').append(`<option value="${d.dep_id}">${d.nama}</option>`);
+                });
+            });
+
+            // 2. Init DataTable
+            table = $('#tabelLive').DataTable({
+                responsive: true,
+                language: { search: "Cari:", emptyTable: "Tidak ada pegawai yang sedang dinas saat ini.", zeroRecords: "Tidak ditemukan" },
+                order: [[ 4, "desc" ]], // Urutkan jam masuk terbaru
+                columns: [
+                    { data: 'photo', orderable: false, width: "50px", render: function(data, type, row) {
+                        let imgPath = "../../" + data;
+                        return `<div class="h-10 w-10 rounded-full overflow-hidden border-2 border-blue-500 cursor-pointer" onclick="lihatFoto('${imgPath}', '${row.nama}')">
+                                    <img src="${imgPath}" class="h-full w-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=${row.nama}&background=random'">
+                                </div>`;
+                    }},
+                    { data: 'nama', render: (data, type, row) => `<div class="font-bold">${data}</div><div class="text-xs text-gray-400">${row.nik}</div>` },
+                    { data: 'dep' },
+                    { data: 'shift', render: function(data) {
+                        return `<span class="bg-blue-900 text-blue-200 px-2 py-0.5 rounded text-xs">${data}</span>`;
+                    }},
+                    { data: 'jam_datang', className: 'text-green-400 font-mono font-bold' },
+                    { data: 'durasi_live', className: 'text-yellow-400 font-mono' }, // Kolom baru
+                    { data: 'status', render: function(data) {
+                        return data.includes('Terlambat') 
+                            ? `<span class="text-red-400 font-bold">${data}</span>` 
+                            : `<span class="text-green-500">${data}</span>`;
+                    }}
+                ]
+            });
+
+            // Load Awal
+            loadTable();
+
+            // 3. Auto Refresh setiap 30 Detik
+            reloadInterval = setInterval(function() {
+                table.ajax.reload(null, false); // False = jangan reset paging
+                const now = new Date().toLocaleTimeString();
+                console.log("Data refreshed at " + now);
+            }, 30000);
+
+            // Filter Change
+            $('#dep').change(function() {
+                loadTable();
+            });
+        });
+
+        function loadTable() {
+            const dep = $('#dep').val();
+            table.ajax.url(`api_monitoring.php?act=get_live_data&dep=${dep}`).load();
+        }
+
+        function lihatFoto(url, nama) {
+            Swal.fire({
+                title: nama,
+                imageUrl: url,
+                imageHeight: 400,
+                imageAlt: 'Foto Absen',
+                background: '#1f2937',
+                color: '#fff',
+                confirmButtonColor: '#2563eb'
+            });
+        }
+    </script>
+</body>
+</html>

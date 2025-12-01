@@ -24,12 +24,23 @@ if (strpos($user_ip, $allowed_ip_prefix) !== 0 && $user_ip !== '127.0.0.1' && $u
 </head>
 <body class="bg-gray-900 flex flex-col items-center justify-center min-h-screen text-white relative">
 
-    <a href="hrd/" class="absolute top-4 right-4 bg-gray-800 p-2 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 transition z-20" title="Login HRD">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-    </a>
+    <div class="absolute top-4 left-4 z-20">
+        <a href="jadwal/login.php" class="bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-full shadow-lg transition flex items-center gap-2 px-4 border border-blue-400/30 backdrop-blur-sm" title="Cek Jadwal Dinas">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span class="text-xs font-bold hidden md:block">Jadwal</span>
+        </a>
+    </div>
 
+    <div class="absolute top-4 right-4 z-20">
+        <a href="hrd/login.php" class="bg-gray-800/80 hover:bg-gray-700 text-gray-400 hover:text-white p-3 rounded-full shadow-lg transition border border-gray-600 backdrop-blur-sm flex items-center gap-2" title="Login Admin / HRD">
+            <span class="text-xs font-bold hidden md:block">Admin</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </a>
+    </div>
     <div class="absolute top-8 w-full text-center z-10">
         <h1 class="text-xl font-bold text-blue-400 tracking-widest">PRESENSI WAJAH</h1>
         <div id="jam" class="text-4xl font-mono font-bold mt-1">00:00:00</div>
@@ -43,14 +54,14 @@ if (strpos($user_ip, $allowed_ip_prefix) !== 0 && $user_ip !== '127.0.0.1' && $u
     <div class="mt-6 text-center px-4">
         <p id="status" class="text-yellow-400 animate-pulse font-medium">Memuat Data Wajah...</p>
     </div>
-
     <audio id="audio_beep" src="assets/beep.mp3"></audio>
 
 <script>
     const video = document.getElementById('video');
     const statusText = document.getElementById('status');
     const audioBeep = document.getElementById('audio_beep');
-    const modelPath = '/webapps/absensi/models'; 
+    //const modelPath = '/webapps/absensi/models'; 
+	const modelPath = 'models';
     
     let labeledFaceDescriptors = [];
     let faceMatcher;
@@ -67,14 +78,39 @@ if (strpos($user_ip, $allowed_ip_prefix) !== 0 && $user_ip !== '127.0.0.1' && $u
     async function loadDataPegawai() {
         try {
             const res = await fetch('api_presensi.php?act=get_descriptors');
-            const data = await res.json();
-            if (data.length === 0) { statusText.innerText = "⚠️ Belum ada data wajah."; return; }
             
-            labeledFaceDescriptors = data.map(d => new faceapi.LabeledFaceDescriptors(d.label + "|" + d.nama, [new Float32Array(d.descriptor)]));
-            faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.55); // Sedikit dilonggarkan
+            // CEK 1: Apakah response OK?
+            if (!res.ok) throw new Error(res.statusText);
+
+            // CEK 2: Apakah valid JSON?
+            const text = await res.text(); // Ambil teks mentah dulu
+            try {
+                const data = JSON.parse(text); // Coba parse
+                
+                if (data.length === 0) { 
+                    statusText.innerText = "⚠️ Belum ada data wajah pegawai."; 
+                    return; 
+                }
+
+                labeledFaceDescriptors = data.map(d => {
+                    return new faceapi.LabeledFaceDescriptors(d.label + "|" + d.nama, [new Float32Array(d.descriptor)]);
+                });
+                
+                faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.45); 
+                statusText.innerText = "Kamera sedang disiapkan...";
+                startVideo();
+
+            } catch(e) {
+                console.error("Raw Response:", text); // Lihat ini di Console jika error
+                throw new Error("Format Data Salah: " + text.substring(0, 50) + "..."); 
+            }
             
-            startVideo();
-        } catch (e) { console.error(e); statusText.innerText = "Gagal koneksi API."; }
+        } catch (e) { 
+            console.error(e); 
+            // Tampilkan error spesifik di layar hitam
+            statusText.innerText = "Error: " + e.message; 
+            statusText.classList.add('text-red-500');
+        }
     }
 
     function startVideo() {

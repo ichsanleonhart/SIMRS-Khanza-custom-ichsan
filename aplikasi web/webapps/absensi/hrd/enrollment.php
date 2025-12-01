@@ -35,7 +35,8 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
 <script>
     let selId='', selNik='';
     const statusText = document.getElementById('loading');
-    const modelPath = '/webapps/absensi/models'; // Path absolut agar tidak bingung ../
+    // const modelPath = '/webapps/absensi/models'; // Path absolut agar tidak bingung ../
+	const modelPath = '../models';
 
     // Load Models dengan Error Handling Lengkap
     async function loadModels() {

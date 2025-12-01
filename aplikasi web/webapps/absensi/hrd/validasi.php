@@ -26,8 +26,8 @@ $res = bukaquery($sql);
     </nav>
     <div class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="gallery">
         <?php while($row = mysqli_fetch_assoc($res)) { 
-            $img = "../../../" . $row['photo'];
-            $img = file_exists($img) ? $img : "https://via.placeholder.com/150";
+            $img = "../../" . $row['photo'];
+            $img = file_exists($img) ? $img : "https://via.placeholder.com/150?text=Hilang";
         ?>
         <div class="bg-white rounded-lg shadow p-4 flex gap-4">
             <img src="<?php echo $img; ?>" class="w-24 h-32 object-cover rounded cursor-pointer bg-gray-200">

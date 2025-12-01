@@ -143,7 +143,7 @@ elseif ($act == 'get_schedule') {
 }
 
 // ==================================================================================
-// ACTION 3: SUBMIT ABSEN
+// ACTION 3: SUBMIT ABSEN (UPDATED PATH)
 // ==================================================================================
 elseif ($act == 'submit_absen') {
     $nik = validTeks($_POST['nik']);
@@ -154,14 +154,26 @@ elseif ($act == 'submit_absen') {
     $nama_peg = $pegawai['nama'];
     $dep_id = $pegawai['departemen'];
 
-    // Simpan Foto
-    $folderRelative = "pages/pegawai/photo_absensi/" . date("Y-m") . "/";
-    $folderServer   = "../" . $folderRelative; 
-    if (!file_exists($folderServer)) mkdir($folderServer, 0777, true);
+    // --- PERBAIKAN PATH PENYIMPANAN ---
+    // Kita berada di: /var/www/html/webapps/absensi/
+    // Tujuan fisik:   /var/www/html/webapps/absensi/foto_absen/YYYY-MM/
+    
+    $subFolder = date("Y-m") . "/";
+    $targetDir = "foto_absen/" . $subFolder; // Relatif terhadap file ini
+    
+    // Buat folder jika belum ada
+    if (!file_exists($targetDir)) {
+        mkdir($targetDir, 0777, true);
+    }
     
     $fileName = $nik . "-" . date("Ymd-His") . ".jpg";
-    file_put_contents($folderServer . $fileName, base64_decode(explode(";base64,", $img_base64)[1]));
-    $dbPhotoPath = $folderRelative . $fileName;
+    
+    // Simpan Fisik
+    file_put_contents($targetDir . $fileName, base64_decode(explode(";base64,", $img_base64)[1]));
+    
+    // Path untuk Database (Relatif terhadap folder webapps/, standar Khanza)
+    // Hasil: absensi/foto_absen/2025-12/123.jpg
+    $dbPhotoPath = "absensi/" . $targetDir . $fileName;
 
     $konektor = bukakoneksi();
     $tgl_sekarang = date('Y-m-d');
