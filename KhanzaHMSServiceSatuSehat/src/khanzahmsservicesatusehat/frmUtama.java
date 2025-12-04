@@ -33,7 +33,7 @@ import org.springframework.web.client.HttpClientErrorException;
 public class frmUtama extends javax.swing.JFrame {
     private Connection koneksi=koneksiDB.condb();
     private sekuel Sequel=new sekuel();
-    private String json="",link="",nol_jam = "",nol_menit = "",nol_detik = "",jam="",menit="",detik="",iddokter="",idpasien="",sistole="0",diastole="0",signa1="1",signa2="1",idrequest="";
+    private String json="",link="",nol_jam = "",nol_menit = "",nol_detik = "",jam="",menit="",detik="",iddokter="",idpasien="",sistole="0",diastole="0",signa1="1",signa2="1",idrequest="", identifierValue="";
     private ApiSatuSehat api=new ApiSatuSehat();
     private HttpHeaders headers;
     private HttpEntity requestEntity;
@@ -5524,18 +5524,17 @@ public class frmUtama extends javax.swing.JFrame {
         }
     }
     
+    // MODUL UTAMA OBSERVATION LAB PK
     private void observationlabpk() {
         try {
             TeksArea.append("\n------------------------------------------------------\n");
             TeksArea.append("MULAI PROSES KIRIM OBSERVATION LAB PK (HASIL)\n");
             TeksArea.append("------------------------------------------------------\n");
 
-            // PERBAIKAN QUERY:
-            // 1. Hapus JOIN nota_jalan (agar Ranap terbaca).
-            // 2. Filter berdasarkan permintaan_lab.tgl_hasil (Waktu hasil keluar).
-            // 3. Menggunakan LEFT JOIN ke tabel log resource prasyarat agar bisa dideteksi di Java.
-            ps = koneksi.prepareStatement(
-                    "select reg_periksa.no_rawat,reg_periksa.no_rkm_medis,pasien.nm_pasien,pasien.no_ktp,permintaan_lab.noorder,"
+            // QUERY UTAMA
+            // Filter berdasarkan tgl_hasil (Waktu hasil keluar)
+            // Pastikan ServiceRequest SUDAH TERKIRIM (Inner Join atau where id_servicerequest != '')
+            String query = "select reg_periksa.no_rawat,reg_periksa.no_rkm_medis,pasien.nm_pasien,pasien.no_ktp,permintaan_lab.noorder,"
                     + "permintaan_lab.tgl_hasil,permintaan_lab.jam_hasil,template_laboratorium.Pemeriksaan,satu_sehat_mapping_lab.code,"
                     + "satu_sehat_mapping_lab.system,satu_sehat_mapping_lab.display,detail_periksa_lab.nilai,detail_periksa_lab.nilai_rujukan,"
                     + "detail_periksa_lab.keterangan,permintaan_detail_permintaan_lab.id_template,ifnull(satu_sehat_specimen_lab.id_specimen,'') as id_specimen,"
@@ -5553,7 +5552,6 @@ public class frmUtama extends javax.swing.JFrame {
                     + "inner join detail_periksa_lab on periksa_lab.no_rawat=detail_periksa_lab.no_rawat and periksa_lab.tgl_periksa=detail_periksa_lab.tgl_periksa "
                     + "and periksa_lab.jam=detail_periksa_lab.jam and detail_periksa_lab.id_template=permintaan_detail_permintaan_lab.id_template "
                     + "inner join pegawai on periksa_lab.kd_dokter=pegawai.nik "
-                    // LEFT JOIN ke Log Resources Prasyarat
                     + "left join satu_sehat_servicerequest_lab on satu_sehat_servicerequest_lab.noorder=permintaan_detail_permintaan_lab.noorder "
                     + "and satu_sehat_servicerequest_lab.id_template=permintaan_detail_permintaan_lab.id_template "
                     + "and satu_sehat_servicerequest_lab.kd_jenis_prw=permintaan_detail_permintaan_lab.kd_jenis_prw "
@@ -5563,170 +5561,156 @@ public class frmUtama extends javax.swing.JFrame {
                     + "left join satu_sehat_observation_lab on satu_sehat_specimen_lab.noorder=satu_sehat_observation_lab.noorder "
                     + "and satu_sehat_specimen_lab.id_template=satu_sehat_observation_lab.id_template "
                     + "and satu_sehat_specimen_lab.kd_jenis_prw=satu_sehat_observation_lab.kd_jenis_prw "
-                    // Filter Waktu Hasil & Validasi NIK
                     + "where permintaan_lab.tgl_hasil between ? and ? "
                     + "and permintaan_lab.tgl_hasil <> '0000-00-00' "
                     + "and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' "
                     + "and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' "
-                    + "and ifnull(satu_sehat_observation_lab.id_observation,'')='' ");
+                    + "and ifnull(satu_sehat_observation_lab.id_observation,'')='' ";
+            
+            ps = koneksi.prepareStatement(query);
             try {
                 ps.setString(1, Tanggal1.getText());
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
-                    TeksArea.append("\n[PROSES OBSERVATION LAB PK] No.Order: " + rs.getString("noorder") + " | Item: " + rs.getString("Pemeriksaan") + "\n");
-
-                    if ((!rs.getString("no_ktp").equals("")) && (!rs.getString("ktppraktisi").equals("")) && rs.getString("id_observation").equals("")) {
-                        try {
-                            // Validasi Prasyarat (Chain of Custody)
-                            if (rs.getString("id_servicerequest").equals("")) {
-                                TeksArea.append("!! SKIP: ServiceRequest Lab PK belum terkirim.\n");
-                                continue;
-                            }
-                            // Specimen Lab sangat disarankan ada
-                            if (rs.getString("id_specimen").equals("")) {
-                                TeksArea.append("!! SKIP: Specimen Lab PK belum terkirim/tidak ditemukan.\n");
-                                continue;
-                            }
-
-                            // Cek ID Satu Sehat
-                            idpasien = cekViaSatuSehat.tampilIDPasien(rs.getString("no_ktp"));
-                            iddokter = cekViaSatuSehat.tampilIDParktisi(rs.getString("ktppraktisi"));
-
-                            if (idpasien.equals("") || iddokter.equals("")) {
-                                TeksArea.append("!! SKIP: ID Pasien/Dokter PJ Lab tidak ditemukan di Satu Sehat.\n");
-                                continue;
-                            }
-
-                            // Sanitasi Data Hasil
-                            String nilaiHasil = rs.getString("nilai").replaceAll("\"", "'");
-                            String satuan = rs.getString("satuan").replaceAll("\"", "'");
-                            String nilaiRujukan = rs.getString("nilai_rujukan").replaceAll("\"", "'");
-                            String keterangan = rs.getString("keterangan").replaceAll("(\r\n|\r|\n|\n\r)", " ").replaceAll("\"", "'");
-
-                            String hasilString = "Hasil Lab: " + nilaiHasil + " " + satuan + ", Nilai Rujukan: " + nilaiRujukan;
-                            if (!keterangan.equals("")) {
-                                hasilString += ", Keterangan: " + keterangan;
-                            }
-                            // Sanitasi akhir untuk hasilString
-                            hasilString = hasilString.replaceAll("(\r\n|\r|\n|\n\r)", "<br>")
-                                    .replaceAll("\"", "'")
-                                    .replaceAll("\\\\", "/")
-                                    .replaceAll("\t", " ");
-
-                            String displayMapping = rs.getString("display").replaceAll("\"", "'");
-                            String nmPasien = rs.getString("nm_pasien").replaceAll("\"", "'");
-                            String nmDokter = rs.getString("nama").replaceAll("\"", "'");
-
-                            try {
-                                headers = new HttpHeaders();
-                                headers.setContentType(MediaType.APPLICATION_JSON);
-                                headers.add("Authorization", "Bearer " + api.TokenSatuSehat());
-                                json = "{"
-                                        + "\"resourceType\": \"Observation\","
-                                        + "\"identifier\": ["
-                                        + "{"
-                                        + "\"system\": \"http://sys-ids.kemkes.go.id/observation/" + koneksiDB.IDSATUSEHAT() + "\","
-                                        + "\"value\": \"" + rs.getString("noorder") + "." + rs.getString("id_template") + "\""
-                                        + "}"
-                                        + "],"
-                                        + "\"status\": \"final\","
-                                        + "\"category\": ["
-                                        + "{"
-                                        + "\"coding\": ["
-                                        + "{"
-                                        + "\"system\": \"http://terminology.hl7.org/CodeSystem/observation-category\","
-                                        + "\"code\": \"laboratory\","
-                                        + "\"display\": \"Laboratory\""
-                                        + "}"
-                                        + "]"
-                                        + "}"
-                                        + "],"
-                                        + "\"code\": {"
-                                        + "\"coding\": ["
-                                        + "{"
-                                        + "\"system\": \"" + rs.getString("system") + "\","
-                                        + "\"code\": \"" + rs.getString("code") + "\","
-                                        + "\"display\": \"" + displayMapping + "\""
-                                        + "}"
-                                        + "]"
-                                        + "},"
-                                        + "\"subject\": {"
-                                        + "\"reference\": \"Patient/" + idpasien + "\","
-                                        + "\"display\": \"" + nmPasien + "\""
-                                        + "},"
-                                        + "\"performer\": ["
-                                        + "{"
-                                        + "\"reference\": \"Practitioner/" + iddokter + "\","
-                                        + "\"display\": \"" + nmDokter + "\""
-                                        + "}"
-                                        + "],"
-                                        + "\"encounter\": {"
-                                        + "\"reference\": \"Encounter/" + rs.getString("id_encounter") + "\""
-                                        + "},"
-                                        + "\"specimen\": {"
-                                        + "\"reference\": \"Specimen/" + rs.getString("id_specimen") + "\""
-                                        + "},"
-                                        + "\"basedOn\": ["
-                                        + "{"
-                                        + "\"reference\": \"ServiceRequest/" + rs.getString("id_servicerequest") + "\""
-                                        + "}"
-                                        + "],"
-                                        + "\"effectiveDateTime\": \"" + rs.getString("tgl_hasil") + "T" + rs.getString("jam_hasil") + "+07:00\","
-                                        + "\"valueString\": \"" + hasilString + "\""
-                                        + "}";
-
-                                TeksArea.append("   URL : " + link + "/Observation\n");
-                                TeksArea.append("   Request JSON : " + json + "\n");
-
-                                requestEntity = new HttpEntity(json, headers);
-                                json = api.getRest().exchange(link + "/Observation", HttpMethod.POST, requestEntity, String.class).getBody();
-
-                                TeksArea.append("   Result JSON : " + json + "\n");
-
-                                root = mapper.readTree(json);
-                                response = root.path("id");
-                                if (!response.asText().equals("")) {
-                                    Sequel.menyimpan2("satu_sehat_observation_lab", "?,?,?,?", "No.Order", 4, new String[]{
-                                        rs.getString("noorder"), rs.getString("kd_jenis_prw"), rs.getString("id_template"), response.asText()
-                                    });
-                                    TeksArea.append("   [SUKSES] Disimpan ke database lokal.\n");
-                                }
-                            } catch (Exception ea) {
-                                TeksArea.append("   [ERROR API] " + ea + "\n");
-                                System.out.println("Notifikasi Bridging : " + ea);
-                            }
-                        } catch (Exception ef) {
-                            TeksArea.append("   [ERROR INTERN] " + ef + "\n");
-                            System.out.println("Notifikasi : " + ef);
-                        }
-                    } else {
-                        if (rs.getString("no_ktp").equals("")) {
-                            TeksArea.append("!! SKIP: NIK Pasien Kosong\n");
-                        }
-                        if (rs.getString("ktppraktisi").equals("")) {
-                            TeksArea.append("!! SKIP: NIK Dokter PJ Lab Kosong\n");
-                        }
-                        if (!rs.getString("id_observation").equals("")) {
-                            TeksArea.append("!! SKIP: Sudah Terkirim\n");
-                        }
-                    }
+                    // Helper Kirim Observation
+                    kirimObservationLab(rs);
                     jeda();
                 }
             } catch (Exception e) {
                 System.out.println("Notif Lab PK : " + e);
                 TeksArea.append("ERROR QUERY LAB PK: " + e + "\n");
             } finally {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (ps != null) {
-                    ps.close();
-                }
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
             }
         } catch (Exception e) {
             System.out.println("Notifikasi Utama Lab PK : " + e);
             TeksArea.append("!! ERROR UTAMA OBSERVATION LAB PK: " + e + "\n");
+        }
+    }
+
+    // HELPER BARU (Agar kode lebih rapi & mudah didebug)
+    private void kirimObservationLab(ResultSet rs) {
+        try {
+            TeksArea.append("\n[PROSES OBSERVATION LAB PK] No.Order: " + rs.getString("noorder") + " | Item: " + rs.getString("Pemeriksaan") + "\n");
+
+            // 1. Cek Prasyarat (Chain of Custody)
+            String idServiceRequest = rs.getString("id_servicerequest");
+            String idSpecimen = rs.getString("id_specimen");
+
+            if (idServiceRequest.isEmpty()) {
+                TeksArea.append("   !! [SKIP] ServiceRequest Lab belum terkirim.\n");
+                return;
+            }
+            if (idSpecimen.isEmpty()) {
+                TeksArea.append("   !! [SKIP] Specimen Lab belum terkirim/tidak ditemukan.\n");
+                return;
+            }
+
+            // 2. Cek KyC
+            idpasien = cekViaSatuSehat.tampilIDPasien(rs.getString("no_ktp"));
+            iddokter = cekViaSatuSehat.tampilIDParktisi(rs.getString("ktppraktisi"));
+
+            if (idpasien.isEmpty() || iddokter.isEmpty()) {
+                TeksArea.append("   !! [SKIP] ID Pasien/Dokter PJ Lab tidak ditemukan di Satu Sehat.\n");
+                return;
+            }
+
+            // 3. Sanitasi Data Hasil
+            String nilaiHasil = rs.getString("nilai").replaceAll("\"", "'");
+            String satuan = rs.getString("satuan").replaceAll("\"", "'");
+            String nilaiRujukan = rs.getString("nilai_rujukan").replaceAll("\"", "'");
+            String keterangan = rs.getString("keterangan").replaceAll("(\r\n|\r|\n|\n\r)", " ").replaceAll("\"", "'");
+
+            // Format Value String yang Informatif
+            String hasilString = "Hasil: " + nilaiHasil + " " + satuan + " (Rujukan: " + nilaiRujukan + ")";
+            if (!keterangan.isEmpty()) {
+                hasilString += " Ket: " + keterangan;
+            }
+            // Bersihkan karakter berbahaya untuk JSON
+            hasilString = hasilString.replaceAll("[\n\r]", " ").replaceAll("\"", "'").replaceAll("\\\\", "/");
+
+            String displayMapping = rs.getString("display").replaceAll("\"", "'");
+            String nmPasien = rs.getString("nm_pasien").replaceAll("\"", "'");
+            String nmDokter = rs.getString("nama").replaceAll("\"", "'");
+            String tglHasil = rs.getString("tgl_hasil") + "T" + rs.getString("jam_hasil") + "+07:00";
+
+            // 4. Konstruksi JSON
+            headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("Authorization", "Bearer " + api.TokenSatuSehat());
+
+            json = "{"
+                    + "\"resourceType\": \"Observation\","
+                    + "\"identifier\": ["
+                        + "{\"system\": \"http://sys-ids.kemkes.go.id/observation/" + koneksiDB.IDSATUSEHAT() + "\",\"value\": \"" + rs.getString("noorder") + "." + rs.getString("id_template") + "\"}"
+                    + "],"
+                    + "\"status\": \"final\","
+                    + "\"category\": ["
+                        + "{\"coding\": [{\"system\": \"http://terminology.hl7.org/CodeSystem/observation-category\",\"code\": \"laboratory\",\"display\": \"Laboratory\"}]}"
+                    + "],"
+                    + "\"code\": {"
+                        + "\"coding\": [{\"system\": \"" + rs.getString("system") + "\",\"code\": \"" + rs.getString("code") + "\",\"display\": \"" + displayMapping + "\"}]"
+                    + "},"
+                    + "\"subject\": {\"reference\": \"Patient/" + idpasien + "\",\"display\": \"" + nmPasien + "\"},"
+                    + "\"performer\": [{\"reference\": \"Practitioner/" + iddokter + "\",\"display\": \"" + nmDokter + "\"}],"
+                    + "\"encounter\": {\"reference\": \"Encounter/" + rs.getString("id_encounter") + "\"},"
+                    + "\"specimen\": {\"reference\": \"Specimen/" + idSpecimen + "\"},"
+                    + "\"basedOn\": [{\"reference\": \"ServiceRequest/" + idServiceRequest + "\"}],"
+                    + "\"effectiveDateTime\": \"" + tglHasil + "\","
+                    + "\"valueString\": \"" + hasilString + "\""
+                    + "}";
+
+            TeksArea.append("   [DEBUG] URL : " + link + "/Observation\n");
+            // TeksArea.append("   [DEBUG] JSON: " + json + "\n"); // Uncomment jika ingin lihat JSON mentah
+
+            // 5. Kirim Request
+            requestEntity = new HttpEntity(json, headers);
+            String responseJson = api.getRest().exchange(link + "/Observation", HttpMethod.POST, requestEntity, String.class).getBody();
+            
+            root = mapper.readTree(responseJson);
+            JsonNode responseId = root.path("id");
+            
+            if (!responseId.asText().equals("")) {
+                TeksArea.append("   [SUKSES] ID: " + responseId.asText() + "\n");
+                Sequel.menyimpan2("satu_sehat_observation_lab", "?,?,?,?", "No.Order", 4, new String[]{
+                    rs.getString("noorder"), rs.getString("kd_jenis_prw"), rs.getString("id_template"), responseId.asText()
+                });
+            }
+            
+        } catch (HttpClientErrorException e) {
+            // --- HANDLER ERROR DUPLIKAT (AUTO-FIX) ---
+            String responseBody = e.getResponseBodyAsString();
+            if (e.getStatusCode().value() == 400 && responseBody.contains("duplicate")) {
+                TeksArea.append("   [INFO] Data Duplikat. Mengambil ID dari Server...\n");
+                try {
+                    // Cari ID berdasarkan Identifier
+                    String searchUrl = link + "/Observation?identifier=http://sys-ids.kemkes.go.id/observation/" + koneksiDB.IDSATUSEHAT() + "|" + identifierValue;
+                    String searchJson = api.getRest().exchange(searchUrl, HttpMethod.GET, new HttpEntity(headers), String.class).getBody();
+                    
+                    JsonNode searchRoot = mapper.readTree(searchJson);
+                    if (searchRoot.path("total").asInt() > 0) {
+                        String existingId = searchRoot.path("entry").get(0).path("resource").path("id").asText();
+                        TeksArea.append("   [RECOVERED] ID Ditemukan: " + existingId + "\n");
+                        
+                        // Simpan ID yang ditemukan ke Database agar tidak error lagi
+                        Sequel.menyimpan2("satu_sehat_observation_lab", "?,?,?,?", "No.Order", 4, new String[]{
+                            rs.getString("noorder"), rs.getString("kd_jenis_prw"), rs.getString("id_template"), existingId
+                        });
+                    } else {
+                        TeksArea.append("   !! [GAGAL RECOVER] Data duplikat tapi tidak ditemukan saat dicari.\n");
+                    }
+                } catch (Exception ex) {
+                    TeksArea.append("   !! [ERROR RECOVER] Gagal mengambil data duplikat: " + ex + "\n");
+                }
+            } else {
+                // Error Lain
+                TeksArea.append("   !! [ERROR API " + e.getStatusCode() + "] " + responseBody + "\n");
+            }
+        } catch (Exception e) {
+            TeksArea.append("   !! [ERROR SYSTEM] " + e + "\n");
+            e.printStackTrace();
         }
     }
     
