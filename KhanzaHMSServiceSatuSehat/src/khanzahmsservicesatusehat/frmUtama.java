@@ -102,6 +102,7 @@ public class frmUtama extends javax.swing.JFrame {
         kirim_diagnosticreportlabmb = new javax.swing.JMenuItem();
         kirim_careplan = new javax.swing.JMenuItem();
         kirim_questionnaire = new javax.swing.JMenuItem();
+        kirim_composition = new javax.swing.JMenuItem();
         jScrollPane1 = new javax.swing.JScrollPane();
         TeksArea = new javax.swing.JTextArea();
         jPanel1 = new javax.swing.JPanel();
@@ -190,7 +191,6 @@ public class frmUtama extends javax.swing.JFrame {
         jPopupMenu1.add(kirim_medicationdispense);
 
         kirim_medicationstatement.setText("Kirim Aturan Pakai Obat (Medication Statement)");
-        kirim_medicationstatement.setActionCommand("Kirim Aturan Pakai Obat (Medication Statement)");
         kirim_medicationstatement.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 kirim_medicationstatementActionPerformed(evt);
@@ -311,6 +311,14 @@ public class frmUtama extends javax.swing.JFrame {
             }
         });
         jPopupMenu1.add(kirim_questionnaire);
+
+        kirim_composition.setLabel("Kirim Composition");
+        kirim_composition.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kirim_compositionActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(kirim_composition);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Service Satu Sehat (Ichsan)");
@@ -809,6 +817,23 @@ public class frmUtama extends javax.swing.JFrame {
         }.execute();
     }//GEN-LAST:event_kirim_questionnaireActionPerformed
 
+    private void kirim_compositionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_compositionActionPerformed
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Composition...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                kirimComposition();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Composition SELESAI.\n");
+            }
+        }.execute();
+    }//GEN-LAST:event_kirim_compositionActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -861,6 +886,7 @@ public class frmUtama extends javax.swing.JFrame {
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JMenuItem kirim_careplan;
     private javax.swing.JMenuItem kirim_clinicalimpression;
+    private javax.swing.JMenuItem kirim_composition;
     private javax.swing.JMenuItem kirim_condition;
     private javax.swing.JMenuItem kirim_diagnosticreportlabmb;
     private javax.swing.JMenuItem kirim_diagnosticreportlabpk;
@@ -7276,6 +7302,232 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
         }
     }
     
+    
+    // GERBONG TERAKHIR: KIRIM COMPOSITION (RESUME MEDIS) - REVISI TIPE DOKUMEN
+    private void kirimComposition() {
+        try {
+            TeksArea.append("\n------------------------------------------------------\n");
+            TeksArea.append("MULAI PROSES COMPOSITION (RESUME MEDIS)\n");
+            TeksArea.append("------------------------------------------------------\n");
+
+            // QUERY SWEEPER (VALIDASI KASIR & RESUME)
+            String query = 
+                "SELECT rp.no_rawat, rp.no_rkm_medis, p.nm_pasien, p.no_ktp, " +
+                "pg.nama as nama_dokter, pg.no_ktp as nik_dokter, " +
+                "rp.status_lanjut, " + 
+                "sse.id_encounter, " +
+                "rp.tgl_registrasi, rp.jam_reg, " +
+                "ifnull(ssc.id_composition,'') as id_composition_ada, " +
+                
+                // Kumpulkan ID Resource
+                "GROUP_CONCAT(DISTINCT scond.id_condition SEPARATOR '|') as list_diagnosa, " +
+                "GROUP_CONCAT(DISTINCT ssmr.id_medicationrequest SEPARATOR '|') as list_resep, " +
+                "GROUP_CONCAT(DISTINCT ssol.id_observation SEPARATOR '|') as list_observasi " +
+                
+                "FROM reg_periksa rp " +
+                "JOIN pasien p ON rp.no_rkm_medis = p.no_rkm_medis " +
+                "JOIN pegawai pg ON rp.kd_dokter = pg.nik " +
+                "JOIN satu_sehat_encounter sse ON sse.no_rawat = rp.no_rawat " +
+                
+                // JOIN LOG RESOURCES
+                "LEFT JOIN satu_sehat_condition scond ON scond.no_rawat = rp.no_rawat " +
+                "LEFT JOIN resep_obat ro ON ro.no_rawat = rp.no_rawat " +
+                "LEFT JOIN satu_sehat_medicationrequest ssmr ON ssmr.no_resep = ro.no_resep " +
+                "LEFT JOIN permintaan_lab pl ON pl.no_rawat = rp.no_rawat " +
+                "LEFT JOIN satu_sehat_observation_lab ssol ON ssol.noorder = pl.noorder " +
+                
+                "LEFT JOIN satu_sehat_composition ssc ON ssc.no_rawat = rp.no_rawat " +
+                
+                "WHERE sse.id_encounter IS NOT NULL " + 
+                "AND (ssc.id_composition IS NULL OR ssc.id_composition = '') " + 
+                
+                // --- LOGIKA VALIDASI GANDA ---
+                "AND ( " +
+                "  (rp.status_lanjut = 'Ralan' " +
+                "   AND EXISTS(SELECT no_rawat FROM nota_jalan WHERE no_rawat = rp.no_rawat) " +       
+                "   AND EXISTS(SELECT no_rawat FROM resume_pasien WHERE no_rawat = rp.no_rawat) " +    
+                "  ) " +
+                "  OR " +
+                "  (rp.status_lanjut = 'Ranap' " +
+                "   AND EXISTS(SELECT no_rawat FROM nota_inap WHERE no_rawat = rp.no_rawat) " +        
+                "   AND EXISTS(SELECT no_rawat FROM resume_pasien_ranap WHERE no_rawat = rp.no_rawat) " + 
+                "  ) " +
+                ") " +
+                
+                "GROUP BY rp.no_rawat LIMIT 10";
+
+            ps = koneksi.prepareStatement(query);
+            rs = ps.executeQuery();
+
+            while(rs.next()) {
+                TeksArea.append("\n[PROSES COMPOSITION] No.Rawat: " + rs.getString("no_rawat") + " | Pasien: " + rs.getString("nm_pasien") + "\n");
+
+                idpasien = cekViaSatuSehat.tampilIDPasien(rs.getString("no_ktp"));
+                iddokter = cekViaSatuSehat.tampilIDParktisi(rs.getString("nik_dokter"));
+
+                if (idpasien.isEmpty() || iddokter.isEmpty()) {
+                    TeksArea.append("   !! [SKIP] ID Pasien/Dokter tidak valid.\n");
+                    continue;
+                }
+
+                // 2. Siapkan Sections
+                String sectionDiagnosa = "";
+                String sectionResep = "";
+                String sectionObservasi = "";
+
+                // A. Section Diagnosa
+                String rawDiagnosa = rs.getString("list_diagnosa");
+                if (rawDiagnosa != null && !rawDiagnosa.isEmpty()) {
+                    String[] arrDiag = rawDiagnosa.split("\\|");
+                    StringBuilder sb = new StringBuilder();
+                    for (String id : arrDiag) {
+                        if(!id.trim().isEmpty()) sb.append("{\"reference\": \"Condition/").append(id.trim()).append("\"},");
+                    }
+                    if (sb.length() > 0) {
+                        sb.setLength(sb.length() - 1);
+                        sectionDiagnosa = 
+                            "{\"title\": \"Diagnosis\",\"code\": {\"coding\": [{\"system\": \"http://loinc.org\",\"code\": \"29548-5\",\"display\": \"Diagnosis\"}]},\"entry\": [" + sb.toString() + "]},";
+                    }
+                }
+
+                // B. Section Resep
+                String rawResep = rs.getString("list_resep");
+                if (rawResep != null && !rawResep.isEmpty()) {
+                    String[] arrResep = rawResep.split("\\|");
+                    StringBuilder sb = new StringBuilder();
+                    for (String id : arrResep) {
+                        if(!id.trim().isEmpty()) sb.append("{\"reference\": \"MedicationRequest/").append(id.trim()).append("\"},");
+                    }
+                    if (sb.length() > 0) {
+                        sb.setLength(sb.length() - 1);
+                        sectionResep = 
+                            "{\"title\": \"Prescription\",\"code\": {\"coding\": [{\"system\": \"http://loinc.org\",\"code\": \"57828-6\",\"display\": \"Prescriptions\"}]},\"entry\": [" + sb.toString() + "]},";
+                    }
+                }
+
+                // C. Section Observasi
+                String rawObs = rs.getString("list_observasi");
+                if (rawObs != null && !rawObs.isEmpty()) {
+                    String[] arrObs = rawObs.split("\\|");
+                    StringBuilder sb = new StringBuilder();
+                    for (String id : arrObs) {
+                        if(!id.trim().isEmpty()) sb.append("{\"reference\": \"Observation/").append(id.trim()).append("\"},");
+                    }
+                    if (sb.length() > 0) {
+                        sb.setLength(sb.length() - 1);
+                        sectionObservasi = 
+                            "{\"title\": \"Diagnostic Results\",\"code\": {\"coding\": [{\"system\": \"http://loinc.org\",\"code\": \"30954-2\",\"display\": \"Relevant diagnostic tests/laboratory data\"}]},\"entry\": [" + sb.toString() + "]},";
+                    }
+                }
+
+                String allSections = sectionDiagnosa + sectionResep + sectionObservasi;
+                if (allSections.endsWith(",")) allSections = allSections.substring(0, allSections.length() - 1);
+
+                if (allSections.isEmpty()) {
+                    TeksArea.append("   !! [SKIP] Tidak ada data klinis (Diagnosa/Obat/Lab) yang bisa dibungkus.\n");
+                    continue;
+                }
+
+                // 3. Konstruksi JSON
+                String tglNow = rs.getString("tgl_registrasi") + "T" + rs.getString("jam_reg") + "+07:00"; 
+                
+                headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                // Ambil token saat ini
+                headers.add("Authorization", "Bearer " + api.TokenSatuSehat());
+
+                String json = "{" +
+                    "\"resourceType\": \"Composition\"," +
+                    "\"status\": \"final\"," +
+                    "\"type\": {" +
+                        "\"coding\": [{" +
+                            "\"system\": \"http://loinc.org\"," +
+                            "\"code\": \"18842-5\"," +
+                            "\"display\": \"Discharge summary\"" +
+                        "}]" +
+                    "}," +
+                    "\"category\": [{" +
+                        "\"coding\": [{" +
+                            "\"system\": \"http://loinc.org\"," +
+                            "\"code\": \"LP173421-1\"," +
+                            "\"display\": \"Report\"" +
+                        "}]" +
+                    "}]," +
+                    "\"subject\": {\"reference\": \"Patient/" + idpasien + "\", \"display\": \"" + rs.getString("nm_pasien") + "\"}," +
+                    "\"encounter\": {\"reference\": \"Encounter/" + rs.getString("id_encounter") + "\"}," +
+                    "\"date\": \"" + tglNow + "\"," +
+                    "\"author\": [{\"reference\": \"Practitioner/" + iddokter + "\", \"display\": \"" + rs.getString("nama_dokter") + "\"}]," +
+                    "\"title\": \"Ringkasan Pulang Pasien\"," +
+                    "\"section\": [" + allSections + "]" +
+                "}";
+
+                TeksArea.append("   [DEBUG] Payload JSON Composition:\n");
+                // TeksArea.append(json + "\n"); // Hemat log area
+
+                // 4. Kirim ke API dengan RETRY MECHANISM
+                requestEntity = new HttpEntity(json, headers);
+                
+                try {
+                    // PERCOBAAN PERTAMA
+                    String responseJson = api.getRest().exchange(link + "/Composition", HttpMethod.POST, requestEntity, String.class).getBody();
+                    simpanLogComposition(responseJson, rs);
+                    
+                } catch (HttpClientErrorException e) {
+                    
+                    // JIKA ERROR 401 (TOKEN EXPIRED)
+                    if (e.getStatusCode().value() == 401) {
+                        TeksArea.append("   !! [TOKEN EXPIRED] Memperbarui Token...\n");
+                        
+                        // 1. Generate Token Baru (Panggil fungsi Login Satu Sehat Anda)
+                        // Pastikan method ini ada di class ApiSatuSehat Anda
+                        api.TokenSatuSehat(); 
+                        
+                        // 2. Update Header dengan Token Baru
+                        headers.set("Authorization", "Bearer " + api.TokenSatuSehat());
+                        requestEntity = new HttpEntity(json, headers);
+                        
+                        // 3. Coba Kirim Ulang (Retry)
+                        try {
+                            String responseJsonRetry = api.getRest().exchange(link + "/Composition", HttpMethod.POST, requestEntity, String.class).getBody();
+                            TeksArea.append("   [RETRY SUKSES] Berhasil dikirim setelah refresh token.\n");
+                            simpanLogComposition(responseJsonRetry, rs);
+                        } catch (Exception ex) {
+                            TeksArea.append("   !! [GAGAL RETRY] " + ex.getMessage() + "\n");
+                        }
+                        
+                    } else {
+                        // Error lain (400 Bad Request, dll)
+                        TeksArea.append("   !! [ERROR API " + e.getStatusCode() + "] " + e.getResponseBodyAsString() + "\n");
+                    }
+                }
+
+                jeda(); 
+            }
+        } catch (Exception e) {
+            System.out.println("Error Composition: " + e);
+            TeksArea.append("!! ERROR COMPOSITION SYSTEM: " + e + "\n");
+        }
+    }
+    
+    // Helper untuk menyimpan log sukses
+    private void simpanLogComposition(String responseJson, ResultSet rs) throws Exception {
+        JsonNode root = mapper.readTree(responseJson);
+        JsonNode responseId = root.path("id");
+
+        if (!responseId.asText().equals("")) {
+            TeksArea.append("   [SUKSES] Composition ID: " + responseId.asText() + "\n");
+            
+            String statusRawat = rs.getString("status_lanjut");
+            Sequel.menyimpan2("satu_sehat_composition", "?,?,?,?", "Composition Log", 4, new String[]{
+                rs.getString("no_rawat"), 
+                responseId.asText(), 
+                statusRawat, 
+                new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date())
+            });
+        }
+    }
+    
+    
     private void jeda() throws InterruptedException {
         Thread.sleep(300); // Jeda selama 300 milidetik (0.3 detik)
     }
@@ -7310,6 +7562,7 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
     diagnosticreportlabmb();
     careplan();
     questionnaire();
+    kirimComposition();
     
     TeksArea.append("\n======================================================\n");
     TeksArea.append("PROSES BRIDGING DATA SELESAI.\n");
