@@ -52,6 +52,7 @@ $current_user = $_SESSION['user_admin'];
         <span class="navbar-brand fw-bold text-info"><i class="fa-solid fa-user-secret"></i> SUPER ADMIN PANEL</span>
         <div>
             <span class="text-muted me-3">User: <b class="text-white"><?= $current_user ?></b></span>
+			<a href="rescue_ui.php" class="btn btn-sm btn-outline-warning fw-bold"> <i class="fa-solid fa-truck-medical"></i> RESCUE MISSION </a>
             <a href="logout.php" class="btn btn-sm btn-outline-danger">Logout</a>
         </div>
     </div>
