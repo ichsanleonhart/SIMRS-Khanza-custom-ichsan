@@ -1,0 +1,41 @@
+function OnStoredInstance(instanceId, tags, metadata)
+   -- 1. Ambil Accession Number (Pastikan tidak nil)
+   local acsn = tags['AccessionNumber']
+   
+   -- [DEBUG] Tulis ke Log agar kita tahu script jalan
+   print('--- LUA CHECK: File Baru Masuk ---')
+   print('Instance ID : ' .. instanceId)
+
+   -- 2. Cek apakah ACSN ada?
+   if acsn == nil or acsn == '' then
+      print('Status: SKIP (Accession Number Kosong/Nil)')
+      return -- Stop di sini
+   else
+      print('Terdeteksi ACSN: ' .. acsn)
+   end
+
+   -- 3. Cek Format (Awalan PR) - Menggunakan string.match lebih aman
+   -- Kita ubah jadi huruf besar semua (upper) jaga-jaga kalau ada typo
+   if string.sub(string.upper(acsn), 1, 2) == 'PR' then
+      
+      print('Validasi: COCOK! Ini orderan Khanza.')
+      print('Aksi: Mengirim ke SATUSEHAT_ROUTER...')
+      
+      -- 4. Eksekusi Kirim
+      -- Menggunakan pcall (protected call) agar kalau gagal tidak bikin Orthanc crash
+      local success, err = pcall(function()
+         SendToModality(instanceId, 'SATUSEHAT_ROUTER')
+      end)
+
+      if success then
+         print('Hasil: PERINTAH KIRIM SUKSES')
+      else
+         print('Hasil: ERROR SAAT MENGIRIM -> ' .. tostring(err))
+      end
+
+   else
+      print('Status: SKIP (Format ACSN bukan PR...)')
+   end
+   
+   print('----------------------------------')
+end
