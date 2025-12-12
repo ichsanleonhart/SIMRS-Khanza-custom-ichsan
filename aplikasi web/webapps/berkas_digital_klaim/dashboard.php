@@ -1,7 +1,7 @@
 <?php
 /*
  * File: /webapps/berkas_digital_perawatan/dashboard.php
- * Fungsi: Menampilkan daftar pasien (V4 - Fix Duplikasi Data)
+ * Fungsi: Menampilkan daftar pasien (V6 - Fix Column Name 'tanggal')
  */
 session_start();
 
@@ -19,17 +19,15 @@ $nama_instansi = "RS Khanza";
 $q_set = mysqli_query($koneksi, "SELECT nama_instansi FROM setting LIMIT 1");
 if($r_set = mysqli_fetch_assoc($q_set)) $nama_instansi = $r_set['nama_instansi'];
 
-// 3. AMBIL NAMA USER (PEGAWAI)
+// 3. AMBIL NAMA USER
 $user_id = $_SESSION['casemix_user'];
-$nama_user_login = $user_id; // Default
+$nama_user_login = $user_id; 
 
-// Cek di tabel pegawai
 $q_pegawai = mysqli_query($koneksi, "SELECT nama FROM pegawai WHERE nik = '$user_id'");
 if(mysqli_num_rows($q_pegawai) > 0){
     $r_peg = mysqli_fetch_assoc($q_pegawai);
     $nama_user_login = $r_peg['nama'];
 } else {
-    // Opsional: Cek di tabel dokter
     $q_dok = mysqli_query($koneksi, "SELECT nm_dokter FROM dokter WHERE kd_dokter = '$user_id'");
     if(mysqli_num_rows($q_dok) > 0){
         $r_dok = mysqli_fetch_assoc($q_dok);
@@ -37,7 +35,7 @@ if(mysqli_num_rows($q_pegawai) > 0){
     }
 }
 
-// 4. FILTER TANGGAL
+// 4. FILTER TANGGAL (DEFAULT HARI INI)
 $tgl_awal  = isset($_GET['tgl_awal']) ? validTeks4($_GET['tgl_awal'], 10) : date('Y-m-d');
 $tgl_akhir = isset($_GET['tgl_akhir']) ? validTeks4($_GET['tgl_akhir'], 10) : date('Y-m-d');
 ?>
@@ -57,7 +55,6 @@ $tgl_akhir = isset($_GET['tgl_akhir']) ? validTeks4($_GET['tgl_akhir'], 10) : da
         body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; font-size: 0.9rem; }
         .navbar { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
         .navbar-brand img { height: 35px; border-radius: 4px; background: #fff; padding: 2px; }
-        /* Custom Color */
         .bg-pink { background-color: #d63384 !important; color: white; }
         .penjamin-text { font-size: 0.75rem; font-weight: 700; color: #6c757d; display: block; margin-top: 4px; }
     </style>
@@ -82,11 +79,11 @@ $tgl_akhir = isset($_GET['tgl_akhir']) ? validTeks4($_GET['tgl_akhir'], 10) : da
         <div class="card-body py-3">
             <form action="" method="GET" class="row g-2 align-items-end">
                 <div class="col-md-3">
-                    <label class="form-label fw-bold">Dari Tanggal</label>
+                    <label class="form-label fw-bold">Tgl Closing Awal</label>
                     <input type="date" name="tgl_awal" class="form-control" value="<?= $tgl_awal ?>">
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label fw-bold">Sampai Tanggal</label>
+                    <label class="form-label fw-bold">Tgl Closing Akhir</label>
                     <input type="date" name="tgl_akhir" class="form-control" value="<?= $tgl_akhir ?>">
                 </div>
                 <div class="col-md-2">
@@ -103,7 +100,7 @@ $tgl_akhir = isset($_GET['tgl_akhir']) ? validTeks4($_GET['tgl_akhir'], 10) : da
 
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-list me-2"></i>Daftar Pasien</h5>
+            <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-list me-2"></i>Daftar Pasien Closing</h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -111,7 +108,7 @@ $tgl_akhir = isset($_GET['tgl_akhir']) ? validTeks4($_GET['tgl_akhir'], 10) : da
                     <thead class="table-light">
                         <tr>
                             <th>No. Rawat</th>
-                            <th>Tgl. Reg</th>
+                            <th>Tgl. Closing</th>
                             <th>No. RM</th>
                             <th>Nama Pasien</th>
                             <th>Status</th>
@@ -124,7 +121,7 @@ $tgl_akhir = isset($_GET['tgl_akhir']) ? validTeks4($_GET['tgl_akhir'], 10) : da
                     </thead>
                     <tbody>
                         <?php
-                        // QUERY UTAMA - FIX DUPLIKASI DENGAN GROUP BY
+                        // QUERY UTAMA - PERBAIKAN NAMA KOLOM (ni.tanggal & nj.tanggal)
                         $query = "SELECT 
                                     p.nm_pasien, 
                                     p.no_rkm_medis, 
@@ -139,32 +136,41 @@ $tgl_akhir = isset($_GET['tgl_akhir']) ? validTeks4($_GET['tgl_akhir'], 10) : da
                                     COALESCE(bs.no_sep, '-') as no_sep,
                                     COALESCE(bs.no_kartu, '-') as no_kartu,
                                     COALESCE(pen.nm_penyakit, '-') as diagnosa_utama,
-                                    COALESCE(pen.kd_penyakit, '-') as kd_diagnosa
+                                    COALESCE(pen.kd_penyakit, '-') as kd_diagnosa,
+                                    -- Perbaikan di sini: menggunakan kolom 'tanggal'
+                                    COALESCE(ni.tanggal, nj.tanggal) as tgl_closing
                                 FROM reg_periksa rp
                                 JOIN pasien p ON rp.no_rkm_medis = p.no_rkm_medis
                                 JOIN dokter d ON rp.kd_dokter = d.kd_dokter
                                 JOIN poliklinik poli ON rp.kd_poli = poli.kd_poli
                                 JOIN penjab pj ON rp.kd_pj = pj.kd_pj
+                                -- JOIN NOTA
+                                LEFT JOIN nota_jalan nj ON rp.no_rawat = nj.no_rawat
+                                LEFT JOIN nota_inap ni ON rp.no_rawat = ni.no_rawat
+                                -- JOIN BRIDGING & DIAGNOSA
                                 LEFT JOIN bridging_sep bs ON rp.no_rawat = bs.no_rawat
-                                -- Join Diagnosa (Prioritas 1)
                                 LEFT JOIN diagnosa_pasien dp ON rp.no_rawat = dp.no_rawat AND dp.prioritas = 1
                                 LEFT JOIN penyakit pen ON dp.kd_penyakit = pen.kd_penyakit
-                                WHERE rp.tgl_registrasi BETWEEN '$tgl_awal' AND '$tgl_akhir'
+                                -- FILTER TANGGAL CLOSING
+                                WHERE COALESCE(ni.tanggal, nj.tanggal) BETWEEN '$tgl_awal' AND '$tgl_akhir'
                                 GROUP BY rp.no_rawat
-                                ORDER BY rp.tgl_registrasi DESC, rp.jam_reg DESC";
+                                ORDER BY tgl_closing DESC, rp.jam_reg DESC";
                         
                         $hasil = mysqli_query($koneksi, $query);
                         
-                        // Error Handling jika query gagal
                         if(!$hasil) {
-                            echo "<tr><td colspan='10' class='text-center text-danger'>Error Query: ".mysqli_error($koneksi)."</td></tr>";
+                            // Tampilkan pesan error jika query SQL gagal
+                            // Colspan 10 agar tabel tidak rusak struktur datatables-nya
+                            echo "<tr><td colspan='10' class='text-center text-danger fw-bold'>
+                                    Error Database: ".mysqli_error($koneksi)."
+                                  </td></tr>";
                         } else {
                             while ($row = mysqli_fetch_assoc($hasil)) {
                                 $badge_class = ($row['status_lanjut'] == 'Ralan') ? 'bg-success' : 'bg-pink';
                         ?>
                             <tr>
                                 <td><?= $row['no_rawat'] ?></td>
-                                <td><?= $row['tgl_registrasi'] ?> <br><small class="text-muted"><?= $row['jam_reg'] ?></small></td>
+                                <td class="fw-bold text-dark"><?= $row['tgl_closing'] ?></td>
                                 <td><?= $row['no_rkm_medis'] ?></td>
                                 <td>
                                     <div class="fw-bold"><?= $row['nm_pasien'] ?></div>
@@ -246,7 +252,6 @@ $tgl_akhir = isset($_GET['tgl_akhir']) ? validTeks4($_GET['tgl_akhir'], 10) : da
         $('#tablePasien').DataTable({
             dom: 'Bfrtip',
             pageLength: 15,
-            // Hapus default sorting dari JS karena sudah di-sort di SQL
             order: [], 
             buttons: [
                 { extend: 'excel', className: 'btn btn-success btn-sm', text: '<i class="fas fa-file-excel me-2"></i>Export Excel' }
@@ -262,14 +267,12 @@ $tgl_akhir = isset($_GET['tgl_akhir']) ? validTeks4($_GET['tgl_akhir'], 10) : da
         const tglAwal = $('input[name="tgl_awal"]').val();
         const tglAkhir = $('input[name="tgl_akhir"]').val();
         
-        // Reset UI
         generatedFiles = [];
         $('#bulkProgress').css('width', '0%').text('0%');
         $('#btnCloseBulk').prop('disabled', true);
         const modal = new bootstrap.Modal(document.getElementById('modalBulk'));
         modal.show();
         
-        // 1. Get Target Pasien
         $('#bulkStatus').text('Mengambil daftar pasien...');
         
         try {
@@ -285,7 +288,6 @@ $tgl_akhir = isset($_GET['tgl_akhir']) ? validTeks4($_GET['tgl_akhir'], 10) : da
                     return;
                 }
                 
-                // 2. Loop Process
                 for (let i = 0; i < total; i++) {
                     const pasien = listPasien[i];
                     const percent = Math.round(((i + 1) / total) * 100);
@@ -294,7 +296,6 @@ $tgl_akhir = isset($_GET['tgl_akhir']) ? validTeks4($_GET['tgl_akhir'], 10) : da
                     $('#bulkDetail').text(`${pasien.nm_pasien} (${pasien.no_rawat})`);
                     $('#bulkProgress').css('width', percent + '%').text(percent + '%');
                     
-                    // Call merge per item
                     const resMerge = await $.post('ajax_process_item.php', { 
                         no_rawat: pasien.no_rawat,
                         nm_pasien: pasien.nm_pasien
@@ -305,7 +306,6 @@ $tgl_akhir = isset($_GET['tgl_akhir']) ? validTeks4($_GET['tgl_akhir'], 10) : da
                     }
                 }
                 
-                // 3. Trigger Download ZIP
                 $('#bulkStatus').text('Mengompresi File ZIP...');
                 $('#bulkDetail').text('Download akan segera dimulai...');
                 
