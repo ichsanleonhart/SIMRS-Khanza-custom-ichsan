@@ -1169,6 +1169,14 @@ public class frmUtama extends javax.swing.JFrame {
                                 //Task ID 6 Non Mobile JKN
                                 // Cek variabel task6
                                 if(task6.equals("")){
+                                    
+                                    // [VALIDASI KETAT DB] Cek apakah Task 5 BENAR-BENAR ada di database lokal
+                                    // Ini mencegah Task 6 jalan jika Task 5 di memori "Sudah" tapi di DB sebenarnya sudah dihapus/gagal
+                                    int cekTask5DB = Sequel.cariInteger("select count(no_rawat) from referensi_mobilejkn_bpjs_taskid where no_rawat=? and taskid='5'", rs.getString("no_rawat"));
+    
+                                    // Hanya lanjut jika task5 sudah berstatus "Sudah" DI MEMORI **DAN** ada DI DATABASE
+                                    if (task5.equals("Sudah") && cekTask5DB > 0) {                                
+                            
                                         datajam=Sequel.cariIsi("select concat(tgl_peresepan,' ',jam_peresepan) from resep_obat where resep_obat.status='ralan' and resep_obat.no_rawat=?",rs.getString("no_rawat"));
                                         if(!datajam.equals("")){
                                             if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"6",datajam})==true){
@@ -1214,7 +1222,8 @@ public class frmUtama extends javax.swing.JFrame {
                                                     System.out.println("Notifikasi Bridging : "+ex);
                                                 }
                                             }
-                                        }                                       
+                                        }    
+                                    } //akhir dari cek task 5 sebelum kirim task 6
                                 } // Akhir cek task6
                                 
                                 //Task ID 7 Non Mobile JKN
