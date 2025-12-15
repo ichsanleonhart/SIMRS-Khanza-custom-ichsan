@@ -1,162 +1,117 @@
 <?php
-// File: /var/www/html/webapps/absensi/hrd/api_enrollment.php
 session_start();
-// Bersihkan output buffer agar JSON murni
-ob_start();
 require_once('../../conf/conf.php');
-ob_end_clean();
 
+// Header JSON
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['hrd_login'])) {
-    echo json_encode(['status' => 'error', 'message' => 'Sesi habis, login ulang']);
+    echo json_encode(['status' => 'error', 'message' => 'Sesi habis']);
     exit;
 }
 
 $act = isset($_GET['act']) ? $_GET['act'] : '';
-$konektor = bukakoneksi();
 
-// --- 1. SEARCH PEGAWAI (Untuk didaftarkan) ---
+// 1. CARI PEGAWAI (Untuk didaftarkan)
 if($act == 'search') {
-    // Output HTML partial untuk list pencarian
-    header('Content-Type: text/html'); 
+    header('Content-Type: text/html'); // Balik ke HTML buat UI search result
     $kw = validTeks($_POST['kw']);
-    
-    // Cari pegawai yang BELUM terdaftar di face_enrollment
-    // Agar tidak double input
-    $sql = "SELECT p.id, p.nik, p.nama, p.jbtn 
+    // Hanya cari yang BELUM punya data wajah
+    $sql = "SELECT p.id, p.nik, p.nama 
             FROM pegawai p 
             LEFT JOIN face_enrollment f ON p.id = f.user_id
             WHERE p.stts_aktif='AKTIF' 
-            AND f.id IS NULL
+            AND f.id IS NULL 
             AND (p.nik LIKE '%$kw%' OR p.nama LIKE '%$kw%') 
             LIMIT 5";
             
-    $res = mysqli_query($konektor, $sql);
-    
+    $res = bukaquery($sql);
     if(mysqli_num_rows($res) > 0) {
         while($r = mysqli_fetch_assoc($res)) {
-            echo "<div class='flex justify-between items-center bg-gray-700 p-3 rounded border border-gray-600 mb-2 hover:bg-gray-600 transition'>
-                  <div>
-                    <span class='font-bold text-sm text-white'>{$r['nama']}</span><br>
-                    <span class='text-xs text-gray-400'>{$r['nik']} - {$r['jbtn']}</span>
-                  </div>
-                  <button onclick=\"pilih('{$r['id']}','{$r['nik']}','{$r['nama']}')\" class='bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded text-xs font-bold shadow'>PILIH</button>
+            echo "<div class='flex justify-between bg-gray-700 p-3 rounded border border-gray-600 mb-2'>
+                  <span class='font-mono text-sm text-gray-300'><b>{$r['nik']}</b><br>{$r['nama']}</span>
+                  <button onclick=\"pilih('{$r['id']}','{$r['nik']}','{$r['nama']}')\" class='bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded text-xs font-bold shadow text-white'>PILIH</button>
                   </div>";
         }
     } else {
-        echo "<div class='text-yellow-400 text-sm italic'>Pegawai tidak ditemukan atau sudah terdaftar.</div>";
+        echo "<div class='text-yellow-400 text-sm'>Pegawai tidak ditemukan atau sudah terdaftar.</div>";
     }
     exit;
-}
+} 
 
-// --- 2. GET LIST SUDAH TERDAFTAR (Untuk HRD Monitoring) ---
-elseif ($act == 'get_registered') {
-    $kw = isset($_GET['q']) ? validTeks($_GET['q']) : '';
-    $filter = "";
-    if(!empty($kw)) {
-        $filter = "AND (p.nama LIKE '%$kw%' OR p.nik LIKE '%$kw%')";
-    }
-
-    $sql = "SELECT f.id as fid, p.nik, p.nama, p.jbtn, f.photo, f.created_at 
-            FROM face_enrollment f 
-            JOIN pegawai p ON f.user_id = p.id
-            WHERE p.stts_aktif='AKTIF' $filter
-            ORDER BY f.created_at DESC LIMIT 20";
-            
-    $res = mysqli_query($konektor, $sql);
-    $data = [];
-    while($r = mysqli_fetch_assoc($res)) {
-        // Path foto relatif untuk ditampilkan di web
-        // Di DB tersimpan: absensi/photo_enrollment/xxx.jpg (Standar V4.2)
-        // Kita butuh path dari HRD: ../../absensi/photo_enrollment
-        // Cek dulu apakah path di DB diawali 'absensi/' atau langsung 'photo_enrollment/'
-        
-        $img = $r['photo'];
-        if(strpos($img, 'http') === false) {
-             $img = "../../" . $img; // Naik 2 level
-        }
-        
-        $data[] = [
-            'fid' => $r['fid'],
-            'nik' => $r['nik'],
-            'nama' => $r['nama'],
-            'jbtn' => $r['jbtn'],
-            'photo' => $img,
-            'tgl' => date('d/m/Y', strtotime($r['created_at']))
-        ];
-    }
-    echo json_encode($data);
-    exit;
-}
-
-// --- 3. HAPUS DATA WAJAH (RESET) ---
-elseif ($act == 'delete') {
-    $fid = validTeks($_POST['fid']);
-    
-    // Ambil path foto dulu untuk dihapus fisik
-    $q = mysqli_query($konektor, "SELECT photo FROM face_enrollment WHERE id='$fid'");
-    $d = mysqli_fetch_assoc($q);
-    
-    if($d) {
-        $path_fisik = "../../" . $d['photo']; // Sesuaikan path fisik server
-        if(file_exists($path_fisik) && !is_dir($path_fisik)) {
-            unlink($path_fisik);
-        }
-        
-        // Hapus Database
-        if(mysqli_query($konektor, "DELETE FROM face_enrollment WHERE id='$fid'")) {
-            echo json_encode(['status' => 'success']);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => mysqli_error($konektor)]);
-        }
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
-    }
-    exit;
-}
-
-// --- 4. SIMPAN WAJAH (ENROLLMENT BARU) ---
+// 2. SIMPAN WAJAH BARU
 elseif($act == 'save') {
-    $id = validTeks($_POST['id']);
-    $nik = validTeks($_POST['nik']);
-    $desc = $_POST['desc']; // JSON string descriptor
+    $id = $_POST['id'];
+    $nik = $_POST['nik'];
+    $desc = $_POST['desc']; 
     $img = $_POST['img'];
     
-    if(empty($id) || empty($desc) || empty($img)) {
-        echo json_encode(['status' => 'error', 'message' => 'Data wajah tidak lengkap.']);
-        exit;
-    }
-
-    // Persiapan Folder (Sesuai Standar V4.2)
-    // Path Fisik: /var/www/html/webapps/absensi/photo_enrollment/
-    $folderName = "photo_enrollment/"; 
-    $targetDir = "../" . $folderName; // Naik satu dari folder HRD
-
-    if (!file_exists($targetDir)) mkdir($targetDir, 0777, true);
+    // Validasi Folder
+    $folder_foto = "../photo_enrollment/";
+    if (!file_exists($folder_foto)) mkdir($folder_foto, 0777, true);
     
     // Simpan File
-    $fileName = $nik . "_ref.jpg";
+    $path = $folder_foto . $nik . ".jpg";
     $image_parts = explode(";base64,", $img);
     $image_decoded = base64_decode($image_parts[1]);
-    file_put_contents($targetDir . $fileName, $image_decoded);
-
-    // Path Database (Relatif webapps/)
-    $dbPath = "absensi/" . $folderName . $fileName;
+    file_put_contents($path, $image_decoded);
 
     // Simpan DB
+    $konektor = bukakoneksi();
     $desc_safe = mysqli_real_escape_string($konektor, $desc);
     
-    // Cek duplikasi (Delete dulu kalo ada, biar update)
+    // Hapus data lama jika ada (Clean Install)
     mysqli_query($konektor, "DELETE FROM face_enrollment WHERE user_id='$id'");
-
-    $sql = "INSERT INTO face_enrollment (user_id, nik, face_descriptor, photo) 
-            VALUES ('$id', '$nik', '$desc_safe', '$dbPath')";
+    
+    $sql = "INSERT INTO face_enrollment (user_id, nik, face_descriptor, photo) VALUES ('$id', '$nik', '$desc_safe', '$path')";
 
     if(mysqli_query($konektor, $sql)) {
         echo json_encode(['status' => 'success', 'message' => 'Wajah Berhasil Didaftarkan!']);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'DB Error: ' . mysqli_error($konektor)]);
+    }
+    mysqli_close($konektor);
+    exit;
+}
+
+// 3. (BARU) LOAD LIST TERDAFTAR
+elseif($act == 'list_enrolled') {
+    $kw = isset($_GET['q']) ? validTeks($_GET['q']) : '';
+    $filter = $kw ? "AND (p.nama LIKE '%$kw%' OR p.nik LIKE '%$kw%')" : "";
+    
+    $sql = "SELECT f.id, p.nama, p.nik, f.photo 
+            FROM face_enrollment f 
+            JOIN pegawai p ON f.user_id = p.id 
+            WHERE p.stts_aktif='AKTIF' $filter
+            ORDER BY f.created_at DESC LIMIT 20";
+            
+    $res = bukaquery($sql);
+    $data = [];
+    while($r = mysqli_fetch_assoc($res)) {
+        // Path fix untuk display (naik satu folder dari hrd)
+        // DB: ../photo_enrollment/xxx.jpg -> UI: ../photo_enrollment/xxx.jpg (Sama karena file php ini di hrd/)
+        $data[] = $r;
+    }
+    echo json_encode($data);
+    exit;
+}
+
+// 4. (BARU) HAPUS DATA WAJAH
+elseif($act == 'delete') {
+    $id_enroll = validTeks($_POST['id']);
+    
+    // Ambil path foto dulu
+    $d = fetch_assoc("SELECT photo FROM face_enrollment WHERE id='$id_enroll'");
+    
+    if($d) {
+        // Hapus File
+        if(file_exists($d['photo'])) unlink($d['photo']);
+        
+        // Hapus DB
+        bukaquery("DELETE FROM face_enrollment WHERE id='$id_enroll'");
+        echo json_encode(['status'=>'success']);
+    } else {
+        echo json_encode(['status'=>'error', 'message'=>'Data tidak ditemukan']);
     }
     exit;
 }
