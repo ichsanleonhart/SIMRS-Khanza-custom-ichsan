@@ -96,7 +96,8 @@ if (strpos($user_ip, $allowed_ip_prefix) !== 0 && $user_ip !== '127.0.0.1' && $u
                     return new faceapi.LabeledFaceDescriptors(d.label + "|" + d.nama, [new Float32Array(d.descriptor)]);
                 });
                 
-                faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.45); 
+                //faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.45);   //value lama, terlalu longgar -- ichsan
+				faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.40);
                 statusText.innerText = "Kamera sedang disiapkan...";
                 startVideo();
 
