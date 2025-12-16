@@ -1,44 +1,65 @@
 <?php
 /*
  * File: kunjungan_ralan.php
- * Deskripsi: Monitoring Billing Rawat Jalan & Deteksi Anomali Batal
+ * Deskripsi: Monitoring Billing Ralan dengan Fitur Audit Mundur.
  */
-$page_title = "Billing Rawat Jalan & Anomali";
+$page_title = "Billing Rawat Jalan & Audit";
 require_once('includes/header.php');
 ?>
 
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
 
 <div class="container-fluid">
-    <div class="alert alert-warning shadow-sm mb-4 border-left-warning">
-        <div class="d-flex align-items-center">
-            <div class="me-3"><i class="fas fa-exclamation-triangle fa-2x text-warning"></i></div>
-            <div>
-                <h5 class="alert-heading mb-1">Monitoring Rawat Jalan</h5>
-                <p class="mb-0">
-                    Data menampilkan kunjungan <strong>Hari Ini</strong>. 
-                    Baris berwarna <strong class="text-warning bg-dark px-1 rounded">Kuning</strong> menandakan Pasien <b>BATAL</b> namun masih memiliki tagihan (Anomali).
-                </p>
-            </div>
+    
+    <div class="card shadow-sm mb-4 border-start border-4 border-primary">
+        <div class="card-body py-3">
+            <form id="formFilter">
+                <div class="row align-items-end g-2">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted mb-1">Dari Tanggal</label>
+                        <input type="date" id="tgl_awal" class="form-control form-control-sm" value="<?php echo date('Y-m-d'); ?>">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted mb-1">Sampai Tanggal</label>
+                        <input type="date" id="tgl_akhir" class="form-control form-control-sm" value="<?php echo date('Y-m-d'); ?>" max="<?php echo date('Y-m-d'); ?>">
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check mb-1">
+                            <input class="form-check-input" type="checkbox" id="chk_semua">
+                            <label class="form-check-label small" for="chk_semua">
+                                <strong>Audit Mode</strong> (Tampilkan Semua s.d Hari Ini)
+                            </label>
+                        </div>
+                        <small class="text-muted" style="font-size: 0.7rem;">Cek seluruh tunggakan masa lalu.</small>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" onclick="reloadTable()" class="btn btn-sm btn-primary w-100 fw-bold">
+                            <i class="fas fa-filter me-1"></i> Terapkan Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 
     <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Pasien Rawat Jalan Aktif</h6>
-            <button onclick="reloadTable()" class="btn btn-sm btn-primary"><i class="fas fa-sync-alt me-2"></i>Refresh Data</button>
+        <div class="card-header py-3 d-flex justify-content-between align-items-center bg-white">
+            <h6 class="m-0 font-weight-bold text-primary">Daftar Pasien Belum Bayar</h6>
+            <div>
+                <button onclick="reloadTable()" class="btn btn-sm btn-light border"><i class="fas fa-sync-alt text-gray-500"></i></button>
+            </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle" id="tableRalan" width="100%" cellspacing="0">
+                <table class="table table-bordered table-hover align-middle table-sm" id="tableRalan" width="100%" cellspacing="0">
                     <thead class="table-light">
                         <tr>
-                            <th width="12%">Waktu</th>
+                            <th width="12%">Waktu Reg</th>
                             <th width="20%">No. Rawat / Pasien</th>
                             <th width="20%">Dokter / Poli</th>
-                            <th width="15%">Penjamin</th>
+                            <th width="12%">Penjamin</th>
                             <th class="text-end">Biaya Obat</th>
-                            <th class="text-end bg-success text-white">Est. Total</th>
+                            <th class="text-end bg-success text-white">Total Tagihan</th>
                             <th class="text-center">Status</th>
                             <th class="text-center">Aksi</th>
                         </tr>
@@ -108,34 +129,47 @@ require_once('includes/header.php');
     }
 
     $(document).ready(function() {
+        // Logika UX: Jika 'Audit Mode' dicentang, disable tanggal input
+        $('#chk_semua').change(function() {
+            if($(this).is(':checked')) {
+                $('#tgl_awal, #tgl_akhir').prop('disabled', true).addClass('bg-light');
+            } else {
+                $('#tgl_awal, #tgl_akhir').prop('disabled', false).removeClass('bg-light');
+            }
+        });
+
         tableRalan = $('#tableRalan').DataTable({
             "processing": true,
             "serverSide": true,
             "ajax": {
                 "url": "api/data_kunjungan_ralan.php",
-                "type": "GET"
+                "type": "GET",
+                "data": function(d) {
+                    // KIRIM PARAMETER FILTER KE BACKEND
+                    d.mode = $('#chk_semua').is(':checked') ? 'semua' : 'periode';
+                    d.tgl_awal = $('#tgl_awal').val();
+                    d.tgl_akhir = $('#tgl_akhir').val();
+                }
             },
             "pageLength": 10,
-            "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+            "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
             "dom": 'Bfrtip',
             "buttons": [
                 {
                     extend: 'excelHtml5',
                     text: '<i class="fas fa-file-excel me-1"></i> Export Excel',
-                    className: 'btn btn-success btn-sm mb-3', // Hijau Kecil
-                    title: 'Laporan Billing Rawat Jalan',
-                    exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6] }
+                    className: 'btn btn-success btn-sm mb-3',
+                    title: 'Laporan Billing Rawat Jalan'
                 },
                 {
                     extend: 'pageLength',
-                    className: 'btn btn-secondary btn-sm mb-3' // Abu Kecil (SEJAJAR)
+                    className: 'btn btn-secondary btn-sm mb-3'
                 }
             ],
-            "order": [],
+            "order": [], 
             "createdRow": function(row, data, dataIndex) {
-                // WARNAI BARIS KUNING JIKA STATUS BATAL (ANOMALI)
                 if (data.is_anomali === true) {
-                    $(row).addClass('table-warning');
+                    $(row).addClass('table-warning border-start border-warning border-4');
                 }
             },
             "columns": [
@@ -157,17 +191,11 @@ require_once('includes/header.php');
                     "render": function(data) {
                         let penjamin = data.penjamin.toLowerCase();
                         let badgeClass = 'bg-secondary'; 
-                        let badgeStyle = '';
-
-                        if (penjamin.includes('bpjs')) {
-                            badgeClass = 'bg-success';
-                        } else if (penjamin.includes('umum')) {
-                            badgeClass = 'bg-primary';
-                        } else if (penjamin.includes('asuransi') || penjamin.includes('inhealth')) {
-                            badgeClass = ''; 
-                            badgeStyle = 'background-color: #e83e8c; color: white;'; // Pink Custom
-                        }
-                        return `<span class="badge ${badgeClass}" style="${badgeStyle}">${data.penjamin}</span>`;
+                        if (penjamin.includes('bpjs')) badgeClass = 'bg-success';
+                        else if (penjamin.includes('umum')) badgeClass = 'bg-primary';
+                        else if (penjamin.includes('asuransi')) badgeClass = 'bg-info text-dark';
+                        
+                        return `<span class="badge ${badgeClass}">${data.penjamin}</span>`;
                     }
                 },
                 { "data": "biaya_obat", "className": "text-end" },
@@ -175,7 +203,7 @@ require_once('includes/header.php');
                 { 
                     "data": "status",
                     "className": "text-center",
-                    "render": function(data, type, row) {
+                    "render": function(data) {
                         if(data === 'Batal') return `<span class="badge bg-danger">BATAL</span>`;
                         if(data === 'Sudah') return `<span class="badge bg-success">Sudah</span>`;
                         return `<span class="badge bg-secondary">${data}</span>`;
@@ -184,9 +212,8 @@ require_once('includes/header.php');
                 { 
                     "data": null, "className": "text-center", 
                     "render": function(data, type, row) {
-                        return `<button class="btn btn-sm btn-info text-white" 
-                                onclick="showDetailBilling('${row.no_rawat}', '${row.pasien.replace(/'/g, "\\'")}')" 
-                                title="Rincian">
+                        return `<button class="btn btn-sm btn-info text-white shadow-sm" 
+                                onclick="showDetailBilling('${row.no_rawat}', '${row.pasien.replace(/'/g, "\\'")}')">
                                 <i class="fas fa-eye"></i>
                                 </button>`;
                     }
@@ -205,7 +232,7 @@ require_once('includes/header.php');
         $('#modalDetailBilling').modal('show');
 
         $.ajax({
-            url: 'api/data_rincian_billing.php', // Menggunakan API detail yang sudah diupdate
+            url: 'api/data_rincian_billing.php', 
             type: 'GET',
             data: { no_rawat: noRawat },
             dataType: 'json',

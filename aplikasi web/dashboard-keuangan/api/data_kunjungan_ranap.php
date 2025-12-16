@@ -1,14 +1,14 @@
 <?php
 /*
- * File: api/data_kunjungan_ranap.php (FIX V26 - HYBRID 7.3 & 8.3 COMPATIBLE)
+ * File: api/data_kunjungan_ranap.php (FIX V27 - FILTER & AUDIT MODE)
+ * - Fitur: Mode 'Active' (Default) vs 'Audit' (Cek Pulang Belum Bayar).
+ * - Security: Future Ban pada filter tanggal.
  */
 
 ob_start();
 ini_set('display_errors', 0);
 error_reporting(0);
 set_time_limit(0);
-
-// PENTING: Matikan Exception MySQLi untuk PHP 8.1+
 mysqli_report(MYSQLI_REPORT_OFF);
 
 header('Content-Type: application/json; charset=utf-8');
@@ -16,12 +16,11 @@ require_once(dirname(__DIR__) . '/config/koneksi.php');
 
 $koneksi->query("SET sql_mode = ''");
 
+// --- HELPER ---
 function textToUtf8($str) {
     if (is_null($str)) return "";
     $str = (string)$str;
-    if (function_exists('mb_convert_encoding')) {
-        return mb_convert_encoding($str, 'UTF-8', 'ISO-8859-1');
-    }
+    if (function_exists('mb_convert_encoding')) return mb_convert_encoding($str, 'UTF-8', 'ISO-8859-1');
     return @utf8_encode($str);
 }
 
@@ -30,9 +29,9 @@ function safeFloat($val) {
     return (float)$val;
 }
 
+// --- SETTINGS ---
 function getSettings($conn) {
     $settings = ['service_charge' => 0, 'ppn_obat' => false, 'components' => []];
-    
     $q = $conn->query("SELECT tampilkan_ppnobat_ranap FROM set_nota LIMIT 1");
     if($q && $r = $q->fetch_assoc()) $settings['ppn_obat'] = ($r['tampilkan_ppnobat_ranap'] == 'Yes');
 
@@ -45,6 +44,7 @@ function getSettings($conn) {
     return $settings;
 }
 
+// --- HITUNG ESTIMASI (Logic Sama) ---
 function hitungEstimasiAkurat($conn, $no_rawat, $settings) {
     $biaya = [
         'laborat' => 0.0, 'radiologi' => 0.0, 'operasi' => 0.0, 'obat' => 0.0,
@@ -135,6 +135,29 @@ $length = isset($_GET['length']) ? (int)$_GET['length'] : 10;
 $search_value = isset($_GET['search']['value']) ? $koneksi->real_escape_string($_GET['search']['value']) : '';
 $draw = isset($_GET['draw']) ? (int)$_GET['draw'] : 1;
 
+// --- LOGIKA FILTER MODE (ACTIVE vs AUDIT) ---
+$mode = isset($_GET['mode']) ? $_GET['mode'] : 'active'; // Default Active Only
+$tgl_awal = isset($_GET['tgl_awal']) ? $koneksi->real_escape_string($_GET['tgl_awal']) : date('Y-m-01');
+$tgl_akhir = isset($_GET['tgl_akhir']) ? $koneksi->real_escape_string($_GET['tgl_akhir']) : date('Y-m-d');
+$hari_ini = date('Y-m-d');
+
+// Future Ban Rule
+if ($tgl_akhir > $hari_ini) {
+    $tgl_akhir = $hari_ini;
+}
+
+// Base Filter: Selalu 'Belum Bayar'
+$filter_sql = " AND rp.status_bayar = 'Belum Bayar' ";
+
+if ($mode == 'audit') {
+    // Mode Audit: Tampilkan semua (Termasuk yg sudah Pulang) berdasarkan Tanggal Masuk
+    $filter_sql .= " AND ki.tgl_masuk BETWEEN '$tgl_awal' AND '$tgl_akhir' ";
+} else {
+    // Mode Active: Hanya yang masih dirawat (stts_pulang kosong/minus). 
+    // Tanggal filter diabaikan agar semua pasien aktif terlihat.
+    $filter_sql .= " AND (ki.stts_pulang = '-' OR ki.stts_pulang = '') ";
+}
+
 $sql_from = "
     FROM kamar_inap ki
     INNER JOIN reg_periksa rp ON ki.no_rawat = rp.no_rawat
@@ -144,11 +167,12 @@ $sql_from = "
     INNER JOIN penjab pj ON rp.kd_pj = pj.kd_pj
     LEFT JOIN perkiraan_biaya_ranap pbr ON ki.no_rawat = pbr.no_rawat
     LEFT JOIN dokter d_reg ON rp.kd_dokter = d_reg.kd_dokter
-    WHERE (ki.stts_pulang = '-' OR ki.stts_pulang = '') 
-    AND rp.status_bayar = 'Belum Bayar' 
+    WHERE 1=1
+    $filter_sql 
 ";
 
 if (!empty($search_value)) {
+    // Saat search, batasan filter tetap berlaku agar konteks terjaga
     $sql_from .= " AND (
         p.nm_pasien LIKE '%$search_value%' 
         OR ki.no_rawat LIKE '%$search_value%' 
@@ -158,21 +182,15 @@ if (!empty($search_value)) {
 }
 
 $q_cnt = $koneksi->query("SELECT COUNT(*) as total " . $sql_from);
-if(!$q_cnt) {
-    ob_end_clean();
-    die(json_encode(["error" => "SQL Count Error: " . $koneksi->error]));
-}
+if(!$q_cnt) { ob_end_clean(); die(json_encode(["error" => "SQL Count Error"])); }
 $totalFiltered = $q_cnt->fetch_assoc()['total'];
 $totalData = $totalFiltered;
 
-$sql_limit = "";
-if ($length != -1) {
-    $sql_limit = "LIMIT $start, $length";
-}
+$sql_limit = ($length != -1) ? "LIMIT $start, $length" : "";
 
 $sql_data = "
     SELECT 
-        ki.no_rawat, ki.tgl_masuk, ki.jam_masuk, 
+        ki.no_rawat, ki.tgl_masuk, ki.jam_masuk, ki.stts_pulang,
         p.no_rkm_medis, p.nm_pasien, pj.png_jawab, 
         k.kd_kamar, b.nm_bangsal, k.kelas,
         pbr.tarif as plafon_db, 
@@ -185,10 +203,7 @@ $sql_data = "
 ";
 
 $res_data = $koneksi->query($sql_data);
-if(!$res_data) {
-    ob_end_clean();
-    die(json_encode(["error" => "SQL Data Error: " . $koneksi->error]));
-}
+if(!$res_data) { ob_end_clean(); die(json_encode(["error" => "SQL Data Error"])); }
 
 $raw_data = [];
 
@@ -220,6 +235,12 @@ while ($row = $res_data->fetch_assoc()) {
     }
 
     $lama = (safeFloat($row['lama']) < 1) ? 1 : $row['lama'];
+    
+    // Status Pulang Logic
+    $stts_pulang = $row['stts_pulang'];
+    if ($stts_pulang == '' || $stts_pulang == '-') {
+        $stts_pulang = 'Masih Dirawat';
+    }
 
     $raw_data[] = [
         'waktu' => $row['tgl_masuk'] . ' ' . $row['jam_masuk'],
@@ -236,7 +257,8 @@ while ($row = $res_data->fetch_assoc()) {
         'plafon' => $plafon_display,
         'selisih' => $selisih_display,
         'is_over' => $is_over,
-        'selisih_raw' => $selisih_raw 
+        'selisih_raw' => $selisih_raw,
+        'status_pulang' => textToUtf8($stts_pulang) // Data untuk kolom status
     ];
 }
 
