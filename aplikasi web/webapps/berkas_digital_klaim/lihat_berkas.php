@@ -125,6 +125,15 @@ $data_pasien  = mysqli_fetch_assoc(mysqli_query($koneksi, $query_pasien));
                         <a href="erm/cetak_resume.php?no_rawat=<?= urlencode($no_rawat) ?>" target="_blank" class="btn btn-outline-success text-start">
                             <i class="fas fa-file-medical me-2"></i> Resume Medis Ranap
                         </a>
+						<a href="erm/cetak_resume_ralan.php?no_rawat=<?= urlencode($no_rawat) ?>" target="_blank" class="btn btn-outline-primary text-start">
+							<i class="fas fa-file-prescription me-2"></i> Resume Medis Ralan
+						</a>
+						<a href="erm/cetak_triase_igd.php?no_rawat=<?= urlencode($no_rawat) ?>" target="_blank" class="btn btn-outline-danger text-start">
+							<i class="fas fa-ambulance me-2"></i> Triase IGD
+						</a>
+						<a href="erm/cetak_asesmen_igd.php?no_rawat=<?= urlencode($no_rawat) ?>" target="_blank" class="btn btn-outline-info text-start">
+							<i class="fas fa-user-md me-2"></i> Asesmen Awal Medis IGD
+						</a>
 
                         <button disabled class="btn btn-outline-secondary text-start">
                             <i class="fas fa-file-invoice-dollar me-2"></i> Rincian Biaya (Billing)
