@@ -2,7 +2,6 @@
 /*
  * File: /webapps/berkas_digital_perawatan/dashboard.php
  * Fungsi: Dashboard Monitoring Casemix (V7 - Indikator Kelengkapan Data)
- * Update: Fix Prioritas Nama Dokter (DPJP Ranap > Dokter Registrasi)
  */
 session_start();
 
@@ -155,10 +154,7 @@ function renderStatus($status, $type = 'mandatory') {
                         $query = "SELECT 
                                     rp.no_rawat, rp.tgl_registrasi, rp.jam_reg, rp.status_lanjut, rp.kd_poli,
                                     p.no_rkm_medis, p.nm_pasien, 
-                                    
-                                    -- PERBAIKAN: Prioritas Ambil DPJP Ranap, jika tidak ada baru ambil Dokter Registrasi
-                                    COALESCE(dd.nm_dokter, d.nm_dokter) as nm_dokter,
-                                    
+                                    d.nm_dokter, 
                                     COALESCE(bs.no_sep, '-') as no_sep,
                                     COALESCE(ni.tanggal, nj.tanggal) as tgl_closing,
                                     
@@ -198,12 +194,7 @@ function renderStatus($status, $type = 'mandatory') {
 
                                 FROM reg_periksa rp
                                 JOIN pasien p ON rp.no_rkm_medis = p.no_rkm_medis
-                                JOIN dokter d ON rp.kd_dokter = d.kd_dokter -- Dokter Registrasi (Default)
-                                
-                                -- PERBAIKAN: Join ke DPJP Ranap
-                                LEFT JOIN dpjp_ranap dr ON rp.no_rawat = dr.no_rawat
-                                LEFT JOIN dokter dd ON dr.kd_dokter = dd.kd_dokter
-                                
+                                JOIN dokter d ON rp.kd_dokter = d.kd_dokter
                                 LEFT JOIN nota_jalan nj ON rp.no_rawat = nj.no_rawat
                                 LEFT JOIN nota_inap ni ON rp.no_rawat = ni.no_rawat
                                 LEFT JOIN bridging_sep bs ON rp.no_rawat = bs.no_rawat

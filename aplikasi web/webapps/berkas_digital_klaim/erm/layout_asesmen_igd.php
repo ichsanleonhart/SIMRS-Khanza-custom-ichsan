@@ -33,10 +33,10 @@
     <table class="kop-table">
         <tr>
             <td width="15%" class="text-center">
-                <img src="<?= $logo_src ?>" style="width: 60px; height: 60px;">
+                <img src="<?= $logo_src ?>" style="width: 70px; height: 70px;">
             </td>
             <td width="85%" class="text-center">
-                <span class="fs-14 text-bold"><?= strtoupper($setting['nama_instansi']) ?></span><br>
+                <span class="fs-14 text-bold"> <b style="font-size:20px"><?= strtoupper($setting['nama_instansi']) ?> </b></span><br>
                 <span class="fs-10"><?= $setting['alamat_instansi'] ?>, <?= $setting['kabupaten'] ?></span><br>
                 <span class="fs-10">Telp: <?= $setting['kontak'] ?> | E-mail: <?= $setting['email'] ?></span>
             </td>

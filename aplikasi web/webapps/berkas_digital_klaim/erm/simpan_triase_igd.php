@@ -124,7 +124,8 @@ try {
     $options->set('isRemoteEnabled', true);
     $dompdf = new Dompdf($options);
     $dompdf->loadHtml($html);
-    $dompdf->setPaper('legal', 'portrait');
+    $customPaper = array(0, 0, 595.28, 935.43);
+	$dompdf->setPaper($customPaper, 'portrait');
     $dompdf->render();
     $output = $dompdf->output();
 

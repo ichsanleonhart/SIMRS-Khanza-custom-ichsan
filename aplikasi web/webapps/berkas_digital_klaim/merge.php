@@ -1,80 +1,55 @@
 <?php
 /*
- * File: /webapps/berkas_digital_perawatan/merge.php
- * Fungsi: Menggabungkan berkas terpilih menjadi satu PDF
- * Update: Support filtering checkbox selection
+ * File: merge.php (V.Final - Ghostscript Engine with Path Input)
+ * Fungsi: Menggabungkan berkas berdasarkan PATH fisik (Input dari lihat_berkas.php)
  */
 
+session_start();
 require_once('../conf/conf.php');
-require_once('fpdf.php'); // Pastikan library ini ada
+require_once('fpdf.php'); // Menggunakan FPDF milik Anda
 
 // 1. SETUP & VALIDASI
 $storage_path = "../berkasrawat/"; 
 $temp_dir = __DIR__ . "/tmp/"; 
 
-// Pastikan folder tmp ada
 if (!file_exists($temp_dir)) {
     if (!mkdir($temp_dir, 0777, true) && !is_dir($temp_dir)) {
         die("Gagal membuat direktori temporary.");
     }
 }
 
-// Tangkap No Rawat (Bisa dari POST atau GET sebagai fallback)
 $no_rawat = isset($_REQUEST['no_rawat']) ? validTeks4($_REQUEST['no_rawat'], 20) : '';
-if(empty($no_rawat)) die("No Rawat tidak ditemukan.");
+// Tangkap Array Path dari lihat_berkas.php
+$selected_paths = isset($_POST['selected_files']) ? $_POST['selected_files'] : [];
 
-// Tangkap List Kode File yang dipilih (Array)
-$selected_codes = isset($_POST['selected_files']) ? $_POST['selected_files'] : [];
-
-// 2. BUILD QUERY
-$koneksi = bukakoneksi();
-
-// Query Dasar
-$sql = "SELECT bdp.lokasi_file, mbd.nama as jenis_berkas 
-        FROM berkas_digital_perawatan bdp 
-        JOIN master_berkas_digital mbd ON bdp.kode = mbd.kode
-        WHERE bdp.no_rawat = '$no_rawat'";
-
-// Tambahkan Filter jika User Memilih (Jika kosong/select all via GET, ambil semua)
-if (!empty($selected_codes)) {
-    // Sanitasi array agar aman masuk ke SQL IN (...)
-    $safe_codes = array_map(function($code) use ($koneksi) {
-        return "'" . mysqli_real_escape_string($koneksi, $code) . "'";
-    }, $selected_codes);
-    
-    $in_clause = implode(',', $safe_codes);
-    $sql .= " AND bdp.kode IN ($in_clause)";
-} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Jika via POST tapi array kosong, berarti user uncheck semua
-    echo "<script>alert('Tidak ada file yang dipilih!'); window.history.back();</script>";
+if (empty($no_rawat)) die("No Rawat tidak ditemukan.");
+if (empty($selected_paths)) {
+    echo "<script>alert('Tidak ada file yang dipilih!'); window.close();</script>";
     exit;
 }
 
-$sql .= " ORDER BY bdp.kode ASC";
-$hasil = mysqli_query($koneksi, $sql);
-
-if(mysqli_num_rows($hasil) == 0) {
-    echo "<script>alert('Berkas tidak ditemukan atau tidak ada yang dipilih.'); window.history.back();</script>";
-    exit;
-}
-
-// 3. PROSES MERGE (GHOSTSCRIPT HYBRID)
+// 2. PROSES MERGE (GHOSTSCRIPT HYBRID)
 $files_to_merge = [];
 $temp_files_created = [];
 $counter = 1;
 
-while($row = mysqli_fetch_assoc($hasil)) {
-    $original_file = $storage_path . $row['lokasi_file'];
+// Loop langsung array path dari input user (Tanpa Query DB lagi)
+foreach ($selected_paths as $rel_path) {
+    // Sanitasi path traversal sederhana
+    $rel_path = str_replace('..', '', $rel_path);
+    
+    // Path fisik lengkap: ../berkasrawat/pages/upload/namafile.pdf
+    $original_file = $storage_path . $rel_path;
     
     // Skip jika file fisik hilang
     if(!file_exists($original_file)) continue;
 
     $ext = strtolower(pathinfo($original_file, PATHINFO_EXTENSION));
-    $uniq = uniqid(); // Cegah bentrok nama
+    $uniq = uniqid();
     $temp_filename = $temp_dir . $uniq . "_part_" . $counter . ".pdf";
 
     if(in_array($ext, ['jpg', 'jpeg', 'png'])) {
-        // --- GAMBAR KE PDF ---
+        // --- GAMBAR KE PDF (FPDF) ---
         try {
             $pdf = new FPDF();
             $pdf->AddPage();
@@ -96,21 +71,21 @@ while($row = mysqli_fetch_assoc($hasil)) {
     $counter++;
 }
 
-if(empty($files_to_merge)) die("Gagal memproses file fisik.");
+if(empty($files_to_merge)) die("Gagal memproses file fisik. Pastikan file ada di server.");
 
 // Output Final Path
 $clean_no_rawat = str_replace(['/','\\'], '-', $no_rawat);
 $final_output = $temp_dir . "MERGED_" . $clean_no_rawat . "_" . date('His') . ".pdf";
 
 // Command Ghostscript (Linux)
-// Pastikan gs terinstall: sudo apt-get install ghostscript
+// -dAutoRotatePages=/None untuk mencegah orientasi berubah aneh
 $files_str = implode(' ', $files_to_merge);
 $command = "gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=\"{$final_output}\" {$files_str}";
 
 // Eksekusi
 exec($command, $output, $return_var);
 
-// 4. DOWNLOAD & CLEANUP
+// 3. DOWNLOAD & CLEANUP
 if (file_exists($final_output)) {
     // Kirim Header Download
     header('Content-Description: File Transfer');
@@ -120,6 +95,11 @@ if (file_exists($final_output)) {
     header('Cache-Control: must-revalidate');
     header('Pragma: public');
     header('Content-Length: ' . filesize($final_output));
+    
+    // Bersihkan buffer output sebelumnya (jika ada echo tak sengaja)
+    if (ob_get_length()) ob_clean();
+    flush();
+    
     readfile($final_output);
 
     // Hapus file temporary
@@ -127,6 +107,6 @@ if (file_exists($final_output)) {
     unlink($final_output);
     exit;
 } else {
-    echo "Terjadi kesalahan saat menggabungkan PDF (Ghostscript Error code: $return_var).";
+    echo "Terjadi kesalahan saat menggabungkan PDF (Ghostscript Error code: $return_var). <br> Command: $command";
 }
 ?>
