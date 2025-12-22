@@ -1,7 +1,7 @@
 <?php
 // injector_engine.php
-// VERSI 5.0: DYNAMIC LIMIT SUPPORT
-// Memungkinkan Admin Panel meminta lebih dari 10 data sekaligus.
+// VERSI 5.6: ADDED ORTHANC LOCAL CHECK
+// Fitur Baru: Mode 'check_orthanc' untuk memeriksa ketersediaan gambar di server lokal.
 
 ob_start();
 session_start(); 
@@ -25,23 +25,51 @@ if ($conn->connect_error) json_response("error", "DB Error");
 // --- API PUBLIC (LOG) ---
 if (isset($_GET['mode']) && $_GET['mode'] === 'view_log') {
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-    // FIX: Menerima limit dari parameter, default 10, max 1000 (biar ga crash)
     $limit = isset($_GET['limit']) ? min((int)$_GET['limit'], 1000) : 10; 
     $offset = ($page - 1) * $limit;
     
     $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
+    
+    // Filter Dasar
     $where = "WHERE 1=1";
-    if (!empty($search)) $where .= " AND (nama_pasien LIKE '%$search%' OR no_rm LIKE '%$search%' OR acsn_baru LIKE '%$search%')";
-    if (!empty($_GET['date_start']) && !empty($_GET['date_end'])) $where .= " AND (DATE(waktu_suntik) BETWEEN '{$_GET['date_start']}' AND '{$_GET['date_end']}')";
+    if (!empty($search)) $where .= " AND (log.nama_pasien LIKE '%$search%' OR log.no_rm LIKE '%$search%' OR log.acsn_baru LIKE '%$search%')";
+    if (!empty($_GET['date_start']) && !empty($_GET['date_end'])) $where .= " AND (DATE(log.waktu_suntik) BETWEEN '{$_GET['date_start']}' AND '{$_GET['date_end']}')";
     
-    $total = $conn->query("SELECT COUNT(*) as t FROM orthanc_injector_log $where")->fetch_assoc()['t'];
-    $q = $conn->query("SELECT * FROM orthanc_injector_log $where ORDER BY id DESC LIMIT $limit OFFSET $offset");
-    $data = []; while($r = $q->fetch_assoc()) $data[] = $r;
+    // Hitung Total Data (Tanpa Join Berat)
+    $total = $conn->query("SELECT COUNT(*) as t FROM orthanc_injector_log log $where")->fetch_assoc()['t'];
     
-    json_response("success", "OK", ["data" => $data, "pagination" => ["current_page" => $page, "total_pages" => ceil($total/$limit), "limit" => $limit]]);
+    // QUERY UTAMA (RELASI TABEL KHANZA)
+    $sql = "
+        SELECT 
+            log.*,
+            pr.no_rawat AS real_no_rawat,
+            sse.id_encounter,
+            ssr.id_servicerequest
+        FROM orthanc_injector_log log
+        LEFT JOIN permintaan_radiologi pr ON log.acsn_baru = pr.noorder
+        LEFT JOIN satu_sehat_encounter sse ON pr.no_rawat = sse.no_rawat
+        LEFT JOIN satu_sehat_servicerequest_radiologi ssr ON log.acsn_baru = ssr.noorder
+        $where
+        GROUP BY log.id 
+        ORDER BY log.acsn_baru DESC
+        LIMIT $limit OFFSET $offset
+    ";
+
+    $q = $conn->query($sql);
+    if(!$q) json_response("error", "SQL Error: " . $conn->error);
+    
+    $data = []; 
+    while($r = $q->fetch_assoc()) {
+        $r['has_encounter'] = !empty($r['id_encounter']);
+        $r['has_servicerequest'] = !empty($r['id_servicerequest']);
+        if(empty($r['real_no_rawat'])) $r['real_no_rawat'] = $r['no_rawat'];
+        $data[] = $r;
+    }
+    
+    json_response("success", "OK", ["data" => $data, "pagination" => ["current_page" => $page, "total_pages" => ceil($total/$limit), "limit" => $limit, "total_data" => $total]]);
 }
 
-// --- ADMIN API ---
+// --- ADMIN API (CHECK & DELETE) ---
 if (isset($_GET['mode'])) {
     if (!isset($_SESSION['user_admin'])) json_response("error", "Access Denied");
     $mode = $_GET['mode'];
@@ -57,6 +85,27 @@ if (isset($_GET['mode'])) {
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         $res = json_decode(curl_exec($ch), true); curl_close($ch);
         return $res['access_token'] ?? false;
+    }
+
+    // [BARU] Cek Ketersediaan di Orthanc Lokal
+    if ($mode === 'check_orthanc') {
+        $acsn = trim($_POST['acsn']);
+        
+        $ch = curl_init(ORTHANC_URL . "/tools/find");
+        curl_setopt($ch, CURLOPT_USERPWD, ORTHANC_USER.":".ORTHANC_PASS);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["Level" => "Study", "Expand" => false, "Query" => ["AccessionNumber" => $acsn]]));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $res = curl_exec($ch);
+        curl_close($ch);
+        
+        $json = json_decode($res, true);
+        
+        if (is_array($json) && count($json) > 0) {
+            json_response("found", "Ada di Orthanc", ["count" => count($json)]);
+        } else {
+            json_response("not_found", "Kosong");
+        }
     }
 
     if ($mode === 'check_ss') {
@@ -83,17 +132,15 @@ if (isset($_GET['mode'])) {
         $acsn = trim($_POST['acsn']); add_log("HARD DELETE: $acsn");
         $token = get_token(); if(!$token) json_response("error", "Token Fail");
 
-        // Search ID
         $url = SS_BASE_URL . "/fhir-r4/v1/ImagingStudy?identifier=" . urlencode("http://sys-ids.kemkes.go.id/acsn/".SS_ORG_ID."|".$acsn);
         $ch = curl_init($url); curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer $token"]); curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         $search = json_decode(curl_exec($ch), true); curl_close($ch);
         $rid = $search['entry'][0]['resource']['id'] ?? null;
         if(!$rid) json_response("error", "Resource ID Not Found");
 
-        // Delete
         $ch = curl_init(SS_BASE_URL . "/fhir-r4/v1/ImagingStudy/$rid");
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
-        curl_setopt($ch, CURLOPT_POSTFIELDS, "{}"); // Fix empty body
+        curl_setopt($ch, CURLOPT_POSTFIELDS, "{}"); 
         curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer $token", "Content-Type: application/json"]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

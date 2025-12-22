@@ -1,3 +1,8 @@
+<?php
+// index.php (orthanc_injector)
+// VERSI: MONITOR + AUTO INJECTOR + AUTO RESCUE
+// Halaman ini sekarang menjalankan DUA misi otomatis sekaligus.
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -19,6 +24,8 @@
         /* Pagination */
         .page-link { background-color: #212529; border-color: #343a40; color: #aaa; }
         .page-item.active .page-link { background-color: #0dcaf0; border-color: #0dcaf0; color: #000; }
+        
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
     </style>
 </head>
 <body class="p-4">
@@ -26,8 +33,12 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="text-info fw-bold"><i class="fa-solid fa-satellite-dish"></i> Radiology Monitor</h2>
-            <small>Engine Status: <span id="sys-status" class="badge bg-success badge-pulse">ONLINE (Auto H-7)</span></small>
-            <small class="text-muted ms-2" id="last-sync">Waiting sync...</small>
+            <div class="d-flex gap-3 align-items-center">
+                <small>Injector: <span id="sys-status" class="badge bg-success badge-pulse">ONLINE (Auto H-7)</span></small>
+                
+                <small>Rescue Bot: <span id="rescue-status" class="badge bg-secondary">WAITING...</span></small>
+            </div>
+            <small class="text-muted d-block mt-1" id="last-sync">Waiting sync...</small>
         </div>
         <a href="login.php" class="btn btn-outline-warning"><i class="fa-solid fa-lock"></i> Login Super Admin</a>
     </div>
@@ -89,18 +100,17 @@
     document.getElementById('date_end').valueAsDate = new Date();
 
     // --- 1. ENGINE AUTO-INJECTOR (BACKGROUND) ---
-    // Ini berjalan diam-diam tanpa mempedulikan filter tanggal di atas
+    // Tugas: Memperbaiki ACSN yang salah (PR...)
     function runAutoInjector() {
         $('#sys-status').removeClass('bg-success').addClass('bg-warning').text('SYNCING...');
         $.ajax({
             url: 'injector_engine.php', 
-            // Tidak kirim parameter = Mode Auto H-7 Default
             dataType: 'json',
             success: function(res) {
                 $('#sys-status').removeClass('bg-warning bg-danger').addClass('bg-success').text('ONLINE (Auto H-7)');
                 $('#last-sync').text('Last Sync: ' + new Date().toLocaleTimeString());
                 
-                // Jika ada injeksi baru sukses, refresh tabel log (biar user lihat update realtime)
+                // Jika ada injeksi baru sukses, refresh tabel log
                 if(res.processed > 0) {
                     loadLogs(1); 
                 }
@@ -111,11 +121,69 @@
         });
     }
 
-    // Jalankan Engine tiap 15 detik
-    setInterval(runAutoInjector, 15000);
-    runAutoInjector(); // Jalankan sekali saat load
+    // --- 2. ENGINE AUTO-RESCUE (BACKGROUND) ---
+    // Tugas: Mendorong data yang macet (WAIT -> READY) ke Router
+    // --- AUTO RESCUE BOT LOGIC (UPGRADED: H-7 SCAN) ---
+    function runAutoRescue() {
+        // 1. Hitung Tanggal Akhir (Hari Ini)
+        let endObj = new Date();
+        let endDate = endObj.toISOString().split('T')[0];
 
-    // --- 2. LOG VIEWER (FOREGROUND) ---
+        // 2. Hitung Tanggal Awal (Mundur 7 Hari)
+        let startObj = new Date();
+        startObj.setDate(startObj.getDate() - 7);
+        let startDate = startObj.toISOString().split('T')[0];
+
+        $('#next-rescue-timer').text('Bot Running (H-7)...');
+        
+        // Update status visual agar user tahu sedang scan rentang mana
+        if($('#rescue-status').length) {
+            $('#rescue-status').removeClass('bg-secondary bg-success').addClass('bg-warning').text('SCAN H-7...');
+        }
+
+        $.ajax({
+            url: 'rescue_sender.php',
+            data: { start_date: startDate, end_date: endDate }, // KIRIM RENTANG H-7
+            dataType: 'json',
+            success: function(res) {
+                if(res.pushed_total > 0) {
+                    let msg = `AUTO-RESCUE SUKSES: Mendorong ${res.pushed_total} data macet (${startDate} s/d ${endDate}).`;
+                    addToLiveLog(msg, 'bot');
+                    
+                    // Update Indikator (khusus index.php)
+                    if($('#rescue-status').length) {
+                        $('#rescue-status').removeClass('bg-warning').addClass('bg-success').text('PUSHED: ' + res.pushed_total);
+                    }
+                    
+                    // Refresh tabel
+                    loadAdminTable(1);
+                } else {
+                    // Balikin status ke idle jika 0 data
+                    if($('#rescue-status').length) {
+                        $('#rescue-status').removeClass('bg-warning').addClass('bg-secondary').text('IDLE (H-7 Aman)');
+                    }
+                }
+            },
+            error: function() {
+                addToLiveLog('Auto-Rescue Bot: Connection Failed', 'error');
+                if($('#rescue-status').length) $('#rescue-status').addClass('bg-danger').text('ERROR');
+            }
+        });
+    }
+
+    // --- INTERVAL SETTING ---
+    
+    // 1. Jalankan Injector tiap 15 detik (Cukup cepat karena ini core function)
+    setInterval(runAutoInjector, 15000);
+    
+    // 2. Jalankan Rescue tiap 50 Menit (Sesuai permintaanmu: 50 * 60 * 1000 = 3000000 ms)
+    setInterval(runAutoRescue, 3000000); 
+
+    // Start Awal saat halaman dibuka
+    runAutoInjector();
+    setTimeout(runAutoRescue, 5000); // Delay dikit biar ga tabrakan request di awal
+
+    // --- 3. LOG VIEWER (FOREGROUND) ---
     function loadLogs(page) {
         let q = $('#search_q').val();
         let ds = $('#date_start').val();
