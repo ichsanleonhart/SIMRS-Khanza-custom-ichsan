@@ -128,6 +128,47 @@ client.on("call", async (call) => {
   );
 });
 
+// ==================================================================
+// FITUR CHATBOT 2 ARAH (THE LISTENER)
+// ==================================================================
+client.on("message", async (msg) => {
+    // 1. Ambil Isi Pesan
+    const messageBody = msg.body;
+    const senderNumber = msg.from;
+
+    // console.log(`Pesan dari ${senderNumber}: ${messageBody}`); // Debugging (Opsional)
+
+    // 2. FILTER: Hanya proses jika diawali tanda pagar '#'
+    if (messageBody.startsWith('#')) {
+        console.log(`[BOT] Menerima Perintah: ${messageBody}`);
+
+        try {
+            // 3. LEMPAR KE PHP (chatbot.php) via HTTP POST
+            // Kita pakai axios yang sudah diinstall
+            const response = await axios.post('http://localhost/wa_gateway/chatbot.php', {
+                sender: senderNumber,
+                message: messageBody
+            });
+
+            // 4. AMBIL JAWABAN DARI PHP
+            const replyText = response.data.reply;
+
+            // 5. BALAS KE USER (REPLY)
+            if (replyText) {
+                msg.reply(replyText);
+                console.log(`[BOT] Membalas: Sukses`);
+            }
+
+        } catch (error) {
+            console.error(`[BOT] Error menghubungi PHP: ${error.message}`);
+            // Opsional: msg.reply("Maaf, server chatbot sedang sibuk.");
+        }
+    } else {
+        // Pesan sampah (tidak ada hashtag) -> ABAIKAN.
+        // Tidak direkam ke DB, tidak diproses. Bersih!
+    }
+});
+
 client.initialize();
 
 app.get("/", (req, res) => {
@@ -301,3 +342,5 @@ app.listen(port, () => {
 process.on("exit", (code) => {
   console.log(`Nodejs exit with code ${code}`);
 });
+
+
