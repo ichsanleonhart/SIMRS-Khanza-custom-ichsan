@@ -66,7 +66,7 @@ if ($user_ip !== '127.0.0.1' && $user_ip !== '::1') {
     <div class="header">
         <div>
             <h2>🤖 WA GATEWAY (AUTO PILOT)</h2>
-            <small>Database: 192.168.1.2 | Node: Port 8100</small>
+            <small>Database: 192.168.1.5 | Node: Port 8100</small>
         </div>
         <div>
             <button id="btn-start" class="btn-start" onclick="manualStart()">START SEKARANG</button>
@@ -96,7 +96,7 @@ if ($user_ip !== '127.0.0.1' && $user_ip !== '::1') {
 
     // --- KONFIGURASI DELAY (Detik) ---
     const DELAY_MIN = 20; 
-    const DELAY_MAX = 600;
+    const DELAY_MAX = 120;
     const DELAY_EMPTY = 5; 
     const AUTO_START_DELAY = 300; // 5 Menit
 

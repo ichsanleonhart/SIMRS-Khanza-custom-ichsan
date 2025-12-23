@@ -1,87 +1,101 @@
 <?php
-// FILE: processor.php
-// FIXED VERSION: Support Hex Emoji Converter (0xF0 0x9F...) -> Emoji Asli
+// FILE: processor.php (RSIA DIAN - UNIVERSAL AUTO CONVERT)
+// Fitur: Mengubah pattern 0x.. menjadi Emoji secara otomatis tanpa merusak teks lain.
+
+// 1. Matikan error display agar JSON bersih
+ini_set('display_errors', 0);
+error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 header('Content-Type: application/json; charset=utf-8');
 
-// --- KONFIGURASI DATABASE & NODEJS ---
-$host = '192.168.1.2';
+// --- SECURITY CHECK ---
+$user_ip = $_SERVER['REMOTE_ADDR'];
+if ($user_ip !== '127.0.0.1' && $user_ip !== '::1' && $user_ip !== 'localhost') {
+    echo json_encode(['status' => 'error', 'log' => "AKSES DITOLAK (IP: $user_ip)."]);
+    exit;
+}
+
+// --- KONFIGURASI RSIA DIAN ---
+$host = '192.168.1.5'; 
 $db   = 'sik_master';
-$user = 'client';
-$pass = 'epotoransu';
+$user = 'client';      
+$pass = 'epotoransu'; 
 
-// URL Node.js
 $node_base_url = 'http://localhost:8100';
-
-// Folder Media
 $media_folder = __DIR__ . DIRECTORY_SEPARATOR . 'media' . DIRECTORY_SEPARATOR;
 
-// --- FUNGSI SAKTI: KONVERSI HEX KE EMOJI ---
+// --- FUNGSI EMOJI AUTO-CONVERT (CERDAS) ---
 function convertHexToEmoji($text) {
-    // Mencari pola seperti "0xF0 0x9F 0x8F 0xA5" (case insensitive)
-    // Regex: Cari grup yang diawali 0x diikuti 2 huruf/angka hex, boleh ada spasi
-    return preg_replace_callback('/((?:0x[0-9a-fA-F]{2}\s*)+)/', function ($matches) {
-        // Bersihkan "0x" dan spasi, sisakan angka hex murni (contoh: F09F8FA5)
-        $hex_clean = str_replace(['0x', '0X', ' '], '', $matches[0]);
-        
-        // Ubah Hex menjadi Binary String (Karakter Asli)
-        return hex2bin($hex_clean);
+    // REGEX PENJELASAN:
+    // (0x[0-9a-fA-F]{2}      -> Cari awalan "0x" diikuti 2 digit hex (cth: 0xF0)
+    // (?:\s*0x[0-9a-fA-F]{2})*) -> Boleh diikuti spasi (opsional) lalu "0x" lagi berulang-ulang
+    // Pattern ini memastikan hanya menangkap rantai hex, TIDAK menangkap teks biasa.
+    $pattern = '/(0x[0-9a-fA-F]{2}(?:\s*0x[0-9a-fA-F]{2})*)/i';
+
+    return preg_replace_callback($pattern, function ($matches) {
+        $found_string = $matches[0]; // Cth: "0xF0 0x9F 0x98 0x8A"
+
+        // Bersihkan hanya bagian yang tertangkap (Hapus 0x dan Spasi)
+        $clean_hex = str_replace(['0x', '0X', ' '], '', $found_string);
+
+        // Validasi: Panjang harus genap (karena hex = 2 digit)
+        if (strlen($clean_hex) % 2 != 0) {
+            return $found_string; // Kembalikan aslinya jika aneh
+        }
+
+        // Konversi Hex bersih ke Biner (Emoji)
+        return hex2bin($clean_hex);
     }, $text);
 }
 
 try {
-    // 1. Koneksi Database
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // 2. Ambil 1 Pesan Antrian
+    // Ambil Antrian
     $stmt = $pdo->query("SELECT * FROM wa_outbox WHERE status = 'ANTRIAN' ORDER BY tanggal_jam ASC LIMIT 1");
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($row) {
-        $id_db = $row['nomor']; // Primary Key (misal: 41101)
-
-        // Bersihkan Nomor HP
+        $id_db = $row['nomor']; 
         $raw_nowa = $row['nowa']; 
         $parts = explode('@', $raw_nowa);
         $nomor_bersih = $parts[0]; 
 
-        // --- KONVERSI PESAN (FITUR BARU) ---
+        // --- PROSES PESAN ---
         $pesan_raw = $row['pesan'];
-        // Terjemahkan kode hex menjadi emoji sebelum dikirim
+        
+        // JALANKAN KONVERSI OTOMATIS
         $pesan = convertHexToEmoji($pesan_raw);
 
         $file_name = $row['file']; 
-
-        // Setup Log
         $log_msg = "[" . date('H:i:s') . "] ID:$id_db | Ke:$nomor_bersih";
 
-        // --- ROUTING ---
         $target_url = "";
         $postData = [];
         
+        // Cek File
         if (!empty($file_name) && file_exists($media_folder . $file_name)) {
-            // JALUR FILE
             $target_url = $node_base_url . '/send-file';
             $postData = [
                 'number'   => $nomor_bersih,
                 'namafile' => $file_name,
-                'caption'  => $pesan // Pesan (yang sudah jadi emoji) jadi caption
+                'caption'  => $pesan 
             ];
-            $log_msg .= " + File ($file_name)";
+            $log_msg .= " + File";
         } else {
-            // JALUR TEKS
             $target_url = $node_base_url . '/send-message';
             $postData = [
                 'number'  => $nomor_bersih,
-                'message' => $pesan // Kirim pesan yang sudah jadi emoji
+                'message' => $pesan 
             ];
         }
 
-        // 3. Eksekusi cURL
+        // Tembak Node.js
         $ch = curl_init($target_url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
+        // http_build_query sangat penting untuk menjaga emoji tetap utuh saat dikirim via HTTP
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
         curl_setopt($ch, CURLOPT_TIMEOUT, 60); 
         
@@ -94,7 +108,7 @@ try {
         }
         curl_close($ch);
 
-        // 4. Update Database
+        // Update Database
         if ($httpCode == 200) {
             $sql = "UPDATE wa_outbox SET status = 'Terproses', sender = 'NODEJS', success = '1', response = :resp WHERE nomor = :id_db";
             $log_msg .= " -> SUKSES.";
@@ -116,6 +130,6 @@ try {
     }
 
 } catch (Exception $e) {
-    echo json_encode(['status' => 'error', 'log' => 'SYSTEM ERROR: ' . $e->getMessage()]);
+    echo json_encode(['status' => 'error', 'log' => 'DB ERROR: ' . $e->getMessage()]);
 }
 ?>
