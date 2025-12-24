@@ -76,6 +76,13 @@ $hadir = fetch_assoc("SELECT count(id) as t FROM rekap_presensi WHERE jam_datang
                 <h3 class="font-bold text-white group-hover:text-indigo-300">Data Pegawai</h3>
                 <p class="text-xs text-gray-400 mt-1">Input, Edit & Validasi Staf</p>
             </a>
+			<a href="cuti.php" class="block bg-gray-800 hover:bg-gray-700 p-5 rounded-xl border border-gray-700 transition shadow hover:shadow-lg group relative overflow-hidden">
+                <div class="w-10 h-10 bg-yellow-900/50 rounded-lg flex items-center justify-center text-yellow-400 mb-3 group-hover:text-white group-hover:bg-yellow-600 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                <h3 class="font-bold text-white group-hover:text-yellow-300">Approval Cuti</h3>
+                <p class="text-xs text-gray-400 mt-1">Persetujuan & Update Jadwal</p>
+            </a>
 			
         </div>
     </div>
