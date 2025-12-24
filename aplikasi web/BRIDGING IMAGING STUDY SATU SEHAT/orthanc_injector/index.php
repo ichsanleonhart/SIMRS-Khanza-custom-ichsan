@@ -176,12 +176,14 @@
     // 1. Jalankan Injector tiap 15 detik (Cukup cepat karena ini core function)
     setInterval(runAutoInjector, 15000);
     
-    // 2. Jalankan Rescue tiap 50 Menit (Sesuai permintaanmu: 50 * 60 * 1000 = 3000000 ms)
-    setInterval(runAutoRescue, 3000000); 
+    // 2. Jalankan Rescue tiap 12 JAM (Agar tidak agresif)
+    // Rumus: 12 jam * 60 menit * 60 detik * 1000 ms = 43200000
+    setInterval(runAutoRescue, 43200000); 
 
     // Start Awal saat halaman dibuka
     runAutoInjector();
-    setTimeout(runAutoRescue, 5000); // Delay dikit biar ga tabrakan request di awal
+    // Delay 10 detik agar injector jalan duluan, baru rescue menyusul pelan-pelan
+    setTimeout(runAutoRescue, 10000);
 
     // --- 3. LOG VIEWER (FOREGROUND) ---
     function loadLogs(page) {

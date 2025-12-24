@@ -1,0 +1,7 @@
+{
+  "db_host": "192.168.1.5",
+  "db_name": "wa_delphi",
+  "db_user": "wa_gateway_mgm",
+  "db_pass": "RSIADi@n123",
+  "node_port": 8200
+}
