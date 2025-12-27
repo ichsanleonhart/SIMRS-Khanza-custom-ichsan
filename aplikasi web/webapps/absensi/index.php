@@ -89,7 +89,8 @@ $logo_src = "data:image/jpeg;base64," . base64_encode($setting['logo']);
     <div class="bg-gray-950 border-t border-gray-800 p-4">
         <div class="max-w-2xl mx-auto grid grid-cols-2 gap-4">
             <a href="jadwal/login.php" class="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 p-3 rounded text-sm text-gray-300 border border-gray-700">Login Jadwal</a>
-            <a href="hrd/login.php" class="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 p-3 rounded text-sm text-gray-300 border border-gray-700">Portal HRD</a>
+            <a href="pegawai/login.php" class="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 p-3 rounded text-sm text-gray-300 border border-gray-700">Pengajuan Cuti</a>
+			<a href="hrd/login.php" class="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 p-3 rounded text-sm text-gray-300 border border-gray-700">Portal HRD</a>
         </div>
     </div>
 

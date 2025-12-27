@@ -8,6 +8,19 @@ if (!isset($_SESSION['jadwal_login'])) {
     exit();
 }
 
+// Hitung Notifikasi Cuti (Pending Level 1)
+$nik_login = $_SESSION['jadwal_user'];
+$q_notif = "SELECT count(*) as total FROM pengajuan_cuti 
+            WHERE nik_pj='$nik_login' AND (status='Proses Pengajuan' OR status IS NULL OR status='')";
+$d_notif = fetch_assoc($q_notif);
+$total_pending = $d_notif['total'];
+
+// Badge HTML
+$badge_html = "";
+if($total_pending > 0) {
+    $badge_html = "<span class='absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-lg'>$total_pending</span>";
+}
+
 $dep_akses = $_SESSION['jadwal_dep']; // 'ALL' atau Kode Dept (misal 'D001')
 $bulan = isset($_GET['bulan']) ? $_GET['bulan'] : date('m');
 $tahun = isset($_GET['tahun']) ? $_GET['tahun'] : date('Y');
@@ -98,6 +111,37 @@ $result = bukaquery($sql);
 </div>
 
 <main class="max-w-4xl mx-auto px-4 py-6 pb-20">
+
+	<div class="mb-6">
+        <a href="approval_cuti.php" class="relative group block w-full">
+            
+            <?php if($total_pending > 0): ?>
+                <span class="absolute -top-2 -right-1 z-10 flex h-6 w-6">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-6 w-6 bg-red-600 text-white text-[10px] font-bold items-center justify-center border-2 border-slate-100">
+                        <?= $total_pending ?>
+                    </span>
+                </span>
+            <?php endif; ?>
+
+            <div class="flex items-center justify-between p-5 bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl shadow-lg border-l-4 border-indigo-500 hover:shadow-indigo-500/20 transition-all transform hover:-translate-y-1">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-gray-700/50 rounded-lg flex items-center justify-center text-indigo-400 group-hover:text-white group-hover:bg-indigo-600 transition duration-300">
+                        <i class="fa-solid fa-file-signature text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white text-lg group-hover:text-indigo-300 transition">Approval Cuti</h3>
+                        <p class="text-xs text-gray-400 mt-0.5">Kelola persetujuan izin cuti bawahan (Level 1)</p>
+                    </div>
+                </div>
+                
+                <div class="text-gray-500 group-hover:text-white transition">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+
     <div class="grid grid-cols-1 gap-3">
         <?php if(mysqli_num_rows($result) > 0): ?>
             <?php while($row = mysqli_fetch_assoc($result)): ?>
