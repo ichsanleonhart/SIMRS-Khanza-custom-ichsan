@@ -3,313 +3,419 @@ require_once('../conf/conf.php');
 $allowed_ip_prefix = '192.168.';
 $user_ip = $_SERVER['REMOTE_ADDR'];
 if (strpos($user_ip, $allowed_ip_prefix) !== 0 && $user_ip !== '127.0.0.1' && $user_ip !== '::1') {
-    die("<center><h1>Akses Ditolak</h1>Hanya via WiFi RS</center>");
+    die("<center><h1 style='color:red'>AKSES DITOLAK</h1><p>Hanya bisa diakses via WiFi RS</p></center>");
 }
+$setting = fetch_assoc("SELECT nama_instansi, alamat_instansi, kabupaten, logo FROM setting LIMIT 1");
+$logo_src = "data:image/jpeg;base64," . base64_encode($setting['logo']);
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Presensi Wajah RS</title>
+    <title>Presensi Wajah - Anti Spoofing</title>
+    <link rel="icon" type="image/x-icon" href="models/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="js/jquery.min.js"></script>
     <script src="js/face-api.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        /* VIDEO dimirror agar user merasa bercermin */
         video { transform: scaleX(-1); width: 100%; height: auto; border-radius: 1rem; }
-        #video-container { position: relative; width: 100%; max-width: 600px; margin: 0 auto; }
+        
+        #video-container { 
+            position: relative; width: 100%; max-width: 640px; margin: 0 auto; 
+            overflow: hidden; border-radius: 1rem; border: 4px solid #374151; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); background: #000;
+        }
+        
+        /* CANVAS JANGAN DIMIRROR via CSS. Kita mirror koordinatnya via JS agar teks terbaca */
         canvas { position: absolute; top: 0; left: 0; }
+
+        #challenge-box {
+            position: absolute; bottom: 30px; left: 0; right: 0;
+            text-align: center; z-index: 50; pointer-events: none; display: none;
+        }
+        .challenge-text {
+            background: rgba(0, 0, 0, 0.85); color: #fbbf24;
+            font-size: 1.8rem; font-weight: 800; padding: 10px 30px; border-radius: 50px;
+            display: inline-block; border: 3px solid #fbbf24;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.5); text-shadow: 2px 2px 0 #000;
+            animation: pulse 0.8s infinite;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
-<body class="bg-gray-900 flex flex-col items-center justify-center min-h-screen text-white relative">
+<body class="bg-gray-900 text-white min-h-screen flex flex-col font-sans">
 
-    <div class="absolute top-4 left-4 z-20">
-        <a href="jadwal/login.php" class="bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-full shadow-lg transition flex items-center gap-2 px-4 border border-blue-400/30 backdrop-blur-sm" title="Cek Jadwal Dinas">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <span class="text-xs font-bold hidden md:block">Jadwal</span>
-        </a>
-    </div>
-
-    <div class="absolute top-4 right-4 z-20">
-        <a href="hrd/login.php" class="bg-gray-800/80 hover:bg-gray-700 text-gray-400 hover:text-white p-3 rounded-full shadow-lg transition border border-gray-600 backdrop-blur-sm flex items-center gap-2" title="Login Admin / HRD">
-            <span class="text-xs font-bold hidden md:block">Admin</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-        </a>
-    </div>
-    <div class="absolute top-8 w-full text-center z-10">
-        <h1 class="text-xl font-bold text-blue-400 tracking-widest">PRESENSI WAJAH</h1>
-        <div id="jam" class="text-4xl font-mono font-bold mt-1">00:00:00</div>
+    <div class="bg-gray-800 border-b border-gray-700 p-4 shadow-md z-20">
+        <div class="max-w-4xl mx-auto flex items-center gap-4">
+            <img src="<?= $logo_src ?>" class="h-12 w-12 object-contain bg-white rounded-full p-1">
+            <div>
+                <h1 class="text-xl font-bold text-blue-400 leading-tight"><?= $setting['nama_instansi'] ?></h1>
+                <p class="text-xs text-gray-400"><?= $setting['alamat_instansi'] ?></p>
+            </div>
+            <div class="ml-auto text-right hidden md:block">
+                <div id="jam" class="text-2xl font-mono font-bold text-white"></div>
+            </div>
+        </div>
     </div>
 
-    <div id="video-container" class="border-4 border-gray-700 shadow-2xl rounded-2xl overflow-hidden">
-        <video id="video" autoplay muted playsinline></video>
-        <canvas id="overlay"></canvas>
+    <div class="flex-1 flex flex-col items-center justify-center p-4">
+        <div id="video-container">
+            <video id="video" autoplay muted playsinline></video>
+            <canvas id="overlay"></canvas>
+            
+            <div id="loading" class="absolute inset-0 flex items-center justify-center bg-gray-900 z-40">
+                <div class="text-center">
+                    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 mx-auto mb-4"></div>
+                    <p class="text-blue-400 font-bold animate-pulse">Menyiapkan AI...</p>
+                </div>
+            </div>
+
+            <div id="challenge-box">
+                <div id="instruction" class="challenge-text">INSTRUKSI</div>
+            </div>
+        </div>
+
+        <div class="mt-6 w-full max-w-lg bg-gray-800 rounded-lg p-4 border border-gray-700 text-center shadow-lg">
+            <p id="status-text" class="text-lg font-semibold text-gray-300">Menunggu Wajah...</p>
+            <div class="mt-2 h-2 w-full bg-gray-700 rounded-full overflow-hidden">
+                <div id="progress-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
+            </div>
+        </div>
     </div>
 
-    <div class="mt-6 text-center px-4">
-        <p id="status" class="text-yellow-400 animate-pulse font-medium">Memuat Data Wajah...</p>
+    <div class="bg-gray-950 border-t border-gray-800 p-4">
+        <div class="max-w-2xl mx-auto grid grid-cols-2 gap-4">
+            <a href="jadwal/login.php" class="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 p-3 rounded text-sm text-gray-300 border border-gray-700">Login Jadwal</a>
+            <a href="hrd/login.php" class="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 p-3 rounded text-sm text-gray-300 border border-gray-700">Portal HRD</a>
+        </div>
     </div>
-    <audio id="audio_beep" src="assets/beep.mp3"></audio>
 
 <script>
-    const video = document.getElementById('video');
-    const statusText = document.getElementById('status');
-    const audioBeep = document.getElementById('audio_beep');
-    //const modelPath = '/webapps/absensi/models'; 
-	const modelPath = 'models';
+    const modelPath = 'models'; 
+    const thresholdMatch = 0.45;
     
+    let video, canvas, displaySize;
     let labeledFaceDescriptors = [];
     let faceMatcher;
-    let isProcessing = false; // Kunci agar tidak double popup
-    let isCoolingDown = false; // Kunci jeda setelah absen
+    
+    // States: IDLE -> CHALLENGE -> CONFIRM -> PROCESS -> FAILED -> COOLDOWN
+    let state = 'IDLE'; 
+    let currentChallenge = ''; 
+    let challengeTimer = null;
+    let detectedNIK = '';
+    let detectedName = '';
+    let finalPhotoData = null; 
 
-    // 1. Init AI
-    Promise.all([
-        faceapi.nets.tinyFaceDetector.loadFromUri(modelPath),
-        faceapi.nets.faceLandmark68Net.loadFromUri(modelPath),
-        faceapi.nets.faceRecognitionNet.loadFromUri(modelPath)
-    ]).then(loadDataPegawai).catch(e => alert("Gagal load model: "+e));
+    setInterval(() => { document.getElementById('jam').innerText = new Date().toLocaleTimeString('id-ID', {hour12: false}); }, 1000);
 
-    async function loadDataPegawai() {
-        try {
-            const res = await fetch('api_presensi.php?act=get_descriptors');
-            
-            // CEK 1: Apakah response OK?
-            if (!res.ok) throw new Error(res.statusText);
+    $(document).ready(function() {
+        video = document.getElementById('video');
+        canvas = document.getElementById('overlay');
 
-            // CEK 2: Apakah valid JSON?
-            const text = await res.text(); // Ambil teks mentah dulu
-            try {
-                const data = JSON.parse(text); // Coba parse
-                
-                if (data.length === 0) { 
-                    statusText.innerText = "⚠️ Belum ada data wajah pegawai."; 
-                    return; 
-                }
-
-                labeledFaceDescriptors = data.map(d => {
-                    return new faceapi.LabeledFaceDescriptors(d.label + "|" + d.nama, [new Float32Array(d.descriptor)]);
-                });
-                
-                //faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.45);   //value lama, terlalu longgar -- ichsan
-				faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.40);
-                statusText.innerText = "Kamera sedang disiapkan...";
-                startVideo();
-
-            } catch(e) {
-                console.error("Raw Response:", text); // Lihat ini di Console jika error
-                throw new Error("Format Data Salah: " + text.substring(0, 50) + "..."); 
-            }
-            
-        } catch (e) { 
-            console.error(e); 
-            // Tampilkan error spesifik di layar hitam
-            statusText.innerText = "Error: " + e.message; 
-            statusText.classList.add('text-red-500');
-        }
-    }
+        Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(modelPath),
+            faceapi.nets.faceLandmark68Net.loadFromUri(modelPath),
+            faceapi.nets.faceRecognitionNet.loadFromUri(modelPath),
+            faceapi.nets.faceExpressionNet.loadFromUri(modelPath),
+            faceapi.nets.ssdMobilenetv1.loadFromUri(modelPath) 
+        ]).then(startVideo).catch(err => Swal.fire('Error AI', ''+err, 'error'));
+    });
 
     function startVideo() {
         navigator.mediaDevices.getUserMedia({ video: {} })
-            .then(stream => { 
-                video.srcObject = stream; 
-                statusText.innerText = "✅ Kamera Siap. Silahkan menghadap..."; 
+            .then(stream => {
+                video.srcObject = stream;
+                video.onplay = () => { loadDataPegawai(); };
             })
-            .catch(e => Swal.fire('Error', 'Kamera tidak aktif', 'error'));
+            .catch(err => Swal.fire('Error Kamera', 'Izin kamera ditolak!', 'error'));
     }
 
-    // 2. Logic Loop Deteksi (Recursive Timeout agar TIDAK double popup)
-    video.addEventListener('play', () => {
-        const canvas = document.getElementById('overlay');
-        const displaySize = { width: video.videoWidth, height: video.videoHeight };
+    async function loadDataPegawai() {
+        $('#status-text').text("Mengunduh Database Wajah...");
+        try {
+            const res = await fetch('api_presensi.php?act=get_descriptors');
+            const data = await res.json();
+            
+            if (data.length === 0) {
+                $('#status-text').text("Database Wajah Kosong.");
+                $('#loading').addClass('hidden');
+                return;
+            }
+
+            labeledFaceDescriptors = data.map(d => {
+                return new faceapi.LabeledFaceDescriptors(d.label + "|" + d.nama, [new Float32Array(d.descriptor)]);
+            });
+            
+            faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, thresholdMatch);
+            $('#loading').addClass('hidden');
+            $('#status-text').text("Silakan Menghadap Kamera");
+            
+            startDetectionLoop();
+        } catch (e) {
+            Swal.fire('Error Server', 'Gagal ambil data: ' + e, 'error');
+        }
+    }
+
+    function startDetectionLoop() {
+        displaySize = { width: video.videoWidth, height: video.videoHeight };
         faceapi.matchDimensions(canvas, displaySize);
 
-        // Fungsi deteksi rekursif
-        async function detectLoop() {
-            // Jika sedang memproses popup atau sedang cooldown, skip deteksi frame ini
-            if (isProcessing || isCoolingDown) {
-                setTimeout(detectLoop, 1000); // Cek lagi 1 detik kemudian
-                return;
-            }
+        setInterval(async () => {
+            if (state === 'PROCESS' || state === 'COOLDOWN' || state === 'CONFIRM' || state === 'FAILED') return;
 
-            try {
-                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
+            const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+                .withFaceLandmarks().withFaceExpressions().withFaceDescriptors();
+            
+            const resizedDetections = faceapi.resizeResults(detections, displaySize);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (resizedDetections.length > 0) {
+                const detection = resizedDetections[0];
+                const result = faceMatcher.findBestMatch(detection.descriptor);
+                const box = detection.detection.box;
+
+                // --- MANUAL MIRRORING DRAWING (Agar teks tidak terbalik) ---
+                // Karena Video dimirror CSS (-1), koordinat X asli (0) ada di kanan layar.
+                // Kita harus membalik X: newX = width - x - widthBox
+                const mirroredBox = {
+                    x: displaySize.width - box.x - box.width,
+                    y: box.y,
+                    width: box.width,
+                    height: box.height
+                };
+
+                // Gambar Kotak Custom
+                ctx.strokeStyle = '#3b82f6';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(mirroredBox.x, mirroredBox.y, mirroredBox.width, mirroredBox.height);
                 
-                // Bersihkan canvas
-                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                // Gambar Teks
+                ctx.fillStyle = '#3b82f6';
+                ctx.fillRect(mirroredBox.x, mirroredBox.y - 25, mirroredBox.width, 25);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 16px sans-serif';
+                ctx.fillText(result.label.split('|')[1] || result.label, mirroredBox.x + 5, mirroredBox.y - 7);
 
-                if (detections.length > 0 && faceMatcher) {
-                    const resizedDetections = faceapi.resizeResults(detections, displaySize);
-                    const results = resizedDetections.map(d => faceMatcher.findBestMatch(d.descriptor));
-                    
-                    // Ambil hasil terbaik pertama
-                    const bestResult = results[0];
-                    
-                    // Gambar kotak
-                    const box = resizedDetections[0].detection.box;
-                    new faceapi.draw.DrawBox(box, { label: bestResult.toString() }).draw(canvas);
-
-                    if (bestResult.label !== 'unknown') {
-                        const [nik, nama] = bestResult.label.split('|');
+                if (state === 'IDLE') {
+                    if (result.label !== 'unknown') {
+                        const [nik, nama] = result.label.split('|');
+                        detectedNIK = nik;
+                        detectedName = nama;
                         
-                        // KUNCI LOGIC: Langsung set processing true agar loop selanjutnya diblokir
-                        isProcessing = true; 
+                        // SNAPSHOT SEKARANG (Posisi Depan)
+                        finalPhotoData = ambilFoto();
                         
-                        // Bunyikan Suara
-                        audioBeep.play().catch(e => console.log('Audio play failed'));
-
-                        // Proses selanjutnya
-                        handleDetectedFace(nik, nama);
-                        
-                        // Jangan panggil detectLoop lagi di sini, tunggu handle selesai
-                        return; 
+                        mulaiTantangan(); 
+                    } else {
+                        $('#status-text').text("Wajah Tidak Dikenal").addClass('text-red-400');
+                    }
+                } 
+                else if (state === 'CHALLENGE') {
+                    const pose = cekTantangan(detection.landmarks, detection.expressions);
+                    if (pose === currentChallenge) {
+                        selesaikanTantangan();
                     }
                 }
-            } catch (error) {
-                console.error(error);
+            } else {
+                if (state === 'IDLE') $('#status-text').text("Menunggu Wajah...").removeClass('text-red-400');
             }
-
-            // Jika tidak ada wajah terdeteksi/unknown, lanjut loop
-            setTimeout(detectLoop, 800); // Interval 0.8 detik
-        }
-
-        // Mulai Loop
-        detectLoop();
-    });
-
-    // 3. Handle Wajah & Fetch Data Jadwal
-    async function handleDetectedFace(nik, nama) {
-        statusText.innerText = "Memverifikasi Data...";
-
-        // Snap Foto
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
-        const img = canvas.toDataURL('image/jpeg');
-
-        try {
-            // Ambil data jadwal dan status absen terkini
-            const raw = await fetch('api_presensi.php?act=get_schedule&nik=' + nik);
-            const info = await raw.json();
-			
-			// TAMBAHAN: Jika server menolak (karena jadwal kosong)
-            if (info.status === 'error') {
-                Swal.fire('Info', info.message, 'info').then(() => {
-                    // Cooldown agar tidak spam alert yang sama terus menerus
-                    aktifkanCooldown(); 
-                });
-                return;
-            }
-            
-            // Cek jika sudah selesai absen hari ini
-            if(info.mode_absen === "SELESAI") {
-                Swal.fire('Info', 'Anda sudah menyelesaikan absen hari ini.', 'info').then(() => startCooldown());
-                return;
-            }
-
-            // Warna judul berdasarkan Masuk/Pulang
-            let colorTitle = info.mode_absen === 'MASUK' ? 'text-green-600' : 'text-orange-600';
-            let btnText = info.mode_absen === 'MASUK' ? 'YA, ABSEN MASUK' : 'YA, ABSEN PULANG';
-
-            let htmlContent = `
-                <div class="text-left bg-gray-100 p-3 rounded mb-3 shadow-inner">
-                    <h3 class="font-bold text-xl ${colorTitle} mb-2 text-center">KONFIRMASI ${info.mode_absen}</h3>
-                    <hr class="mb-2 border-gray-300">
-                    <p class="text-sm"><strong>Nama:</strong> ${nama}</p>
-                    <p class="text-sm"><strong>Shift:</strong> ${info.shift}</p>
-                    <p class="text-sm"><strong>Jadwal:</strong> ${info.jam_masuk} - ${info.jam_pulang_jadwal}</p>
-                </div>
-                <img src="${img}" class="w-full rounded border-2 border-gray-300 shadow-sm">
-            `;
-
-            Swal.fire({
-                html: htmlContent,
-                showCancelButton: true,
-                confirmButtonText: btnText,
-                cancelButtonText: 'Batal',
-                confirmButtonColor: info.mode_absen === 'MASUK' ? '#10B981' : '#F59E0B',
-                cancelButtonColor: '#EF4444',
-                allowOutsideClick: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    kirimAbsen(nik, img);
-                } else {
-                    // Jika batal, buka kunci setelah jeda singkat
-                    setTimeout(() => { 
-                        isProcessing = false; 
-                        statusText.innerText = "✅ Kamera Siap...";
-                        // Trigger loop lagi manual karena tadi di-return
-                        // Tapi karena kita pakai setTimeout recursive di atas, kita perlu reload page atau restart function
-                        // Cara gampang: reload page sebagian
-                        location.reload(); 
-                    }, 1000);
-                }
-            });
-
-        } catch (e) {
-            Swal.fire('Gagal', 'Koneksi API Error', 'error').then(() => startCooldown());
-        }
+        }, 500); 
     }
 
-    function kirimAbsen(nik, img) {
-        Swal.fire({ title: 'Menyimpan...', didOpen: () => Swal.showLoading() });
+    // --- LOGIKA TANTANGAN (KALIBRASI ULANG) ---
+    function cekTantangan(landmarks, expressions) {
+        if (expressions.happy > 0.7) return 'SMILE';
+
+        const nose = landmarks.getNose()[3];      
+        const jawLeft = landmarks.getJawOutline()[0];  
+        const jawRight = landmarks.getJawOutline()[16];
+        const chin = landmarks.getJawOutline()[8]; 
         
-        $.post('api_presensi.php?act=submit_absen', { nik: nik, image: img }, function(res) {
-            try {
-                const data = JSON.parse(res);
-                if (data.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: data.nama + ' berhasil absen ' + data.mode + ' pada ' + data.waktu,
-                        timer: 3000,
-                        showConfirmButton: false
-                    }).then(() => startCooldown());
+        const leftEye = landmarks.getLeftEye()[0];
+        const rightEye = landmarks.getRightEye()[3];
+        const midEyeY = (leftEye.y + rightEye.y) / 2;
+
+        // YAW Calculation
+        const distLeft = Math.abs(nose.x - jawLeft.x);
+        const distRight = Math.abs(nose.x - jawRight.x);
+        const yawRatio = distLeft / distRight;
+
+        // REVISI ARAH (Berdasarkan Feedback User)
+        // Jika Ratio > 1.5 -> Jarak ke kiri jauh, ke kanan dekat -> Hidung di kanan -> User menoleh KANAN
+        // Jika Ratio < 0.6 -> Jarak ke kiri dekat -> Hidung di kiri -> User menoleh KIRI
+        if (yawRatio > 1.5) return 'RIGHT'; 
+        if (yawRatio < 0.6) return 'LEFT'; 
+
+        // PITCH Calculation
+        const topDist = Math.abs(nose.y - midEyeY);
+        const bottomDist = Math.abs(chin.y - nose.y);
+        const pitchRatio = topDist / bottomDist;
+
+        if (pitchRatio < 0.45) return 'UP'; // Dongak
+        if (pitchRatio > 1.1) return 'DOWN'; // Tunduk
+
+        return 'CENTER';
+    }
+
+    function mulaiTantangan() {
+        state = 'CHALLENGE';
+        const options = ['LEFT', 'RIGHT', 'UP', 'DOWN', 'SMILE'];
+        currentChallenge = options[Math.floor(Math.random() * options.length)];
+
+        $('#challenge-box').show();
+        let text = "";
+        switch(currentChallenge) {
+            case 'LEFT':  text = "TENGOK KANAN ➡"; break;
+            case 'RIGHT': text = "⬅️ TENGOK KIRI"; break;
+            case 'UP':    text = "⬆️ DONGAK ATAS"; break;
+            case 'DOWN':  text = "⬇️ TUNDUK BAWAH"; break;
+            case 'SMILE': text = "😊 SENYUM LEBAR"; break;
+        }
+        
+        $('#instruction').text(text);
+        $('#instruction').css('color', '#fbbf24').css('border-color', '#fbbf24'); // Reset warna
+        $('#status-text').text(`Halo ${detectedName}, Ikuti Instruksi!`).removeClass('text-red-400').addClass('text-yellow-400');
+
+        clearTimeout(challengeTimer);
+        challengeTimer = setTimeout(() => {
+            // Cek ulang state agar tidak clash dengan sukses
+            if (state === 'CHALLENGE') gagalTantangan();
+        }, 5000); 
+    }
+
+    function ambilFoto() {
+        const cvs = document.createElement('canvas');
+        cvs.width = video.videoWidth; cvs.height = video.videoHeight;
+        cvs.getContext('2d').drawImage(video, 0, 0);
+        return cvs.toDataURL('image/jpeg', 0.85);
+    }
+
+    function gagalTantangan() {
+        state = 'FAILED'; // KUNCI STATE AGAR TIDAK BISA CONFIRM
+        $('#instruction').text("GAGAL / TIMEOUT ❌").css('color', 'red').css('border-color', 'red');
+        $('#status-text').text("Verifikasi Gagal.").removeClass('text-yellow-400').addClass('text-red-400');
+        setTimeout(resetState, 2000);
+    }
+
+    function selesaikanTantangan() {
+        if(state === 'FAILED') return; // Cegah race condition
+        
+        state = 'CONFIRM'; 
+        clearTimeout(challengeTimer);
+        $('#instruction').text("BERHASIL ✅").css('color', '#4ade80').css('border-color', '#4ade80');
+        
+        cekStatusDanKonfirmasi();
+    }
+
+    function cekStatusDanKonfirmasi() {
+        $('#status-text').text("Mengecek Jadwal...");
+        
+        $.ajax({
+            url: 'api_presensi.php?act=check_status_rs',
+            type: 'GET',
+            data: { nik: detectedNIK },
+            dataType: 'json',
+            success: function(res) {
+                if(res.status === 'success') {
+                    tampilkanKonfirmasi(res);
                 } else {
-                    Swal.fire('Gagal', data.message, 'error').then(() => startCooldown());
+                    Swal.fire('Info', res.message, 'info').then(masukCooldown);
                 }
-            } catch(e) {
-                Swal.fire('Error', 'Respons Server Invalid', 'error').then(() => startCooldown());
+            },
+            error: function() {
+                Swal.fire('Error', 'Gagal cek jadwal', 'error').then(masukCooldown);
             }
-        }).fail(() => {
-            Swal.fire('Error', 'Koneksi Terputus', 'error').then(() => startCooldown());
         });
     }
 
-    function startCooldown() {
-        isProcessing = false; // Reset processing flag
-        isCoolingDown = true; // Aktifkan cooldown
+    function tampilkanKonfirmasi(data) {
+        let textMsg = "";
+        let colorBtn = data.mode === 'MASUK' ? '#10b981' : '#f59e0b';
         
-        statusText.innerText = "⏳ Jeda sistem 10 detik...";
-        statusText.classList.add("text-red-400");
+        if(data.mode === 'MASUK') {
+            textMsg = `Shift: <b>${data.shift}</b><br>Jam: ${data.jam_kerja}`;
+        } else {
+            textMsg = `Absen Pulang untuk Shift: <b>${data.shift}</b>`;
+        }
 
-        let countdown = 10;
-        let timer = setInterval(() => {
-            countdown--;
-            statusText.innerText = `⏳ Jeda sistem ${countdown} detik...`;
-            if(countdown <= 0) {
-                clearInterval(timer);
-                isCoolingDown = false;
-                statusText.innerText = "✅ Kamera Siap...";
-                statusText.classList.remove("text-red-400");
-                // Panggil loop lagi karena tadi di-return
-                const videoEl = document.getElementById('video');
-                // Trigger play event manual untuk restart loop jika perlu, 
-                // atau cukup biarkan karena loop pakai recursive timeout yang mengecek flag
-                // Kita panggil manual satu kali untuk memancing loop:
-                const canvas = document.getElementById('overlay');
-                // re-init loop logic if needed, but usually reload is safer to clear memory
-                location.reload(); 
+        Swal.fire({
+            title: `Halo, ${data.nama}`,
+            html: textMsg,
+            imageUrl: finalPhotoData, 
+            imageHeight: 150,
+            showCancelButton: true,
+            confirmButtonText: `YA, ABSEN ${data.mode}`,
+            cancelButtonText: 'BATAL',
+            confirmButtonColor: colorBtn,
+            cancelButtonColor: '#ef4444',
+            allowOutsideClick: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                kirimAbsen();
+            } else {
+                masukCooldown();
+            }
+        });
+    }
+
+    function kirimAbsen() {
+        state = 'PROCESS';
+        Swal.fire({title: 'Menyimpan...', didOpen: () => Swal.showLoading()});
+        
+        $.ajax({
+            url: 'api_presensi.php?act=submit_absen',
+            type: 'POST',
+            data: {
+                nik: detectedNIK,
+                image: finalPhotoData 
+            },
+            dataType: 'json',
+            success: function(res) {
+                if (res.status === 'success') {
+                    Swal.fire({
+                        title: 'BERHASIL',
+                        text: res.mode === 'MASUK' ? 'Selamat Bekerja' : 'Hati-hati di jalan',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(masukCooldown);
+                } else {
+                    Swal.fire('Gagal', res.message, 'error').then(masukCooldown);
+                }
+            },
+            error: function(e) {
+                Swal.fire('Error', 'Gagal koneksi server', 'error').then(masukCooldown);
+            }
+        });
+    }
+
+    function resetState() {
+        state = 'IDLE';
+        detectedNIK = ''; detectedName = ''; finalPhotoData = null; currentChallenge = '';
+        $('#challenge-box').hide();
+        $('#instruction').css('color', '#fbbf24').css('border-color', '#fbbf24');
+        $('#status-text').text("Silakan Menghadap Kamera").removeClass('text-yellow-400').removeClass('text-red-400');
+        $('#progress-bar').width('0%');
+    }
+
+    function masukCooldown() {
+        state = 'COOLDOWN';
+        $('#challenge-box').hide();
+        let cd = 5;
+        $('#status-text').text(`Jeda ${cd} detik...`);
+        let i = setInterval(() => {
+            cd--;
+            $('#status-text').text(`Jeda ${cd} detik...`);
+            if(cd <= 0) {
+                clearInterval(i);
+                resetState();
             }
         }, 1000);
     }
-
-    setInterval(() => { document.getElementById('jam').innerText = new Date().toLocaleTimeString('id-ID', {hour12: false}); }, 1000);
 </script>
 </body>
 </html>
