@@ -1,6 +1,10 @@
 <?php
-// FILE: processor.php (REFACTORED: CONFIG VIA JSON)
-// Fitur: Anti-Capslock, Trust Database (No Formatting), Universal Emoji, Config JSON
+// FILE: processor.php (FINAL - UNLIMITED EXECUTION TIME)
+// Fitur: Anti-Timeout untuk mode "Admin Kewalahan"
+
+// 1. SETTING NYAWA TAK TERBATAS (WAJIB ADA DI SINI)
+set_time_limit(0); 
+ini_set('max_execution_time', 0);
 
 ini_set('display_errors', 0);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
@@ -13,7 +17,7 @@ if ($user_ip !== '127.0.0.1' && $user_ip !== '::1' && $user_ip !== 'localhost') 
     exit;
 }
 
-// --- LOAD CONFIG DARI JSON (BARU) ---
+// --- LOAD CONFIG ---
 $configFile = __DIR__ . DIRECTORY_SEPARATOR . 'config.json';
 if (!file_exists($configFile)) {
     echo json_encode(['status' => 'error', 'log' => "Config.json tidak ditemukan!"]);
@@ -21,7 +25,6 @@ if (!file_exists($configFile)) {
 }
 $config = json_decode(file_get_contents($configFile), true);
 
-// Setup Variabel dari Config
 $host = $config['db_host'];
 $db   = $config['db_name'];
 $user = $config['db_user'];
@@ -31,7 +34,7 @@ $node_port = $config['node_port'];
 $node_base_url = 'http://localhost:' . $node_port; 
 $media_folder  = __DIR__ . DIRECTORY_SEPARATOR . 'media' . DIRECTORY_SEPARATOR;
 
-// --- FUNGSI EMOJI (UNIVERSAL) ---
+// --- FUNGSI EMOJI ---
 function convertHexToEmoji($text) {
     $pattern = '/(0x[0-9a-fA-F]{2}(?:\s*0x[0-9a-fA-F]{2})*)/i';
     return preg_replace_callback($pattern, function ($matches) {
@@ -45,19 +48,14 @@ try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // ANTI CAPSLOCK QUERY
     $stmt = $pdo->query("SELECT * FROM wa_outbox WHERE UPPER(status) = 'ANTRIAN' ORDER BY tanggal_jam ASC LIMIT 1");
     $row_raw = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($row_raw) {
-        // Normalisasi nama kolom jadi huruf kecil (Jurus Anti Capslock)
         $row = array_change_key_case($row_raw, CASE_LOWER);
 
         $id_db = $row['nomor']; 
-        
-        // TRUST DATABASE: Ambil mentah-mentah tanpa format ulang
         $target_wa = $row['nowa']; 
-
         $pesan_raw = $row['pesan'];
         $pesan = convertHexToEmoji($pesan_raw);
         $file_name = $row['file']; 
@@ -87,7 +85,9 @@ try {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
-        curl_setopt($ch, CURLOPT_TIMEOUT, 300); 
+        
+        // 2. SETTING CURL TIMEOUT (JANGAN LUPA UBAH KE 600)
+        curl_setopt($ch, CURLOPT_TIMEOUT, 600); 
         
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);

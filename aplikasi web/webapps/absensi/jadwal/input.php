@@ -33,6 +33,8 @@ $jml_hari = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
         .bg-siang { background-color: #fef9c3; } /* Kuning Muda */
         .bg-malam { background-color: #dbeafe; } /* Biru Muda */
         .bg-libur { background-color: #fee2e2; } /* Merah Muda */
+        /* Style Khusus Locked Cuti */
+        .bg-locked { background-color: #f3f4f6; color: #9ca3af; cursor: not-allowed; border-color: #d1d5db; }
     </style>
 </head>
 <body class="bg-slate-50 pb-24">
@@ -80,10 +82,13 @@ $jml_hari = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
                     <div class="text-lg font-bold <?php echo $color; ?>"><?php echo $i; ?></div>
                     <div class="text-[10px] uppercase text-slate-400"><?php echo $dayName; ?></div>
                 </div>
-                <div class="flex-1">
+                <div class="flex-1 relative">
                     <select name="h<?php echo $i; ?>" id="h<?php echo $i; ?>" onchange="colorize(this)" class="shift-select w-full p-2 text-sm border rounded bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
                         <option value="">Loading...</option>
                     </select>
+                    <div id="lock-<?php echo $i; ?>" class="hidden absolute right-8 top-2.5 text-orange-500">
+                        <i class="fa-solid fa-lock" title="Terkunci: Cuti HRD"></i>
+                    </div>
                 </div>
             </div>
             <?php endfor; ?>
@@ -105,20 +110,17 @@ $jml_hari = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
     let currentMode = 'reguler';
     let shiftOptions = [];
 
-    // 1. Load Options & Data saat start
     document.addEventListener("DOMContentLoaded", async () => {
         await loadShiftOptions();
         await loadData();
     });
 
-    // 2. Ambil Opsi Shift dari API
     async function loadShiftOptions() {
         try {
             let req = await fetch(`api_jadwal.php?act=get_shifts&id_pegawai=${idPegawai}`);
             let res = await req.json();
             if(res.status === 'success') {
                 shiftOptions = res.data;
-                // Isi dropdown Quick Fill
                 let qFill = document.getElementById('quick-fill-val');
                 qFill.innerHTML = '<option value="">- Pilih -</option>';
                 shiftOptions.forEach(s => {
@@ -130,22 +132,38 @@ $jml_hari = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
         } catch(e) { alert('Gagal memuat opsi shift'); }
     }
 
-    // 3. Render Dropdown di setiap baris tanggal
     function renderDropdowns(selectedValueObj = {}) {
         for(let i=1; i<=<?php echo $jml_hari; ?>; i++) {
             let select = document.getElementById(`h${i}`);
+            let lockIcon = document.getElementById(`lock-${i}`);
             let currentVal = selectedValueObj[`h${i}`] || '';
             
+            // Reset state
+            select.disabled = false;
             select.innerHTML = '';
+            lockIcon.classList.add('hidden');
+
             shiftOptions.forEach(opt => {
                 let selected = (opt.kode === currentVal) ? 'selected' : '';
                 select.innerHTML += `<option value="${opt.kode}" ${selected}>${opt.label}</option>`;
             });
+
+            // LOGIC FRONTEND ANTI-FRAUD
+            if(currentVal === 'Cuti') {
+                select.disabled = true; // Matikan Dropdown
+                select.classList.add('bg-locked');
+                lockIcon.classList.remove('hidden'); // Tampilkan Gembok
+                
+                // Tambah hidden input agar value 'Cuti' tetap terbaca jika kita submit form standard (opsional)
+                // Tapi karena kita pakai JSON payload manual di saveData(), kita ambil value dari property .value walau disabled
+            } else {
+                select.classList.remove('bg-locked');
+            }
+
             colorize(select);
         }
     }
 
-    // 4. Load Data Existing
     async function loadData() {
         Swal.fire({title: 'Memuat Data...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
         try {
@@ -153,23 +171,22 @@ $jml_hari = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
             let res = await req.json();
             
             if(res.found) {
-                renderDropdowns(res.data); // Isi dengan data database
+                renderDropdowns(res.data);
             } else {
-                renderDropdowns({}); // Kosong
+                renderDropdowns({});
             }
             Swal.close();
         } catch(e) { Swal.fire('Error', 'Gagal memuat data jadwal', 'error'); }
     }
 
-    // 5. Simpan Data
     async function saveData() {
         let btn = document.getElementById('btn-save');
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> MENYIMPAN...';
         btn.disabled = true;
 
-        // Kumpulkan data form
         let formData = {};
         for(let i=1; i<=<?php echo $jml_hari; ?>; i++) {
+            // Ambil value meskipun disabled
             formData[`h${i}`] = document.getElementById(`h${i}`).value;
         }
 
@@ -192,7 +209,13 @@ $jml_hari = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
             if(res.status === 'success') {
                 Swal.fire({icon: 'success', title: 'Tersimpan!', timer: 1500, showConfirmButton: false});
             } else {
-                Swal.fire('Gagal', res.message, 'error');
+                // Tampilkan pesan error dari Backend (Contoh: Fraud Detection)
+                Swal.fire({
+                    icon: 'error', 
+                    title: 'Gagal Menyimpan', 
+                    text: res.message,
+                    footer: '<span class="text-red-500 font-bold">Perubahan ditolak oleh sistem keamanan.</span>'
+                });
             }
         } catch(e) {
             Swal.fire('Error', 'Koneksi terputus', 'error');
@@ -206,7 +229,6 @@ $jml_hari = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
 
     function switchMode(mode) {
         currentMode = mode;
-        // Update Tab UI
         if(mode === 'reguler') {
             document.getElementById('tab-reguler').className = 'flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-blue-50';
             document.getElementById('tab-tambahan').className = 'flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 transition';
@@ -214,17 +236,25 @@ $jml_hari = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
             document.getElementById('tab-reguler').className = 'flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 transition';
             document.getElementById('tab-tambahan').className = 'flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-blue-50';
         }
-        loadData(); // Reload data sesuai mode
+        loadData();
     }
 
     function colorize(el) {
         let val = el.value.toLowerCase();
+        // Reset base class
         el.className = 'shift-select w-full p-2 text-sm border rounded focus:ring-2 focus:ring-blue-500 outline-none ';
         
+        // Cek jika disabled (Locked Cuti)
+        if(el.disabled) {
+            el.classList.add('bg-locked');
+            return; 
+        }
+
         if(val.includes('pagi')) el.classList.add('bg-pagi', 'text-green-800', 'border-green-200');
         else if(val.includes('siang')) el.classList.add('bg-siang', 'text-yellow-800', 'border-yellow-200');
         else if(val.includes('malam')) el.classList.add('bg-malam', 'text-blue-800', 'border-blue-200');
-        else if(val.includes('libur') || val.includes('cuti')) el.classList.add('bg-libur', 'text-red-800', 'border-red-200');
+        else if(val.includes('libur')) el.classList.add('bg-libur', 'text-red-800', 'border-red-200');
+        else if(val.includes('cuti')) el.classList.add('bg-orange-100', 'text-orange-800', 'border-orange-200', 'font-bold'); 
         else el.classList.add('bg-slate-50');
     }
 
@@ -234,17 +264,22 @@ $jml_hari = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
         
         for(let i=1; i<=<?php echo $jml_hari; ?>; i++) {
             let el = document.getElementById(`h${i}`);
-            el.value = val;
-            colorize(el);
+            // Jangan timpa jika terkunci
+            if(!el.disabled) {
+                el.value = val;
+                colorize(el);
+            }
         }
     }
 
     function clearAll() {
-        if(!confirm('Kosongkan semua kolom?')) return;
+        if(!confirm('Kosongkan semua kolom (kecuali yang terkunci)?')) return;
         for(let i=1; i<=<?php echo $jml_hari; ?>; i++) {
             let el = document.getElementById(`h${i}`);
-            el.value = '';
-            colorize(el);
+            if(!el.disabled) {
+                el.value = '';
+                colorize(el);
+            }
         }
     }
 </script>

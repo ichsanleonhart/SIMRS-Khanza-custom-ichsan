@@ -14,10 +14,17 @@ $q_rekap = fetch_assoc("SELECT count(id) as t FROM rekap_presensi WHERE jam_data
 $q_live  = fetch_assoc("SELECT count(id) as t FROM temporary_presensi WHERE jam_datang LIKE '$tgl%'");
 $total_hadir = $q_rekap['t'] + $q_live['t'];
 
-// 3. AMBIL NAMA PEGAWAI YANG LOGIN
+// 3. Hitung Pegawai Belum Enrollment (Active User Only)
+// Logic: Cari pegawai Aktif yang ID-nya TIDAK ADA di tabel face_enrollment
+$q_unenroll = fetch_assoc("SELECT count(p.id) as t 
+                           FROM pegawai p 
+                           LEFT JOIN face_enrollment f ON p.id = f.user_id 
+                           WHERE p.stts_aktif='AKTIF' AND f.id IS NULL");
+$total_belum = $q_unenroll['t'];
+
+// 4. Ambil Nama HRD
 $nik_hrd = $_SESSION['hrd_user'];
 $cek_pegawai = fetch_assoc("SELECT nama FROM pegawai WHERE nik='$nik_hrd'");
-// Jika NIK ditemukan di tabel pegawai, pakai namanya. Jika tidak (misal admin murni), pakai NIK/Admin.
 $nama_hrd = $cek_pegawai ? $cek_pegawai['nama'] : $nik_hrd; 
 ?>
 <!DOCTYPE html>
@@ -48,11 +55,11 @@ $nama_hrd = $cek_pegawai ? $cek_pegawai['nama'] : $nik_hrd;
             </p>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
             
             <a href="validasi.php" class="block bg-gray-800 hover:bg-gray-700 p-5 rounded-xl border border-gray-700 transition shadow hover:shadow-lg group">
                 <div class="w-10 h-10 bg-cyan-900/50 rounded-lg flex items-center justify-center text-cyan-400 mb-3 group-hover:text-white group-hover:bg-cyan-600 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 00-2-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                 </div>
                 <h3 class="font-bold text-white group-hover:text-cyan-300">Validasi Absen</h3>
                 <p class="text-xs text-gray-400 mt-1">Cek foto & data presensi</p>
@@ -100,7 +107,7 @@ $nama_hrd = $cek_pegawai ? $cek_pegawai['nama'] : $nik_hrd;
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
                 <h3 class="font-bold text-white group-hover:text-teal-300">Live Monitoring</h3>
-                <p class="text-xs text-gray-400 mt-1">Pantau <span class="font-bold text-white bg-blue-700 px-2 rounded"><?php echo $total_hadir; ?></span> pegawai yang sedang dinas</p>
+                <p class="text-xs text-gray-400 mt-1">Pantau pegawai yang sedang dinas</p>
             </a>
 
             <a href="pegawai.php" class="block bg-gray-800 hover:bg-gray-700 p-5 rounded-xl border border-gray-700 transition shadow hover:shadow-lg group relative overflow-hidden">
@@ -117,6 +124,16 @@ $nama_hrd = $cek_pegawai ? $cek_pegawai['nama'] : $nik_hrd;
                 </div>
                 <h3 class="font-bold text-white group-hover:text-yellow-300">Approval Cuti</h3>
                 <p class="text-xs text-gray-400 mt-1">Persetujuan & Update Jadwal</p>
+            </a>
+
+            <a href="enrollment.php" class="block bg-gray-800 hover:bg-gray-700 p-5 rounded-xl border border-gray-700 transition shadow hover:shadow-lg group relative overflow-hidden">
+                <div class="w-10 h-10 bg-red-900/50 rounded-lg flex items-center justify-center text-red-400 mb-3 group-hover:text-white group-hover:bg-red-600 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h3 class="font-bold text-white group-hover:text-red-300">Belum Enrollment</h3>
+                <p class="text-xs text-gray-400 mt-1">
+                    <span class="text-lg font-bold text-red-400"><?php echo $total_belum; ?></span> Pegawai belum daftar
+                </p>
             </a>
             
         </div>

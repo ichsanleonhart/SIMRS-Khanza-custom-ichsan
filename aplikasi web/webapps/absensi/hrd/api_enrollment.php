@@ -12,11 +12,10 @@ if (!isset($_SESSION['hrd_login'])) {
 
 $act = isset($_GET['act']) ? $_GET['act'] : '';
 
-// 1. CARI PEGAWAI (Untuk didaftarkan)
+// 1. CARI PEGAWAI (SEARCH BOX LAMA - Tetap Dipertahankan)
 if($act == 'search') {
-    header('Content-Type: text/html'); // Balik ke HTML buat UI search result
+    header('Content-Type: text/html'); 
     $kw = validTeks($_POST['kw']);
-    // Hanya cari yang BELUM punya data wajah
     $sql = "SELECT p.id, p.nik, p.nama 
             FROM pegawai p 
             LEFT JOIN face_enrollment f ON p.id = f.user_id
@@ -74,7 +73,7 @@ elseif($act == 'save') {
     exit;
 }
 
-// 3. (BARU) LOAD LIST TERDAFTAR
+// 3. LOAD LIST TERDAFTAR (KANAN)
 elseif($act == 'list_enrolled') {
     $kw = isset($_GET['q']) ? validTeks($_GET['q']) : '';
     $filter = $kw ? "AND (p.nama LIKE '%$kw%' OR p.nik LIKE '%$kw%')" : "";
@@ -88,31 +87,46 @@ elseif($act == 'list_enrolled') {
     $res = bukaquery($sql);
     $data = [];
     while($r = mysqli_fetch_assoc($res)) {
-        // Path fix untuk display (naik satu folder dari hrd)
-        // DB: ../photo_enrollment/xxx.jpg -> UI: ../photo_enrollment/xxx.jpg (Sama karena file php ini di hrd/)
         $data[] = $r;
     }
     echo json_encode($data);
     exit;
 }
 
-// 4. (BARU) HAPUS DATA WAJAH
+// 4. HAPUS DATA WAJAH
 elseif($act == 'delete') {
     $id_enroll = validTeks($_POST['id']);
-    
-    // Ambil path foto dulu
     $d = fetch_assoc("SELECT photo FROM face_enrollment WHERE id='$id_enroll'");
     
     if($d) {
-        // Hapus File
         if(file_exists($d['photo'])) unlink($d['photo']);
-        
-        // Hapus DB
         bukaquery("DELETE FROM face_enrollment WHERE id='$id_enroll'");
         echo json_encode(['status'=>'success']);
     } else {
         echo json_encode(['status'=>'error', 'message'=>'Data tidak ditemukan']);
     }
+    exit;
+}
+
+// 5. (BARU) LIST PEGAWAI BELUM ENROLLMENT (KIRI)
+elseif($act == 'list_unenrolled') {
+    $kw = isset($_GET['q']) ? validTeks($_GET['q']) : '';
+    $filter = $kw ? "AND (p.nama LIKE '%$kw%' OR p.nik LIKE '%$kw%')" : "";
+
+    // Ambil pegawai aktif yang tidak punya record di face_enrollment
+    $sql = "SELECT p.id, p.nik, p.nama, d.nama as dep
+            FROM pegawai p
+            LEFT JOIN face_enrollment f ON p.id = f.user_id
+            LEFT JOIN departemen d ON p.departemen = d.dep_id
+            WHERE p.stts_aktif='AKTIF' AND f.id IS NULL $filter
+            ORDER BY p.nama ASC LIMIT 50";
+
+    $res = bukaquery($sql);
+    $data = [];
+    while($r = mysqli_fetch_assoc($res)) {
+        $data[] = $r;
+    }
+    echo json_encode($data);
     exit;
 }
 ?>

@@ -1,6 +1,6 @@
 // ====================================================================================
-// APPJM.JS - OVERWORKED ADMIN EDITION (EXTREME HUMAN SIMULATION)
-// Fitur: Ngetik lambat, jeda random 5-15s, tanpa batas waktu ngetik.
+// APPJM.JS - ROBUST ADMIN (ANTI CRASH NO LID)
+// Fitur: Skip typing simulation untuk nomor baru agar tidak error.
 // ====================================================================================
 const fs = require('fs');
 const path = require('path');
@@ -46,7 +46,7 @@ const client = new Client({
   puppeteer: {
     headless: true, // Server Mode
     executablePath: puppeteer.executablePath(),
-    protocolTimeout: 300000, // Timeout puppeteer diperpanjang (5 menit)
+    protocolTimeout: 300000, // 5 Menit Timeout
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
@@ -76,24 +76,22 @@ client.on("qr", (qr) => {
 });
 
 client.on("ready", () => {
-  console.log("WA Gate is ready (Mode: Admin Kewalahan)!");
+  console.log("WA Gate is ready (Robust Mode)!");
   cqrCode = "WA Gate is ready";
 });
 
 client.on("authenticated", () => { lAuth = true; console.log("AUTHENTICATED"); });
 
-// Reject Call
 client.on("call", async (call) => {
   if (rejectCalls) await call.reject();
-  await client.sendMessage(call.from, `[Auto Reply] Mohon maaf, nomor ini hanya untuk notifikasi WhatsApp (Tidak menerima telepon).`);
+  await client.sendMessage(call.from, `[Auto Reply] Mohon maaf, nomor ini hanya untuk notifikasi WhatsApp.`);
 });
 
-// Listener Chatbot & Legacy
+// Listener Chatbot
 client.on("message", async (msg) => {
     const messageBody = msg.body;
     const senderNumber = msg.from;
 
-    // --- Legacy Features ---
     if (messageBody === "ping") await msg.reply("Whatsapp ping (RSPON)");
     else if (messageBody === "!reaction") await msg.react("👍");
     else if (messageBody === "!all_groups_info") {
@@ -108,22 +106,19 @@ client.on("message", async (msg) => {
     }
     else if (messageBody === "!this group info") {
         let chat = await msg.getChat();
-        if (chat.isGroup) {
-            msg.reply(`*Group Details*\nName: ${chat.name}\nID: ${chat.id._serialized}`);
-        } else {
-            msg.reply("Group only!");
-        }
+        if (chat.isGroup) msg.reply(`*Group Details*\nName: ${chat.name}\nID: ${chat.id._serialized}`);
+        else msg.reply("Group only!");
     }
-
-    // --- Chatbot # (Mode Berpikir Keras) ---
+    // Chatbot #
     else if (messageBody.startsWith('#')) {
         console.log(`[BOT] Perintah: ${messageBody}`);
-        
-        // Simulasi Berpikir/Mencari Data (2-5 detik)
         await sleep(Math.floor(Math.random() * 3000) + 2000);
         
-        const chat = await msg.getChat();
-        await chat.sendStateTyping(); 
+        // Coba Typing, kalau gagal (Nomor baru) skip aja
+        try {
+            const chat = await msg.getChat();
+            await chat.sendStateTyping(); 
+        } catch (e) { /* Ignore typing error */ }
 
         try {
             const response = await axios.post('http://localhost/wa_gateway/chatbot.php', {
@@ -131,31 +126,22 @@ client.on("message", async (msg) => {
             });
             const replyText = response.data.reply;
             if (replyText) {
-                // Rumus Admin Lambat: 150ms per karakter
-                // Contoh: 200 karakter = 30 detik ngetik.
                 const typingTime = replyText.length * 150; 
+                await sleep(typingTime);
                 
-                // Tambah sedikit variasi random biar gak robot banget (+- 2 detik)
-                const finalTime = typingTime + Math.floor(Math.random() * 2000);
-
-                console.log(`[CHATBOT] Ngetik jawaban selama: ${finalTime}ms`);
-                await sleep(finalTime);
+                // Clear state aman
+                try { const chat = await msg.getChat(); await chat.clearState(); } catch(e){}
                 
-                await chat.clearState();
                 msg.reply(replyText);
-            } else await chat.clearState();
-        } catch (error) { await chat.clearState(); }
+            }
+        } catch (error) { console.error(error); }
     }
 });
 
-const checkRegisteredNumber = async function (number) { return true; };
 client.initialize();
 
-// ====================================================================================
-// API ENDPOINTS
-// ====================================================================================
-
-app.get("/", (req, res) => res.status(200).json({ status: true, message: "WAG API (Busy Admin Mode)" }));
+// --- API ENDPOINTS ---
+app.get("/", (req, res) => res.status(200).json({ status: true, message: "WAG API (Robust Mode)" }));
 app.get("/uptime", (req, res) => res.status(200).json({ status: true, message: "Uptime: " + process.uptime() }));
 app.post("/WA-QrCode", (req, res) => {
   if (!lAuth) return res.status(200).json({ status: false, message: "QR Not Ready", qrBarCode: cqrCode });
@@ -163,7 +149,7 @@ app.post("/WA-QrCode", (req, res) => {
 });
 
 // ============================================================================
-// SEND MESSAGE (BROADCAST: ADMIN SIBUK)
+// SEND MESSAGE (SAFE TYPING)
 // ============================================================================
 app.post("/send-message", [body("number").notEmpty(), body("message").notEmpty()], async (req, res) => {
   const errors = validationResult(req).formatWith(({ msg }) => { return msg; });
@@ -174,43 +160,52 @@ app.post("/send-message", [body("number").notEmpty(), body("message").notEmpty()
 
   console.log(`[BOT] Sending to: ${number}`);
 
-  try {
-      // 1. COOLDOWN ANTI-SPAM (5 - 15 Detik)
-      // Jeda sebelum mulai berinteraksi dengan chat ini
-      const cooldown = Math.floor(Math.random() * 10000) + 5000;
-      console.log(`[BOT] Cooldown (Istirahat/Ganti Chat): ${cooldown}ms`);
-      await sleep(cooldown);
+  // 1. Cooldown Global
+  const cooldown = Math.floor(Math.random() * 10000) + 5000;
+  await sleep(cooldown);
 
-      // 2. Simulasi Mengetik
+  // 2. Logic Simulasi Aman
+  try {
+      // Coba ambil Chat Object
       const chat = await client.getChatById(number);
-      await chat.sendStateTyping();
       
-      // Rumus Admin Lambat: 150ms per karakter
-      // TANPA BATAS MAKSIMAL. 
-      // Jika pesan 1000 huruf = 150 detik (2.5 menit).
-      // Minimal ngetik 3 detik (untuk pesan pendek kayak "Ok")
+      // Hitung Durasi Ngetik
       let typingDuration = message.length * 150;
       if (typingDuration < 3000) typingDuration = 3000;
+      
+      console.log(`[BOT] Admin mengetik: ${typingDuration}ms`);
+      
+      // COBA SIMULASI TYPING (DIBUNGKUS TRY-CATCH)
+      // Agar jika error "No LID", tidak meledakkan seluruh proses
+      try {
+          await chat.sendStateTyping();
+      } catch (typingErr) {
+          console.log("[BOT] Skip typing simulation (New Number/No LID).");
+      }
 
-      console.log(`[BOT] Admin sedang mengetik selama: ${typingDuration}ms`);
+      // Tunggu seolah-olah mengetik (tetap tunggu walau simulasi gagal, biar natural)
       await sleep(typingDuration);
       
-      // 3. Stop Typing & Kirim
-      await chat.clearState();
+      // Stop Typing (Safe)
+      try { await chat.clearState(); } catch (e) {}
+
+      // Kirim via Chat Object
       const response = await chat.sendMessage(message);
-      
       res.status(200).json({ status: true, message: "Sukses", response: response });
 
   } catch (err) {
-      console.error("[BOT] Gagal simulasi (mungkin nomor baru), kirim paksa...", err.message);
+      // FALLBACK UTAMA: Jika getChatById gagal total atau error lain
+      console.error("[BOT] Error Simulasi, Menggunakan Kirim Paksa (Direct):", err.message);
+      
+      // Kirim Langsung ke Nomor (Tanpa via Chat Object)
       client.sendMessage(number, message)
-        .then((response) => res.status(200).json({ status: true, response: response }))
-        .catch((err2) => res.status(500).json({ status: false, response: err2 }));
+        .then((response) => res.status(200).json({ status: true, message: "Sukses (Direct)", response: response }))
+        .catch((err2) => res.status(500).json({ status: false, message: "Gagal Kirim", response: err2 }));
   }
 });
 
 // ============================================================================
-// SEND FILE (ADMIN UPLOAD FILE)
+// SEND FILE (SAFE UPLOAD)
 // ============================================================================
 app.post("/send-file", [body("number").notEmpty(), body("namafile").notEmpty()], async (req, res) => {
   const errors = validationResult(req).formatWith(({ msg }) => { return msg; });
@@ -230,28 +225,46 @@ app.post("/send-file", [body("number").notEmpty(), body("namafile").notEmpty()],
     const mimetype = mime.lookup(filePath);
     const media = new MessageMedia(mimetype, fileData, namafile);
 
-    // 1. COOLDOWN ANTI-SPAM (5 - 15 Detik)
+    // Cooldown
     const cooldown = Math.floor(Math.random() * 10000) + 5000;
     await sleep(cooldown);
 
-    // 2. Simulasi "Recording/Uploading"
-    const chat = await client.getChatById(number);
-    await chat.sendStateRecording(); // Icon mic/upload
-    
-    // Simulasi cari file + upload (10 - 20 detik)
-    // Admin agak gaptek, nyari filenya lama
-    const uploadDelay = Math.floor(Math.random() * 10000) + 10000; 
-    console.log(`[BOT] Admin mencari/upload file selama: ${uploadDelay}ms`);
-    await sleep(uploadDelay);
+    try {
+        const chat = await client.getChatById(number);
+        
+        // Simulasi Recording (Safe Mode)
+        try { await chat.sendStateRecording(); } catch (e) {}
+        
+        const uploadDelay = Math.floor(Math.random() * 10000) + 10000; 
+        console.log(`[BOT] Uploading file: ${uploadDelay}ms`);
+        await sleep(uploadDelay);
 
-    await chat.clearState();
+        try { await chat.clearState(); } catch (e) {}
 
-    // 3. Kirim File
-    const response = await chat.sendMessage(media, { caption: caption });
-    res.status(200).json({ status: true, message: "Sukses", response: response });
+        const response = await chat.sendMessage(media, { caption: caption });
+        res.status(200).json({ status: true, message: "Sukses", response: response });
+
+    } catch (innerErr) {
+        throw innerErr; // Lempar ke Catch Utama untuk Fallback Direct
+    }
 
   } catch (error) {
-      res.status(500).json({ status: false, message: "Internal Server Error", error: error.message });
+      console.error("[BOT] Error File, Fallback Direct:", error.message);
+      
+      // Fallback Direct Send File
+      try {
+          // Re-read file data for fallback context if needed (variable scope is safe here)
+          const filePath = path.join(__dirname, '../media', namafile);
+          const fileData = fs.readFileSync(filePath, { encoding: 'base64' });
+          const mimetype = mime.lookup(filePath);
+          const media = new MessageMedia(mimetype, fileData, namafile);
+
+          client.sendMessage(number, media, { caption: caption })
+            .then((resp) => res.status(200).json({ status: true, message: "Sukses (Direct)", response: resp }))
+            .catch((err2) => res.status(500).json({ status: false, message: "Gagal Kirim", response: err2 }));
+      } catch (fatal) {
+          res.status(500).json({ status: false, message: "Fatal Error", error: fatal.message });
+      }
   }
 });
 
@@ -275,10 +288,7 @@ app.post("/send-group", [
       if (!group) { return res.status(422).json({ status: false, message: "No group found: " + groupName }); }
       chatId = group.id._serialized;
     }
-    
-    // JANGAN LUPA COOLDOWN UNTUK GROUP MANUAL JUGA
     await sleep(5000); 
-
     client.sendMessage(chatId, message)
       .then((response) => res.status(200).json({ status: true, message: "Sukses", response: response }))
       .catch((err) => res.status(500).json({ status: false, message: "Gagal Kirim", response: err }));
@@ -286,5 +296,5 @@ app.post("/send-group", [
 );
 
 app.listen(port, () => {
-  console.log(`WAG listening on port ${port} (Busy Admin Mode)`);
+  console.log(`WAG listening on port ${port} (Robust Mode)`);
 });

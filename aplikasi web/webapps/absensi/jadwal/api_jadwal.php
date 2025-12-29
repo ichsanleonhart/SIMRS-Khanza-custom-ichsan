@@ -65,7 +65,7 @@ elseif ($act == 'get_schedule') {
     }
 }
 
-// --- FUNGSI 3: SIMPAN JADWAL (INSERT / UPDATE) ---
+// --- FUNGSI 3: SIMPAN JADWAL (ANTI-FRAUD CUTI) ---
 elseif ($act == 'save_schedule') {
     // Terima JSON Data
     $input = json_decode(file_get_contents('php://input'), true);
@@ -78,23 +78,39 @@ elseif ($act == 'save_schedule') {
 
     $table = ($jenis == 'tambahan') ? 'jadwal_tambahan' : 'jadwal_pegawai';
 
-    // Cek apakah sudah ada data?
-    $cek = fetch_assoc("SELECT id FROM $table WHERE id='$id' AND bulan='$bln' AND tahun='$thn'");
+    // Cek data lama di database
+    // Kita select semua kolom h1-h31 untuk validasi
+    $cek = fetch_assoc("SELECT * FROM $table WHERE id='$id' AND bulan='$bln' AND tahun='$thn'");
 
     $konektor = bukakoneksi();
 
     if ($cek) {
-        // --- UPDATE ---
+        // --- VALIDASI ANTI-FRAUD & UPDATE ---
         $set_query = [];
-        for ($i = 1; $i <= 31; $i++) {
-            $val = isset($data_hari['h'.$i]) ? $data_hari['h'.$i] : '';
-            $set_query[] = "h$i = '$val'";
-        }
-        $set_string = implode(", ", $set_query);
         
+        for ($i = 1; $i <= 31; $i++) {
+            $val_baru = isset($data_hari['h'.$i]) ? $data_hari['h'.$i] : '';
+            $val_lama = $cek['h'.$i];
+
+            // LOGIC PENTING: Jika data lama adalah 'Cuti', user TIDAK BOLEH mengubahnya
+            if ($val_lama == 'Cuti' && $val_baru != 'Cuti') {
+                echo json_encode([
+                    'status' => 'error', 
+                    'message' => "FRAUD PROTECTED: Tanggal $i sudah disetujui CUTI oleh HRD. Anda tidak memiliki akses untuk mengubahnya menjadi '$val_baru'. Hubungi HRD untuk pembatalan."
+                ]);
+                exit(); // Stop proses total
+            }
+
+            // Jika lolos validasi, masukkan ke query update
+            $set_query[] = "h$i = '$val_baru'";
+        }
+        
+        $set_string = implode(", ", $set_query);
         $sql = "UPDATE $table SET $set_string WHERE id='$id' AND bulan='$bln' AND tahun='$thn'";
+        
     } else {
         // --- INSERT ---
+        // Insert aman karena data baru belum ada 'Cuti' dari HRD (HRD biasanya update, bukan insert data kosong)
         $cols = "id, tahun, bulan";
         $vals = "'$id', '$thn', '$bln'";
         
