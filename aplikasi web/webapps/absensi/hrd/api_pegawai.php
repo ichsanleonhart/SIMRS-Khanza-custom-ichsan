@@ -11,11 +11,10 @@ if (!isset($_SESSION['hrd_login'])) {
 $act = isset($_GET['act']) ? $_GET['act'] : '';
 $konektor = bukakoneksi();
 
-// --- 1. AMBIL OPSI DROPDOWN (REFERENSI) ---
+// --- 1. AMBIL OPSI DROPDOWN ---
 if ($act == 'get_options') {
     $data = [];
     
-    // Helper function biar kodenya rapi
     function get_ref($table, $col_id, $col_name) {
         global $konektor;
         $res = [];
@@ -29,7 +28,7 @@ if ($act == 'get_options') {
     $data['kelompok']   = get_ref('kelompok_jabatan', 'kode_kelompok', 'nama_kelompok');
     $data['resiko']     = get_ref('resiko_kerja', 'kode_resiko', 'nama_resiko');
     $data['emergency']  = get_ref('emergency_index', 'kode_emergency', 'nama_emergency');
-    $data['pendidikan'] = get_ref('pendidikan', 'tingkat', 'tingkat'); // id & nama sama
+    $data['pendidikan'] = get_ref('pendidikan', 'tingkat', 'tingkat'); 
     $data['stts_wp']    = get_ref('stts_wp', 'stts', 'ktg');
     $data['stts_kerja'] = get_ref('stts_kerja', 'stts', 'ktg');
     $data['bidang']     = get_ref('bidang', 'nama', 'nama');
@@ -39,43 +38,41 @@ if ($act == 'get_options') {
     exit;
 }
 
-// --- 2. LIST DATA PEGAWAI (DATATABLES) ---
+// --- 2. LIST DATA PEGAWAI ---
 elseif ($act == 'list') {
     $sql = "SELECT id, nik, nama, jbtn, departemen, stts_aktif, photo FROM pegawai ORDER BY stts_aktif ASC, nama ASC";
     $result = bukaquery($sql);
     $data = [];
     while ($r = mysqli_fetch_assoc($result)) {
-        // Fix path foto untuk display (relatif dari folder hrd)
-        $r['photo_url'] = "../../" . $r['photo']; 
+        // Path fisik relatif dari script ini ke folder foto
+        $r['photo_url'] = "../../penggajian/" . $r['photo']; 
         $data[] = $r;
     }
     echo json_encode(['data' => $data]);
     exit;
 }
 
-// --- 3. GENERATE NIP OTOMATIS (SUGGESTION) ---
+// --- 3. GENERATE NIP ---
 elseif ($act == 'gen_nik') {
-    // Format: YYYY.XXX (Contoh: 2023.005)
     $prefix = date('Y') . ".";
-    // Cari NIK terakhir yang berawalan tahun ini
     $q = fetch_assoc("SELECT nik FROM pegawai WHERE nik LIKE '$prefix%' ORDER BY nik DESC LIMIT 1");
     if ($q) {
-        $last_no = (int) substr($q['nik'], 5); // Ambil angka setelah titik
+        $last_no = (int) substr($q['nik'], 5); 
         $new_no = $last_no + 1;
     } else {
         $new_no = 1;
     }
-    $new_nik = $prefix . sprintf("%03d", $new_no); // Padding 001
+    $new_nik = $prefix . sprintf("%03d", $new_no); 
     echo json_encode(['nik' => $new_nik]);
     exit;
 }
 
-// --- 4. AMBIL DETAIL PEGAWAI (UNTUK EDIT) ---
+// --- 4. AMBIL DETAIL PEGAWAI ---
 elseif ($act == 'detail') {
     $id = validTeks($_GET['id']);
     $data = fetch_assoc("SELECT * FROM pegawai WHERE id='$id'");
     if($data) {
-        $data['photo_url'] = "../../" . $data['photo'];
+        $data['photo_url'] = "../../penggajian/" . $data['photo'];
         echo json_encode(['status'=>'success', 'data'=>$data]);
     } else {
         echo json_encode(['status'=>'error', 'message'=>'Data tidak ditemukan']);
@@ -85,29 +82,31 @@ elseif ($act == 'detail') {
 
 // --- 5. SIMPAN DATA (INSERT / UPDATE) ---
 elseif ($act == 'save') {
-    // Sanitasi Input Wajib
-    $id             = isset($_POST['id']) ? validTeks($_POST['id']) : ''; // Kosong = Insert
+    $id             = isset($_POST['id']) ? validTeks($_POST['id']) : ''; 
     $nik            = validTeks($_POST['nik']);
     $nama           = validTeks($_POST['nama']);
     $jk             = validTeks($_POST['jk']);
     $no_ktp         = validTeks($_POST['no_ktp']);
     
-    // Validasi Dasar
+    // VALIDASI KHUSUS: ms_kerja mengandung karakter < dan > yang akan dihapus oleh validTeks()
+    // Maka kita gunakan mysqli_real_escape_string langsung agar karakter aman tapi tidak hilang.
+    $ms_kerja_raw   = $_POST['ms_kerja']; 
+    $ms_kerja       = mysqli_real_escape_string($konektor, $ms_kerja_raw);
+
     if(empty($nik) || empty($nama) || empty($no_ktp)) {
         echo json_encode(['status'=>'error', 'message'=>'NIK, Nama, dan No KTP wajib diisi.']); exit;
     }
 
-    // --- VALIDASI DUPLIKAT KTP ---
-    // Cek apakah KTP sudah dipakai orang lain?
+    // Validasi Duplikat KTP
     $ktp_check_sql = "SELECT id, nama FROM pegawai WHERE no_ktp='$no_ktp'";
-    if(!empty($id)) $ktp_check_sql .= " AND id != '$id'"; // Kecualikan diri sendiri saat edit
+    if(!empty($id)) $ktp_check_sql .= " AND id != '$id'";
     
     $cek_ktp = fetch_assoc($ktp_check_sql);
     if($cek_ktp) {
         echo json_encode(['status'=>'error', 'message'=>"Gagal! No KTP sudah digunakan oleh pegawai: " . $cek_ktp['nama']]); exit;
     }
 
-    // --- VALIDASI DUPLIKAT NIK (Hanya Insert) ---
+    // Validasi Duplikat NIK (Insert Only)
     if(empty($id)) {
         $cek_nik = fetch_assoc("SELECT id FROM pegawai WHERE nik='$nik'");
         if($cek_nik) {
@@ -115,18 +114,19 @@ elseif ($act == 'save') {
         }
     }
 
-    // --- HANDLE FOTO ---
-    $photo_db = "pages/pegawai/photo/default.jpg"; // Default
+    // --- HANDLE FOTO (FIX PATH PREFIX) ---
+    // Default Path
+    $photo_db = "pages/pegawai/photo/default.jpg"; 
+    
     if(!empty($id)) {
-        // Ambil foto lama jika edit
         $old = fetch_assoc("SELECT photo FROM pegawai WHERE id='$id'");
         if($old) $photo_db = $old['photo'];
     }
 
     if(isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
-        $target_dir = "../../pages/pegawai/photo/";
+        // Target Folder Fisik: /webapps/penggajian/pages/pegawai/photo/
+        $target_dir = "../../penggajian/pages/pegawai/photo/";
         
-        // Buat folder jika belum ada (meskipun biasanya sudah ada bawaan Khanza)
         if (!file_exists($target_dir)) mkdir($target_dir, 0777, true);
 
         $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
@@ -135,13 +135,13 @@ elseif ($act == 'save') {
             $target_file = $target_dir . $new_name;
             
             if(move_uploaded_file($_FILES['photo']['tmp_name'], $target_file)) {
+                // Simpan PATH LENGKAP ke database
                 $photo_db = "pages/pegawai/photo/" . $new_name;
             }
         }
     }
 
-    // --- MAPPING KOLOM (34 Kolom) ---
-    // Kita gunakan array agar mudah menyusun query
+    // Mapping Data
     $data = [
         'nik' => $nik, 'nama' => $nama, 'jk' => $jk, 'no_ktp' => $no_ktp,
         'jbtn' => validTeks($_POST['jbtn']),
@@ -161,9 +161,9 @@ elseif ($act == 'save') {
         'alamat' => validTeks($_POST['alamat']),
         'kota' => validTeks($_POST['kota']),
         'mulai_kerja' => validTeks($_POST['mulai_kerja']),
-        'ms_kerja' => validTeks($_POST['ms_kerja']),
+        'ms_kerja' => $ms_kerja, // PENTING: Gunakan variabel yang di-escape khusus
         'indexins' => validTeks($_POST['indexins']),
-        'bpd' => validTeks($_POST['bpd']), // Bank
+        'bpd' => validTeks($_POST['bpd']), 
         'rekening' => validTeks($_POST['rekening']),
         'stts_aktif' => validTeks($_POST['stts_aktif']),
         'wajibmasuk' => (int)$_POST['wajibmasuk'],
@@ -176,12 +176,10 @@ elseif ($act == 'save') {
     ];
 
     if(empty($id)) {
-        // --- INSERT ---
         $cols = implode(", ", array_keys($data));
         $vals = "'" . implode("', '", array_values($data)) . "'";
         $sql = "INSERT INTO pegawai ($cols) VALUES ($vals)";
     } else {
-        // --- UPDATE ---
         $set = "";
         foreach($data as $k => $v) {
             $set .= "$k = '$v', ";
@@ -202,22 +200,19 @@ elseif ($act == 'save') {
 elseif ($act == 'delete') {
     $id = validTeks($_POST['id']);
     
-    // Hapus foto fisik jika bukan default
     $q = fetch_assoc("SELECT photo FROM pegawai WHERE id='$id'");
+    
     if($q && $q['photo'] != 'pages/pegawai/photo/default.jpg') {
-        $path = "../../" . $q['photo'];
-        if(file_exists($path)) unlink($path);
+        $path_fisik = "../../penggajian/" . $q['photo'];
+        if(file_exists($path_fisik)) unlink($path_fisik);
     }
 
-    // Hapus data (relasi foreign key di Khanza biasanya ON DELETE RESTRICT, jadi pastikan bersih)
-    // Tapi user minta hapus pegawai saja.
-    // Kita coba hapus, jika gagal karena relasi, user akan diberitahu.
     $sql = "DELETE FROM pegawai WHERE id='$id'";
     
     if(mysqli_query($konektor, $sql)) {
         echo json_encode(['status'=>'success', 'message'=>'Pegawai berhasil dihapus']);
     } else {
-        echo json_encode(['status'=>'error', 'message'=>'Gagal hapus (Mungkin data terikat di tabel lain): '.mysqli_error($konektor)]);
+        echo json_encode(['status'=>'error', 'message'=>'Gagal hapus (Data terkait tabel lain): '.mysqli_error($konektor)]);
     }
     exit;
 }

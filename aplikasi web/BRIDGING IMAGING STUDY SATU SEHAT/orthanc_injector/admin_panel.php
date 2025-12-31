@@ -240,8 +240,8 @@ $current_user = $_SESSION['user_admin'];
             }
         });
     }
-
-    setInterval(runAutoRescue, 3000000); // 50 Menit
+ // Rumus: 12 jam * 60 menit * 60 detik * 1000 ms = 43200000
+    setInterval(runAutoRescue, 43200000);     
     
     let nextRescue = 3000;
     setInterval(() => {

@@ -16,16 +16,32 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     
     <style>
-        /* CSS Khusus Tab */
         .tab-btn.active { border-bottom: 2px solid #3b82f6; color: #3b82f6; font-weight: bold; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        /* DataTables Dark Mode Patch */
-        .dataTables_wrapper .dataTables_length select, .dataTables_wrapper .dataTables_filter input {
-            background-color: #1f2937; color: white; border: 1px solid #4b5563; padding: 4px; border-radius: 4px;
+        
+        /* DataTables Customization for Dark Mode */
+        .dataTables_wrapper .dataTables_length, 
+        .dataTables_wrapper .dataTables_filter, 
+        .dataTables_wrapper .dataTables_info, 
+        .dataTables_wrapper .dataTables_processing, 
+        .dataTables_wrapper .dataTables_paginate {
+            color: #d1d5db !important; /* text-gray-300 */
+            margin-bottom: 1rem;
+        }
+        .dataTables_wrapper .dataTables_length select, 
+        .dataTables_wrapper .dataTables_filter input {
+            background-color: #1f2937; /* bg-gray-800 */
+            color: white; 
+            border: 1px solid #4b5563; /* border-gray-600 */
+            padding: 4px; 
+            border-radius: 4px;
         }
         table.dataTable tbody tr { background-color: #1f2937; color: #d1d5db; }
         table.dataTable tbody tr:hover { background-color: #374151; cursor: pointer;}
+        
+        /* Hilangkan border default DataTables yang bikin dobel */
+        table.dataTable.no-footer { border-bottom: 1px solid #374151; }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen p-4">
@@ -44,16 +60,16 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
             </div>
         </div>
 
-        <div class="bg-gray-800 p-4 rounded shadow border border-gray-700">
-            <table id="tabelPegawai" class="w-full text-sm text-left text-gray-300">
+        <div class="bg-gray-800 p-4 rounded shadow border border-gray-700 overflow-x-auto">
+            <table id="tabelPegawai" class="w-full text-sm text-left text-gray-300" style="width:100%">
                 <thead class="text-xs uppercase bg-gray-700 text-gray-400">
                     <tr>
-                        <th class="p-3">Foto</th>
+                        <th class="p-3 w-12 text-center">Foto</th>
                         <th class="p-3">NIK / Nama</th>
                         <th class="p-3">Jabatan</th>
                         <th class="p-3">Departemen</th>
-                        <th class="p-3">Status</th>
-                        <th class="p-3">Aksi</th>
+                        <th class="p-3 w-20 text-center">Status</th>
+                        <th class="p-3 w-24 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -92,7 +108,7 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
                                 </div>
                                 <div>
                                     <label class="block text-xs text-gray-400 mb-1">No. KTP (Wajib Unik)</label>
-                                    <input type="text" name="no_ktp" id="no_ktp" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" required minlength="16" maxlength="16" placeholder="16 Digit NIK KTP">
+                                    <input type="text" name="no_ktp" id="no_ktp" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" required minlength="16" maxlength="16">
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-xs text-gray-400 mb-1">Nama Lengkap</label>
@@ -101,8 +117,8 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
                                 <div>
                                     <label class="block text-xs text-gray-400 mb-1">Jenis Kelamin</label>
                                     <select name="jk" id="jk" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white">
-                                        <option value="L">Laki-Laki</option>
-                                        <option value="P">Perempuan</option>
+                                        <option value="Pria">Pria</option>
+                                        <option value="Wanita">Wanita</option>
                                     </select>
                                 </div>
                                 <div>
@@ -139,7 +155,7 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
                                     <select name="bidang" id="bidang" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white"></select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-gray-400 mb-1">Jabatan (Ketik Manual)</label>
+                                    <label class="block text-xs text-gray-400 mb-1">Jabatan</label>
                                     <input type="text" name="jbtn" id="jbtn" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white">
                                 </div>
                                 <div>
@@ -166,9 +182,9 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
                                 <div>
                                     <label class="block text-xs text-gray-400 mb-1">Masa Kerja</label>
                                     <select name="ms_kerja" id="ms_kerja" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white">
-                                        <option value="< 1 Tahun">< 1 Tahun</option>
-                                        <option value="1 - 2 Tahun">1 - 2 Tahun</option>
-                                        <option value="> 2 Tahun">> 2 Tahun</option>
+                                        <option value="<1">&lt; 1 Tahun</option>
+                                        <option value="PT">PT (1 - 2 Tahun)</option>
+                                        <option value="FT>1">FT &gt; 1 (&gt; 2 Tahun)</option>
                                     </select>
                                 </div>
                                 <div>
@@ -192,54 +208,18 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
 
                         <div id="tab3" class="tab-content space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs text-gray-400 mb-1">Gaji Pokok</label>
-                                    <input type="number" name="gapok" id="gapok" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" value="0">
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-400 mb-1">Status WP</label>
-                                    <select name="stts_wp" id="stts_wp" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white"></select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-400 mb-1">Status Kerja</label>
-                                    <select name="stts_kerja" id="stts_kerja" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white"></select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-400 mb-1">NPWP</label>
-                                    <input type="text" name="npwp" id="npwp" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white">
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-400 mb-1">Bank (BPD)</label>
-                                    <select name="bpd" id="bpd" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white"></select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-400 mb-1">No Rekening</label>
-                                    <input type="text" name="rekening" id="rekening" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white">
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-400 mb-1">Index Ins</label>
-                                    <input type="text" name="indexins" id="indexins" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white">
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-400 mb-1">Pengurang</label>
-                                    <input type="number" name="pengurang" id="pengurang" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" value="0">
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-400 mb-1">Wajib Masuk (Hari)</label>
-                                    <input type="number" name="wajibmasuk" id="wajibmasuk" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" value="0">
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-400 mb-1">Cuti Diambil</label>
-                                    <input type="number" name="cuti_diambil" id="cuti_diambil" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" value="0">
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-400 mb-1">Indek</label>
-                                    <input type="number" name="indek" id="indek" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" value="0">
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-400 mb-1">Dankes</label>
-                                    <input type="number" name="dankes" id="dankes" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" value="0">
-                                </div>
+                                <div><label class="block text-xs text-gray-400 mb-1">Gaji Pokok</label><input type="number" name="gapok" id="gapok" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" value="0"></div>
+                                <div><label class="block text-xs text-gray-400 mb-1">Status WP</label><select name="stts_wp" id="stts_wp" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white"></select></div>
+                                <div><label class="block text-xs text-gray-400 mb-1">Status Kerja</label><select name="stts_kerja" id="stts_kerja" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white"></select></div>
+                                <div><label class="block text-xs text-gray-400 mb-1">NPWP</label><input type="text" name="npwp" id="npwp" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white"></div>
+                                <div><label class="block text-xs text-gray-400 mb-1">Bank (BPD)</label><select name="bpd" id="bpd" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white"></select></div>
+                                <div><label class="block text-xs text-gray-400 mb-1">No Rekening</label><input type="text" name="rekening" id="rekening" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white"></div>
+                                <div><label class="block text-xs text-gray-400 mb-1">Index Ins</label><input type="text" name="indexins" id="indexins" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white"></div>
+                                <div><label class="block text-xs text-gray-400 mb-1">Pengurang</label><input type="number" name="pengurang" id="pengurang" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" value="0"></div>
+                                <div><label class="block text-xs text-gray-400 mb-1">Wajib Masuk (Hari)</label><input type="number" name="wajibmasuk" id="wajibmasuk" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" value="0"></div>
+                                <div><label class="block text-xs text-gray-400 mb-1">Cuti Diambil</label><input type="number" name="cuti_diambil" id="cuti_diambil" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" value="0"></div>
+                                <div><label class="block text-xs text-gray-400 mb-1">Indek</label><input type="number" name="indek" id="indek" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" value="0"></div>
+                                <div><label class="block text-xs text-gray-400 mb-1">Dankes</label><input type="number" name="dankes" id="dankes" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" value="0"></div>
                             </div>
                         </div>
 
@@ -262,21 +242,22 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
         
         table = $('#tabelPegawai').DataTable({
             ajax: 'api_pegawai.php?act=list',
+            autoWidth: false, // MATIKAN AUTO WIDTH BAWAAN DATATABLES
             columns: [
-                { data: 'photo_url', render: function(data) {
-                    return `<img src="${data}" class="w-10 h-10 rounded-full object-cover border border-gray-600" onerror="this.src='https://ui-avatars.com/api/?background=random&name=User'">`;
+                { data: 'photo_url', className: "text-center", render: function(data) {
+                    return `<img src="${data}" class="w-10 h-10 rounded-full object-cover border border-gray-600 bg-gray-700 inline-block" onerror="this.src='https://ui-avatars.com/api/?background=random&name=User'">`;
                 }},
                 { data: null, render: function(data, type, row) {
                     return `<div><div class="font-bold text-white">${row.nama}</div><div class="text-xs font-mono text-gray-400">${row.nik}</div></div>`;
                 }},
                 { data: 'jbtn' },
                 { data: 'departemen' },
-                { data: 'stts_aktif', render: function(data) {
+                { data: 'stts_aktif', className: "text-center", render: function(data) {
                     return data === 'AKTIF' 
                         ? `<span class="bg-green-900 text-green-200 px-2 py-0.5 rounded text-xs">${data}</span>` 
                         : `<span class="bg-red-900 text-red-200 px-2 py-0.5 rounded text-xs">${data}</span>`;
                 }},
-                { data: null, render: function(data, type, row) {
+                { data: null, className: "text-center", render: function(data, type, row) {
                     return `<button onclick="edit('${row.id}')" class="text-blue-400 hover:underline mr-2">Edit</button>
                             <button onclick="hapus('${row.id}', '${row.nama}')" class="text-red-400 hover:underline">Hapus</button>`;
                 }}
@@ -284,7 +265,6 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
         });
     });
 
-    // --- LOGIC DROPDOWN ---
     function loadDropdowns() {
         $.get('api_pegawai.php?act=get_options', function(res) {
             fillSelect('departemen', res.departemen, 'id', 'nama');
@@ -308,7 +288,6 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
         });
     }
 
-    // --- TAB SWITCHER ---
     function switchTab(tabId) {
         $('.tab-content').removeClass('active');
         $('#' + tabId).addClass('active');
@@ -316,7 +295,6 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
         $('#btn-' + tabId).addClass('active');
     }
 
-    // --- MODAL ACTION ---
     function bukaModal() {
         $('#formPegawai')[0].reset();
         $('#id').val('');
@@ -336,10 +314,6 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
         });
     }
 
-    // --- CRUD ---
-    // --- VALIDASI & SUBMIT CERDAS ---
-    
-    // Hapus merah-merah saat user mulai mengetik/memilih
     $('#formPegawai input, #formPegawai select, #formPegawai textarea').on('input change', function() {
         $(this).removeClass('border-red-500 ring-2 ring-red-500');
     });
@@ -348,66 +322,29 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
         e.preventDefault();
         
         let isValid = true;
-        let errorList = [];
         let firstErrorInput = null;
 
-        // Loop semua elemen yang punya atribut 'required'
         $(this).find('[required]').each(function() {
             let val = $(this).val();
-            
-            // Cek jika kosong
             if (!val || val.trim() === '') {
                 isValid = false;
-                
-                // 1. Beri Visual Merah
                 $(this).addClass('border-red-500 ring-2 ring-red-500');
-                
-                // 2. Ambil Nama Label untuk pesan error
-                // Mencari label terdekat (prev sibling atau parent)
-                let label = $(this).closest('div').find('label').text().replace('*', '').trim();
-                if(!label) label = $(this).attr('name'); // Fallback ke nama atribut
-                
-                errorList.push(label);
-
-                // Simpan input error pertama untuk fokus nanti
                 if (!firstErrorInput) firstErrorInput = $(this);
             }
         });
 
         if (!isValid) {
-            // --- LOGIKA PINDAH TAB OTOMATIS ---
-            // Cari input error pertama ada di tab mana
             let parentTab = firstErrorInput.closest('.tab-content').attr('id');
-            
-            // Pindah ke tab tersebut
             switchTab(parentTab);
-
-            // Fokus ke input
             setTimeout(() => { firstErrorInput.focus(); }, 100);
-
-            // Tampilkan Pesan Error Rinci
-            let errorHtml = '<ul class="text-left text-sm mt-2 list-disc pl-5 text-red-400 space-y-1">';
-            errorList.forEach(err => {
-                errorHtml += `<li>${err} wajib diisi</li>`;
-            });
-            errorHtml += '</ul>';
-
-            Swal.fire({
-                icon: 'warning',
-                title: 'Data Belum Lengkap!',
-                html: `Mohon lengkapi kolom berikut sebelum menyimpan:<br>${errorHtml}`,
-                confirmButtonColor: '#3b82f6'
-            });
-
-            return; // STOP PROSES DISINI
+            Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap!', text: 'Mohon lengkapi kolom yang berwarna merah.', confirmButtonColor: '#3b82f6' });
+            return;
         }
 
-        // --- JIKA LOLOS VALIDASI, LANJUT SIMPAN ---
         let formData = new FormData(this);
         let btnSimpan = $(this).find('button[type="submit"]');
         let btnText = btnSimpan.text();
         
-        // Loading State
         btnSimpan.prop('disabled', true).text('Menyimpan...');
 
         $.ajax({
@@ -419,13 +356,7 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
             success: function(res) {
                 btnSimpan.prop('disabled', false).text(btnText);
                 if(res.status === 'success') {
-                    Swal.fire({
-                        title: 'Berhasil', 
-                        text: res.message, 
-                        icon: 'success',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
+                    Swal.fire({ title: 'Berhasil', text: res.message, icon: 'success', timer: 1500, showConfirmButton: false });
                     tutupModal();
                     table.ajax.reload();
                 } else {
@@ -446,14 +377,19 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
                 $('#modalTitle').text('Edit Data Pegawai');
                 let d = res.data;
                 
-                // Auto Fill Inputs
                 for(let key in d) {
                     let el = document.getElementsByName(key)[0];
-                    if(el) el.value = d[key];
+                    if(el) {
+                        el.value = (d[key] === null) ? '' : d[key];
+                    }
                 }
                 
-                // Handle Readonly NIK saat edit (opsional, biasanya NIK jangan diubah sembarangan)
-                // $('#nik').prop('readonly', true); 
+                // EXPLICIT ASSIGNMENT
+                if(d.no_ktp) $('#no_ktp').val(String(d.no_ktp));
+                if(d.jk) $('#jk').val(d.jk);
+                if(d.ms_kerja) $('#ms_kerja').val(d.ms_kerja);
+
+                $('#nik').prop('readonly', true); 
             }
         });
     }

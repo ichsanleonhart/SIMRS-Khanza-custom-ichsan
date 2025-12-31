@@ -1,9 +1,10 @@
 <?php
 session_start();
 require_once('../../conf/conf.php');
-header('Content-Type: application/json');
 
 if (!isset($_SESSION['hrd_login'])) {
+    if(isset($_GET['act']) && $_GET['act']=='export_excel'){ die("Akses ditolak."); }
+    header('Content-Type: application/json');
     echo json_encode(['status' => 'error', 'message' => 'Sesi habis']);
     exit;
 }
@@ -11,107 +12,105 @@ if (!isset($_SESSION['hrd_login'])) {
 $act = isset($_GET['act']) ? $_GET['act'] : '';
 $konektor = bukakoneksi();
 
-// --- 1. LIST PENGAJUAN CUTI (FILTERED) ---
+// --- 1. LIST DATA (FIXED LOGIC) ---
 if ($act == 'list') {
-    $tgl_mulai   = isset($_GET['tgl_mulai']) ? $_GET['tgl_mulai'] : '';
-    $tgl_akhir   = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : '';
-    $filter_type = isset($_GET['filter_type']) ? $_GET['filter_type'] : 'cuti';
-    $status_l1   = isset($_GET['status_atasan']) ? $_GET['status_atasan'] : 'ALL';
-    $status_l2   = isset($_GET['status_hrd']) ? $_GET['status_hrd'] : 'ALL';
-
-    $where = " WHERE 1=1 ";
-
-    if (!empty($tgl_mulai) && !empty($tgl_akhir)) {
-        if ($filter_type == 'cuti') {
-            $where .= " AND (pc.tanggal_awal BETWEEN '$tgl_mulai' AND '$tgl_akhir') ";
-        } else {
-            $where .= " AND (pc.tanggal BETWEEN '$tgl_mulai' AND '$tgl_akhir') ";
-        }
-    }
-
-    if ($status_l1 != 'ALL') {
-        if ($status_l1 == 'Proses Pengajuan') {
-            $where .= " AND (pc.status = 'Proses Pengajuan' OR pc.status IS NULL OR pc.status = '') ";
-        } else {
-            $where .= " AND pc.status = '$status_l1' ";
-        }
-    }
-
-    if ($status_l2 != 'ALL') {
-        if ($status_l2 == 'Proses Pengajuan') {
-            $where .= " AND (pc.status_persetujuan_HRD = 'Proses Pengajuan' OR pc.status_persetujuan_HRD IS NULL OR pc.status_persetujuan_HRD = '') ";
-        } else {
-            $where .= " AND pc.status_persetujuan_HRD = '$status_l2' ";
-        }
-    }
-
-    $sql = "SELECT pc.*, p.nama, p.departemen, d.nama as nama_dep 
-            FROM pengajuan_cuti pc
-            JOIN pegawai p ON pc.nik = p.nik
-            LEFT JOIN departemen d ON p.departemen = d.dep_id
-            $where
-            ORDER BY pc.tanggal DESC";
-            
-    $hasil = bukaquery($sql);
+    header('Content-Type: application/json');
+    $query = build_query_cuti($_GET);
+    $hasil = bukaquery($query);
     $data = [];
+    
     while($r = mysqli_fetch_assoc($hasil)) {
+        // LOGIC SISA CUTI PER TAHUN
+        $tahun_ajuan = date('Y', strtotime($r['tanggal_awal']));
+        $nik_peg = $r['nik'];
+        
+        $q_sisa = fetch_assoc("SELECT COALESCE(SUM(jumlah),0) as terpakai FROM pengajuan_cuti 
+                               WHERE nik='$nik_peg' 
+                               AND status_persetujuan_HRD='Disetujui' 
+                               AND urgensi='Tahunan' 
+                               AND YEAR(tanggal_awal)='$tahun_ajuan'");
+        
+        $terpakai = $q_sisa['terpakai'];
+        $sisa = 12 - $terpakai;
+        if($sisa < 0) $sisa = 0;
+        
+        // --- PERBAIKAN DI SINI ---
+        // Kirim Angka Murni untuk Logic JS
+        $r['sisa_cuti_angka'] = (int)$sisa; 
+        // Kirim Teks Formatted untuk Tampilan UI
+        $r['sisa_cuti_display'] = "$sisa (Thn $tahun_ajuan)"; 
+        
         $data[] = $r;
     }
-    
     echo json_encode(['data' => $data]);
     exit;
 }
 
-// --- 2. APPROVAL HRD ---
+// --- 2. EXPORT EXCEL ---
+elseif ($act == 'export_excel') {
+    header("Content-type: application/vnd-ms-excel");
+    header("Content-Disposition: attachment; filename=Laporan_Cuti_".date('Ymd').".xls");
+    $query = build_query_cuti($_GET);
+    $hasil = bukaquery($query);
+    ?>
+    <style> table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid #000; padding: 5px; } th { background-color: #f0f0f0; } </style>
+    <h3>LAPORAN CUTI PEGAWAI</h3>
+    <table>
+        <thead>
+            <tr><th>No</th><th>NIK</th><th>Nama</th><th>Jenis</th><th>Mulai</th><th>Selesai</th><th>Jml</th><th>Status HRD</th></tr>
+        </thead>
+        <tbody>
+            <?php $no=1; while($r=mysqli_fetch_assoc($hasil)){ ?>
+            <tr>
+                <td><?=$no++?></td><td><?=$r['nik']?></td><td><?=$r['nama']?></td>
+                <td><?=$r['urgensi']?></td><td><?=$r['tanggal_awal']?></td><td><?=$r['tanggal_akhir']?></td>
+                <td><?=$r['jumlah']?></td><td><?=$r['status_persetujuan_HRD']?></td>
+            </tr>
+            <?php } ?>
+        </tbody>
+    </table>
+    <?php exit;
+}
+
+// --- 3. APPROVE ---
 elseif ($act == 'approve') {
+    header('Content-Type: application/json');
     $no_pengajuan = validTeks($_POST['no_pengajuan']);
     $status_hrd   = validTeks($_POST['status']); 
     
-    if(!in_array($status_hrd, ['Disetujui', 'Ditolak'])) {
-         echo json_encode(['status'=>'error', 'message'=>'Status tidak valid']);
-         exit;
-    }
-
     $data_cuti = fetch_assoc("SELECT * FROM pengajuan_cuti WHERE no_pengajuan='$no_pengajuan'");
-    if(!$data_cuti) {
-        echo json_encode(['status'=>'error', 'message'=>'Data pengajuan tidak ditemukan']);
-        exit;
-    }
+    if(!$data_cuti) { echo json_encode(['status'=>'error', 'message'=>'Data tidak ditemukan']); exit; }
 
     $pesan_tambahan = "";
 
     if ($status_hrd == 'Disetujui') {
-        $sql_update = "UPDATE pengajuan_cuti SET 
-                       status = 'Disetujui', 
-                       waktu_disetujui_atasan = NOW(),
-                       status_persetujuan_HRD = 'Disetujui', 
-                       waktu_disetujui_HRD = NOW() 
-                       WHERE no_pengajuan='$no_pengajuan'";
-                       
-        // Panggil fungsi update jadwal dan tangkap hasilnya
+        $sql_update = "UPDATE pengajuan_cuti SET status='Disetujui', status_persetujuan_HRD='Disetujui', waktu_disetujui_HRD=NOW(), waktu_disetujui_atasan=IF(waktu_disetujui_atasan IS NULL, NOW(), waktu_disetujui_atasan) WHERE no_pengajuan='$no_pengajuan'";
+        
         $hasil_update = update_jadwal_otomatis($data_cuti['nik'], $data_cuti['tanggal_awal'], $data_cuti['tanggal_akhir']);
+        
+        // Update Saldo (Arsip)
+        if(trim(strtolower($data_cuti['urgensi'])) == 'tahunan') {
+            $jml = $data_cuti['jumlah'];
+            $nik = $data_cuti['nik'];
+            mysqli_query($konektor, "UPDATE pegawai SET cuti_diambil = cuti_diambil + $jml WHERE nik='$nik'");
+        }
         $pesan_tambahan = " (" . $hasil_update . ")";
         
     } else {
-        $sql_update = "UPDATE pengajuan_cuti SET 
-                       status_persetujuan_HRD = 'Ditolak', 
-                       waktu_disetujui_HRD = NOW() 
-                       WHERE no_pengajuan='$no_pengajuan'";
+        $sql_update = "UPDATE pengajuan_cuti SET status_persetujuan_HRD='Ditolak', waktu_disetujui_HRD=NOW() WHERE no_pengajuan='$no_pengajuan'";
     }
 
     if(mysqli_query($konektor, $sql_update)) {
-        echo json_encode(['status'=>'success', 'message'=>"Pengajuan telah $status_hrd." . $pesan_tambahan]);
+        echo json_encode(['status'=>'success', 'message'=>"Berhasil $status_hrd." . $pesan_tambahan]);
     } else {
-        echo json_encode(['status'=>'error', 'message'=>'Gagal update DB: '.mysqli_error($konektor)]);
+        echo json_encode(['status'=>'error', 'message'=>'DB Error: '.mysqli_error($konektor)]);
     }
     exit;
 }
 
-// --- HELPER: UPDATE JADWAL (DIPERBAIKI) ---
+// --- HELPER ---
 function update_jadwal_otomatis($nik, $tgl_awal, $tgl_akhir) {
     global $konektor;
-    
-    // 1. Ambil ID Pegawai
     $peg = fetch_assoc("SELECT id FROM pegawai WHERE nik='$nik'");
     if(!$peg) return "Pegawai tidak ditemukan";
     $id_peg = $peg['id'];
@@ -119,48 +118,37 @@ function update_jadwal_otomatis($nik, $tgl_awal, $tgl_akhir) {
     $begin = new DateTime($tgl_awal);
     $end   = new DateTime($tgl_akhir);
     $end->modify('+1 day'); 
+    $period = new DatePeriod($begin, DateInterval::createFromDateString('1 day'), $end);
 
-    $interval = DateInterval::createFromDateString('1 day');
-    $period   = new DatePeriod($begin, $interval, $end);
-
-    $count_success = 0;
-    $count_failed = 0;
-
+    $count = 0;
     foreach ($period as $dt) {
-        $tahun = $dt->format("Y");
-        
-        // FIX: Gunakan 'n' agar bulan 1-9 tidak ada angka 0 di depan (1, 2, ... 12)
-        // Sesuai standar Khanza integer
-        $bulan = $dt->format("n"); 
-        
-        $hari  = $dt->format("j"); // 1-31
-        $kolom = "h" . $hari;      // h1 - h31
+        $thn = $dt->format("Y");
+        $bln = $dt->format("n"); 
+        $hari = "h" . $dt->format("j"); 
 
-        // Cek apakah baris jadwal sudah dibuat oleh admin?
-        // Kita cek 2 kemungkinan format bulan (String '01' atau Int 1) agar aman
-        $cek = fetch_assoc("SELECT id FROM jadwal_pegawai WHERE id='$id_peg' AND tahun='$tahun' AND (bulan='$bulan' OR bulan='0$bulan')");
+        $cek = fetch_assoc("SELECT id FROM jadwal_pegawai WHERE id='$id_peg' AND tahun='$thn' AND (bulan='$bln' OR bulan='0$bln')");
         
         if($cek) {
-            // Lakukan Update
-            $q = "UPDATE jadwal_pegawai SET $kolom='Cuti' WHERE id='$id_peg' AND tahun='$tahun' AND (bulan='$bulan' OR bulan='0$bulan')";
-            if(mysqli_query($konektor, $q)) {
-                $count_success++;
-            }
+            $q = "UPDATE jadwal_pegawai SET $hari='Cuti' WHERE id='$id_peg' AND tahun='$thn' AND (bulan='$bln' OR bulan='0$bln')";
         } else {
-            $count_failed++; // Jadwal bulan tersebut belum dibuat
+            $q = "INSERT INTO jadwal_pegawai (id, tahun, bulan, $hari) VALUES ('$id_peg', '$thn', '$bln', 'Cuti')";
         }
         
-        // Update Jadwal Tambahan (Opsional)
-        $cek2 = fetch_assoc("SELECT id FROM jadwal_tambahan WHERE id='$id_peg' AND tahun='$tahun' AND (bulan='$bulan' OR bulan='0$bulan')");
-        if($cek2) {
-             mysqli_query($konektor, "UPDATE jadwal_tambahan SET $kolom='Cuti' WHERE id='$id_peg' AND tahun='$tahun' AND (bulan='$bulan' OR bulan='0$bulan')");
-        }
+        if(mysqli_query($konektor, $q)) $count++;
+        mysqli_query($konektor, "DELETE FROM jadwal_tambahan WHERE id='$id_peg' AND tahun='$thn' AND (bulan='$bln' OR bulan='0$bln') AND $hari IS NOT NULL");
     }
+    return "Jadwal Updated: $count hari";
+}
 
-    if ($count_failed > 0) {
-        return "Update $count_success hari. Gagal $count_failed hari (Jadwal blm dibuat).";
-    } else {
-        return "Update jadwal sukses untuk $count_success hari.";
+function build_query_cuti($p) {
+    $where = " WHERE 1=1 ";
+    if (!empty($p['tgl_mulai']) && !empty($p['tgl_akhir'])) {
+        $col = ($p['filter_type'] == 'cuti') ? 'pc.tanggal_awal' : 'pc.tanggal';
+        $where .= " AND ($col BETWEEN '{$p['tgl_mulai']}' AND '{$p['tgl_akhir']}') ";
     }
+    if (isset($p['status_hrd']) && $p['status_hrd'] != 'ALL') {
+        $where .= " AND pc.status_persetujuan_HRD = '{$p['status_hrd']}' ";
+    }
+    return "SELECT pc.*, p.nama, p.departemen, p.cuti_diambil FROM pengajuan_cuti pc JOIN pegawai p ON pc.nik = p.nik $where ORDER BY pc.tanggal DESC";
 }
 ?>

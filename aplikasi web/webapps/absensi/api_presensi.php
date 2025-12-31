@@ -1,7 +1,7 @@
 <?php
 /**
- * API PRESENSI WAJAH - FINAL WITH JAM JAGA VALIDATION
- * Fitur: Validasi ketat ketersediaan setting jam jaga per departemen
+ * API PRESENSI WAJAH - V5.1 (FIXED PATH & STORAGE)
+ * Perbaikan: Path penyimpanan foto fisik dan database disinkronkan
  */
 
 require_once('../conf/conf.php');
@@ -15,22 +15,14 @@ if (strpos($user_ip, $allowed_ip_prefix) !== 0 && $user_ip !== '127.0.0.1' && $u
 }
 
 $act = isset($_GET['act']) ? $_GET['act'] : '';
+$konektor = bukakoneksi();
 
 // --- HELPER ---
-function get_setting_keterlambatan() {
-    $data = fetch_assoc("SELECT * FROM set_keterlambatan LIMIT 1");
-    return $data; 
-}
-
 function get_jam_jaga($dep_id, $shift) {
-    // Validasi SQL Injection sederhana via escape string di conf.php biasanya sudah terhandle, 
-    // tapi pastikan $shift dan $dep_id bersih.
     return fetch_assoc("SELECT jam_masuk, jam_pulang FROM jam_jaga WHERE dep_id='$dep_id' AND shift='$shift'");
 }
 
-// ==================================================================================
-// ACTION 1: GET DESCRIPTORS
-// ==================================================================================
+// 1. GET DESCRIPTORS
 if ($act == 'get_descriptors') {
     $sql = "SELECT f.nik, f.face_descriptor, p.nama FROM face_enrollment f JOIN pegawai p ON f.user_id = p.id";
     $hasil = bukaquery($sql);
@@ -50,101 +42,77 @@ if ($act == 'get_descriptors') {
     exit;
 }
 
-// ==================================================================================
-// ACTION 2: GET SCHEDULE (VALIDASI JAM JAGA)
-// ==================================================================================
-elseif ($act == 'get_schedule') {
+// 2. CEK STATUS (Untuk Popup Konfirmasi)
+elseif ($act == 'check_status_rs') {
     $nik = validTeks($_GET['nik']);
     $tgl_sql = date('Y-m-d');
     $thn = date('Y'); $bln = date('m'); $tgl = date('j');
     
-    $pegawai = fetch_assoc("SELECT id, departemen FROM pegawai WHERE nik='$nik'");
+    $pegawai = fetch_assoc("SELECT id, nama, departemen FROM pegawai WHERE nik='$nik'");
     if(!$pegawai) { echo json_encode(['status'=>'error', 'message'=>'Pegawai tidak ditemukan']); exit; }
     
     $id_peg = $pegawai['id'];
     $dep_id = $pegawai['departemen'];
 
-    // Cek Temporary (Sedang berlangsung?)
+    // Cek Temporary
     $cek_temp = fetch_assoc("SELECT * FROM temporary_presensi WHERE id='$id_peg'");
 
     if ($cek_temp) {
-        // --- MODE PULANG ---
+        // MODE PULANG
         $shift_kode = $cek_temp['shift'];
         $d_jam = get_jam_jaga($dep_id, $shift_kode);
         
-        // Validasi Jam Jaga (Safety Check saat pulang)
-        if (!$d_jam) {
-            echo json_encode([
-                'status' => 'error',
-                'message' => "Shift '$shift_kode' pada jam jaga departemen belum disetting, silakan hubungi IT / HRD."
-            ]);
-            exit;
-        }
-        
         echo json_encode([
             'status' => 'success',
-            'mode_absen' => 'PULANG',
+            'mode' => 'PULANG',
+            'nama' => $pegawai['nama'],
             'shift' => $shift_kode,
-            'jam_masuk' => $d_jam['jam_masuk'],
-            'jam_pulang_jadwal' => $d_jam['jam_pulang']
+            'jam_kerja' => ($d_jam ? $d_jam['jam_masuk'] . ' - ' . $d_jam['jam_pulang'] : '-')
         ]);
     } else {
-        // --- MODE MASUK ---
+        // MODE MASUK - Cari Jadwal
         $cek_rekap = fetch_assoc("SELECT count(id) as total FROM rekap_presensi WHERE id='$id_peg' AND jam_datang LIKE '$tgl_sql%'");
         $total_absen = $cek_rekap['total'];
+        $table_jadwal = ($total_absen > 0) ? 'jadwal_tambahan' : 'jadwal_pegawai';
         $hari_kolom = "h" . $tgl;
 
-        // Tentukan Tabel Jadwal
-        if ($total_absen == 0) {
-            $table_jadwal = 'jadwal_pegawai';
-            $label_jadwal = 'Jadwal Reguler';
-        } else {
-            $table_jadwal = 'jadwal_tambahan';
-            $label_jadwal = 'Jadwal Tambahan';
-        }
-
-        // Ambil Kode Shift
-        $q_jadwal = "SELECT $hari_kolom as shift FROM $table_jadwal WHERE id='$id_peg' AND tahun='$thn' AND bulan='$bln'";
+        // Query Jadwal (Handle bulan '01' atau '1')
+        $q_jadwal = "SELECT $hari_kolom as shift FROM $table_jadwal WHERE id='$id_peg' AND tahun='$thn' AND (bulan='$bln' OR bulan='".(int)$bln."')";
         $d_jadwal = fetch_assoc($q_jadwal);
-        $shift_kode = $d_jadwal['shift'] ?? 'Non Shift';
+        $shift_kode = $d_jadwal['shift'] ?? '';
         
-        // 1. Validasi Shift Kosong di Jadwal
-        if (empty($shift_kode) || $shift_kode == 'Non Shift' || $shift_kode == '' || $shift_kode == '-') {
-            if ($total_absen > 0) {
-                echo json_encode(['status' => 'error', 'message' => 'Anda sudah selesai shift reguler & tidak memiliki jadwal tambahan.']);
-            } else {
-                echo json_encode(['status' => 'error', 'message' => 'Anda tidak memiliki jadwal shift hari ini (Libur).']);
-            }
-            exit;
+        if (empty($shift_kode) || $shift_kode == 'Non Shift' || $shift_kode == '-' || $shift_kode == 'L' || $shift_kode == '') {
+             // Coba cek jadwal tambahan jika jadwal utama kosong
+             if($table_jadwal == 'jadwal_pegawai') {
+                 $q_add = "SELECT $hari_kolom as shift FROM jadwal_tambahan WHERE id='$id_peg' AND tahun='$thn' AND (bulan='$bln' OR bulan='".(int)$bln."')";
+                 $d_add = fetch_assoc($q_add);
+                 if($d_add && $d_add['shift'] != '' && $d_add['shift'] != '-') {
+                     $shift_kode = $d_add['shift'];
+                 } else {
+                     echo json_encode(['status' => 'error', 'message' => 'Jadwal libur / Kosong.']); exit;
+                 }
+             } else {
+                 echo json_encode(['status' => 'error', 'message' => 'Jadwal tidak ditemukan.']); exit;
+             }
         }
 
-        // 2. VALIDASI SETTING JAM JAGA (Query ke table jam_jaga)
         $d_jam = get_jam_jaga($dep_id, $shift_kode);
-        
         if (!$d_jam) {
-            // Jika return false/null, berarti belum disetting di jam_jaga
-            echo json_encode([
-                'status' => 'error', 
-                'message' => "Shift '$shift_kode' pada jam jaga departemen belum disetting, silakan hubungi IT / HRD terlebih dahulu."
-            ]);
-            exit;
+            echo json_encode(['status' => 'error', 'message' => "Shift '$shift_kode' belum disetting jam jaganya."]); exit;
         }
 
-        // Jika lolos semua validasi
         echo json_encode([
             'status' => 'success',
-            'mode_absen' => 'MASUK',
-            'shift' => $shift_kode . " ($label_jadwal)",
-            'jam_masuk' => $d_jam['jam_masuk'],
-            'jam_pulang_jadwal' => $d_jam['jam_pulang']
+            'mode' => 'MASUK',
+            'nama' => $pegawai['nama'],
+            'shift' => $shift_kode,
+            'jam_kerja' => $d_jam['jam_masuk'] . ' - ' . $d_jam['jam_pulang']
         ]);
     }
     exit;
 }
 
-// ==================================================================================
-// ACTION 3: SUBMIT ABSEN (UPDATED PATH)
-// ==================================================================================
+// 3. SUBMIT ABSEN
 elseif ($act == 'submit_absen') {
     $nik = validTeks($_POST['nik']);
     $img_base64 = $_POST['image'];
@@ -154,131 +122,102 @@ elseif ($act == 'submit_absen') {
     $nama_peg = $pegawai['nama'];
     $dep_id = $pegawai['departemen'];
 
-    // --- PERBAIKAN PATH PENYIMPANAN ---
-    // Kita berada di: /var/www/html/webapps/absensi/
-    // Tujuan fisik:   /var/www/html/webapps/absensi/foto_absen/YYYY-MM/
+    // --- FIX PATH PENYIMPANAN ---
+    // Simpan di: /var/www/html/webapps/absensi/foto_absen/2025-12/
+    $subFolder = date("Y-m");
+    $physicalDir = __DIR__ . "/foto_absen/" . $subFolder; 
     
-    $subFolder = date("Y-m") . "/";
-    $targetDir = "foto_absen/" . $subFolder; // Relatif terhadap file ini
-    
-    // Buat folder jika belum ada
-    if (!file_exists($targetDir)) {
-        mkdir($targetDir, 0777, true);
+    if (!file_exists($physicalDir)) {
+        if (!mkdir($physicalDir, 0777, true)) {
+            echo json_encode(['status'=>'error', 'message'=>'Gagal buat folder foto']); exit;
+        }
     }
     
     $fileName = $nik . "-" . date("Ymd-His") . ".jpg";
+    $fullPath = $physicalDir . "/" . $fileName;
     
-    // Simpan Fisik
-    file_put_contents($targetDir . $fileName, base64_decode(explode(";base64,", $img_base64)[1]));
+    // Decode & Simpan Fisik
+    $img_data = base64_decode(explode(";base64,", $img_base64)[1]);
+    if(file_put_contents($fullPath, $img_data) === false) {
+        echo json_encode(['status'=>'error', 'message'=>'Gagal simpan file fisik']); exit;
+    }
     
-    // Path untuk Database (Relatif terhadap folder webapps/, standar Khanza)
-    // Hasil: absensi/foto_absen/2025-12/123.jpg
-    $dbPhotoPath = "absensi/" . $targetDir . $fileName;
+    // Path Database (Relatif dari root webapps agar bisa tampil di laporan)
+    // Contoh: absensi/foto_absen/2025-12/123.jpg
+    $dbPhotoPath = "absensi/foto_absen/" . $subFolder . "/" . $fileName;
 
     $konektor = bukakoneksi();
-    $tgl_sekarang = date('Y-m-d');
-    $jam_sekarang = date('H:i:s');
-
     $cek_temp = fetch_assoc("SELECT * FROM temporary_presensi WHERE id='$id_peg'");
 
     if (!$cek_temp) {
-        // --- MODE MASUK ---
-        $cek_rekap = fetch_assoc("SELECT count(id) as total FROM rekap_presensi WHERE id='$id_peg' AND jam_datang LIKE '$tgl_sekarang%'");
-        $total_absen = $cek_rekap['total'];
-        $thn = date('Y'); $bln = date('m'); $tgl = date('j'); $hari_kolom = "h" . $tgl;
+        // --- MASUK ---
+        // (Logic penentuan shift sama seperti check_status, dipersingkat)
+        $thn = date('Y'); $bln = date('m'); $tgl = date('j'); $hari = "h".$tgl;
         
-        $table_jadwal = ($total_absen > 0) ? 'jadwal_tambahan' : 'jadwal_pegawai';
+        // Cek total rekap hari ini
+        $cek_rekap = fetch_assoc("SELECT count(id) as total FROM rekap_presensi WHERE id='$id_peg' AND jam_datang LIKE '".date('Y-m-d')."%'");
+        $tbl = ($cek_rekap['total'] > 0) ? 'jadwal_tambahan' : 'jadwal_pegawai';
         
-        $q_jadwal = "SELECT $hari_kolom as shift FROM $table_jadwal WHERE id='$id_peg' AND tahun='$thn' AND bulan='$bln'";
-        $d_jadwal = fetch_assoc($q_jadwal);
-        $shift_kode = $d_jadwal['shift'] ?? 'Non Shift';
-
-        // Validasi 1: Shift Ada?
-        if (empty($shift_kode) || $shift_kode == 'Non Shift' || $shift_kode == '-') {
-            echo json_encode(['status'=>'error', 'message'=>'Tidak ada jadwal valid.']);
-            exit;
+        $qj = fetch_assoc("SELECT $hari as shift FROM $tbl WHERE id='$id_peg' AND tahun='$thn' AND (bulan='$bln' OR bulan='".(int)$bln."')");
+        $shift_kode = $qj['shift'] ?? '-';
+        
+        // Fallback cek tambahan
+        if(($shift_kode == '-' || $shift_kode == '') && $tbl == 'jadwal_pegawai') {
+             $qj2 = fetch_assoc("SELECT $hari as shift FROM jadwal_tambahan WHERE id='$id_peg' AND tahun='$thn' AND (bulan='$bln' OR bulan='".(int)$bln."')");
+             if($qj2 && $qj2['shift'] != '-') $shift_kode = $qj2['shift'];
         }
 
-        // Validasi 2: Jam Jaga Ada?
         $d_jam = get_jam_jaga($dep_id, $shift_kode);
-        if (!$d_jam) {
-             echo json_encode(['status'=>'error', 'message'=>"Shift '$shift_kode' belum disetting di Jam Jaga Departemen."]);
-             exit;
-        }
-
-        $jam_baku_masuk = $d_jam['jam_masuk'];
-
-        // Hitung Telat
-        $settings = get_setting_keterlambatan();
-        $toleransi = $settings['toleransi'] ?? 0;
-        $t1 = $settings['terlambat1'] ?? 0;
-        
-        $selisih_detik = strtotime($jam_sekarang) - strtotime($jam_baku_masuk);
-        $selisih_menit = floor($selisih_detik / 60);
-
         $status = "Tepat Waktu";
-        if ($selisih_menit > 0) {
-            if ($selisih_menit <= $toleransi) $status = "Terlambat Toleransi";
-            elseif ($selisih_menit <= $t1) $status = "Terlambat I";
-            else $status = "Terlambat II";
+        $telat_db = "";
+        
+        if ($d_jam) {
+            $selisih = strtotime(date('H:i:s')) - strtotime($d_jam['jam_masuk']);
+            if ($selisih > 0) {
+                $menit = floor($selisih/60);
+                $set = fetch_assoc("SELECT * FROM set_keterlambatan LIMIT 1");
+                if ($menit > ($set['toleransi']??0)) $status = ($menit <= ($set['terlambat1']??0)) ? "Terlambat I" : "Terlambat II";
+                $telat_db = gmdate("H:i:s", $selisih);
+            }
         }
 
-        $ket_telat_db = ($selisih_menit > 0) ? gmdate("H:i:s", $selisih_detik) : ""; 
-
-        $sql = "INSERT INTO temporary_presensi 
-                (id, shift, jam_datang, status, keterlambatan, durasi, photo) 
-                VALUES 
-                ('$id_peg', '$shift_kode', NOW(), '$status', '$ket_telat_db', '', '$dbPhotoPath')";
+        $sql = "INSERT INTO temporary_presensi (id, shift, jam_datang, status, keterlambatan, durasi, photo) 
+                VALUES ('$id_peg', '$shift_kode', NOW(), '$status', '$telat_db', '', '$dbPhotoPath')";
 
         if (mysqli_query($konektor, $sql)) {
-            echo json_encode(['status'=>'success', 'mode'=>'MASUK', 'nama'=>$nama_peg, 'waktu'=>$jam_sekarang]);
+            echo json_encode(['status'=>'success', 'mode'=>'MASUK', 'nama'=>$nama_peg, 'waktu'=>date('H:i:s')]);
         } else {
-            echo json_encode(['status'=>'error', 'message'=>'Gagal Insert: '.mysqli_error($konektor)]);
+            echo json_encode(['status'=>'error', 'message'=>'DB Error: '.mysqli_error($konektor)]);
         }
 
     } else {
-        // --- MODE PULANG ---
-        $jam_masuk_awal = $cek_temp['jam_datang'];
+        // --- PULANG ---
         $shift_kode = $cek_temp['shift'];
         $status_awal = $cek_temp['status'];
-        
+        $jam_masuk = $cek_temp['jam_datang'];
         $d_jam = get_jam_jaga($dep_id, $shift_kode);
+        $jam_pulang_baku = $d_jam['jam_pulang'] ?? '14:00:00';
         
-        // Validasi Jam Jaga (Safety)
-        if (!$d_jam) {
-            // Fallback darurat jika jam jaga dihapus di tengah shift
-            $jam_baku_pulang = '14:00:00'; 
-        } else {
-            $jam_baku_pulang = $d_jam['jam_pulang'];
-        }
-
-        // Cek PSW
         $status_akhir = $status_awal;
-        if (strtotime($jam_sekarang) < strtotime($jam_baku_pulang)) {
-            if (strpos($status_awal, 'PSW') === false) $status_akhir .= " & PSW";
+        if (strtotime(date('H:i:s')) < strtotime($jam_pulang_baku) && strpos($status_awal, 'PSW') === false) {
+            $status_akhir .= " & PSW";
         }
 
-        // Hitung Durasi
-        $durasi_detik = strtotime($jam_sekarang) - strtotime($jam_masuk_awal);
-        $durasi_str = sprintf("%02d:%02d", floor($durasi_detik / 3600), floor(($durasi_detik % 3600) / 60));
+        $durasi = gmdate("H:i:s", strtotime(date('H:i:s')) - strtotime($jam_masuk));
 
-        $sql_update = "UPDATE temporary_presensi SET jam_pulang=NOW(), status='$status_akhir', durasi='$durasi_str', photo='$dbPhotoPath' WHERE id='$id_peg'";
+        // Update Temp (Penting: Update foto terbaru)
+        mysqli_query($konektor, "UPDATE temporary_presensi SET jam_pulang=NOW(), status='$status_akhir', durasi='$durasi', photo='$dbPhotoPath' WHERE id='$id_peg'");
+
+        // Pindahkan ke Rekap
+        $q_mov = "INSERT INTO rekap_presensi (id, shift, jam_datang, jam_pulang, status, keterlambatan, durasi, keterangan, photo)
+                  SELECT id, shift, jam_datang, jam_pulang, status, keterlambatan, durasi, '-', photo FROM temporary_presensi WHERE id='$id_peg'";
         
-        if(mysqli_query($konektor, $sql_update)) {
-            $sql_move = "INSERT INTO rekap_presensi (id, shift, jam_datang, jam_pulang, status, keterlambatan, durasi, keterangan, photo)
-                         SELECT id, shift, jam_datang, jam_pulang, status, keterlambatan, durasi, '-', photo
-                         FROM temporary_presensi WHERE id='$id_peg'";
-            
-            if (mysqli_query($konektor, $sql_move)) {
-                mysqli_query($konektor, "DELETE FROM temporary_presensi WHERE id='$id_peg'");
-                echo json_encode(['status'=>'success', 'mode'=>'PULANG', 'nama'=>$nama_peg, 'waktu'=>$jam_sekarang]);
-            } else {
-                echo json_encode(['status'=>'error', 'message'=>'Gagal Arsip ke Rekap']);
-            }
+        if (mysqli_query($konektor, $q_mov)) {
+            mysqli_query($konektor, "DELETE FROM temporary_presensi WHERE id='$id_peg'");
+            echo json_encode(['status'=>'success', 'mode'=>'PULANG', 'nama'=>$nama_peg, 'waktu'=>date('H:i:s')]);
         } else {
-            echo json_encode(['status'=>'error', 'message'=>'Gagal Update Temp']);
+            echo json_encode(['status'=>'error', 'message'=>'Gagal Arsip Rekap']);
         }
     }
-    mysqli_close($konektor);
 }
 ?>
