@@ -1196,12 +1196,12 @@ private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
     }//GEN-LAST:event_StatusKeyPressed
 
     private void Tgl1ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_Tgl1ItemStateChanged
-        Sequel.cariIsi("select to_days('"+Valid.SetTgl(Tgl2.getSelectedItem()+"")+"')-to_days('"+Valid.SetTgl(Tgl1.getSelectedItem()+"")+"')",Jumlah); 
-    }//GEN-LAST:event_Tgl1ItemStateChanged
+        Sequel.cariIsi("select (to_days('"+Valid.SetTgl(Tgl2.getSelectedItem()+"")+"')-to_days('"+Valid.SetTgl(Tgl1.getSelectedItem()+"")+"'))+1",Jumlah);
+	}//GEN-LAST:event_Tgl1ItemStateChanged
 
     private void Tgl2ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_Tgl2ItemStateChanged
-        Sequel.cariIsi("select to_days('"+Valid.SetTgl(Tgl2.getSelectedItem()+"")+"')-to_days('"+Valid.SetTgl(Tgl1.getSelectedItem()+"")+"')",Jumlah); 
-    }//GEN-LAST:event_Tgl2ItemStateChanged
+        Sequel.cariIsi("select (to_days('"+Valid.SetTgl(Tgl2.getSelectedItem()+"")+"')-to_days('"+Valid.SetTgl(Tgl1.getSelectedItem()+"")+"'))+1",Jumlah);
+	}//GEN-LAST:event_Tgl2ItemStateChanged
 
     private void MnCetakCutiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MnCetakCutiActionPerformed
         if(NoPengajuan.getText().trim().equals("")){
