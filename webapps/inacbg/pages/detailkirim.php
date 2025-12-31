@@ -498,8 +498,7 @@
                 }
                 $radiologi=(getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where no_rawat='".$norawat."' and status='Radiologi'")
 							+getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(RAD)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )")
-							+getOne("select if(sum(totalbiaya)='','0',sum(totalbiaya)) from billing where nm_perawatan like '%(FIS)%' and no_rawat='".$norawat."' and (status='Ralan Paramedis' or status='Ranap Paramedis' or status='Ralan Dokter Paramedis' or status='Ranap Dokter Paramedis' or status='Ralan Dokter' or status='Ranap Dokter' )")
-								);
+							);
                 if($radiologi==""){
                     $radiologi="0";
                 }

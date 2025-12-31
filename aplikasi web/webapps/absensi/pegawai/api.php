@@ -57,10 +57,15 @@ if ($act == 'dashboard') {
     while($row = mysqli_fetch_assoc($r_hist)) { $history[] = $row; }
 
     $photo_db = $d_peg['photo'];
+    // Logic display foto: Cek apakah path DB valid
     if(empty($photo_db) || $photo_db == '-' || $photo_db == '') {
         $url_photo = "https://ui-avatars.com/api/?name=".urlencode($d_peg['nama'])."&background=random";
     } else {
-        $url_photo = "../../penggajian/pages/pegawai/photo/" . $photo_db;
+        // Karena path di DB sudah mengandung "pages/pegawai/photo/", kita tinggal mundur 2 folder dari 'pegawai/api.php' ke root webapps
+        // Lokasi api.php: /var/www/html/webapps/absensi/pegawai/api.php
+        // Target foto: /var/www/html/webapps/penggajian/pages/pegawai/photo/...
+        // Jadi path relatifnya: ../../penggajian/ + path_db
+        $url_photo = "../../penggajian/" . $photo_db;
     }
 
     echo json_encode([
@@ -121,23 +126,31 @@ elseif ($act == 'save') {
     exit;
 }
 
-// --- 5. JADWAL + LOG FINGER (FALLBACK MODE) ---
+// --- 5. JADWAL + LOG FINGER ---
 elseif ($act == 'get_jadwal') {
     $bulan = isset($_POST['bulan']) ? sprintf("%02d", $_POST['bulan']) : date('m');
     $tahun = isset($_POST['tahun']) ? $_POST['tahun'] : date('Y');
     
-    $peg = fetch_assoc("SELECT id FROM pegawai WHERE nik='$nik_login'");
+    $peg = fetch_assoc("SELECT id, departemen FROM pegawai WHERE nik='$nik_login'");
     $id_peg = $peg['id'];
+    $my_dep = $peg['departemen']; 
 
-    // A. REFERENSI JAM (GLOBAL LOOKUP)
-    // Kita ambil SEMUA kemungkinan shift. Jika ada duplikat nama shift, yang terakhir diambil.
-    // Ini lebih aman daripada filter departemen jika data master sedang diacak-acak.
-    $shifts = [];
-    $qs = bukaquery("SELECT shift, jam_masuk, jam_pulang FROM jam_jaga");
+    // A. REFERENSI JAM (PRIORITY)
+    $shifts_utama = []; 
+    $shifts_cadangan = []; 
+
+    $qs = bukaquery("SELECT dep_id, shift, jam_masuk, jam_pulang FROM jam_jaga");
     while($s = mysqli_fetch_assoc($qs)) {
-        // Kunci array = Nama Shift (Pagi, Midle Pagi1, dll)
-        $shifts[$s['shift']] = substr($s['jam_masuk'],0,5) . " - " . substr($s['jam_pulang'],0,5);
+        $jam_str = substr($s['jam_masuk'],0,5) . " - " . substr($s['jam_pulang'],0,5);
+        $kode_shift = $s['shift']; 
+
+        if($s['dep_id'] == $my_dep) {
+            $shifts_utama[$kode_shift] = $jam_str;
+        } else {
+            $shifts_cadangan[$kode_shift] = $jam_str;
+        }
     }
+    $shifts = array_merge($shifts_cadangan, $shifts_utama);
 
     // B. LOG PRESENSI
     $log_presensi = [];
@@ -163,7 +176,7 @@ elseif ($act == 'get_jadwal') {
         }
     }
 
-    // C. JADWAL (VALUE DARI H1-H31)
+    // C. JADWAL
     $qj = fetch_assoc("SELECT * FROM jadwal_pegawai WHERE id='$id_peg' AND tahun='$tahun' AND (bulan='$bulan' OR bulan='".(int)$bulan."')");
     $qt = fetch_assoc("SELECT * FROM jadwal_tambahan WHERE id='$id_peg' AND tahun='$tahun' AND (bulan='$bulan' OR bulan='".(int)$bulan."')");
 
@@ -179,37 +192,18 @@ elseif ($act == 'get_jadwal') {
         if(isset($qt[$col]) && $qt[$col] != "") $shift_kode = $qt[$col];
         elseif(isset($qj[$col])) $shift_kode = $qj[$col];
 
-        // --- FALLBACK LOGIC JAM ---
-        // Cek di kamus jam_jaga. Jika tidak ada, tampilkan strip "-" agar UI tetap rapi.
-        // Frontend akan tetap menampilkan Nama Shift ($shift_kode) jadi user tetap tahu jadwalnya.
         $jam_shift = isset($shifts[$shift_kode]) ? $shifts[$shift_kode] : "-";
         
-        // --- FALLBACK LOGIC WARNA ---
-        // Kita gunakan 'strpos' agar 'Pagi2', 'Midle Pagi' tetap dapat warna.
-        // Jika data kacau (misal: "Shift Hura Hura"), dia akan jatuh ke 'default' (Abu-abu), bukan error/blank.
         $sk = strtolower($shift_kode); 
-        $color = 'bg-gray-700 text-gray-300'; // Default Abu-abu
+        $color = 'bg-gray-700 text-gray-300'; 
 
-        if (strpos($sk, 'midle') !== false) {
-            $color = 'bg-teal-900 text-teal-200 border-teal-700'; // Prioritas tertinggi
-        }
-        elseif (strpos($sk, 'pagi') !== false) {
-            $color = 'bg-green-900 text-green-200 border-green-700'; 
-        } 
-        elseif (strpos($sk, 'siang') !== false) {
-            $color = 'bg-yellow-900 text-yellow-200 border-yellow-700'; 
-        }
-        elseif (strpos($sk, 'malam') !== false) {
-            $color = 'bg-blue-900 text-blue-200 border-blue-700'; 
-        }
-        elseif (strpos($sk, 'libur') !== false || $sk == 'off' || $sk == 'l') {
-            $color = 'bg-red-900 text-red-200 border-red-700'; 
-        }
-        elseif (strpos($sk, 'cuti') !== false) {
-            $color = 'bg-purple-900 text-purple-200 border-purple-700'; 
-        }
+        if (strpos($sk, 'midle') !== false) $color = 'bg-teal-900 text-teal-200 border-teal-700'; 
+        elseif (strpos($sk, 'pagi') !== false) $color = 'bg-green-900 text-green-200 border-green-700'; 
+        elseif (strpos($sk, 'siang') !== false) $color = 'bg-yellow-900 text-yellow-200 border-yellow-700'; 
+        elseif (strpos($sk, 'malam') !== false) $color = 'bg-blue-900 text-blue-200 border-blue-700'; 
+        elseif (strpos($sk, 'libur') !== false || $sk == 'off' || $sk == 'l') $color = 'bg-red-900 text-red-200 border-red-700'; 
+        elseif (strpos($sk, 'cuti') !== false) $color = 'bg-purple-900 text-purple-200 border-purple-700'; 
 
-        // Cek Log Presensi
         $real_in = "-"; $real_out = "-";
         $has_log = false;
         if(isset($log_presensi[$date_str])) {
@@ -223,7 +217,7 @@ elseif ($act == 'get_jadwal') {
         $result[] = [
             'tanggal' => sprintf("%02d", $i),
             'hari' => $days_id[$day_name],
-            'shift' => $shift_kode ? $shift_kode : '-', // Nama Shift Asli Selalu Muncul
+            'shift' => $shift_kode ? $shift_kode : '-', 
             'jam_shift' => $jam_shift, 
             'color' => $color,
             'is_today' => ($date_str == date('Y-m-d')),
@@ -249,15 +243,19 @@ elseif ($act == 'get_profile') {
     }
     $peg['no_telp'] = $no_telp;
     
-    $peg['photo_url'] = (!empty($peg['photo']) && $peg['photo'] != '-') 
-        ? "../../penggajian/pages/pegawai/photo/" . $peg['photo'] 
-        : "";
+    // Logic Preview Foto di Form
+    if(!empty($peg['photo']) && $peg['photo'] != '-') {
+        // Path fisik: ../../penggajian/ + path_db
+        $peg['photo_url'] = "../../penggajian/" . $peg['photo'];
+    } else {
+        $peg['photo_url'] = "";
+    }
 
     echo json_encode($peg);
     exit;
 }
 
-// --- 7. UPDATE PROFILE ---
+// --- 7. UPDATE PROFILE (FIX UPLOAD FOTO PATH) ---
 elseif ($act == 'update_profile') {
     $tmp_lahir = validTeks($_POST['tmp_lahir']);
     $tgl_lahir = validTeks($_POST['tgl_lahir']);
@@ -272,15 +270,18 @@ elseif ($act == 'update_profile') {
         if (!file_exists($target_dir)) mkdir($target_dir, 0777, true);
         
         $ext = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
-        $nama_file_foto = $nik_login . "." . $ext; 
-        $target_file = $target_dir . $nama_file_foto;
+        $nama_file_fisik = $nik_login . "." . $ext; // Nama file di folder: 123.jpg
+        $target_file = $target_dir . $nama_file_fisik;
         
         if(move_uploaded_file($_FILES['photo']['tmp_name'], $target_file)) {
-            $query_foto = ", photo='$nama_file_foto'";
+            // Path yang disimpan di DB: pages/pegawai/photo/123.jpg
+            $nama_file_db = "pages/pegawai/photo/" . $nama_file_fisik;
+            $query_foto = ", photo='$nama_file_db'";
         }
     }
 
     $sql_peg = "UPDATE pegawai SET tmp_lahir='$tmp_lahir', tgl_lahir='$tgl_lahir', alamat='$alamat', kota='$kota', no_ktp='$no_ktp' $query_foto WHERE nik='$nik_login'";
+    
     if(!mysqli_query($konektor, $sql_peg)) {
         echo json_encode(['status'=>'error', 'message'=>'Gagal update pegawai: '.mysqli_error($konektor)]);
         exit;
