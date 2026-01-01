@@ -11,7 +11,7 @@ if (!isset($_SESSION['hrd_login'])) {
 
 $act = isset($_GET['act']) ? $_GET['act'] : '';
 
-// --- AMBIL DATA DEPARTEMEN ---
+// --- AMBIL DATA DEPARTEMEN (Untuk Filter) ---
 if ($act == 'get_dep') {
     $sql = "SELECT dep_id, nama FROM departemen ORDER BY nama ASC";
     $res = bukaquery($sql);
@@ -34,15 +34,13 @@ elseif ($act == 'get_data') {
         $filter_dep = "AND p.departemen = '$dep'";
     }
 
-    // Query Utama: JOIN ke jam_jaga untuk ambil jadwal seharusnya
+    // Query Utama (Mirip DlgHarian.java tapi dioptimalkan)
     $sql = "SELECT p.nik, p.nama, d.nama as dep, 
                    r.shift, r.jam_datang, r.jam_pulang, 
-                   r.status, r.keterlambatan, r.durasi, r.keterangan, r.photo,
-                   j.jam_masuk as jadwal_masuk, j.jam_pulang as jadwal_pulang
+                   r.status, r.keterlambatan, r.durasi, r.keterangan, r.photo
             FROM rekap_presensi r
             JOIN pegawai p ON r.id = p.id
             JOIN departemen d ON p.departemen = d.dep_id
-            LEFT JOIN jam_jaga j ON p.departemen = j.dep_id AND r.shift = j.shift
             WHERE (r.jam_datang BETWEEN '$tgl1 00:00:00' AND '$tgl2 23:59:59')
             $filter_dep
             ORDER BY r.jam_datang DESC, p.nama ASC";
@@ -51,25 +49,26 @@ elseif ($act == 'get_data') {
     $data = [];
 
     while($r = mysqli_fetch_assoc($hasil)) {
-        // Format Jam Aktual
+        // Format Jam agar lebih bersih (hilangkan detik jika perlu, atau biarkan)
         $jam_masuk = date('H:i', strtotime($r['jam_datang']));
         $jam_pulang = ($r['jam_pulang'] == '0000-00-00 00:00:00') ? '-' : date('H:i', strtotime($r['jam_pulang']));
         
-        // Format Jadwal Seharusnya (Ambil 5 karakter pertama: 07:00)
-        $jadwal_masuk = (!empty($r['jadwal_masuk'])) ? substr($r['jadwal_masuk'], 0, 5) : '-';
-        $jadwal_pulang = (!empty($r['jadwal_pulang'])) ? substr($r['jadwal_pulang'], 0, 5) : '-';
-
+        // Fix Path Foto untuk display di web
+        // DB simpan: absensi/foto_absen/2023-12/xxx.jpg
+        // Kita butuh relative path dari folder hrd: ../../absensi/foto_absen...
+        // Atau kalau path di DB sudah 'pages/pegawai/...' sesuaikan.
+        // Sesuai V2 terakhir, kita pakai: absensi/foto_absen/...
+        
+        // Kita kirim data mentah, formatting di JS
         $data[] = [
             'nik' => $r['nik'],
             'nama' => $r['nama'],
             'dep' => $r['dep'],
             'shift' => $r['shift'],
-            'jam_datang' => $r['jam_datang'],
+            'jam_datang' => $r['jam_datang'], // Full datetime untuk sorting
             'jam_pulang' => $r['jam_pulang'],
             'display_masuk' => $jam_masuk,
             'display_pulang' => $jam_pulang,
-            'jadwal_masuk' => $jadwal_masuk,   // Data Baru
-            'jadwal_pulang' => $jadwal_pulang, // Data Baru
             'status' => $r['status'],
             'telat' => $r['keterlambatan'],
             'durasi' => $r['durasi'],

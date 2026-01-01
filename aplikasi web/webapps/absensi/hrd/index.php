@@ -78,7 +78,9 @@ $nama_hrd = $cek_pegawai ? $cek_pegawai['nama'] : $nik_hrd;
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
                 <h3 class="font-bold text-white group-hover:text-purple-300">Enrollment</h3>
-                <p class="text-xs text-gray-400 mt-1">Daftarkan wajah pegawai</p>
+                <p class="text-xs text-gray-400 mt-1">Daftarkan wajah pegawai<br>
+				(<span class="text-lg text-red-400"><?php echo $total_belum; ?></span> Pegawai belum daftar) 
+				</p> 
             </a>
 
             <a href="jam_jaga.php" class="block bg-gray-800 hover:bg-gray-700 p-5 rounded-xl border border-gray-700 transition shadow hover:shadow-lg group">
@@ -126,13 +128,13 @@ $nama_hrd = $cek_pegawai ? $cek_pegawai['nama'] : $nik_hrd;
                 <p class="text-xs text-gray-400 mt-1">Persetujuan & Update Jadwal</p>
             </a>
 
-            <a href="enrollment.php" class="block bg-gray-800 hover:bg-gray-700 p-5 rounded-xl border border-gray-700 transition shadow hover:shadow-lg group relative overflow-hidden">
+            <a href="evaluasi.php" class="block bg-gray-800 hover:bg-gray-700 p-5 rounded-xl border border-gray-700 transition shadow hover:shadow-lg group relative overflow-hidden">
                 <div class="w-10 h-10 bg-red-900/50 rounded-lg flex items-center justify-center text-red-400 mb-3 group-hover:text-white group-hover:bg-red-600 transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 </div>
-                <h3 class="font-bold text-white group-hover:text-red-300">Belum Enrollment</h3>
-                <p class="text-xs text-gray-400 mt-1">
-                    <span class="text-lg font-bold text-red-400"><?php echo $total_belum; ?></span> Pegawai belum daftar
+                <h3 class="font-bold text-white group-hover:text-red-300">Evaluasi Absensi</h3>
+                <p class="text-xs text-gray-400 mt-1">Cek Jadwal vs Data Presensi
+                    
                 </p>
             </a>
             

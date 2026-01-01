@@ -25,6 +25,7 @@ if($dep_akses != 'ALL') {
 }
 
 // --- QUERY DINAMIS (MERGE REGULER & TAMBAHAN) ---
+// Kita buat select string untuk h1-h31 dari dua tabel sekaligus
 $select_cols = "p.nama, p.nik";
 for($k=1; $k<=31; $k++) {
     $select_cols .= ", j1.h$k as r_h$k, j2.h$k as t_h$k"; // r_ = reguler, t_ = tambahan
@@ -50,14 +51,14 @@ function parseShift($val) {
     $cat = ''; // P/S/M/L/C
     $bg = '';
 
-    if (strpos($val, 'midle') !== false) { $code = 'Md'; $cat = 'M'; $bg = 'bg-purple-100 text-purple-800'; } 
+    if (strpos($val, 'midle') !== false) { $code = 'Md'; $cat = 'M'; $bg = 'bg-purple-100 text-purple-800'; } // Middle masuk kategori Malam/Siang tergantung kebijakan, disini saya mapping ke code Md tapi kategori hitung manual nanti
     elseif (strpos($val, 'pagi') !== false) { $code = 'P'; $cat = 'P'; $bg = 'bg-green-100 text-green-800'; }
     elseif (strpos($val, 'siang') !== false) { $code = 'S'; $cat = 'S'; $bg = 'bg-yellow-100 text-yellow-800'; }
     elseif (strpos($val, 'malam') !== false) { $code = 'M'; $cat = 'M'; $bg = 'bg-blue-100 text-blue-800'; }
     elseif (strpos($val, 'libur') !== false || $val == 'off') { $code = 'L'; $cat = 'L'; $bg = 'bg-red-200 text-red-800 font-bold'; }
     elseif (strpos($val, 'cuti') !== false) { $code = 'C'; $cat = 'C'; $bg = 'bg-orange-200 text-orange-800 font-bold'; }
     
-    // Fix kategori Middle agar terhitung Pagi/Siang/Malam sesuai nama
+    // Fix kategori Middle agar terhitung di footer (Asumsi Middle Pagi = Pagi)
     if (strpos($val, 'midle pagi') !== false) $cat = 'P';
     if (strpos($val, 'midle siang') !== false) $cat = 'S';
     if (strpos($val, 'midle malam') !== false) $cat = 'M';
@@ -163,26 +164,20 @@ for($d=1; $d<=31; $d++) {
                                 $display_html = "";
                                 $cell_bg = "";
 
-                                // 1. KASUS DOUBLE SHIFT (P/S, S/M, dll)
+                                // Jika ada jadwal tambahan DAN reguler
                                 if ($p_reg && $p_add && $p_reg['code'] != $p_add['code']) {
                                     $display_html = $p_reg['code'] . " / " . $p_add['code'];
                                     $cell_bg = "bg-gray-100"; // Warna netral untuk ganda
                                     
-                                    // --- FIX REKAP FOOTER (Hitung Dua-duanya) ---
+                                    // Hitung keduanya untuk rekap footer
                                     if(isset($daily_rekap[$i][$p_reg['cat']])) $daily_rekap[$i][$p_reg['cat']]++;
                                     if(isset($daily_rekap[$i][$p_add['cat']])) $daily_rekap[$i][$p_add['cat']]++;
 
-                                    // --- FIX REKAP PERSONAL (Hitung Dua-duanya) ---
-                                    if(isset($cnt[$p_reg['cat']])) $cnt[$p_reg['cat']]++;
-                                    if(isset($cnt[$p_add['cat']])) $cnt[$p_add['cat']]++;
-
-                                    // Hitung JML (Total Hari Kerja)
-                                    // Meski shift ganda, tetap dihitung 1 kehadiran (kecuali salah satu Libur/Cuti)
-                                    // Logic: Jika salah satu bukan libur, hitung masuk.
-                                    if($p_reg['cat'] != 'L' || $p_add['cat'] != 'L') $cnt['Total']++; 
+                                    // Hitung personal (Hitung 1 hari kerja)
+                                    if($p_reg['cat'] != 'L' && $p_reg['cat'] != 'C') $cnt['Total']++; 
 
                                 } 
-                                // 2. KASUS REGULER SAJA
+                                // Jika hanya Reguler
                                 elseif ($p_reg) {
                                     $display_html = $p_reg['code'];
                                     $cell_bg = $p_reg['bg'];
@@ -194,7 +189,7 @@ for($d=1; $d<=31; $d++) {
                                     if(isset($cnt[$p_reg['cat']])) $cnt[$p_reg['cat']]++;
                                     if($p_reg['cat'] != 'L') $cnt['Total']++; // JML exclude Libur
                                 }
-                                // 3. KASUS TAMBAHAN SAJA (Jarang terjadi)
+                                // Jika hanya Tambahan (Kasus jarang tapi mungkin)
                                 elseif ($p_add) {
                                     $display_html = $p_add['code'];
                                     $cell_bg = $p_add['bg'];
