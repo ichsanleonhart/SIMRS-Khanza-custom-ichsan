@@ -1,8 +1,8 @@
 <?php
-// FILE: processor.php (FINAL - UNLIMITED EXECUTION TIME)
-// Fitur: Anti-Timeout untuk mode "Admin Kewalahan"
+// FILE: processor.php (FIXED SCHEDULE BUG)
+// Fitur: Hanya memproses pesan yang waktunya sudah tiba + Anti Timeout
 
-// 1. SETTING NYAWA TAK TERBATAS (WAJIB ADA DI SINI)
+// 1. SETTING NYAWA TAK TERBATAS
 set_time_limit(0); 
 ini_set('max_execution_time', 0);
 
@@ -48,7 +48,16 @@ try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    $stmt = $pdo->query("SELECT * FROM wa_outbox WHERE UPPER(status) = 'ANTRIAN' ORDER BY tanggal_jam ASC LIMIT 1");
+    // =================================================================================
+    // FIX FATAL: TAMBAHKAN 'AND tanggal_jam <= NOW()'
+    // Agar pesan masa depan tidak terkirim sekarang.
+    // =================================================================================
+    $sql = "SELECT * FROM wa_outbox 
+            WHERE UPPER(status) = 'ANTRIAN' 
+            AND tanggal_jam <= NOW() 
+            ORDER BY tanggal_jam ASC LIMIT 1";
+
+    $stmt = $pdo->query($sql);
     $row_raw = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($row_raw) {
@@ -85,9 +94,7 @@ try {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
-        
-        // 2. SETTING CURL TIMEOUT (JANGAN LUPA UBAH KE 600)
-        curl_setopt($ch, CURLOPT_TIMEOUT, 600); 
+        curl_setopt($ch, CURLOPT_TIMEOUT, 600); // 10 Menit Timeout
         
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -115,6 +122,7 @@ try {
         echo json_encode(['status' => $status_op, 'log' => $log_msg]);
 
     } else {
+        // Jika tidak ada antrian yang valid (waktunya belum tiba)
         echo json_encode(['status' => 'empty', 'log' => '']);
     }
 
