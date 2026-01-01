@@ -1,6 +1,6 @@
 // ====================================================================================
-// APPJM.JS - ROBUST ADMIN (ANTI CRASH NO LID)
-// Fitur: Skip typing simulation untuk nomor baru agar tidak error.
+// APPJM.JS - STABLE HEARTBEAT (ANTI SESSION CLOSED)
+// Fitur: Tidur Ayam (Chunked Delay) untuk mencegah Chrome putus koneksi saat ngetik lama.
 // ====================================================================================
 const fs = require('fs');
 const path = require('path');
@@ -46,7 +46,7 @@ const client = new Client({
   puppeteer: {
     headless: true, // Server Mode
     executablePath: puppeteer.executablePath(),
-    protocolTimeout: 300000, // 5 Menit Timeout
+    // Tambahkan argumen keep-alive
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
@@ -55,6 +55,7 @@ const client = new Client({
       "--no-first-run",
       "--no-zygote",
       "--disable-gpu",
+      "--keep-alive", // Coba paksa keep alive
       "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
     ],
   }
@@ -66,6 +67,29 @@ let rejectCalls = true;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// --- FUNGSI BARU: SMART DELAY (TIDUR AYAM) ---
+// Memecah tidur panjang menjadi potongan kecil agar koneksi tidak putus
+const smartTypingDelay = async (ms, chatObject) => {
+    const chunk = 5000; // Cek setiap 5 detik
+    let elapsed = 0;
+
+    while (elapsed < ms) {
+        // 1. Tidur sebentar (5 detik)
+        const timeToSleep = Math.min(chunk, ms - elapsed);
+        await sleep(timeToSleep);
+        elapsed += timeToSleep;
+
+        // 2. HEARTBEAT: Kirim ulang sinyal typing agar session tetap hangat
+        // Ini mencegah "Session Closed" karena idle
+        try {
+            if(chatObject) await chatObject.sendStateTyping();
+        } catch (e) {
+            // Jika error di tengah jalan (misal session mati), throw error agar ditangkap parent
+            throw new Error("Session died during typing");
+        }
+    }
+};
+
 // --- EVENT LISTENERS ---
 
 client.on("qr", (qr) => {
@@ -76,11 +100,17 @@ client.on("qr", (qr) => {
 });
 
 client.on("ready", () => {
-  console.log("WA Gate is ready (Robust Mode)!");
+  console.log("WA Gate is ready (Heartbeat Mode)!");
   cqrCode = "WA Gate is ready";
 });
 
 client.on("authenticated", () => { lAuth = true; console.log("AUTHENTICATED"); });
+
+// RECOVERY: Jika session closed/disconnected, restart otomatis
+client.on("disconnected", (reason) => {
+    console.log("Client Disconnected (Reason: " + reason + "). Reinitializing...");
+    client.initialize();
+});
 
 client.on("call", async (call) => {
   if (rejectCalls) await call.reject();
@@ -104,44 +134,39 @@ client.on("message", async (msg) => {
             msg.reply(replyMsg);
         }
     }
-    else if (messageBody === "!this group info") {
-        let chat = await msg.getChat();
-        if (chat.isGroup) msg.reply(`*Group Details*\nName: ${chat.name}\nID: ${chat.id._serialized}`);
-        else msg.reply("Group only!");
-    }
     // Chatbot #
     else if (messageBody.startsWith('#')) {
         console.log(`[BOT] Perintah: ${messageBody}`);
-        await sleep(Math.floor(Math.random() * 3000) + 2000);
+        await sleep(2000);
         
-        // Coba Typing, kalau gagal (Nomor baru) skip aja
         try {
             const chat = await msg.getChat();
             await chat.sendStateTyping(); 
-        } catch (e) { /* Ignore typing error */ }
-
-        try {
+            
             const response = await axios.post('http://localhost/wa_gateway/chatbot.php', {
                 sender: senderNumber, message: messageBody
             });
             const replyText = response.data.reply;
+            
             if (replyText) {
-                const typingTime = replyText.length * 150; 
-                await sleep(typingTime);
+                const typingTime = replyText.length * 75; 
+                // Pakai Smart Delay
+                await smartTypingDelay(typingTime, chat);
                 
-                // Clear state aman
-                try { const chat = await msg.getChat(); await chat.clearState(); } catch(e){}
-                
+                await chat.clearState();
                 msg.reply(replyText);
             }
-        } catch (error) { console.error(error); }
+        } catch (error) { 
+            console.error(error); 
+        }
     }
 });
 
+const checkRegisteredNumber = async function (number) { return true; };
 client.initialize();
 
 // --- API ENDPOINTS ---
-app.get("/", (req, res) => res.status(200).json({ status: true, message: "WAG API (Robust Mode)" }));
+app.get("/", (req, res) => res.status(200).json({ status: true, message: "WAG API (Heartbeat)" }));
 app.get("/uptime", (req, res) => res.status(200).json({ status: true, message: "Uptime: " + process.uptime() }));
 app.post("/WA-QrCode", (req, res) => {
   if (!lAuth) return res.status(200).json({ status: false, message: "QR Not Ready", qrBarCode: cqrCode });
@@ -149,7 +174,7 @@ app.post("/WA-QrCode", (req, res) => {
 });
 
 // ============================================================================
-// SEND MESSAGE (SAFE TYPING)
+// SEND MESSAGE (HEARTBEAT IMPLEMENTED)
 // ============================================================================
 app.post("/send-message", [body("number").notEmpty(), body("message").notEmpty()], async (req, res) => {
   const errors = validationResult(req).formatWith(({ msg }) => { return msg; });
@@ -160,44 +185,51 @@ app.post("/send-message", [body("number").notEmpty(), body("message").notEmpty()
 
   console.log(`[BOT] Sending to: ${number}`);
 
-  // 1. Cooldown Global
-  const cooldown = Math.floor(Math.random() * 10000) + 5000;
-  await sleep(cooldown);
+  // Cooldown Global (5-10s)
+  await sleep(Math.floor(Math.random() * 5000) + 5000);
 
-  // 2. Logic Simulasi Aman
   try {
-      // Coba ambil Chat Object
+      // 1. Cek User ID (Antisipasi No LID)
+      // Jika nomor baru, client.getChatById biasanya aman, tapi sendStateTyping yang error
       const chat = await client.getChatById(number);
       
-      // Hitung Durasi Ngetik
+      // 2. Hitung Durasi
+      // BATASI MAKSIMAL 90 DETIK (1.5 Menit) demi keamanan Session
       let typingDuration = message.length * 150;
+      if (typingDuration > 90000) typingDuration = 90000; 
       if (typingDuration < 3000) typingDuration = 3000;
       
       console.log(`[BOT] Admin mengetik: ${typingDuration}ms`);
       
-      // COBA SIMULASI TYPING (DIBUNGKUS TRY-CATCH)
-      // Agar jika error "No LID", tidak meledakkan seluruh proses
+      // 3. MULAI TYPING DENGAN HEARTBEAT
       try {
+          // Awal Typing
           await chat.sendStateTyping();
+          
+          // Tidur Ayam (Looping ping 5 detik)
+          await smartTypingDelay(typingDuration, chat);
+          
       } catch (typingErr) {
-          console.log("[BOT] Skip typing simulation (New Number/No LID).");
+          console.log("[BOT] Skip typing (No LID/Error), lanjut kirim.");
       }
 
-      // Tunggu seolah-olah mengetik (tetap tunggu walau simulasi gagal, biar natural)
-      await sleep(typingDuration);
-      
-      // Stop Typing (Safe)
+      // 4. Stop Typing & Kirim
       try { await chat.clearState(); } catch (e) {}
-
-      // Kirim via Chat Object
+      
       const response = await chat.sendMessage(message);
       res.status(200).json({ status: true, message: "Sukses", response: response });
 
   } catch (err) {
-      // FALLBACK UTAMA: Jika getChatById gagal total atau error lain
-      console.error("[BOT] Error Simulasi, Menggunakan Kirim Paksa (Direct):", err.message);
+      console.error("[BOT] Error Utama:", err.message);
+
+      // CRITICAL RECOVERY:
+      // Jika errornya "Session closed", kita harus restart client agar pesan berikutnya bisa masuk
+      if (err.message.includes("Session closed")) {
+          console.log("[BOT] Session mati. Merestart Client...");
+          client.initialize(); 
+      }
       
-      // Kirim Langsung ke Nomor (Tanpa via Chat Object)
+      // FALLBACK KIRIM PAKSA (Jika session masih hidup tapi getChatById gagal)
       client.sendMessage(number, message)
         .then((response) => res.status(200).json({ status: true, message: "Sukses (Direct)", response: response }))
         .catch((err2) => res.status(500).json({ status: false, message: "Gagal Kirim", response: err2 }));
@@ -205,7 +237,7 @@ app.post("/send-message", [body("number").notEmpty(), body("message").notEmpty()
 });
 
 // ============================================================================
-// SEND FILE (SAFE UPLOAD)
+// SEND FILE (HEARTBEAT IMPLEMENTED)
 // ============================================================================
 app.post("/send-file", [body("number").notEmpty(), body("namafile").notEmpty()], async (req, res) => {
   const errors = validationResult(req).formatWith(({ msg }) => { return msg; });
@@ -225,19 +257,19 @@ app.post("/send-file", [body("number").notEmpty(), body("namafile").notEmpty()],
     const mimetype = mime.lookup(filePath);
     const media = new MessageMedia(mimetype, fileData, namafile);
 
-    // Cooldown
-    const cooldown = Math.floor(Math.random() * 10000) + 5000;
-    await sleep(cooldown);
+    await sleep(5000); // Cooldown
 
     try {
         const chat = await client.getChatById(number);
         
-        // Simulasi Recording (Safe Mode)
-        try { await chat.sendStateRecording(); } catch (e) {}
-        
+        // Simulasi Upload (Max 30 detik)
         const uploadDelay = Math.floor(Math.random() * 10000) + 10000; 
-        console.log(`[BOT] Uploading file: ${uploadDelay}ms`);
-        await sleep(uploadDelay);
+        
+        try {
+             await chat.sendStateRecording();
+             // Gunakan Smart Delay juga di sini
+             await smartTypingDelay(uploadDelay, chat);
+        } catch (e) {}
 
         try { await chat.clearState(); } catch (e) {}
 
@@ -245,15 +277,19 @@ app.post("/send-file", [body("number").notEmpty(), body("namafile").notEmpty()],
         res.status(200).json({ status: true, message: "Sukses", response: response });
 
     } catch (innerErr) {
-        throw innerErr; // Lempar ke Catch Utama untuk Fallback Direct
+        throw innerErr; 
     }
 
   } catch (error) {
-      console.error("[BOT] Error File, Fallback Direct:", error.message);
+      console.error("[BOT] Error File:", error.message);
       
-      // Fallback Direct Send File
+      // Recovery Session Closed
+      if (error.message.includes("Session closed")) {
+           client.initialize();
+      }
+
+      // Fallback Direct
       try {
-          // Re-read file data for fallback context if needed (variable scope is safe here)
           const filePath = path.join(__dirname, '../media', namafile);
           const fileData = fs.readFileSync(filePath, { encoding: 'base64' });
           const mimetype = mime.lookup(filePath);
@@ -296,5 +332,5 @@ app.post("/send-group", [
 );
 
 app.listen(port, () => {
-  console.log(`WAG listening on port ${port} (Robust Mode)`);
+  console.log(`WAG listening on port ${port} (Heartbeat Mode)`);
 });
