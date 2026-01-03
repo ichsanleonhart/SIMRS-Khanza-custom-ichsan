@@ -96,7 +96,7 @@ $logo_src = "data:image/jpeg;base64," . base64_encode($setting['logo']);
 
 <script>
     const modelPath = 'models'; 
-    const thresholdMatch = 0.45;
+    const thresholdMatch = 0.38;
     
     let video, canvas, displaySize;
     let labeledFaceDescriptors = [];

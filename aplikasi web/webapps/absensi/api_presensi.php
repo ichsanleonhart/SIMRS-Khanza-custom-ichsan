@@ -1,7 +1,7 @@
 <?php
 /**
- * API PRESENSI WAJAH - V6.0 (SMART TIME-BASED SELECTION)
- * Perbaikan: Memilih jadwal berdasarkan kedekatan waktu, bukan urutan tabel.
+ * API PRESENSI WAJAH - V6.1 (ROBUST SHIFT MATCHING)
+ * Perbaikan: Menangani variasi nama shift (Pagi4, Pagi 4, dll) agar tidak dianggap libur.
  */
 
 require_once('../conf/conf.php');
@@ -17,15 +17,31 @@ if (strpos($user_ip, $allowed_ip_prefix) !== 0 && $user_ip !== '127.0.0.1' && $u
 $act = isset($_GET['act']) ? $_GET['act'] : '';
 $konektor = bukakoneksi();
 
-// --- HELPER JAM JAGA (Robust) ---
+// --- HELPER JAM JAGA (Sangat Robust) ---
 function get_jam_jaga_smart($konektor, $dep_id, $shift_code) {
-    // 1. Coba cari spesifik per departemen
-    $q = mysqli_query($konektor, "SELECT jam_masuk, jam_pulang FROM jam_jaga WHERE dep_id='$dep_id' AND shift='$shift_code'");
-    if ($r = mysqli_fetch_assoc($q)) return $r;
+    // Bersihkan input
+    $shift_clean = mysqli_real_escape_string($konektor, $shift_code);
+    $dep_clean = mysqli_real_escape_string($konektor, $dep_id);
 
-    // 2. Fallback: Cari global (jika admin salah input shift umum di jadwal unit)
-    $q2 = mysqli_query($konektor, "SELECT jam_masuk, jam_pulang FROM jam_jaga WHERE shift='$shift_code' LIMIT 1");
-    if ($r2 = mysqli_fetch_assoc($q2)) return $r2;
+    // 1. Coba cari PERSIS (Spesifik Departemen)
+    $q = mysqli_query($konektor, "SELECT jam_masuk, jam_pulang FROM jam_jaga WHERE dep_id='$dep_clean' AND shift='$shift_clean'");
+    if ($q && mysqli_num_rows($q) > 0) return mysqli_fetch_assoc($q);
+
+    // 2. Fallback 1: Cari PERSIS (Global / Departemen Lain) - Siapa tahu admin lupa input di dep ini
+    $q2 = mysqli_query($konektor, "SELECT jam_masuk, jam_pulang FROM jam_jaga WHERE shift='$shift_clean' LIMIT 1");
+    if ($q2 && mysqli_num_rows($q2) > 0) return mysqli_fetch_assoc($q2);
+
+    // 3. Fallback 2: Cari MIRIP (LIKE) - Menangani kasus spasi 'Pagi 4' vs 'Pagi4'
+    // Hati-hati: 'Pagi' bisa cocok dengan 'Pagi2', jadi kita cari yang paling mendekati
+    $q3 = mysqli_query($konektor, "SELECT jam_masuk, jam_pulang FROM jam_jaga WHERE shift LIKE '$shift_clean%' AND dep_id='$dep_clean' LIMIT 1");
+    if ($q3 && mysqli_num_rows($q3) > 0) return mysqli_fetch_assoc($q3);
+
+    // 4. Ultimate Fallback: Default Jam jika tidak ditemukan sama sekali (Daripada dianggap Libur)
+    // Logika darurat: Tebak dari nama shift
+    $s = strtolower($shift_code);
+    if (strpos($s, 'pagi') !== false) return ['jam_masuk' => '07:00:00', 'jam_pulang' => '14:00:00'];
+    if (strpos($s, 'siang') !== false) return ['jam_masuk' => '14:00:00', 'jam_pulang' => '21:00:00'];
+    if (strpos($s, 'malam') !== false) return ['jam_masuk' => '21:00:00', 'jam_pulang' => '07:00:00'];
 
     return null;
 }
@@ -42,7 +58,7 @@ function determine_active_shift($konektor, $id_peg, $dep_id) {
     // 1. Jadwal Utama
     $q1 = mysqli_query($konektor, "SELECT $hari_col as shift FROM jadwal_pegawai WHERE id='$id_peg' AND tahun='$thn' AND (bulan='$bln' OR bulan='".(int)$bln."')");
     if($d1 = mysqli_fetch_assoc($q1)) {
-        if(!empty($d1['shift']) && !in_array($d1['shift'], ['-','','L','Libur','Cuti'])) {
+        if(!empty($d1['shift']) && !in_array(strtoupper($d1['shift']), ['-','','L','LIBUR','CUTI','OFF'])) {
             $candidates['utama'] = $d1['shift'];
         }
     }
@@ -50,7 +66,7 @@ function determine_active_shift($konektor, $id_peg, $dep_id) {
     // 2. Jadwal Tambahan
     $q2 = mysqli_query($konektor, "SELECT $hari_col as shift FROM jadwal_tambahan WHERE id='$id_peg' AND tahun='$thn' AND (bulan='$bln' OR bulan='".(int)$bln."')");
     if($d2 = mysqli_fetch_assoc($q2)) {
-        if(!empty($d2['shift']) && !in_array($d2['shift'], ['-','','L','Libur','Cuti'])) {
+        if(!empty($d2['shift']) && !in_array(strtoupper($d2['shift']), ['-','','L','LIBUR','CUTI','OFF'])) {
             $candidates['tambahan'] = $d2['shift'];
         }
     }
@@ -58,7 +74,6 @@ function determine_active_shift($konektor, $id_peg, $dep_id) {
     if(empty($candidates)) return ['status' => 'error', 'message' => 'Tidak ada jadwal dinas hari ini (Libur/Kosong).'];
 
     // B. Cek Shift yang SUDAH SELESAI (Rekap)
-    // Agar tidak absen 2x di shift yang sama
     $completed = [];
     $q_rekap = mysqli_query($konektor, "SELECT shift FROM rekap_presensi WHERE id='$id_peg' AND jam_datang LIKE '$today_str%'");
     while($r = mysqli_fetch_assoc($q_rekap)) {
@@ -73,16 +88,22 @@ function determine_active_shift($konektor, $id_peg, $dep_id) {
         // Skip jika sudah selesai
         if(in_array($shift_code, $completed)) continue;
 
-        // Ambil Jam Masuk
+        // Ambil Jam Masuk (Menggunakan Fungsi Baru yang Lebih Kuat)
         $jam = get_jam_jaga_smart($konektor, $dep_id, $shift_code);
-        if(!$jam) continue; // Skip jika jam belum disetting
+        
+        // JIKA JAM MASIH NULL, LANJUT (JANGAN DIE)
+        // Kita beri default value sementara agar logic tetap jalan
+        if(!$jam) {
+             // Fallback darurat hardcoded di dalam loop jika fungsi helper pun menyerah
+             $jam = ['jam_masuk' => '00:00:00', 'jam_pulang' => '00:00:00'];
+        }
 
         // Hitung Selisih Waktu (Sekarang vs Jam Masuk)
         $jam_masuk_ts = strtotime($today_str . ' ' . $jam['jam_masuk']);
         $now_ts = time();
         
-        // Logika Selisih Absolut: 
-        // Jika Jam Masuk 07:00, Sekarang 06:50 -> Beda 10 menit
+        // Logika Selisih Absolut
+		// Jika Jam Masuk 07:00, Sekarang 06:50 -> Beda 10 menit
         // Jika Jam Masuk 14:00, Sekarang 06:50 -> Beda 7 jam
         // Pemenang: 07:00
         $diff = abs($now_ts - $jam_masuk_ts);
@@ -93,14 +114,15 @@ function determine_active_shift($konektor, $id_peg, $dep_id) {
                 'code' => $shift_code,
                 'jam_masuk' => $jam['jam_masuk'],
                 'jam_pulang' => $jam['jam_pulang'],
-                'source' => $source // 'utama' atau 'tambahan' (untuk debug jika perlu)
+                'source' => $source 
             ];
         }
     }
 
     if(!$best_shift) {
-        if(!empty($completed)) return ['status' => 'error', 'message' => 'Semua jadwal hari ini sudah selesai.'];
-        return ['status' => 'error', 'message' => 'Jadwal ditemukan tapi jam jaga belum disetting master-nya.'];
+        if(!empty($completed)) return ['status' => 'error', 'message' => 'Anda sudah menyelesaikan semua shift hari ini.'];
+        // Jika sampai sini, berarti ada jadwal tapi sistem gagal mencocokkan jam
+        return ['status' => 'error', 'message' => 'Jadwal ditemukan tetapi data Jam Jaga belum diatur oleh Admin. Hubungi IT.'];
     }
 
     return ['status' => 'success', 'data' => $best_shift];
@@ -130,7 +152,7 @@ if ($act == 'get_descriptors') {
     exit;
 }
 
-// 2. CEK STATUS (Untuk Popup Konfirmasi)
+// 2. CEK STATUS
 elseif ($act == 'check_status_rs') {
     $nik = validTeks($_GET['nik']);
     $pegawai = fetch_assoc("SELECT id, nama, departemen FROM pegawai WHERE nik='$nik'");
@@ -139,23 +161,24 @@ elseif ($act == 'check_status_rs') {
     $id_peg = $pegawai['id'];
     $dep_id = $pegawai['departemen'];
 
-    // Cek Temporary (Sedang Dinas?)
+    // Cek Temporary
     $cek_temp = fetch_assoc("SELECT * FROM temporary_presensi WHERE id='$id_peg'");
 
     if ($cek_temp) {
         // --- MODE PULANG ---
         $shift_kode = $cek_temp['shift'];
         $d_jam = get_jam_jaga_smart($konektor, $dep_id, $shift_kode);
-        
+        $jam_kerja_str = ($d_jam) ? $d_jam['jam_masuk'] . ' - ' . $d_jam['jam_pulang'] : 'Jam Belum Diset';
+
         echo json_encode([
             'status' => 'success',
             'mode' => 'PULANG',
             'nama' => $pegawai['nama'],
             'shift' => $shift_kode,
-            'jam_kerja' => ($d_jam ? $d_jam['jam_masuk'] . ' - ' . $d_jam['jam_pulang'] : '-')
+            'jam_kerja' => $jam_kerja_str
         ]);
     } else {
-        // --- MODE MASUK (SMART LOGIC) ---
+        // --- MODE MASUK ---
         $analisa = determine_active_shift($konektor, $id_peg, $dep_id);
         
         if($analisa['status'] == 'error') {
@@ -203,7 +226,6 @@ elseif ($act == 'submit_absen') {
         echo json_encode(['status'=>'error', 'message'=>'Gagal simpan file fisik']); exit;
     }
     
-    // Path Database (Relatif dari root webapps)
     $dbPhotoPath = "absensi/foto_absen/" . $subFolder . "/" . $fileName;
 
     // Cek Status Lagi
@@ -247,24 +269,22 @@ elseif ($act == 'submit_absen') {
         $status_awal = $cek_temp['status'];
         $jam_masuk = $cek_temp['jam_datang'];
         
-        // Ambil info jam pulang baku
         $d_jam = get_jam_jaga_smart($konektor, $dep_id, $shift_kode);
         $jam_pulang_baku = $d_jam['jam_pulang'] ?? '14:00:00';
         
-        // Cek PSW (Pulang Sebelum Waktu)
+        // Cek PSW
         $status_akhir = $status_awal;
-        // Hanya tandai PSW jika pulang lebih awal > 15 menit (toleransi wajar)
-        // Dan belum ada status PSW sebelumnya
-        if ((strtotime($jam_pulang_baku) - strtotime(date('H:i:s'))) > 900 && strpos($status_awal, 'PSW') === false) {
+        // Toleransi 5 menit (300 detik) sebelum jam pulang
+        if ((strtotime($jam_pulang_baku) - strtotime(date('H:i:s'))) > 300 && strpos($status_awal, 'PSW') === false) {
             $status_akhir .= " & PSW";
         }
 
         $durasi = gmdate("H:i:s", strtotime(date('H:i:s')) - strtotime($jam_masuk));
 
-        // Update Temp (Penting: Update foto terbaru saat pulang)
+		 // Update Temp (Penting: Update foto terbaru saat pulang)
         mysqli_query($konektor, "UPDATE temporary_presensi SET jam_pulang=NOW(), status='$status_akhir', durasi='$durasi', photo='$dbPhotoPath' WHERE id='$id_peg'");
-
-        // Pindahkan ke Rekap (Arsip)
+		
+		// Pindahkan ke Rekap (Arsip)
         $q_mov = "INSERT INTO rekap_presensi (id, shift, jam_datang, jam_pulang, status, keterlambatan, durasi, keterangan, photo)
                   SELECT id, shift, jam_datang, jam_pulang, status, keterlambatan, durasi, '-', photo FROM temporary_presensi WHERE id='$id_peg'";
         
