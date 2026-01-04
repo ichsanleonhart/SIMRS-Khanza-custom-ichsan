@@ -70,22 +70,17 @@ elseif ($act == 'get_live_data') {
     echo json_encode(['data' => $data]);
 }
 
-// --- FORCE CHECKOUT (PERBAIKAN LOGIKA) ---
+// --- FORCE CHECKOUT (PULANGKAN MANUAL) ---
 elseif ($act == 'force_checkout') {
     $nik = validTeks($_POST['nik']);
-    
-    // Ambil Waktu dari Input HRD
     $input_waktu = isset($_POST['waktu_pulang']) ? $_POST['waktu_pulang'] : '';
-    // Konversi: 2025-12-26T14:00 -> 2025-12-26 14:00:00
     $jam_pulang_manual = $input_waktu ? str_replace('T', ' ', $input_waktu) . ':00' : date('Y-m-d H:i:s');
 
-    // Cek Data Pegawai
     $peg = fetch_assoc("SELECT id, departemen FROM pegawai WHERE nik='$nik'");
     if(!$peg) { echo json_encode(['status'=>'error', 'message'=>'Pegawai tidak ditemukan']); exit; }
     $id_peg = $peg['id'];
     $dep_id = $peg['departemen'];
 
-    // Cek Data Temporary
     $cek_temp = fetch_assoc("SELECT * FROM temporary_presensi WHERE id='$id_peg'");
     if(!$cek_temp) { echo json_encode(['status'=>'error', 'message'=>'Data presensi tidak ditemukan/sudah pulang']); exit; }
 
@@ -93,23 +88,19 @@ elseif ($act == 'force_checkout') {
     $shift_kode = $cek_temp['shift'];
     $status_awal = $cek_temp['status'];
 
-    // Cek Jam Baku (Untuk Status PSW)
     $d_jam = fetch_assoc("SELECT jam_pulang FROM jam_jaga WHERE dep_id='$dep_id' AND shift='$shift_kode'");
     $jam_pulang_baku = $d_jam ? $d_jam['jam_pulang'] : '14:00:00';
     
-    // Logic PSW
     $jam_keluar_only = date('H:i:s', strtotime($jam_pulang_manual));
     $status_akhir = $status_awal;
     if (strtotime($jam_keluar_only) < strtotime($jam_pulang_baku) && strpos($status_awal, 'PSW') === false) {
         $status_akhir .= " & PSW";
     }
 
-    // Hitung Durasi Real
     $durasi_detik = strtotime($jam_pulang_manual) - strtotime($jam_masuk);
-    if($durasi_detik < 0) $durasi_detik = 0; // Cegah minus
+    if($durasi_detik < 0) $durasi_detik = 0; 
     $durasi_str = sprintf("%02d:%02d", floor($durasi_detik / 3600), floor(($durasi_detik % 3600) / 60));
 
-    // LANGKAH 1: UPDATE DULU DI TEMPORARY (Supaya data lengkap sebelum dipindah)
     $sql_update = "UPDATE temporary_presensi SET 
                    jam_pulang = '$jam_pulang_manual', 
                    status = '$status_akhir', 
@@ -117,17 +108,12 @@ elseif ($act == 'force_checkout') {
                    WHERE id='$id_peg'";
     
     if(mysqli_query($konektor, $sql_update)) {
-        
-        // LANGKAH 2: INSERT KE REKAP (TIRU LOGIKA ABSEN PULANG)
-        // Kita selipkan catatan manual di kolom 'keterangan'
         $catatan = "Dipulangkan Manual oleh HRD";
-        
         $sql_move = "INSERT INTO rekap_presensi (id, shift, jam_datang, jam_pulang, status, keterlambatan, durasi, keterangan, photo)
                      SELECT id, shift, jam_datang, jam_pulang, status, keterlambatan, durasi, '$catatan', photo
                      FROM temporary_presensi WHERE id='$id_peg'";
         
         if (mysqli_query($konektor, $sql_move)) {
-            // LANGKAH 3: HAPUS DARI TEMPORARY
             mysqli_query($konektor, "DELETE FROM temporary_presensi WHERE id='$id_peg'");
             echo json_encode(['status'=>'success', 'message'=>'Pegawai berhasil dipulangkan.']);
         } else {
@@ -135,6 +121,39 @@ elseif ($act == 'force_checkout') {
         }
     } else {
         echo json_encode(['status'=>'error', 'message'=>'Gagal update data temporary: '.mysqli_error($konektor)]);
+    }
+    exit;
+}
+
+// --- HAPUS ENTRY (VOID DATA & DELETE FILE) ---
+elseif ($act == 'delete_entry') {
+    $nik = validTeks($_POST['nik']);
+    
+    $peg = fetch_assoc("SELECT id, nama FROM pegawai WHERE nik='$nik'");
+    if(!$peg) { echo json_encode(['status'=>'error', 'message'=>'Pegawai tidak ditemukan']); exit; }
+    $id_peg = $peg['id'];
+
+    // 1. AMBIL INFO FOTO DULU SEBELUM DIHAPUS
+    $cek_foto = fetch_assoc("SELECT photo FROM temporary_presensi WHERE id='$id_peg'");
+
+    // 2. HAPUS RECORD DARI DB
+    if(mysqli_query($konektor, "DELETE FROM temporary_presensi WHERE id='$id_peg'")) {
+        
+        // 3. HAPUS FILE FISIK (GARBAGE COLLECTION)
+        if ($cek_foto && !empty($cek_foto['photo'])) {
+            // Path di DB: absensi/foto_absen/2026-01/xxx.jpg
+            // Posisi file ini: hrd/api_monitoring.php
+            // Relatif path: ../../absensi/foto_absen/...
+            $file_path = "../../" . $cek_foto['photo']; 
+            
+            if (file_exists($file_path)) {
+                unlink($file_path); // Hapus file
+            }
+        }
+
+        echo json_encode(['status'=>'success', 'message'=>"Data presensi atas nama {$peg['nama']} berhasil dihapus dan foto dibersihkan."]);
+    } else {
+        echo json_encode(['status'=>'error', 'message'=>'Gagal menghapus data: '.mysqli_error($konektor)]);
     }
     exit;
 }

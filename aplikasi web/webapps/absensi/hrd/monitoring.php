@@ -109,11 +109,16 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
                     { data: 'jam_datang', className: 'text-green-400 font-mono font-bold' },
                     { data: 'durasi_live', className: 'text-yellow-400 font-mono' },
                     
-                    // TOMBOL PULANGKAN
-                    { data: null, orderable: false, className: "text-center", render: function(data, type, row) {
-                        return `<button onclick="paksaPulang('${row.nik}', '${row.nama}', '${row.full_jam_datang}')" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded text-xs font-bold border border-red-500 shadow-sm transition flex items-center gap-1 mx-auto">
-                                    <i class="fa-solid fa-right-from-bracket"></i> Pulangkan
-                                </button>`;
+                    // TOMBOL AKSI: PULANGKAN & HAPUS
+                    { data: null, orderable: false, className: "text-center", width: "160px", render: function(data, type, row) {
+                        return `<div class="flex items-center justify-center gap-2">
+                                    <button onclick="paksaPulang('${row.nik}', '${row.nama}', '${row.full_jam_datang}')" class="bg-yellow-600 hover:bg-yellow-500 text-white px-2 py-1 rounded text-xs font-bold border border-yellow-500 shadow-sm transition flex items-center gap-1" title="Absen Pulang Manual">
+                                        <i class="fa-solid fa-right-from-bracket"></i> Pulang
+                                    </button>
+                                    <button onclick="hapusEntry('${row.nik}', '${row.nama}')" class="bg-red-700 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-bold border border-red-600 shadow-sm transition flex items-center gap-1" title="Hapus Data Salah (Void)">
+                                        <i class="fa-solid fa-trash"></i> Hapus
+                                    </button>
+                                </div>`;
                     }},
 
                     { data: 'status', render: function(data) {
@@ -152,7 +157,7 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
             });
         }
         
-        // FUNGSI PAKSA PULANG DENGAN INFO DETAIL
+        // FUNGSI 1: PAKSA PULANG (CHECKOUT)
         function paksaPulang(nik, nama, tgl_masuk) {
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -166,7 +171,6 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
                         <p class="text-yellow-400 mt-2 font-mono">
                            <i class="fa-regular fa-clock"></i> Masuk: <b>${tgl_masuk}</b>
                         </p>
-                        <p class="text-xs text-gray-400 mt-1 italic">*Perhatikan tanggal masuknya!</p>
                     </div>
                     <div class="text-left mb-1 text-xs text-gray-400 font-bold">Set Waktu Pulang:</div>
                     <input type="datetime-local" id="waktu_pulang" class="swal2-input w-full text-sm" value="${nowStr}" style="margin: 0;">
@@ -175,9 +179,9 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
                 background: '#1f2937',
                 color: '#fff',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
+                confirmButtonColor: '#d97706', // Yellow/Orange
                 cancelButtonColor: '#374151',
-                confirmButtonText: 'Proses Pulangkan',
+                confirmButtonText: 'Ya, Pulangkan',
                 cancelButtonText: 'Batal',
                 preConfirm: () => {
                     const val = document.getElementById('waktu_pulang').value;
@@ -196,22 +200,48 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
                     }, function(res) {
                         const data = JSON.parse(res);
                         if(data.status === 'success') {
-                            Swal.fire({
-                                title: 'Berhasil', 
-                                text: data.message, 
-                                icon: 'success', 
-                                background: '#1f2937', 
-                                color: '#fff'
-                            });
+                            Swal.fire({title: 'Berhasil', text: data.message, icon: 'success', background: '#1f2937', color: '#fff'});
                             loadTable();
                         } else {
-                            Swal.fire({
-                                title: 'Gagal', 
-                                text: data.message, 
-                                icon: 'error', 
-                                background: '#1f2937', 
-                                color: '#fff'
-                            });
+                            Swal.fire({title: 'Gagal', text: data.message, icon: 'error', background: '#1f2937', color: '#fff'});
+                        }
+                    });
+                }
+            });
+        }
+
+        // FUNGSI 2: HAPUS DATA (VOID / SALAH ORANG)
+        function hapusEntry(nik, nama) {
+            Swal.fire({
+                title: 'Hapus Data Presensi?',
+                html: `
+                    <p class="text-gray-300 text-sm mb-2">Anda akan menghapus data presensi <b>${nama}</b> yang sedang berjalan.</p>
+                    <p class="text-red-400 text-xs font-bold bg-red-900/30 p-2 rounded border border-red-900">
+                        ⚠️ PERINGATAN: Tindakan ini permanen!<br>
+                        Gunakan fitur ini hanya jika terjadi kesalahan sistem (salah identifikasi wajah).
+                    </p>
+                `,
+                icon: 'error', // Ikon X merah
+                background: '#1f2937',
+                color: '#fff',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626', // Red
+                cancelButtonColor: '#374151',
+                confirmButtonText: 'Ya, Hapus Data Ini',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({title: 'Menghapus...', didOpen: () => Swal.showLoading(), background: '#1f2937', color: '#fff'});
+                    
+                    $.post('api_monitoring.php?act=delete_entry', {
+                        nik: nik
+                    }, function(res) {
+                        const data = JSON.parse(res);
+                        if(data.status === 'success') {
+                            Swal.fire({title: 'Terhapus', text: data.message, icon: 'success', background: '#1f2937', color: '#fff'});
+                            loadTable();
+                        } else {
+                            Swal.fire({title: 'Gagal', text: data.message, icon: 'error', background: '#1f2937', color: '#fff'});
                         }
                     });
                 }
