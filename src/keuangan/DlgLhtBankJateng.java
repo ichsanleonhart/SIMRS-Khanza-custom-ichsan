@@ -415,7 +415,7 @@ private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
     private widget.Table tbBangsal;
     // End of variables declaration//GEN-END:variables
 
-    private void tampil(){
+    void tampil(){
         Valid.tabelKosong(tabMode);
         try{
             ps=koneksi.prepareStatement("select * from tagihan_bpd_jateng where tagihan_bpd_jateng.tgl_closing between ? and ? "+

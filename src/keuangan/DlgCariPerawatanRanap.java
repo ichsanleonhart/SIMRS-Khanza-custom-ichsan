@@ -1353,7 +1353,7 @@ private void ppPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     private widget.Table tbKamar;
     // End of variables declaration//GEN-END:variables
 
-    private void tampil() { 
+    public void tampil() { 
         try{   
             Valid.tabelKosong(tabMode);
             file=new File("./cache/tarifranap.iyem");

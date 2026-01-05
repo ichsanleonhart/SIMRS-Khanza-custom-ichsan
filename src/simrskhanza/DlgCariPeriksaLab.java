@@ -47,13 +47,10 @@ import org.apache.http.entity.mime.MultipartEntity; //tambahan ichsan
 import org.apache.http.entity.mime.content.ByteArrayBody; //tambahan ichsan
 import org.apache.http.impl.client.DefaultHttpClient; //tambahan ichsan
 import org.apache.http.HttpResponse; //tambahan ichsan untuk fungsi upload pdf
-//import org.apache.http.entity.mime.content.InputStreamBody; //tambahan ichsan untuk fungsi upload pdf
-//import org.apache.http.entity.mime.MultipartEntityBuilder; //tambahan ichsan untuk fungsi upload pdf
-//import org.apache.http.entity.ContentType; //tambahan ichsan untuk fungsi upload pdf
-//import org.apache.http.impl.client.CloseableHttpClient; //tambahan ichsan untuk fungsi upload pdf
-//import org.apache.http.impl.client.HttpClients; //tambahan ichsan untuk fungsi upload pdf
 import org.apache.http.entity.mime.content.InputStreamBody;
-
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.swing.SwingUtilities;
 
 
 
@@ -84,7 +81,7 @@ public class DlgCariPeriksaLab extends javax.swing.JDialog {
             Suspen_Piutang_Laborat_Ralan="",Laborat_Ralan="",Beban_Jasa_Medik_Dokter_Laborat_Ralan="",Utang_Jasa_Medik_Dokter_Laborat_Ralan="",
             Beban_Jasa_Medik_Petugas_Laborat_Ralan="",Utang_Jasa_Medik_Petugas_Laborat_Ralan="",Beban_Kso_Laborat_Ralan="",Utang_Kso_Laborat_Ralan="",
             HPP_Persediaan_Laborat_Rawat_Jalan="",Persediaan_BHP_Laborat_Rawat_Jalan="",Beban_Jasa_Sarana_Laborat_Ralan="",Utang_Jasa_Sarana_Laborat_Ralan="",
-            Beban_Jasa_Perujuk_Laborat_Ralan="",Utang_Jasa_Perujuk_Laborat_Ralan="",Beban_Jasa_Menejemen_Laborat_Ralan="",Utang_Jasa_Menejemen_Laborat_Ralan="",status="";
+            Beban_Jasa_Perujuk_Laborat_Ralan="",Utang_Jasa_Perujuk_Laborat_Ralan="",Beban_Jasa_Menejemen_Laborat_Ralan="",Utang_Jasa_Menejemen_Laborat_Ralan="",status="";    
 
     /** Creates new form DlgProgramStudi
      * @param parent
@@ -7218,7 +7215,7 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
     public void setPasien(String pasien){
         NoRawat.setText(pasien);
     }
-<<<<<<< HEAD
+
 ///////////////////////// start - upload berkas digital perawatan by ichsan
 	private void UploadPDF(String FileName, String docpath) {
         try {
@@ -7399,8 +7396,6 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
     }
     } 
    
-=======
- 
     private void runBackground(Runnable task) {
         if (ceksukses) return;
         ceksukses = true;
@@ -7418,5 +7413,4 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
             }
         });
     }
->>>>>>> upstream/master
 }

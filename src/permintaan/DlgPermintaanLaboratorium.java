@@ -626,11 +626,7 @@ public final class DlgPermintaanLaboratorium extends javax.swing.JDialog {
         jLabel9.setBounds(0, 40, 92, 23);
 
         Tanggal.setForeground(new java.awt.Color(50, 70, 50));
-<<<<<<< HEAD
-        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "06-03-2025" }));
-=======
         Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-12-2025" }));
->>>>>>> upstream/master
         Tanggal.setDisplayFormat("dd-MM-yyyy");
         Tanggal.setName("Tanggal"); // NOI18N
         Tanggal.setOpaque(false);
@@ -645,22 +641,22 @@ public final class DlgPermintaanLaboratorium extends javax.swing.JDialog {
             }
         });
         PanelInput.add(Tanggal);
-        Tanggal.setBounds(830, 10, 90, 23);
+        Tanggal.setBounds(460, 40, 90, 23);
 
         CmbJam.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23" }));
         CmbJam.setName("CmbJam"); // NOI18N
         PanelInput.add(CmbJam);
-        CmbJam.setBounds(920, 10, 62, 23);
+        CmbJam.setBounds(554, 40, 62, 23);
 
         CmbMenit.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59" }));
         CmbMenit.setName("CmbMenit"); // NOI18N
         PanelInput.add(CmbMenit);
-        CmbMenit.setBounds(990, 10, 62, 23);
+        CmbMenit.setBounds(619, 40, 62, 23);
 
         CmbDetik.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59" }));
         CmbDetik.setName("CmbDetik"); // NOI18N
         PanelInput.add(CmbDetik);
-        CmbDetik.setBounds(1050, 10, 62, 23);
+        CmbDetik.setBounds(684, 40, 62, 23);
 
         ChkJln.setBorder(null);
         ChkJln.setSelected(true);
@@ -674,7 +670,7 @@ public final class DlgPermintaanLaboratorium extends javax.swing.JDialog {
             }
         });
         PanelInput.add(ChkJln);
-        ChkJln.setBounds(1120, 10, 23, 23);
+        ChkJln.setBounds(749, 40, 23, 23);
 
         btnDokter.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         btnDokter.setMnemonic('4');
@@ -691,7 +687,7 @@ public final class DlgPermintaanLaboratorium extends javax.swing.JDialog {
         jLabel15.setText("Tanggal :");
         jLabel15.setName("jLabel15"); // NOI18N
         PanelInput.add(jLabel15);
-        jLabel15.setBounds(760, 10, 67, 23);
+        jLabel15.setBounds(390, 40, 67, 23);
 
         KodePerujuk.setName("KodePerujuk"); // NOI18N
         KodePerujuk.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -708,10 +704,10 @@ public final class DlgPermintaanLaboratorium extends javax.swing.JDialog {
         PanelInput.add(NmPerujuk);
         NmPerujuk.setBounds(177, 40, 180, 23);
 
-        jLabel5.setText("Informasi Tambahan (SHK) :");
+        jLabel5.setText("Informasi Tambahan :");
         jLabel5.setName("jLabel5"); // NOI18N
         PanelInput.add(jLabel5);
-        jLabel5.setBounds(390, 40, 150, 23);
+        jLabel5.setBounds(400, 70, 130, 23);
 
         InformasiTambahan.setHighlighter(null);
         InformasiTambahan.setName("InformasiTambahan"); // NOI18N
@@ -721,7 +717,7 @@ public final class DlgPermintaanLaboratorium extends javax.swing.JDialog {
             }
         });
         PanelInput.add(InformasiTambahan);
-        InformasiTambahan.setBounds(373, 70, 780, 23);
+        InformasiTambahan.setBounds(533, 70, 239, 23);
 
         DiagnosisKlinis.setHighlighter(null);
         DiagnosisKlinis.setName("DiagnosisKlinis"); // NOI18N
@@ -731,7 +727,7 @@ public final class DlgPermintaanLaboratorium extends javax.swing.JDialog {
             }
         });
         PanelInput.add(DiagnosisKlinis);
-        DiagnosisKlinis.setBounds(95, 70, 260, 23);
+        DiagnosisKlinis.setBounds(95, 70, 292, 23);
 
         jLabel7.setText("Indikasi/Klinis :");
         jLabel7.setName("jLabel7"); // NOI18N
@@ -979,11 +975,7 @@ public final class DlgPermintaanLaboratorium extends javax.swing.JDialog {
         jLabel17.setBounds(235, 10, 120, 23);
 
         TanggalPA.setForeground(new java.awt.Color(50, 70, 50));
-<<<<<<< HEAD
-        TanggalPA.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "06-03-2025" }));
-=======
         TanggalPA.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-12-2025" }));
->>>>>>> upstream/master
         TanggalPA.setDisplayFormat("dd-MM-yyyy");
         TanggalPA.setName("TanggalPA"); // NOI18N
         TanggalPA.setOpaque(false);
@@ -1026,11 +1018,7 @@ public final class DlgPermintaanLaboratorium extends javax.swing.JDialog {
         DiagnosaPA.setBounds(432, 100, 340, 23);
 
         TanggalBahan.setForeground(new java.awt.Color(50, 70, 50));
-<<<<<<< HEAD
-        TanggalBahan.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "06-03-2025" }));
-=======
         TanggalBahan.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-12-2025" }));
->>>>>>> upstream/master
         TanggalBahan.setDisplayFormat("dd-MM-yyyy");
         TanggalBahan.setName("TanggalBahan"); // NOI18N
         TanggalBahan.setOpaque(false);
@@ -1850,10 +1838,10 @@ private void BtnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     }//GEN-LAST:event_NomorPAKeyPressed
 
     private void TanggalItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_TanggalItemStateChanged
-        try {
+        if(this.isActive()==true){
             autoNomor();
             autoNomor2();
-        } catch (Exception e) {
+            autoNomor3();
         }
     }//GEN-LAST:event_TanggalItemStateChanged
 

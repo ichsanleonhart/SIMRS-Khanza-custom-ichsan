@@ -54,15 +54,10 @@ public class DlgPermintaanRanap extends javax.swing.JDialog {
     private ResultSet rs;
     private int i=0,nilai_detik,bookingbaru=0, reply=0;  //tambahan [reply=0] by ichsan untuk layar tampilan yes / no;
     private String alarm="",nol_detik,detik,sql="",finger="";
-	private DlgKamar kamar=new DlgKamar(null,false);
     private boolean aktif=false;
     private BackgroundMusic music;
-<<<<<<< HEAD
-	private DlgCariPenyakit penyakit=new DlgCariPenyakit(null,false);
-=======
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private volatile boolean ceksukses = false;
->>>>>>> upstream/master
     
 
     /** Creates new form DlgPemberianInfus
@@ -915,10 +910,7 @@ public class DlgPermintaanRanap extends javax.swing.JDialog {
             if(Sequel.menyimpantf("permintaan_ranap","?,?,?,?,?","Pasien",5,new String[]{
                 NoRw.getText(),Valid.SetTgl(DTPTgl.getSelectedItem()+""),KdKamar.getText(),Diagnosa.getText(),Catatan.getText()
             })==true){
-<<<<<<< HEAD
                 
-                ///////////////////Selesai simpan permintaan ranap, dilanjutkan dengan script untuk mengirim pesan WA ke nomor hp pasien - by ichsan
-                ///////////////////Selesai simpan billing, dilanjutkan dengan script untuk konfirmasi mau mengirim pesan WA ke nomor hp pasien - by ichsan
                 //////////////// start - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
                         try {
                              if(koneksiDB.WANOTIFPASIEN().equals("yes")){
@@ -932,14 +924,12 @@ public class DlgPermintaanRanap extends javax.swing.JDialog {
                              }
                          } catch (Exception e) {                         
                          }
-        ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+            ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
                 
-                tampil();
-                // Sequel.mengedit("kamar","kd_kamar=?","status='DIBOOKING'",1,new String[]{KdKamar.getText()});  //dinonaktifkan karena bikin ribet ketika validasi
-=======
+                
+                
                 runBackground(() ->tampil());
                 Sequel.mengedit("kamar","kd_kamar=?","status='DIBOOKING'",1,new String[]{KdKamar.getText()});
->>>>>>> upstream/master
                 emptTeks();
             }
         }
@@ -1219,13 +1209,9 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                 if(Sequel.mengedittf("permintaan_ranap","no_rawat=?","no_rawat=?,tanggal=?,kd_kamar=?,diagnosa=?,catatan=?",6,new String[]{
                     NoRw.getText(),Valid.SetTgl(DTPTgl.getSelectedItem()+""),KdKamar.getText(),Diagnosa.getText(),Catatan.getText(),tbObat.getValueAt(tbObat.getSelectedRow(),0).toString()
                 })==true){
-<<<<<<< HEAD
-                    tampil();
-                   // Sequel.mengedit("kamar","kd_kamar=?","status='DIBOOKING'",1,new String[]{KdKamar.getText()});
-=======
                     runBackground(() ->tampil());
-                    Sequel.mengedit("kamar","kd_kamar=?","status='DIBOOKING'",1,new String[]{KdKamar.getText()});
->>>>>>> upstream/master
+                    //menghilangkan status kamar menjadi booking
+                    //Sequel.mengedit("kamar","kd_kamar=?","status='DIBOOKING'",1,new String[]{KdKamar.getText()});
                     emptTeks();
                 }
             }
@@ -1833,7 +1819,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
             }                
         };
         new Timer(1000, taskPerformer).start();
-    } 
+    }
     
     private void isMenu(){
         if(ChkAccor.isSelected()==true){

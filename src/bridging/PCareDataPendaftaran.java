@@ -70,6 +70,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import rekammedis.RMRiwayatPerawatan;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.swing.SwingUtilities;
 
 
 /**
@@ -115,6 +118,8 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
     private DayOfWeek dow;
     private static PCareDataPendaftaran activeInstance = null;  //tambahan ichsan
     private static boolean isOpening = false;  //tambahan ichsan
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private volatile boolean ceksukses = false;
     /** Creates new form DlgRujuk
      * @param parent
      * @param modal */
@@ -4444,7 +4449,8 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
 }//GEN-LAST:event_TCariKeyPressed
 
     private void BtnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCariActionPerformed
-        tampil();
+        //tampil();
+        runBackground(() -> tampil());
 }//GEN-LAST:event_BtnCariActionPerformed
 
     private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnCariKeyPressed
@@ -5430,7 +5436,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                         perawatan.emptTeks();
                         perawatan.setPCare("yes",tbKunjungan.getValueAt(tbKunjungan.getSelectedRow(),1).toString());
                         perawatan.isCek();
-                        perawatan.tampil3();
+                        perawatan.tampil();
                         perawatan.setSize(this.getWidth()-20,this.getHeight()-20);
                         perawatan.setLocationRelativeTo(internalFrame1);
                         perawatan.setVisible(true);
@@ -11347,4 +11353,21 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
         return ex.getMessage();
     }
     // ========================================================================
+    private void runBackground(Runnable task) {
+    if (ceksukses) return;
+    ceksukses = true;
+    
+    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    
+    executor.submit(() -> {
+        try {
+            task.run();
+        } finally {
+            ceksukses = false;
+            SwingUtilities.invokeLater(() -> {
+                this.setCursor(Cursor.getDefaultCursor());
+            });
+        }
+    });
+    }
 }

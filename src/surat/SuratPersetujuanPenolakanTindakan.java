@@ -38,7 +38,6 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import kepegawaian.DlgCariDokter;
 import kepegawaian.DlgCariPetugas;
-<<<<<<< HEAD
 import laporan.DlgBerkasRawat;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpResponse;
@@ -49,10 +48,9 @@ import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.client.DefaultHttpClient;
-=======
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
->>>>>>> upstream/master
+import javax.swing.SwingUtilities;
 
 
 /**
@@ -74,7 +72,7 @@ public final class SuratPersetujuanPenolakanTindakan extends javax.swing.JDialog
     private DlgCariDokter dokter=new DlgCariDokter(null,false);
     private String finger="",finger2="",lokasifile="",lokasifile2="";
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private volatile boolean ceksukses = false;
+    private volatile boolean ceksukses = false;    
     
     /** Creates new form DlgRujuk
      * @param parent
@@ -2891,7 +2889,7 @@ public final class SuratPersetujuanPenolakanTindakan extends javax.swing.JDialog
         }
     }
     
-<<<<<<< HEAD
+
     
     
     private void UploadPDF(String FileName, String docpath) {
@@ -3103,7 +3101,7 @@ private void ppBerkasDigitalBtnPrintActionPerformed(java.awt.event.ActionEvent e
    
              
            
-=======
+
     private void runBackground(Runnable task) {
         if (ceksukses) return;
         ceksukses = true;
@@ -3121,5 +3119,5 @@ private void ppBerkasDigitalBtnPrintActionPerformed(java.awt.event.ActionEvent e
             }
         });
     }
->>>>>>> upstream/master
+
 }

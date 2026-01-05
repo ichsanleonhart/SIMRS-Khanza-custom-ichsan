@@ -382,11 +382,7 @@ public class DlgPermintaanKonsultasiMedik extends javax.swing.JDialog {
         label1.setBounds(210, 20, 55, 23);
 
         TanggalJawab.setForeground(new java.awt.Color(50, 70, 50));
-<<<<<<< HEAD
         TanggalJawab.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-07-2024 10:43:47" }));
-=======
-        TanggalJawab.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "31-12-2025 16:33:08" }));
->>>>>>> upstream/master
         TanggalJawab.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         TanggalJawab.setName("TanggalJawab"); // NOI18N
         TanggalJawab.setOpaque(false);
@@ -681,11 +677,8 @@ public class DlgPermintaanKonsultasiMedik extends javax.swing.JDialog {
         R2.setPreferredSize(new java.awt.Dimension(170, 23));
         panelCari.add(R2);
 
-<<<<<<< HEAD
+
         DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-07-2024" }));
-=======
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "31-12-2025" }));
->>>>>>> upstream/master
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -703,11 +696,8 @@ public class DlgPermintaanKonsultasiMedik extends javax.swing.JDialog {
         jLabel25.setPreferredSize(new java.awt.Dimension(30, 23));
         panelCari.add(jLabel25);
 
-<<<<<<< HEAD
+
         DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-07-2024" }));
-=======
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "31-12-2025" }));
->>>>>>> upstream/master
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -801,11 +791,7 @@ public class DlgPermintaanKonsultasiMedik extends javax.swing.JDialog {
         jLabel9.setBounds(415, 40, 90, 23);
 
         TanggalPermintaan.setForeground(new java.awt.Color(50, 70, 50));
-<<<<<<< HEAD
         TanggalPermintaan.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "05-07-2024 10:43:47" }));
-=======
-        TanggalPermintaan.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "31-12-2025 16:33:08" }));
->>>>>>> upstream/master
         TanggalPermintaan.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         TanggalPermintaan.setName("TanggalPermintaan"); // NOI18N
         TanggalPermintaan.setOpaque(false);
@@ -2049,7 +2035,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         }
     }
     
-<<<<<<< HEAD
+
     private void UploadPDF(String FileName, String docpath) {
         try {
             File file = new File("tmpPDF/" + FileName + ".pdf");
@@ -2097,7 +2083,8 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                 myFile.delete();
             }
         }
-=======
+    }
+
     private void runBackground(Runnable task) {
         if (ceksukses) return;
         ceksukses = true;
@@ -2114,6 +2101,6 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                 });
             }
         });
->>>>>>> upstream/master
+
     }
 }

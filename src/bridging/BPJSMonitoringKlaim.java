@@ -9,7 +9,6 @@ import fungsi.validasi;
 import fungsi.akses;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
@@ -54,12 +53,8 @@ public class BPJSMonitoringKlaim extends javax.swing.JDialog {
     private JsonNode root;
     private JsonNode nameNode;
     private JsonNode response;
-<<<<<<< HEAD
-    private double tagihan=0,gruper=0,tarifrs=0;
-=======
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private volatile boolean ceksukses = false;
->>>>>>> upstream/master
    
     /** Creates new form DlgProgramStudi
      * @param parent
@@ -335,7 +330,8 @@ public class BPJSMonitoringKlaim extends javax.swing.JDialog {
         label10 = new widget.Label();
         TCari = new widget.TextBox();
         BtnCari = new widget.Button();
-        label9 = new widget.Label();
+        jLabel7 = new widget.Label();
+        LCount = new widget.Label();
         BtnAll = new widget.Button();
         BtnPrint = new widget.Button();
         BtnKeluar = new widget.Button();
@@ -344,7 +340,7 @@ public class BPJSMonitoringKlaim extends javax.swing.JDialog {
         setUndecorated(true);
         setResizable(false);
 
-        internalFrame1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ Monitoring Verifikasi Klaim SEP BPJS ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50,50,50))); // NOI18N
+        internalFrame1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ Monitoring Verifikasi Klaim SEP BPJS ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50, 50, 50))); // NOI18N
         internalFrame1.setName("internalFrame1"); // NOI18N
         internalFrame1.setLayout(new java.awt.BorderLayout(1, 1));
 
@@ -551,11 +547,11 @@ public class BPJSMonitoringKlaim extends javax.swing.JDialog {
 
         label10.setText("Key Word :");
         label10.setName("label10"); // NOI18N
-        label10.setPreferredSize(new java.awt.Dimension(70, 23));
+        label10.setPreferredSize(new java.awt.Dimension(65, 23));
         panelisi1.add(label10);
 
         TCari.setName("TCari"); // NOI18N
-        TCari.setPreferredSize(new java.awt.Dimension(290, 23));
+        TCari.setPreferredSize(new java.awt.Dimension(220, 23));
         TCari.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 TCariKeyPressed(evt);
@@ -580,9 +576,16 @@ public class BPJSMonitoringKlaim extends javax.swing.JDialog {
         });
         panelisi1.add(BtnCari);
 
-        label9.setName("label9"); // NOI18N
-        label9.setPreferredSize(new java.awt.Dimension(45, 30));
-        panelisi1.add(label9);
+        jLabel7.setText("Record :");
+        jLabel7.setName("jLabel7"); // NOI18N
+        jLabel7.setPreferredSize(new java.awt.Dimension(60, 23));
+        panelisi1.add(jLabel7);
+
+        LCount.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        LCount.setText("0");
+        LCount.setName("LCount"); // NOI18N
+        LCount.setPreferredSize(new java.awt.Dimension(50, 23));
+        panelisi1.add(LCount);
 
         BtnAll.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/Search-16x16.png"))); // NOI18N
         BtnAll.setMnemonic('M');
@@ -814,6 +817,7 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
     private widget.TextBox KdPoli;
     private widget.TextBox KdPpkRujukan;
     private widget.ComboBox Kelas;
+    private widget.Label LCount;
     private widget.TextBox NmPenyakit;
     private widget.TextBox NmPoli;
     private widget.TextBox NmPpkRujukan;
@@ -828,13 +832,13 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
     private widget.Label jLabel13;
     private widget.Label jLabel14;
     private widget.Label jLabel15;
+    private widget.Label jLabel7;
     private widget.Label label10;
     private widget.Label label11;
     private widget.Label label12;
     private widget.Label label13;
     private widget.Label label14;
     private widget.Label label16;
-    private widget.Label label9;
     private widget.panelisi panelisi1;
     private widget.panelisi panelisi3;
     private widget.ScrollPane scrollPane1;
@@ -934,6 +938,7 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
         }catch(Exception e){
             System.out.println("Notifikasi : "+e);
         }
+        LCount.setText(tbDokter.getRowCount()+"");
     }
 
     public void emptTeks() {
@@ -964,35 +969,6 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
                 response = mapper.readTree(api.Decrypt(root.path("response").asText(),utc));
                 //response = root.path("response");
                 if(response.path("klaim").isArray()){
-<<<<<<< HEAD
-                    for(JsonNode list:response.path("klaim")){
-                        pssep=koneksi.prepareStatement("select * from bridging_sep where bridging_sep.no_sep=?");
-                        try {
-                            pssep.setString(1,list.path("noSEP").asText());
-                            rssep=pssep.executeQuery();
-                            while(rssep.next()){
-                                tabMode.addRow(new Object[]{
-                                    rssep.getString(1),rssep.getString(2),rssep.getString(3),rssep.getString(4),
-                                    rssep.getString(5),rssep.getString(6),rssep.getString(7),rssep.getString(8),
-                                    rssep.getString(9),rssep.getString(10),rssep.getString(11),rssep.getString(12),
-                                    rssep.getString(13),rssep.getString(14),rssep.getString(14)+" "+rssep.getString(15),rssep.getString(16),
-                                    rssep.getString(17),rssep.getString(18),rssep.getString(19),rssep.getString(20),
-                                    rssep.getString(21),rssep.getString(22),rssep.getString(23),rssep.getString(24),
-                                    rssep.getString(25),rssep.getString(26),rssep.getString(27),rssep.getString(28),
-                                    rssep.getString(29),rssep.getString(30),rssep.getString(31),
-                                    list.path("Inacbg").path("kode").asText()+" "+list.path("Inacbg").path("nama").asText(),
-                                    list.path("status").asText(),list.path("noFPK").asText(),
-                                    Valid.SetAngka(list.path("biaya").path("byPengajuan").asDouble()),
-                                    Valid.SetAngka(list.path("biaya").path("bySetujui").asDouble()),
-                                    Valid.SetAngka(list.path("biaya").path("byTarifGruper").asDouble()),
-                                    Valid.SetAngka(list.path("biaya").path("byTarifRS").asDouble()),
-                                    Valid.SetAngka(list.path("biaya").path("byTopup").asDouble()),
-                                    Valid.SetAngka(list.path("biaya").path("bySetujui").asDouble()-
-                                            list.path("biaya").path("byTopup").asDouble()-
-                                            list.path("biaya").path("byTarifRS").asDouble())
-                                    
-                                });
-=======
                     if(TCari.getText().trim().equals("")){
                         for(JsonNode list:response.path("klaim")){
                             pssep=koneksi.prepareStatement("select * from bridging_sep where bridging_sep.no_sep=?");
@@ -1020,7 +996,6 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
                                 if(pssep!=null){
                                     pssep.close();
                                 }
->>>>>>> upstream/master
                             }
                         }        
                     }else{
@@ -1090,35 +1065,6 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
                 response = mapper.readTree(api.Decrypt(root.path("response").asText(),utc));
                 //response = root.path("response");
                 if(response.path("klaim").isArray()){
-<<<<<<< HEAD
-                    for(JsonNode list:response.path("klaim")){
-                        pssep=koneksi.prepareStatement("select * from bridging_sep_internal where bridging_sep_internal.no_sep=?");
-                        try {
-                            pssep.setString(1,list.path("noSEP").asText());
-                            rssep=pssep.executeQuery();
-                            while(rssep.next()){
-                                tabMode.addRow(new Object[]{
-                                    rssep.getString(1),rssep.getString(2),rssep.getString(3),rssep.getString(4),
-                                    rssep.getString(5),rssep.getString(6),rssep.getString(7),rssep.getString(8),
-                                    rssep.getString(9),rssep.getString(10),rssep.getString(11),rssep.getString(12),
-                                    rssep.getString(13),rssep.getString(14),rssep.getString(14)+" "+rssep.getString(15),rssep.getString(16),
-                                    rssep.getString(17),rssep.getString(18),rssep.getString(19),rssep.getString(20),
-                                    rssep.getString(21),rssep.getString(22),rssep.getString(23),rssep.getString(24),
-                                    rssep.getString(25),rssep.getString(26),rssep.getString(27),rssep.getString(28),
-                                    rssep.getString(29),rssep.getString(30),rssep.getString(31),
-                                    list.path("Inacbg").path("kode").asText()+" "+list.path("Inacbg").path("nama").asText(),
-                                    list.path("status").asText(),list.path("noFPK").asText(),
-                                    Valid.SetAngka(list.path("biaya").path("byPengajuan").asDouble()),
-                                    Valid.SetAngka(list.path("biaya").path("bySetujui").asDouble()),
-                                    Valid.SetAngka(list.path("biaya").path("byTarifGruper").asDouble()),
-                                    Valid.SetAngka(list.path("biaya").path("byTarifRS").asDouble()),
-                                    Valid.SetAngka(list.path("biaya").path("byTopup").asDouble()),
-                                    Valid.SetAngka(list.path("biaya").path("bySetujui").asDouble()-
-                                            list.path("biaya").path("byTopup").asDouble()-
-                                            list.path("biaya").path("byTarifRS").asDouble())
-                                    
-                                });
-=======
                     if(TCari.getText().trim().equals("")){
                         for(JsonNode list:response.path("klaim")){
                             pssep=koneksi.prepareStatement("select * from bridging_sep_internal where bridging_sep_internal.no_sep=?");
@@ -1146,7 +1092,6 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
                                 if(pssep!=null){
                                     pssep.close();
                                 }
->>>>>>> upstream/master
                             }
                         }
                     }else{

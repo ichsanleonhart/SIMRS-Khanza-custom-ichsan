@@ -270,19 +270,12 @@ import surat.SuratPulangAtasPermintaanSendiri;
 import surat.SuratSakit;
 import surat.SuratSakitPihak2;
 import surat.SuratTidakHamil;
-<<<<<<< HEAD
-
-
-
-
-
-
-
-
 import java.util.Locale;  //tambahan by ichsan
-=======
 import java.util.List;
->>>>>>> upstream/master
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.swing.SwingUtilities;
+
 /**
  *
  * @author dosen
@@ -352,6 +345,7 @@ public final class DlgReg extends javax.swing.JDialog {
     private char[] UNIT_1_360 = {ESC,40, 'U', '1', '0'};
     // move vertical print position
     private char[] VERTICAL_PRINT_POSITION = {ESC, 'J', '1'};
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();    
     
 
     /** Creates new form DlgReg
@@ -7756,9 +7750,11 @@ public final class DlgReg extends javax.swing.JDialog {
 
     private void BtnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCariActionPerformed
         if(TabRawat.getSelectedIndex()==0){
-            tampil();
-        }else if(TabRawat.getSelectedIndex()==1){
-            tampil2();
+            //tampil();
+            runBackground(() -> tampil());   //update khanza 2026 - ichsan
+        }else if(TabRawat.getSelectedIndex()==1){            
+            //tampil2();
+            runBackground(() -> tampil2());  //update khanza 2026 - ichsan
         }
 }//GEN-LAST:event_BtnCariActionPerformed
 
@@ -9510,7 +9506,8 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
     }//GEN-LAST:event_BtnKeluar3KeyPressed
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-        tampil();
+        //tampil();
+        runBackground(() -> tampil());  //update khanza 2026 -- ichsan
     }//GEN-LAST:event_formWindowOpened
 
     private void MnPeriksaRadiologiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MnPeriksaRadiologiActionPerformed
@@ -19402,4 +19399,22 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
             emptTeks();
         }
     }
+    
+    private void runBackground(Runnable task) {
+    if (ceksukses) return;
+    ceksukses = true;
+    
+    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    
+    executor.submit(() -> {
+        try {
+            task.run();
+        } finally {
+            ceksukses = false;
+            SwingUtilities.invokeLater(() -> {
+                this.setCursor(Cursor.getDefaultCursor());
+            });
+        }
+    });
+}
 }

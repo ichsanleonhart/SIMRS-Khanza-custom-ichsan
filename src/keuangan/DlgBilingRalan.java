@@ -3463,8 +3463,7 @@ private void MnPeriksaLabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
                          }
         ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
     }//GEN-LAST:event_BtnSimpanActionPerformed
-
-    //////////////////////////////////////////////////// START - script untuk kirim WA by ichsan     
+//////////////////////////////////////////////////// START - script untuk kirim WA by ichsan     
     private String getquestionaire_ralanUrl() { ///////// START - kode untuk mengambil URL google di table setting_url pada kolom google_map
     String questionaire_ralanUrl = ""; 
     try {
@@ -5250,6 +5249,15 @@ private void kirimWhatsAppMessage() {
         MnPoli.setEnabled(akses.getregistrasi());
         MnDokter.setEnabled(akses.getregistrasi());
         MnPenjab.setEnabled(akses.getregistrasi());
+		if(Sequel.cariIsi("select tampilkan_tombol_nota_ralan from set_nota").equals("Yes")){
+            BtnNota.setVisible(true);
+        }else{
+            if(akses.getkode().equals("Admin Utama")){
+                BtnNota.setVisible(true);
+            }else{
+                BtnNota.setVisible(false);
+            }            
+        }
     } 
     
     public void isKembali(){

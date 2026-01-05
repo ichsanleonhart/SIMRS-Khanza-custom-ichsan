@@ -30,7 +30,6 @@ import keuangan.Jurnal;
 import laporan.DlgBerkasRawat;
 import rekammedis.MasterCariTemplateLaporanOperasi;
 import java.util.Date;
-<<<<<<< HEAD
 import org.apache.commons.io.FileUtils; // tambahan by ichsan
 import org.apache.http.client.HttpClient; // tambahan by ichsan
 import org.apache.http.client.methods.HttpPost; // tambahan by ichsan
@@ -38,11 +37,10 @@ import org.apache.http.entity.mime.HttpMultipartMode; // tambahan by ichsan
 import org.apache.http.entity.mime.MultipartEntity; // tambahan by ichsan
 import org.apache.http.entity.mime.content.ByteArrayBody; // tambahan by ichsan
 import org.apache.http.impl.client.DefaultHttpClient; // tambahan by ichsan
-=======
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.swing.SwingUtilities;
->>>>>>> upstream/master
+
 
 public class DlgCariTagihanOperasi extends javax.swing.JDialog {
     private final DefaultTableModel tabMode;
@@ -3842,7 +3840,7 @@ private void MnHapusObatOperasiActionPerformed(java.awt.event.ActionEvent evt) {
             }
         }
     }
-	//////////////////////// start - upload berkas digital perawatan by ichsan
+	//////////////////////// end - upload berkas digital perawatan by ichsan
  
     private void runBackground(Runnable task) {
         if (ceksukses) return;

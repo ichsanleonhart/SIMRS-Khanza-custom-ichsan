@@ -757,7 +757,7 @@ private void MnDetailCicilanActionPerformed(java.awt.event.ActionEvent evt) {//G
     private widget.Table tbBangsal;
     // End of variables declaration//GEN-END:variables
 
-    private void tampil(){
+    void tampil(){
         Valid.tabelKosong(tabMode);
         try{
             sisapiutang=0;

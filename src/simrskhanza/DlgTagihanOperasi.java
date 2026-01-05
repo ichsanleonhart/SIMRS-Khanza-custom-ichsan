@@ -37,7 +37,9 @@ import org.apache.http.entity.mime.content.ByteArrayBody; // tambahan by ichsan
 import org.apache.http.impl.client.DefaultHttpClient; // tambahan by ichsan
 import java.util.HashMap;        // tambahan by ichsan
 import java.util.Map;            // tambahan by ichsan
-
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.swing.SwingUtilities;
 
 public class DlgTagihanOperasi extends javax.swing.JDialog {
     private final DefaultTableModel tabMode,tabMode2;
@@ -47,13 +49,8 @@ public class DlgTagihanOperasi extends javax.swing.JDialog {
     private volatile boolean ceksukses = false;
     private Jurnal jur=new Jurnal();
     private Connection koneksi=koneksiDB.condb();
-<<<<<<< HEAD
     private PreparedStatement pstindakan,pstindakan2,pstindakan3,pstindakan4,psobat,psset_tarif,psrekening, ps; // TAMBAHAN ps by ichsan
-    private ResultSet rs,rsset_tarif,rsrekening;
-=======
-    private PreparedStatement pstindakan,pstindakan2,pstindakan3,pstindakan4,psobat,psset_tarif,psrekening;
-    private ResultSet rsobat,rstindakan,rsset_tarif,rsrekening;
->>>>>>> upstream/master
+    private ResultSet rs, rsset_tarif,rsrekening, rsobat,rstindakan;
     private DlgCariPetugas petugas=new DlgCariPetugas( null,false);
     private DlgCariDokter dokter=new DlgCariDokter(null,false);
     private String kelas_operasi="Yes",kelas="",cara_bayar_operasi="Yes",kd_pj="",status="", FileName ="", kodeberkas=""; //tambahan FileName ="", kodeberkas=""; oleh ichsan
