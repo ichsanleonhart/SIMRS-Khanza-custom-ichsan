@@ -37,8 +37,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.table.DefaultTableModel;
@@ -64,6 +67,8 @@ public final class DlgCariObat2 extends javax.swing.JDialog {
     private PreparedStatement psobat,pscarikapasitas,psstok,psrekening,ps2,psbatch;
     private ResultSet rsobat,carikapasitas,rsstok,rsrekening,rs2,rsbatch;
     private Jurnal jur=new Jurnal();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private volatile boolean ceksukses = false;
     private double h_belicari=0, hargacari=0, sisacari=0,y=0,embalase=Sequel.cariIsiAngka("select set_embalase.embalase_per_obat from set_embalase"),
             tuslah=Sequel.cariIsiAngka("select set_embalase.tuslah_per_obat from set_embalase"),kenaikan,stokbarang,ttlhpp,ttljual;
     private int jml=0,i=0,z=0,row=0;
@@ -87,6 +92,7 @@ public final class DlgCariObat2 extends javax.swing.JDialog {
     private File file;
     private FileWriter fileWriter;
     private FileReader myObj;
+    private String TANGGALMUNDUR="yes";
     
     /** Creates new form DlgPenyakit
      * @param parent
@@ -381,7 +387,9 @@ public final class DlgCariObat2 extends javax.swing.JDialog {
         }
         
         try {
-            psrekening=koneksi.prepareStatement("select * from set_akun_ranap");
+            psrekening=koneksi.prepareStatement(
+               "select set_akun_ranap.Suspen_Piutang_Obat_Ranap,set_akun_ranap.Obat_Ranap,set_akun_ranap.HPP_Obat_Rawat_Inap,set_akun_ranap.Persediaan_Obat_Rawat_Inap from set_akun_ranap"
+            );
             try {
                 rsrekening=psrekening.executeQuery();
                 while(rsrekening.next()){
@@ -402,6 +410,12 @@ public final class DlgCariObat2 extends javax.swing.JDialog {
             }            
         } catch (Exception e) {
             System.out.println(e);
+        }
+        
+        try {
+            TANGGALMUNDUR=koneksiDB.TANGGALMUNDUR();
+        } catch (Exception e) {
+            TANGGALMUNDUR="yes";
         }
     }    
     
@@ -945,7 +959,7 @@ public final class DlgCariObat2 extends javax.swing.JDialog {
 
     private void BtnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCariActionPerformed
         if(TabRawat.getSelectedIndex()==0){
-            tampilcacheberiobat();
+            runBackground(() ->tampilcacheberiobat());
         }else if(TabRawat.getSelectedIndex()==1){
             if(tbObatRacikan.getRowCount()!=0){
                 if(tbObatRacikan.getSelectedRow()!= -1){
@@ -958,7 +972,7 @@ public final class DlgCariObat2 extends javax.swing.JDialog {
                             tbObatRacikan.getValueAt(tbObatRacikan.getSelectedRow(),6).toString().equals("")){
                         JOptionPane.showMessageDialog(null,"Silahkan lengkapi data racikan..!!");
                     }else{
-                        tampildetailracikanobat();
+                        runBackground(() ->tampildetailracikanobat());
                     }
                 }else{
                     JOptionPane.showMessageDialog(null,"Silahkan pilih racikan..!!");
@@ -1494,7 +1508,7 @@ private void BtnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
                             resep.emptTeks(); 
                             resep.isCek();
                             resep.setNoRm(TNoRw.getText(),DTPTgl.getDate(),DTPTgl.getDate(),cmbJam.getSelectedItem().toString(),cmbMnt.getSelectedItem().toString(),cmbDtk.getSelectedItem().toString(),"ranap");
-                            resep.tampil();
+                            resep.tampil2();
                             //resep.setAlwaysOnTop(true);
                             resep.dokter.setAlwaysOnTop(true);
                             resep.setVisible(true);
@@ -1529,7 +1543,7 @@ private void ppBersihkanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 
 private void JeniskelasItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_JeniskelasItemStateChanged
     if(this.isVisible()==true){
-        tampilcacheberiobat();
+        runBackground(() ->tampilcacheberiobat());
     }        
 }//GEN-LAST:event_JeniskelasItemStateChanged
 
@@ -1577,7 +1591,7 @@ private void ChkJlnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:
             resep.emptTeks(); 
             resep.isCek();
             resep.setNoRm(TNoRw.getText(),DTPTgl.getDate(),DTPTgl.getDate(),cmbJam.getSelectedItem().toString(),cmbMnt.getSelectedItem().toString(),cmbDtk.getSelectedItem().toString(),"ralan");
-            resep.tampil();
+            resep.tampil2();
             resep.setVisible(true);
         }
     }//GEN-LAST:event_ChkNoResepItemStateChanged
@@ -1735,7 +1749,7 @@ private void ChkJlnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:
                                 tbObatRacikan.getValueAt(tbObatRacikan.getSelectedRow(),5).toString().equals("")){
                             JOptionPane.showMessageDialog(null,"Silahkan lengkapi data racikan..!!");
                         }else{
-                            tampildetailracikanobat();
+                            runBackground(() ->tampildetailracikanobat());
                             TCari.requestFocus();
                         }
                     }else{
@@ -1989,7 +2003,7 @@ private void ChkJlnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:
 
     public void tampil() {   
         buatcacheberiobat();
-        tampilcacheberiobat(); 
+        runBackground(() ->tampilcacheberiobat()); 
     }
     
     private void buatcacheberiobat(){
@@ -2697,6 +2711,17 @@ private void ChkJlnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:
             nmgudang.setText(caribangsal.tampil3(kdgudang.getText()));
         }
              
+        if(TANGGALMUNDUR.equals("no")){
+            if(!akses.getkode().equals("Admin Utama")){
+                DTPTgl.setEditable(false);
+                DTPTgl.setEnabled(false);
+                ChkJln.setEnabled(false);
+                cmbJam.setEnabled(false);
+                cmbMnt.setEnabled(false);
+                cmbDtk.setEnabled(false);
+            }
+        }
+        
         BtnTambah.setEnabled(akses.getobat());
         TCari.requestFocus();
         BtnGudang.setEnabled(akses.getakses_depo_obat());
@@ -3231,7 +3256,7 @@ private void ChkJlnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:
         }            
     }
     
-    public void tampilobat2(String no_resep) { 
+    private void tampilobat2(String no_resep) { 
         this.noresep=no_resep;
         try{
             Valid.tabelKosong(tabMode);
@@ -4062,6 +4087,10 @@ private void ChkJlnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:
         }
     }
     
+    public void tampilobat3(String no_resep) {
+        runBackground(() -> tampilobat2(no_resep));
+    }
+    
     private void getDatadetailobatracikan(int data) {       
         try {
             stokbarang=0;  
@@ -4413,5 +4442,23 @@ private void ChkJlnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:
                 JOptionPane.showMessageDialog(null,"Data tidak ditemukan...!");
             }
         } 
+    }
+    
+    private void runBackground(Runnable task) {
+        if (ceksukses) return;
+        ceksukses = true;
+
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+        executor.submit(() -> {
+            try {
+                task.run();
+            } finally {
+                ceksukses = false;
+                SwingUtilities.invokeLater(() -> {
+                    this.setCursor(Cursor.getDefaultCursor());
+                });
+            }
+        });
     }
 }

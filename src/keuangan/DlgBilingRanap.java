@@ -1530,7 +1530,7 @@ public class DlgBilingRanap extends javax.swing.JDialog {
         WindowInput.setUndecorated(true);
         WindowInput.setResizable(false);
 
-        internalFrame2.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ Input Total BHP & Obat]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50, 50, 50))); // NOI18N
+        internalFrame2.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ Input Total BHP & Obat ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50, 50, 50))); // NOI18N
         internalFrame2.setName("internalFrame2"); // NOI18N
         internalFrame2.setLayout(null);
 
@@ -2057,7 +2057,7 @@ public class DlgBilingRanap extends javax.swing.JDialog {
         jLabel4.setPreferredSize(new java.awt.Dimension(65, 23));
         panelGlass1.add(jLabel4);
 
-        DTPTgl.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "17-01-2023 07:41:51" }));
+        DTPTgl.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "02-01-2026 14:59:13" }));
         DTPTgl.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         DTPTgl.setName("DTPTgl"); // NOI18N
         DTPTgl.setOpaque(false);
@@ -2682,7 +2682,7 @@ public class DlgBilingRanap extends javax.swing.JDialog {
                 }else if(pilih==2){
                     this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                     DlgLhtPiutang billing=new DlgLhtPiutang(null,false);
-                    billing.tampil();    
+                    billing.tampil2();    
                     billing.isCek();
                     billing.setSize(this.getWidth()-20,this.getHeight()-20);
                     billing.setLocationRelativeTo(this);
@@ -2691,7 +2691,6 @@ public class DlgBilingRanap extends javax.swing.JDialog {
                 }else if(pilih==3){
                     this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                     DlgLhtBankJateng billing=new DlgLhtBankJateng(null,false);
-                    billing.tampil();   
                     billing.setSize(this.getWidth(),this.getHeight());
                     billing.setLocationRelativeTo(this);
                     billing.setAlwaysOnTop(false);
@@ -2700,7 +2699,6 @@ public class DlgBilingRanap extends javax.swing.JDialog {
                 } else if(pilih==4){
                     this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                     DlgLhtBankPapua billing=new DlgLhtBankPapua(null,false);
-                    billing.tampil();   
                     billing.setSize(this.getWidth(),this.getHeight());
                     billing.setLocationRelativeTo(this);
                     billing.setAlwaysOnTop(false);
@@ -2709,7 +2707,6 @@ public class DlgBilingRanap extends javax.swing.JDialog {
                 }else if(pilih==5){
                     this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                     DlgLhtBankJabar billing=new DlgLhtBankJabar(null,false);
-                    billing.tampil();   
                     billing.setSize(this.getWidth(),this.getHeight());
                     billing.setLocationRelativeTo(this);
                     billing.setAlwaysOnTop(false);
@@ -2718,7 +2715,6 @@ public class DlgBilingRanap extends javax.swing.JDialog {
                 }else if(pilih==6){
                     this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                     DlgLhtBankMandiri billing=new DlgLhtBankMandiri(null,false);
-                    billing.tampil();   
                     billing.setSize(this.getWidth(),this.getHeight());
                     billing.setLocationRelativeTo(this);
                     billing.setAlwaysOnTop(false);
@@ -2752,7 +2748,7 @@ private void tbBillingMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
                                     rawatinap.perawatan.setNoRm(TNoRw.getText(),"rawat_inap_dr",DTPTgl.getDate(),"00","00","00",true,TPasien.getText());
                                     rawatinap.perawatan.setPetugas("","","","");
                                     rawatinap.perawatan.isCek();
-                                    rawatinap.perawatan.tampil();
+                                    rawatinap.perawatan.tampil3();
                                     rawatinap.perawatan.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
                                     rawatinap.perawatan.setLocationRelativeTo(internalFrame1);
                                     rawatinap.perawatan.setVisible(true);
@@ -2809,7 +2805,7 @@ private void tbBillingMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
                                         rawatinap.perawatan.setNoRm(TNoRw.getText(),"rawat_inap_dr",DTPTgl.getDate(),"00","00","00",true,TPasien.getText());
                                         rawatinap.perawatan.setPetugas("","","","");
                                         rawatinap.perawatan.isCek();
-                                        rawatinap.perawatan.tampil();
+                                        rawatinap.perawatan.tampil3();
                                         rawatinap.perawatan.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
                                         rawatinap.perawatan.setLocationRelativeTo(internalFrame1);
                                         rawatinap.perawatan.setVisible(true);
@@ -2927,7 +2923,7 @@ private void tbBillingKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                                     rawatinap.perawatan.setNoRm(TNoRw.getText(),"rawat_inap_dr",DTPTgl.getDate(),"00","00","00",true,TPasien.getText());
                                     rawatinap.perawatan.setPetugas("","","","");
                                     rawatinap.perawatan.isCek();
-                                    rawatinap.perawatan.tampil();
+                                    rawatinap.perawatan.tampil3();
                                     rawatinap.perawatan.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
                                     rawatinap.perawatan.setLocationRelativeTo(internalFrame1);
                                     rawatinap.perawatan.setVisible(true);    
@@ -2983,7 +2979,7 @@ private void tbBillingKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                                     rawatinap.perawatan.setNoRm(TNoRw.getText(),"rawat_inap_dr",DTPTgl.getDate(),"00","00","00",true,TPasien.getText());
                                     rawatinap.perawatan.setPetugas("","","","");
                                     rawatinap.perawatan.isCek();
-                                    rawatinap.perawatan.tampil();
+                                    rawatinap.perawatan.tampil3();
                                     rawatinap.perawatan.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
                                     rawatinap.perawatan.setLocationRelativeTo(internalFrame1);
                                     rawatinap.perawatan.setVisible(true);     
@@ -3059,8 +3055,7 @@ private void MnRawatInapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             rawatinap.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
             rawatinap.setLocationRelativeTo(internalFrame1);
             rawatinap.isCek();
-            rawatinap.setNoRm(TNoRw.getText(),DTPTgl.getDate(),new Date());    
-            rawatinap.tampilDr();
+            rawatinap.setNoRm(TNoRw.getText(),DTPTgl.getDate(),new Date());  
             rawatinap.setVisible(true);
         }
 }//GEN-LAST:event_MnRawatInapActionPerformed
@@ -3133,10 +3128,9 @@ private void MnHapusTagihanActionPerformed(java.awt.event.ActionEvent evt) {//GE
             }
         }
         if(i>0){
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             Sequel.AutoComitFalse();
             sukses=true;
-            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            
             Sequel.queryu2("delete from tampjurnal");
             if((-1*ttlPotongan)>0){
                 if(Sequel.menyimpantf2("tampjurnal","'"+Potongan_Ranap+"','Potongan Ranap','0','"+(-1*ttlPotongan)+"'","Rekening")==false){
@@ -3332,20 +3326,21 @@ private void MnHapusTagihanActionPerformed(java.awt.event.ActionEvent evt) {//GE
                  Valid.hapusTable(tabModeRwJlDr,TNoRw,"billing","no_rawat");
                  Valid.hapusTable(tabModeRwJlDr,TNoRw,"tagihan_sadewa","no_nota");
                  Sequel.Commit();
-                 JOptionPane.showMessageDialog(rootPane,"Proses hapus data Nota Salah selesai..!!");
-                 Valid.tabelKosong(tabModeAkunBayar);
-                 Valid.tabelKosong(tabModeAkunPiutang);
-                 isRawat();
              }else{
                 JOptionPane.showMessageDialog(null,"Terjadi kesalahan saat pemrosesan data, transaksi dibatalkan.\nPeriksa kembali data sebelum melanjutkan menyimpan..!!");
                 Sequel.RollBack();
              }
 
              Sequel.AutoComitTrue();
+             if(sukses==true){
+                 JOptionPane.showMessageDialog(rootPane,"Proses hapus data Nota Salah selesai..!!");
+                 Valid.tabelKosong(tabModeAkunBayar);
+                 Valid.tabelKosong(tabModeAkunPiutang);
+                 isRawat();
+             }
              this.setCursor(Cursor.getDefaultCursor());
         }else if(i<=0){
-            JOptionPane.showMessageDialog(rootPane,"Data belum pernah disimpan/diverifikasi.\n"+
-                    "Tidak perlu ada penghapusan data salah..!!");
+            JOptionPane.showMessageDialog(rootPane,"Data belum pernah disimpan/diverifikasi.\nTidak perlu ada penghapusan data salah..!!");
         }
     } catch (Exception e) {
         System.out.println("Notifikasi : "+e);
@@ -3398,7 +3393,7 @@ private void BtnSimpan2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
             Valid.textKosong(TNoRw,"No.Rawat");
         }else{
             Sequel.menyimpan("tagihan_obat_langsung","'"+TNoRw.getText()+"','"+TotalObat.getText()+"'","No.Rawat");
-            WindowInput.setVisible(false);
+            WindowInput.dispose();
             isRawat();
         }
 }//GEN-LAST:event_BtnSimpan2ActionPerformed
@@ -3412,7 +3407,7 @@ private void BtnBatal1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
             Valid.textKosong(TNoRw,"No.Rawat");
         }else{
             Sequel.queryu("delete from tagihan_obat_langsung where no_rawat=? ",TNoRw.getText());
-            WindowInput.setVisible(false);
+            WindowInput.dispose();
             isRawat();
         }
 }//GEN-LAST:event_BtnBatal1ActionPerformed
@@ -4250,7 +4245,6 @@ private void kirimWhatsAppMessage() {
                 rawatinap.setLocationRelativeTo(internalFrame1);
                 rawatinap.isCek();
                 rawatinap.setNoRm(norawatbayi,DTPTgl.getDate(),new Date());
-                rawatinap.tampilDr();
                 rawatinap.setVisible(true);
             }                
         }
@@ -7755,9 +7749,7 @@ private void kirimWhatsAppMessage() {
                 if(!norawatbayi.equals("")){
                     Sequel.mengedit("reg_periksa","no_rawat='"+norawatbayi+"'","status_bayar='Sudah Bayar'");
                 }  
-                Sequel.meghapus("temporary_tambahan_potongan","no_rawat",TNoRw.getText());
                 Sequel.Commit();
-                JOptionPane.showMessageDialog(null,"Proses simpan selesai...!"); 
             }else{
                 JOptionPane.showMessageDialog(null,"Terjadi kesalahan saat pemrosesan data, transaksi dibatalkan.\nPeriksa kembali data sebelum melanjutkan menyimpan..!!");
                 Sequel.RollBack();
@@ -7766,6 +7758,8 @@ private void kirimWhatsAppMessage() {
             Sequel.AutoComitTrue();
             
             if(sukses==true){
+                Sequel.meghapus("temporary_tambahan_potongan","no_rawat",TNoRw.getText());
+                JOptionPane.showMessageDialog(null,"Proses simpan selesai...!"); 
                 if(notaranap.equals("Yes")){
                     this.dispose();
                 }

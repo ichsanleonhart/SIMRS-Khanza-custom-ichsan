@@ -42,7 +42,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import keuangan.DlgKamar;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -115,6 +118,8 @@ public final class BPJSCekNoRujukanPCare extends javax.swing.JDialog {
     private JsonNode response;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private Date parsedDate;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private volatile boolean ceksukses = false;
 
     /** Creates new form DlgKamar
      * @param parent
@@ -3017,7 +3022,7 @@ public final class BPJSCekNoRujukanPCare extends javax.swing.JDialog {
         if(NoRujukan.getText().trim().equals("")){
             JOptionPane.showMessageDialog(null,"No.Rujukan masih kosong...!!");
         }else{
-            tampil(NoRujukan.getText().trim());
+            runBackground(() ->tampil(NoRujukan.getText().trim()));
         }   
         this.setCursor(Cursor.getDefaultCursor());
     }//GEN-LAST:event_BtnCariActionPerformed
@@ -4921,7 +4926,7 @@ public final class BPJSCekNoRujukanPCare extends javax.swing.JDialog {
             kamar.load();
             kamar.isCek();
             kamar.emptTeks();
-            kamar.tampil();
+            kamar.tampil2();
             kamar.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
             kamar.setLocationRelativeTo(internalFrame1);
             kamar.setVisible(true);
@@ -7572,7 +7577,7 @@ public final class BPJSCekNoRujukanPCare extends javax.swing.JDialog {
     
     public void SetRujukan(String NoRujuk){
         NoRujukan.setText(NoRujuk);
-        tampil(NoRujuk);
+        runBackground(() ->tampil(NoRujuk));
         empt=true;
     }
     
@@ -7776,4 +7781,21 @@ public final class BPJSCekNoRujukanPCare extends javax.swing.JDialog {
         return statusantrean;
     }
     
+    private void runBackground(Runnable task) {
+        if (ceksukses) return;
+        ceksukses = true;
+
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+        executor.submit(() -> {
+            try {
+                task.run();
+            } finally {
+                ceksukses = false;
+                SwingUtilities.invokeLater(() -> {
+                    this.setCursor(Cursor.getDefaultCursor());
+                });
+            }
+        });
+    }
 }

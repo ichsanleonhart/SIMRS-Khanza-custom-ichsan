@@ -19,10 +19,17 @@
             </Property>
             <Property name="name" type="java.lang.String" value="internalFrame2" noResource="true"/>
             <Property name="warnaAtas" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+<<<<<<< HEAD
               <Color blue="e6" green="e6" red="ff" type="rgb"/>
             </Property>
             <Property name="warnaBawah" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="cc" green="cc" red="ff" type="rgb"/>
+=======
+              <Color blue="6a" green="a8" red="0" type="rgb"/>
+            </Property>
+            <Property name="warnaBawah" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+              <Color blue="60" green="9e" red="0" type="rgb"/>
+>>>>>>> upstream/master
             </Property>
           </Properties>
           <Constraints>
@@ -53,10 +60,14 @@
                 <Property name="name" type="java.lang.String" value="internalFrame3" noResource="true"/>
                 <Property name="requestFocusEnabled" type="boolean" value="false"/>
                 <Property name="warnaAtas" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+<<<<<<< HEAD
                   <Color blue="e6" green="e6" red="ff" type="rgb"/>
                 </Property>
                 <Property name="warnaBawah" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="cc" green="cc" red="ff" type="rgb"/>
+=======
+                  <Color blue="d2" green="f0" red="d2" type="rgb"/>
+>>>>>>> upstream/master
                 </Property>
               </Properties>
               <Constraints>
@@ -295,7 +306,7 @@
             <Container class="widget.panelisi" name="panelisi2">
               <Properties>
                 <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                  <Color blue="fd" green="fd" red="ff" type="rgb"/>
+                  <Color blue="fd" green="ff" red="fd" type="rgb"/>
                 </Property>
                 <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                   <Border info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
@@ -488,7 +499,11 @@
         </Property>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
           <StringArray count="1">
+<<<<<<< HEAD
             <StringItem index="0" value="01/12/2025"/>
+=======
+            <StringItem index="0" value="31/12/2025"/>
+>>>>>>> upstream/master
           </StringArray>
         </Property>
         <Property name="displayFormat" type="java.lang.String" value="dd/MM/yyyy"/>
@@ -7869,7 +7884,7 @@
               <Border info="null"/>
             </Property>
             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="fd" green="ff" red="ff" type="rgb"/>
+              <Color blue="ff" green="ff" red="ff" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" noResource="true" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/picture/85.png"/>
@@ -7992,7 +8007,7 @@
               <Border info="null"/>
             </Property>
             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="fd" green="ff" red="ff" type="rgb"/>
+              <Color blue="ff" green="ff" red="ff" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/picture/PatientMale.png"/>
@@ -8167,7 +8182,7 @@
               <Border info="null"/>
             </Property>
             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="fd" green="ff" red="ff" type="rgb"/>
+              <Color blue="ff" green="ff" red="ff" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/picture/Bar Chart.png"/>
@@ -8768,7 +8783,7 @@
               <Border info="null"/>
             </Property>
             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="fd" green="ff" red="ff" type="rgb"/>
+              <Color blue="ff" green="ff" red="ff" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/picture/My-Tickets24.png"/>
@@ -9249,7 +9264,7 @@
               <Border info="null"/>
             </Property>
             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="fd" green="ff" red="ff" type="rgb"/>
+              <Color blue="ff" green="ff" red="ff" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" noResource="true" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/picture/63.png"/>
@@ -9326,7 +9341,11 @@
           <Color blue="e6" green="e6" red="ff" type="rgb"/>
         </Property>
         <Property name="warnaBawah" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+<<<<<<< HEAD
           <Color blue="c8" green="c8" red="ff" type="rgb"/>
+=======
+          <Color blue="cd" green="eb" red="cd" type="rgb"/>
+>>>>>>> upstream/master
         </Property>
       </Properties>
       <Constraints>
@@ -9368,16 +9387,16 @@
         <Component class="javax.swing.JSeparator" name="jSeparator4">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="8e" green="29" red="eb" type="rgb"/>
+              <Color blue="60" green="9e" red="0" type="rgb"/>
             </Property>
             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="8e" green="29" red="eb" type="rgb"/>
+              <Color blue="60" green="9e" red="0" type="rgb"/>
             </Property>
             <Property name="orientation" type="int" value="1"/>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
               <Border info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
                 <LineBorder>
-                  <Color PropertyName="color" blue="7a" green="1" red="d9" type="rgb"/>
+                  <Color PropertyName="color" blue="60" green="9e" red="0" type="rgb"/>
                 </LineBorder>
               </Border>
             </Property>
@@ -9439,16 +9458,16 @@
         <Component class="javax.swing.JSeparator" name="jSeparator5">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="8e" green="29" red="eb" type="rgb"/>
+              <Color blue="60" green="9e" red="0" type="rgb"/>
             </Property>
             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="8e" green="29" red="eb" type="rgb"/>
+              <Color blue="60" green="9e" red="0" type="rgb"/>
             </Property>
             <Property name="orientation" type="int" value="1"/>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
               <Border info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
                 <LineBorder>
-                  <Color PropertyName="color" blue="7a" green="1" red="d9" type="rgb"/>
+                  <Color PropertyName="color" blue="60" green="9e" red="0" type="rgb"/>
                 </LineBorder>
               </Border>
             </Property>
@@ -9531,16 +9550,16 @@
         <Component class="javax.swing.JSeparator" name="jSeparator9">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="8e" green="29" red="eb" type="rgb"/>
+              <Color blue="60" green="9e" red="0" type="rgb"/>
             </Property>
             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="8e" green="29" red="eb" type="rgb"/>
+              <Color blue="60" green="9e" red="0" type="rgb"/>
             </Property>
             <Property name="orientation" type="int" value="1"/>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
               <Border info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
                 <LineBorder>
-                  <Color PropertyName="color" blue="7a" green="1" red="d9" type="rgb"/>
+                  <Color PropertyName="color" blue="60" green="9e" red="0" type="rgb"/>
                 </LineBorder>
               </Border>
             </Property>
@@ -9602,16 +9621,16 @@
         <Component class="javax.swing.JSeparator" name="jSeparator7">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="8e" green="29" red="eb" type="rgb"/>
+              <Color blue="60" green="9e" red="0" type="rgb"/>
             </Property>
             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="8e" green="29" red="eb" type="rgb"/>
+              <Color blue="60" green="9e" red="0" type="rgb"/>
             </Property>
             <Property name="orientation" type="int" value="1"/>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
               <Border info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
                 <LineBorder>
-                  <Color PropertyName="color" blue="7a" green="1" red="d9" type="rgb"/>
+                  <Color PropertyName="color" blue="60" green="9e" red="0" type="rgb"/>
                 </LineBorder>
               </Border>
             </Property>
@@ -9683,10 +9702,14 @@
           <Dimension value="[330, 25]"/>
         </Property>
         <Property name="warnaAtas" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+<<<<<<< HEAD
           <Color blue="cc" green="cc" red="ff" type="rgb"/>
         </Property>
         <Property name="warnaBawah" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="e6" green="e6" red="ff" type="rgb"/>
+=======
+          <Color blue="d2" green="f0" red="d2" type="rgb"/>
+>>>>>>> upstream/master
         </Property>
       </Properties>
       <Constraints>
@@ -9721,16 +9744,16 @@
         <Component class="javax.swing.JSeparator" name="jSeparator1">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="8e" green="3d" red="e1" type="rgb"/>
+              <Color blue="60" green="9e" red="0" type="rgb"/>
             </Property>
             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="8e" green="3d" red="e1" type="rgb"/>
+              <Color blue="60" green="9e" red="0" type="rgb"/>
             </Property>
             <Property name="orientation" type="int" value="1"/>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
               <Border info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
                 <LineBorder>
-                  <Color PropertyName="color" blue="7a" green="1" red="d9" type="rgb"/>
+                  <Color PropertyName="color" blue="60" green="9e" red="0" type="rgb"/>
                 </LineBorder>
               </Border>
             </Property>
@@ -9761,16 +9784,16 @@
         <Component class="javax.swing.JSeparator" name="jSeparator2">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="8e" green="3d" red="e1" type="rgb"/>
+              <Color blue="60" green="9e" red="0" type="rgb"/>
             </Property>
             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="8e" green="3d" red="e1" type="rgb"/>
+              <Color blue="60" green="9e" red="0" type="rgb"/>
             </Property>
             <Property name="orientation" type="int" value="1"/>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
               <Border info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
                 <LineBorder>
-                  <Color PropertyName="color" blue="7a" green="1" red="d9" type="rgb"/>
+                  <Color PropertyName="color" blue="60" green="9e" red="0" type="rgb"/>
                 </LineBorder>
               </Border>
             </Property>
@@ -9801,16 +9824,16 @@
         <Component class="javax.swing.JSeparator" name="jSeparator3">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="8e" green="3d" red="e1" type="rgb"/>
+              <Color blue="60" green="9e" red="0" type="rgb"/>
             </Property>
             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="8e" green="3d" red="e1" type="rgb"/>
+              <Color blue="60" green="9e" red="0" type="rgb"/>
             </Property>
             <Property name="orientation" type="int" value="1"/>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
               <Border info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
                 <LineBorder>
-                  <Color PropertyName="color" blue="7a" green="1" red="d9" type="rgb"/>
+                  <Color PropertyName="color" blue="60" green="9e" red="0" type="rgb"/>
                 </LineBorder>
               </Border>
             </Property>
@@ -9841,16 +9864,16 @@
         <Component class="javax.swing.JSeparator" name="jSeparator6">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="8e" green="3d" red="e1" type="rgb"/>
+              <Color blue="60" green="9e" red="0" type="rgb"/>
             </Property>
             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="8e" green="3d" red="e1" type="rgb"/>
+              <Color blue="60" green="9e" red="0" type="rgb"/>
             </Property>
             <Property name="orientation" type="int" value="1"/>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
               <Border info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
                 <LineBorder>
-                  <Color PropertyName="color" blue="7a" green="1" red="d9" type="rgb"/>
+                  <Color PropertyName="color" blue="60" green="9e" red="0" type="rgb"/>
                 </LineBorder>
               </Border>
             </Property>

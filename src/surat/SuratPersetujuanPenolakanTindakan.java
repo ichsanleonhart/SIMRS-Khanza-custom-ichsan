@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -37,6 +38,7 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import kepegawaian.DlgCariDokter;
 import kepegawaian.DlgCariPetugas;
+<<<<<<< HEAD
 import laporan.DlgBerkasRawat;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpResponse;
@@ -47,6 +49,10 @@ import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.client.DefaultHttpClient;
+=======
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+>>>>>>> upstream/master
 
 
 /**
@@ -67,6 +73,8 @@ public final class SuratPersetujuanPenolakanTindakan extends javax.swing.JDialog
     private String pilihan="", FileName ="",kodeberkas="", lokasifilepdf="", SQLException=""; //tambahan ichsan FileName ="",kodeberkas="", lokasifile="" SQLException=""
     private DlgCariDokter dokter=new DlgCariDokter(null,false);
     private String finger="",finger2="",lokasifile="",lokasifile2="";
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private volatile boolean ceksukses = false;
     
     /** Creates new form DlgRujuk
      * @param parent
@@ -230,19 +238,19 @@ public final class SuratPersetujuanPenolakanTindakan extends javax.swing.JDialog
                 @Override
                 public void insertUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
-                        tampil();
+                        runBackground(() ->tampil());
                     }
                 }
                 @Override
                 public void removeUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
-                        tampil();
+                        runBackground(() ->tampil());
                     }
                 }
                 @Override
                 public void changedUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
-                        tampil();
+                        runBackground(() ->tampil());
                     }
                 }
             });
@@ -1516,7 +1524,7 @@ public final class SuratPersetujuanPenolakanTindakan extends javax.swing.JDialog
                     AlasanDiwakilkan.getText(),JKPenerima.getSelectedItem().toString().substring(0,1),Valid.SetTgl(TglLahirPenerima.getSelectedItem()+""),UmurPenerima.getText(),
                     AlamatPenerima.getText(),NoHPPenerima.getText(),HubunganDenganPasien.getSelectedItem().toString(),"Belum Dikonfirmasi",SaksiKeluarga.getText()
                 })==true){
-                tampil();
+                runBackground(() ->tampil());
                 emptTeks();
             }
         }
@@ -1673,7 +1681,7 @@ public final class SuratPersetujuanPenolakanTindakan extends javax.swing.JDialog
                             "inner join dokter on dokter.kd_dokter=persetujuan_penolakan_tindakan.kd_dokter "+
                             "inner join petugas on petugas.nip=persetujuan_penolakan_tindakan.nip where "+
                             "persetujuan_penolakan_tindakan.tanggal between ? and ? and (persetujuan_penolakan_tindakan.no_pernyataan like ? or reg_periksa.no_rawat like ? or pasien.no_rkm_medis like ? or pasien.nm_pasien like ? or "+
-                            "persetujuan_penolakan_tindakan.kd_dokter like ? or dokter.nm_dokter like ?) order by persetujuan_penolakan_tindakan.tanggal");
+                            "petugas.nip like ? or petugas.nama like ? or persetujuan_penolakan_tindakan.kd_dokter like ? or dokter.nm_dokter like ?) order by persetujuan_penolakan_tindakan.tanggal");
                 }
 
                 try {
@@ -1689,6 +1697,8 @@ public final class SuratPersetujuanPenolakanTindakan extends javax.swing.JDialog
                         ps.setString(6,"%"+TCari.getText()+"%");
                         ps.setString(7,"%"+TCari.getText()+"%");
                         ps.setString(8,"%"+TCari.getText()+"%");
+                        ps.setString(9,"%"+TCari.getText()+"%");
+                        ps.setString(10,"%"+TCari.getText()+"%");
                     } 
                     rs=ps.executeQuery();
                     pilihan = (String)JOptionPane.showInputDialog(null,"Silahkan pilih laporan..!","Pilihan Cetak",JOptionPane.QUESTION_MESSAGE,null,new Object[]{"Laporan 1 (HTML)","Laporan 2 (WPS)","Laporan 3 (CSV)"},"Laporan 1 (HTML)");
@@ -1973,7 +1983,7 @@ public final class SuratPersetujuanPenolakanTindakan extends javax.swing.JDialog
 }//GEN-LAST:event_TCariKeyPressed
 
     private void BtnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCariActionPerformed
-        tampil();
+        runBackground(() ->tampil());
 }//GEN-LAST:event_BtnCariActionPerformed
 
     private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnCariKeyPressed
@@ -1986,13 +1996,13 @@ public final class SuratPersetujuanPenolakanTindakan extends javax.swing.JDialog
 
     private void BtnAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnAllActionPerformed
         TCari.setText("");
-        tampil();
+        runBackground(() ->tampil());
 }//GEN-LAST:event_BtnAllActionPerformed
 
     private void BtnAllKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnAllKeyPressed
         if(evt.getKeyCode()==KeyEvent.VK_SPACE){
             TCari.setText("");
-            tampil();
+            runBackground(() ->tampil());
         }else{
             Valid.pindah(evt, BtnCari, TPasien);
         }
@@ -2030,7 +2040,7 @@ public final class SuratPersetujuanPenolakanTindakan extends javax.swing.JDialog
 
     private void TabRawatMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_TabRawatMouseClicked
         if(TabRawat.getSelectedIndex()==1){
-            tampil();
+            runBackground(() ->tampil());
         }
     }//GEN-LAST:event_TabRawatMouseClicked
 
@@ -2566,7 +2576,7 @@ public final class SuratPersetujuanPenolakanTindakan extends javax.swing.JDialog
                         "inner join dokter on dokter.kd_dokter=persetujuan_penolakan_tindakan.kd_dokter "+
                         "inner join petugas on petugas.nip=persetujuan_penolakan_tindakan.nip where "+
                         "persetujuan_penolakan_tindakan.tanggal between ? and ? and (persetujuan_penolakan_tindakan.no_pernyataan like ? or reg_periksa.no_rawat like ? or pasien.no_rkm_medis like ? or pasien.nm_pasien like ? or "+
-                        "persetujuan_penolakan_tindakan.kd_dokter like ? or dokter.nm_dokter like ?) order by persetujuan_penolakan_tindakan.tanggal");
+                        "petugas.nip like ? or petugas.nama like ? or persetujuan_penolakan_tindakan.kd_dokter like ? or dokter.nm_dokter like ?) order by persetujuan_penolakan_tindakan.tanggal");
             }
                 
             try {
@@ -2582,6 +2592,8 @@ public final class SuratPersetujuanPenolakanTindakan extends javax.swing.JDialog
                     ps.setString(6,"%"+TCari.getText()+"%");
                     ps.setString(7,"%"+TCari.getText()+"%");
                     ps.setString(8,"%"+TCari.getText()+"%");
+                    ps.setString(9,"%"+TCari.getText()+"%");
+                    ps.setString(10,"%"+TCari.getText()+"%");
                 }   
                 rs=ps.executeQuery();
                 while(rs.next()){
@@ -2781,7 +2793,7 @@ public final class SuratPersetujuanPenolakanTindakan extends javax.swing.JDialog
                 AlamatPenerima.getText(),NoHPPenerima.getText(),HubunganDenganPasien.getSelectedItem().toString(),"Belum Dikonfirmasi",SaksiKeluarga.getText(),
                 tbObat.getValueAt(tbObat.getSelectedRow(),0).toString()
             })==true){
-               tampil();
+               runBackground(() ->tampil());
                emptTeks();
                TabRawat.setSelectedIndex(1);
         }
@@ -2879,6 +2891,7 @@ public final class SuratPersetujuanPenolakanTindakan extends javax.swing.JDialog
         }
     }
     
+<<<<<<< HEAD
     
     
     private void UploadPDF(String FileName, String docpath) {
@@ -3090,4 +3103,23 @@ private void ppBerkasDigitalBtnPrintActionPerformed(java.awt.event.ActionEvent e
    
              
            
+=======
+    private void runBackground(Runnable task) {
+        if (ceksukses) return;
+        ceksukses = true;
+
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+        executor.submit(() -> {
+            try {
+                task.run();
+            } finally {
+                ceksukses = false;
+                SwingUtilities.invokeLater(() -> {
+                    this.setCursor(Cursor.getDefaultCursor());
+                });
+            }
+        });
+    }
+>>>>>>> upstream/master
 }

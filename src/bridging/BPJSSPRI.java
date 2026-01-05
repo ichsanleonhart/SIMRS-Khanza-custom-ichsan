@@ -25,10 +25,13 @@ import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -73,6 +76,8 @@ public class BPJSSPRI extends javax.swing.JDialog {
     private JsonNode response;
     private String link="",requestJson="",URL="",user="",utc="", FileName ="",kodeberkas=""; //tambahan ichsan FileName ="",kodeberkas="";
     private ApiBPJS api=new ApiBPJS();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private volatile boolean ceksukses = false;
 
     /** Creates new form DlgPemberianInfus
      * @param parent
@@ -140,19 +145,19 @@ public class BPJSSPRI extends javax.swing.JDialog {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
-                        tampil();
+                        runBackground(() ->tampil());
                     }
                 }
                 @Override
                 public void removeUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
-                        tampil();
+                        runBackground(() ->tampil());
                     }
                 }
                 @Override
                 public void changedUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
-                        tampil();
+                        runBackground(() ->tampil());
                     }
                 }
             });
@@ -956,7 +961,7 @@ public class BPJSSPRI extends javax.swing.JDialog {
                             NoRawat.getText(),NoKartu.getText(),Valid.SetTgl(TanggalSurat.getSelectedItem()+""),response.asText(),Valid.SetTgl(TanggalKontrol.getSelectedItem()+""),KdDokter.getText(),NmDokter.getText(),KdPoli.getText(),NmPoli.getText(),Diagnosa.getText(),NoSEP.getText()
                         })==true){
                         emptTeks();
-                        tampil();
+                        runBackground(() ->tampil());
                     }
                 }else{
                     JOptionPane.showMessageDialog(null,nameNode.path("message").asText());
@@ -1091,7 +1096,7 @@ public class BPJSSPRI extends javax.swing.JDialog {
 }//GEN-LAST:event_TCariKeyPressed
 
     private void BtnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCariActionPerformed
-        tampil();
+        runBackground(() ->tampil());
 }//GEN-LAST:event_BtnCariActionPerformed
 
     private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnCariKeyPressed
@@ -1104,13 +1109,13 @@ public class BPJSSPRI extends javax.swing.JDialog {
 
     private void BtnAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnAllActionPerformed
         TCari.setText("");
-        tampil();
+        runBackground(() ->tampil());
 }//GEN-LAST:event_BtnAllActionPerformed
 
     private void BtnAllKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnAllKeyPressed
         if(evt.getKeyCode()==KeyEvent.VK_SPACE){
-            tampil();
             TCari.setText("");
+            runBackground(() ->tampil());
         }else{
             Valid.pindah(evt, BtnCari, NoKartu);
         }
@@ -1230,7 +1235,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                                 Valid.SetTgl(TanggalSurat.getSelectedItem()+""),Valid.SetTgl(TanggalKontrol.getSelectedItem()+""),KdDokter.getText(),NmDokter.getText(),KdPoli.getText(),NmPoli.getText(),Diagnosa.getText(),NoSEP.getText(),NoSurat.getText()
                             })==true){
                             emptTeks();
-                            tampil();
+                            runBackground(() ->tampil());
                         }
                     }else{
                         JOptionPane.showMessageDialog(null,nameNode.path("message").asText());
@@ -1682,7 +1687,7 @@ private void CreatePDF(String FileName) {
         NoSEP.setText(nosep);
         ChkInput.setSelected(true);
         isForm();
-        tampil();
+        runBackground(() ->tampil());
     }
     
     public void setNoRm(String norawat,String nokartu,String norm,String namapasien,String tanggallahir,String jk,String diagnosa,String nosep) {
@@ -1697,14 +1702,14 @@ private void CreatePDF(String FileName) {
         Diagnosa.setText(diagnosa);
         NoSEP.setText(nosep);
         isForm();
-        tampil();
+        runBackground(() ->tampil());
     }
     
     public void setNoRm(String norm) {
         TCari.setText(norm);
         ChkInput.setSelected(false);
         isForm();
-        tampil();
+        runBackground(() ->tampil());
     }
     
     private void isForm(){
@@ -1801,6 +1806,7 @@ private void CreatePDF(String FileName) {
         }
     }
 
+<<<<<<< HEAD
     ////////// Start - fungsi untuk upload PDF
     private void UploadPDF(String FileName, String docpath) {
         try {
@@ -1851,5 +1857,23 @@ private void CreatePDF(String FileName) {
         }
     }
     ////////// end - fungsi untuk upload PDF
+=======
+    private void runBackground(Runnable task) {
+        if (ceksukses) return;
+        ceksukses = true;
+>>>>>>> upstream/master
 
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+        executor.submit(() -> {
+            try {
+                task.run();
+            } finally {
+                ceksukses = false;
+                SwingUtilities.invokeLater(() -> {
+                    this.setCursor(Cursor.getDefaultCursor());
+                });
+            }
+        });
+    }
 }

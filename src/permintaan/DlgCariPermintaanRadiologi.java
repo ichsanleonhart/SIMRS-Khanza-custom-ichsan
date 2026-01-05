@@ -24,8 +24,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.table.DefaultTableModel;
@@ -48,6 +51,8 @@ public class DlgCariPermintaanRadiologi extends javax.swing.JDialog {
     private ResultSet rs,rs2;
     private Date now;
     private ApiCareStream carestream=new ApiCareStream();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private volatile boolean ceksukses = false;
     private boolean aktif=false,semua;
     private String alarm="",formalarm="",nol_detik,detik,tglsampel="",tglhasil="",norm="",kamar="",namakamar="",
             NoPermintaan="",NoRawat="",Pasien="",Permintaan="",JamPermintaan="",Sampel="",JamSampel="",Hasil="",JamHasil="",KodeDokter="",DokterPerujuk="",Ruang="",
@@ -1373,7 +1378,7 @@ private void BtnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                             JOptionPane.showMessageDialog(null,"Maaf, Tidak boleh dihapus karena sudah ada tindakan yang sudah dibayar.\nSilahkan hubungi kasir...!!!!");
                         }else{
                             Sequel.meghapus("permintaan_radiologi","noorder",tbRadiologiRalan.getValueAt(tbRadiologiRalan.getSelectedRow(),0).toString());
-                            tampil();
+                            runBackground(() -> tampil());
                         }
                     }else{
                         JOptionPane.showMessageDialog(null,"Maaf, Sudah dilakukan pengambilan sampel...!!!!");
@@ -1399,7 +1404,7 @@ private void BtnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                             JOptionPane.showMessageDialog(null,"Maaf, Tidak boleh dihapus karena sudah ada tindakan yang sudah dibayar.\nSilahkan hubungi kasir...!!!!");
                         }else{
                             Sequel.meghapus("permintaan_radiologi","noorder",tbRadiologiRanap.getValueAt(tbRadiologiRanap.getSelectedRow(),0).toString());
-                            tampil3();
+                            runBackground(() -> tampil3());
                         } 
                     }else{
                         JOptionPane.showMessageDialog(null,"Maaf, Sudah dilakukan pengambilan sampel...!!!!");
@@ -2427,6 +2432,7 @@ private void tbRadiologiRalanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRS
                 } 
                     
                 rs=ps.executeQuery();
+                i=0;
                 while(rs.next()){
                     tabMode.addRow(new Object[]{
                         rs.getString("noorder"),rs.getString("no_rawat"),rs.getString("no_rkm_medis")+" "+
@@ -2436,6 +2442,7 @@ private void tbRadiologiRalanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRS
                         rs.getString("nm_poli"),rs.getString("informasi_tambahan"),rs.getString("diagnosa_klinis"),
                         rs.getString("kd_pj"),rs.getString("png_jawab")
                     });
+                    i++;
                     ps2=koneksi.prepareStatement(
                             "select permintaan_pemeriksaan_radiologi.kd_jenis_prw,jns_perawatan_radiologi.nm_perawatan "+
                             "from permintaan_pemeriksaan_radiologi inner join jns_perawatan_radiologi on "+
@@ -2460,8 +2467,7 @@ private void tbRadiologiRalanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRS
                         }
                     }
                 }
-                rs.last();
-                LCount.setText(""+rs.getRow());
+                LCount.setText(""+i);
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
             } finally{
@@ -2608,17 +2614,17 @@ private void tbRadiologiRalanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRS
     
     private void pilihRalan(){
         if(TabRawatJalan.getSelectedIndex()==0){
-            tampil();
+            runBackground(() -> tampil());
         }else if(TabRawatJalan.getSelectedIndex()==1){
-            tampil2();
+            runBackground(() -> tampil2());
         }
     }
     
     private void pilihRanap(){
         if(TabRawatInap.getSelectedIndex()==0){
-            tampil3();
+            runBackground(() -> tampil3());
         }else if(TabRawatInap.getSelectedIndex()==1){
-            tampil4();
+            runBackground(() -> tampil4());
         }
     }
     
@@ -2683,6 +2689,7 @@ private void tbRadiologiRalanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRS
                 }
                     
                 rs=ps.executeQuery();
+                i=0;
                 while(rs.next()){
                     tabMode3.addRow(new Object[]{
                         rs.getString("noorder"),rs.getString("no_rawat"),rs.getString("no_rkm_medis")+" "+
@@ -2692,6 +2699,7 @@ private void tbRadiologiRalanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRS
                         rs.getString("nm_bangsal"),rs.getString("informasi_tambahan"),rs.getString("diagnosa_klinis"),
                         rs.getString("kd_pj"),rs.getString("png_jawab")
                     });
+                    i++;
                     ps2=koneksi.prepareStatement(
                             "select permintaan_pemeriksaan_radiologi.kd_jenis_prw,jns_perawatan_radiologi.nm_perawatan "+
                             "from permintaan_pemeriksaan_radiologi inner join jns_perawatan_radiologi on "+
@@ -2716,8 +2724,7 @@ private void tbRadiologiRalanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRS
                         }
                     }
                 }
-                rs.last();
-                LCount.setText(""+rs.getRow());
+                LCount.setText(""+i);
             } catch (Exception e) {
                 System.out.println("Notif : "+e);
             } finally{
@@ -2840,9 +2847,16 @@ private void tbRadiologiRalanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRS
 
                 detik = nol_detik + Integer.toString(nilai_detik);
                 if(detik.equals("05")){
+                    if(formalarm.contains("ralan")){
+                        runBackground(() -> tampil());
+                    }
+                }else if(detik.equals("15")){
+                    if(formalarm.contains("ranap")){
+                        runBackground(() -> tampil3());
+                    }
+                }else if(detik.equals("25")){
                     permintaanbaru=0;
                     if(formalarm.contains("ralan")){
-                        tampil();
                         for(i=0;i<tbRadiologiRalan.getRowCount();i++){
                             if((!tbRadiologiRalan.getValueAt(i,0).toString().equals(""))&&tbRadiologiRalan.getValueAt(i,5).toString().equals("")){
                                 permintaanbaru++;
@@ -2851,7 +2865,6 @@ private void tbRadiologiRalanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRS
                     }
 
                     if(formalarm.contains("ranap")){
-                        tampil3();
                         for(i=0;i<tbRadiologiRanap.getRowCount();i++){
                             if((!tbRadiologiRanap.getValueAt(i,0).toString().equals(""))&&tbRadiologiRanap.getValueAt(i,5).toString().equals("")){
                                 permintaanbaru++;
@@ -2903,5 +2916,23 @@ private void tbRadiologiRalanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRS
             FormMenu.setVisible(false);    
             ChkAccor.setVisible(true);
         }
+    }
+    
+    private void runBackground(Runnable task) {
+        if (ceksukses) return;
+        ceksukses = true;
+
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+        executor.submit(() -> {
+            try {
+                task.run();
+            } finally {
+                ceksukses = false;
+                SwingUtilities.invokeLater(() -> {
+                    this.setCursor(Cursor.getDefaultCursor());
+                });
+            }
+        });
     }
 }

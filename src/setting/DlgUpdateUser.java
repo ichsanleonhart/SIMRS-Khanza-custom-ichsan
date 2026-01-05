@@ -213,7 +213,9 @@ public class DlgUpdateUser extends javax.swing.JDialog {
             skrining_instrumen_acrs=false,surat_pernyataan_memilih_dpjp=false,skrining_instrumen_mental_emosional=false,pelanggan_lab_kesehatan_lingkungan=false,kriteria_masuk_nicu=false,kriteria_keluar_nicu=false,
             penilaian_medis_ranap_psikiatrik=false,kriteria_masuk_picu=false,kriteria_keluar_picu=false,master_sampel_bakumutu=false,skrining_instrumen_amt=false,parameter_pengujian_lab_kesehatan_lingkungan=false,
             nilai_normal_baku_mutu_lab_kesehatan_lingkungan=false,skrining_pneumonia_severity_index=false,permintaan_pengujian_sampel_lab_kesehatan_lingkungan=false,penilaian_awal_medis_ralan_jantung=false,
-            penilaian_awal_medis_ralan_urologi=false,hasil_pemeriksaan_treadmill=false,hasil_pemeriksaan_echo_pediatrik=false,template_pelaksanaan_informasi_edukasi=false;
+            penilaian_awal_medis_ralan_urologi=false,hasil_pemeriksaan_treadmill=false,hasil_pemeriksaan_echo_pediatrik=false,template_pelaksanaan_informasi_edukasi=false,skrining_instrumen_esat=false,
+            penilaian_awal_medis_ranap_jantung=false,penugasan_pengujian_sampel_lab_kesehatan_lingkungan=false,hasil_pengujian_sampel_lab_kesehatan_lingkungan=false,verifikasi_pengujian_sampel_lab_kesehatan_lingkungan=false,
+            validasi_pengujian_sampel_lab_kesehatan_lingkungan=false,rekap_pelayanan_lab_kesehatan_lingkungan=false,pembayaran_pengujian_sampel_lab_kesehatan_lingkungan=false,skrining_curb65=false,bpjs_potensi_prb=false;
 
     /** Creates new form DlgUser
      * @param parent
@@ -850,7 +852,9 @@ public class DlgUpdateUser extends javax.swing.JDialog {
         skrining_instrumen_acrs=false;surat_pernyataan_memilih_dpjp=false;skrining_instrumen_mental_emosional=false;pelanggan_lab_kesehatan_lingkungan=false;kriteria_masuk_nicu=false;kriteria_keluar_nicu=false;
         penilaian_medis_ranap_psikiatrik=false;kriteria_masuk_picu=false;kriteria_keluar_picu=false;master_sampel_bakumutu=false;skrining_instrumen_amt=false;parameter_pengujian_lab_kesehatan_lingkungan=false;
         nilai_normal_baku_mutu_lab_kesehatan_lingkungan=false;skrining_pneumonia_severity_index=false;permintaan_pengujian_sampel_lab_kesehatan_lingkungan=false;penilaian_awal_medis_ralan_jantung=false;
-        penilaian_awal_medis_ralan_urologi=false;hasil_pemeriksaan_treadmill=false;hasil_pemeriksaan_echo_pediatrik=false;template_pelaksanaan_informasi_edukasi=false;
+        penilaian_awal_medis_ralan_urologi=false;hasil_pemeriksaan_treadmill=false;hasil_pemeriksaan_echo_pediatrik=false;template_pelaksanaan_informasi_edukasi=false;skrining_instrumen_esat=false;
+        penilaian_awal_medis_ranap_jantung=false;penugasan_pengujian_sampel_lab_kesehatan_lingkungan=false;hasil_pengujian_sampel_lab_kesehatan_lingkungan=false;verifikasi_pengujian_sampel_lab_kesehatan_lingkungan=false;
+        validasi_pengujian_sampel_lab_kesehatan_lingkungan=false;rekap_pelayanan_lab_kesehatan_lingkungan=false;pembayaran_pengujian_sampel_lab_kesehatan_lingkungan=false;skrining_curb65=false;bpjs_potensi_prb=false;
         try{    
             jml=0;
             for(i=0;i<tbUser.getRowCount();i++){
@@ -1107,7 +1111,10 @@ public class DlgUpdateUser extends javax.swing.JDialog {
                 "user.kriteria_keluar_nicu,user.penilaian_medis_ranap_psikiatrik,user.kriteria_masuk_picu,user.kriteria_keluar_picu,user.master_sampel_bakumutu,user.skrining_instrumen_amt,"+
                 "user.parameter_pengujian_lab_kesehatan_lingkungan,user.nilai_normal_baku_mutu_lab_kesehatan_lingkungan,user.skrining_pneumonia_severity_index,"+
                 "user.permintaan_pengujian_sampel_lab_kesehatan_lingkungan,user.penilaian_awal_medis_ralan_jantung,user.penilaian_awal_medis_ralan_urologi,"+
-                "user.hasil_pemeriksaan_treadmill,user.hasil_pemeriksaan_echo_pediatrik,user.template_pelaksanaan_informasi_edukasi from user where user.id_user=AES_ENCRYPT(?,'nur')");
+                "user.hasil_pemeriksaan_treadmill,user.hasil_pemeriksaan_echo_pediatrik,user.template_pelaksanaan_informasi_edukasi,user.skrining_instrumen_esat,"+
+                "user.penilaian_awal_medis_ranap_jantung,user.penugasan_pengujian_sampel_lab_kesehatan_lingkungan,user.hasil_pengujian_sampel_lab_kesehatan_lingkungan,"+
+                "user.verifikasi_pengujian_sampel_lab_kesehatan_lingkungan,user.validasi_pengujian_sampel_lab_kesehatan_lingkungan,user.rekap_pelayanan_lab_kesehatan_lingkungan,"+
+                "user.pembayaran_pengujian_sampel_lab_kesehatan_lingkungan,user.skrining_curb65,user.bpjs_potensi_prb from user where user.id_user=AES_ENCRYPT(?,'nur')");
             try {
                 ps.setString(1,user);
                 rs=ps.executeQuery();
@@ -1240,7 +1247,9 @@ public class DlgUpdateUser extends javax.swing.JDialog {
                     hasil_pemeriksaan_oct=rs.getBoolean("hasil_pemeriksaan_oct");beban_hutang_lain=rs.getBoolean("beban_hutang_lain");poli_asal_pasien_ranap=rs.getBoolean("poli_asal_pasien_ranap");pemberi_hutang_lain=rs.getBoolean("pemberi_hutang_lain");dokter_asal_pasien_ranap=rs.getBoolean("dokter_asal_pasien_ranap");duta_parkir_rekap_keluar=rs.getBoolean("duta_parkir_rekap_keluar");surat_keterangan_layak_terbang=rs.getBoolean("surat_keterangan_layak_terbang");bayar_beban_hutang_lain=rs.getBoolean("bayar_beban_hutang_lain");surat_persetujuan_pemeriksaan_hiv=rs.getBoolean("surat_persetujuan_pemeriksaan_hiv");
                     skrining_instrumen_acrs=rs.getBoolean("skrining_instrumen_acrs");surat_pernyataan_memilih_dpjp=rs.getBoolean("surat_pernyataan_memilih_dpjp");skrining_instrumen_mental_emosional=rs.getBoolean("skrining_instrumen_mental_emosional");pelanggan_lab_kesehatan_lingkungan=rs.getBoolean("pelanggan_lab_kesehatan_lingkungan");kriteria_masuk_nicu=rs.getBoolean("kriteria_masuk_nicu");kriteria_keluar_nicu=rs.getBoolean("kriteria_keluar_nicu");penilaian_medis_ranap_psikiatrik=rs.getBoolean("penilaian_medis_ranap_psikiatrik");kriteria_masuk_picu=rs.getBoolean("kriteria_masuk_picu");kriteria_keluar_picu=rs.getBoolean("kriteria_keluar_picu");
                     master_sampel_bakumutu=rs.getBoolean("master_sampel_bakumutu");skrining_instrumen_amt=rs.getBoolean("skrining_instrumen_amt");parameter_pengujian_lab_kesehatan_lingkungan=rs.getBoolean("parameter_pengujian_lab_kesehatan_lingkungan");nilai_normal_baku_mutu_lab_kesehatan_lingkungan=rs.getBoolean("nilai_normal_baku_mutu_lab_kesehatan_lingkungan");skrining_pneumonia_severity_index=rs.getBoolean("skrining_pneumonia_severity_index");permintaan_pengujian_sampel_lab_kesehatan_lingkungan=rs.getBoolean("permintaan_pengujian_sampel_lab_kesehatan_lingkungan");penilaian_awal_medis_ralan_jantung=rs.getBoolean("penilaian_awal_medis_ralan_jantung");
-                    penilaian_awal_medis_ralan_urologi=rs.getBoolean("penilaian_awal_medis_ralan_urologi");hasil_pemeriksaan_treadmill=rs.getBoolean("hasil_pemeriksaan_treadmill");hasil_pemeriksaan_echo_pediatrik=rs.getBoolean("hasil_pemeriksaan_echo_pediatrik");template_pelaksanaan_informasi_edukasi=rs.getBoolean("template_pelaksanaan_informasi_edukasi");
+                    penilaian_awal_medis_ralan_urologi=rs.getBoolean("penilaian_awal_medis_ralan_urologi");hasil_pemeriksaan_treadmill=rs.getBoolean("hasil_pemeriksaan_treadmill");hasil_pemeriksaan_echo_pediatrik=rs.getBoolean("hasil_pemeriksaan_echo_pediatrik");template_pelaksanaan_informasi_edukasi=rs.getBoolean("template_pelaksanaan_informasi_edukasi");skrining_instrumen_esat=rs.getBoolean("skrining_instrumen_esat");penilaian_awal_medis_ranap_jantung=rs.getBoolean("penilaian_awal_medis_ranap_jantung");penugasan_pengujian_sampel_lab_kesehatan_lingkungan=rs.getBoolean("penugasan_pengujian_sampel_lab_kesehatan_lingkungan");
+                    hasil_pengujian_sampel_lab_kesehatan_lingkungan=rs.getBoolean("hasil_pengujian_sampel_lab_kesehatan_lingkungan");verifikasi_pengujian_sampel_lab_kesehatan_lingkungan=rs.getBoolean("verifikasi_pengujian_sampel_lab_kesehatan_lingkungan");validasi_pengujian_sampel_lab_kesehatan_lingkungan=rs.getBoolean("validasi_pengujian_sampel_lab_kesehatan_lingkungan");rekap_pelayanan_lab_kesehatan_lingkungan=rs.getBoolean("rekap_pelayanan_lab_kesehatan_lingkungan");pembayaran_pengujian_sampel_lab_kesehatan_lingkungan=rs.getBoolean("pembayaran_pengujian_sampel_lab_kesehatan_lingkungan");skrining_curb65=rs.getBoolean("skrining_curb65");
+                    bpjs_potensi_prb=rs.getBoolean("bpjs_potensi_prb");
                     setTampil();
                 }       
                 LCount.setText(""+tabMode.getRowCount());
@@ -1467,6 +1476,30 @@ public class DlgUpdateUser extends javax.swing.JDialog {
         
         if("[B]Permintaan Pengujian Sampel Lab Kesling".toLowerCase().contains(TCari.getText().toLowerCase())){
             tabMode.addRow(new Object[]{false,"[B]Permintaan Pengujian Sampel Lab Kesling",permintaan_pengujian_sampel_lab_kesehatan_lingkungan});
+        }
+        
+        if("[B]Data Penugasan Pengujian Sampel Lab Kesling".toLowerCase().contains(TCari.getText().toLowerCase())){
+            tabMode.addRow(new Object[]{false,"[B]Data Penugasan Pengujian Sampel Lab Kesling",penugasan_pengujian_sampel_lab_kesehatan_lingkungan});
+        }
+        
+        if("[B]Data Hasil Pengujian Sampel Lab Kesling".toLowerCase().contains(TCari.getText().toLowerCase())){
+            tabMode.addRow(new Object[]{false,"[B]Data Hasil Pengujian Sampel Lab Kesling",hasil_pengujian_sampel_lab_kesehatan_lingkungan});
+        }
+        
+        if("[B]Data Verifikasi Pengujian Sampel Lab Kesling".toLowerCase().contains(TCari.getText().toLowerCase())){
+            tabMode.addRow(new Object[]{false,"[B]Data Verifikasi Pengujian Sampel Lab Kesling",verifikasi_pengujian_sampel_lab_kesehatan_lingkungan});
+        }
+        
+        if("[B]Data Validasi Pengujian Sampel Lab Kesling".toLowerCase().contains(TCari.getText().toLowerCase())){
+            tabMode.addRow(new Object[]{false,"[B]Data Validasi Pengujian Sampel Lab Kesling",validasi_pengujian_sampel_lab_kesehatan_lingkungan});
+        }
+        
+        if("[B]Rekap Pelayanan Lab Kesling".toLowerCase().contains(TCari.getText().toLowerCase())){
+            tabMode.addRow(new Object[]{false,"[B]Rekap Pelayanan Lab Kesling",rekap_pelayanan_lab_kesehatan_lingkungan});
+        }
+        
+        if("[B]Pembayaran Pengujian Sampel Lab Kesling".toLowerCase().contains(TCari.getText().toLowerCase())){
+            tabMode.addRow(new Object[]{false,"[B]Pembayaran Pengujian Sampel Lab Kesling",pembayaran_pengujian_sampel_lab_kesehatan_lingkungan});
         }
 
         if("[C]Dokter".toLowerCase().contains(TCari.getText().toLowerCase())){
@@ -3980,6 +4013,10 @@ public class DlgUpdateUser extends javax.swing.JDialog {
         if("[L]Rekap Keluar Duta Parking".toLowerCase().contains(TCari.getText().toLowerCase())){
             tabMode.addRow(new Object[]{false,"[L]Rekap Keluar Duta Parking",duta_parkir_rekap_keluar});
         }
+        
+        if("[L]Potensi PRB di VClaim".toLowerCase().contains(TCari.getText().toLowerCase())){
+            tabMode.addRow(new Object[]{false,"[L]Potensi PRB di VClaim",bpjs_potensi_prb});
+        }
 
         if("[M]Pasien".toLowerCase().contains(TCari.getText().toLowerCase())){
             tabMode.addRow(new Object[]{false,"[M]Pasien",pasien});
@@ -4939,6 +4976,18 @@ public class DlgUpdateUser extends javax.swing.JDialog {
         
         if("[M]Master Template Informasi & Edukasi".toLowerCase().contains(TCari.getText().toLowerCase())){
             tabMode.addRow(new Object[]{false,"[M]Master Template Informasi & Edukasi",template_pelaksanaan_informasi_edukasi});
+        }
+        
+        if("[M]Skrining Instrumen ESAT".toLowerCase().contains(TCari.getText().toLowerCase())){
+            tabMode.addRow(new Object[]{false,"[M]Skrining Instrumen ESAT",skrining_instrumen_esat});
+        }
+        
+        if("[M]Pengkajian Awal Medis Ranap Jantung".toLowerCase().contains(TCari.getText().toLowerCase())){
+            tabMode.addRow(new Object[]{false,"[M]Pengkajian Awal Medis Ranap Jantung",penilaian_awal_medis_ranap_jantung});
+        }
+        
+        if("[M]Skrining CURB-65".toLowerCase().contains(TCari.getText().toLowerCase())){
+            tabMode.addRow(new Object[]{false,"[M]Skrining CURB-65",skrining_curb65});
         }
                 
         if("[N]Pengambilan BHP Medis".toLowerCase().contains(TCari.getText().toLowerCase())){
@@ -6115,7 +6164,31 @@ public class DlgUpdateUser extends javax.swing.JDialog {
             if("[B]Permintaan Pengujian Sampel Lab Kesling".equals(tbUser.getValueAt(i,1).toString())){
                 Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","permintaan_pengujian_sampel_lab_kesehatan_lingkungan='"+tbUser.getValueAt(i,2).toString()+"'");
             }
+            
+            if("[B]Data Penugasan Pengujian Sampel Lab Kesling".equals(tbUser.getValueAt(i,1).toString())){
+                Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","penugasan_pengujian_sampel_lab_kesehatan_lingkungan='"+tbUser.getValueAt(i,2).toString()+"'");
+            }
+            
+            if("[B]Data Hasil Pengujian Sampel Lab Kesling".equals(tbUser.getValueAt(i,1).toString())){
+                Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","hasil_pengujian_sampel_lab_kesehatan_lingkungan='"+tbUser.getValueAt(i,2).toString()+"'");
+            }
+            
+            if("[B]Data Verifikasi Pengujian Sampel Lab Kesling".equals(tbUser.getValueAt(i,1).toString())){
+                Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","verifikasi_pengujian_sampel_lab_kesehatan_lingkungan='"+tbUser.getValueAt(i,2).toString()+"'");
+            }
 
+            if("[B]Data Validasi Pengujian Sampel Lab Kesling".equals(tbUser.getValueAt(i,1).toString())){
+                Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","validasi_pengujian_sampel_lab_kesehatan_lingkungan='"+tbUser.getValueAt(i,2).toString()+"'");
+            }
+            
+            if("[B]Rekap Pelayanan Lab Kesling".equals(tbUser.getValueAt(i,1).toString())){
+                Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","rekap_pelayanan_lab_kesehatan_lingkungan='"+tbUser.getValueAt(i,2).toString()+"'");
+            }
+            
+            if("[B]Pembayaran Pengujian Sampel Lab Kesling".equals(tbUser.getValueAt(i,1).toString())){
+                Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","pembayaran_pengujian_sampel_lab_kesehatan_lingkungan='"+tbUser.getValueAt(i,2).toString()+"'");
+            }
+            
             if("[C]Dokter".equals(tbUser.getValueAt(i,1).toString())){
                 Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","dokter='"+tbUser.getValueAt(i,2).toString()+"'");
             }
@@ -8632,6 +8705,10 @@ public class DlgUpdateUser extends javax.swing.JDialog {
                 Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","duta_parkir_rekap_keluar='"+tbUser.getValueAt(i,2).toString()+"'");
             }
             
+            if("[L]Potensi PRB di VClaim".equals(tbUser.getValueAt(i,1).toString())){
+                Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","bpjs_potensi_prb='"+tbUser.getValueAt(i,2).toString()+"'");
+            }
+            
             if("[M]Pasien".equals(tbUser.getValueAt(i,1).toString())){
                 Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","pasien='"+tbUser.getValueAt(i,2).toString()+"'");
             }
@@ -9590,6 +9667,18 @@ public class DlgUpdateUser extends javax.swing.JDialog {
             
             if("[M]Master Template Informasi & Edukasi".equals(tbUser.getValueAt(i,1).toString())){
                 Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","template_pelaksanaan_informasi_edukasi='"+tbUser.getValueAt(i,2).toString()+"'");
+            }
+            
+            if("[M]Skrining Instrumen ESAT".equals(tbUser.getValueAt(i,1).toString())){
+                Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","skrining_instrumen_esat='"+tbUser.getValueAt(i,2).toString()+"'");
+            }
+            
+            if("[M]Pengkajian Awal Medis Ranap Jantung".equals(tbUser.getValueAt(i,1).toString())){
+                Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","penilaian_awal_medis_ranap_jantung='"+tbUser.getValueAt(i,2).toString()+"'");
+            }
+            
+            if("[M]Skrining CURB-65".equals(tbUser.getValueAt(i,1).toString())){
+                Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","skrining_curb65='"+tbUser.getValueAt(i,2).toString()+"'");
             }
                     
             if("[N]Pengambilan BHP Medis".equals(tbUser.getValueAt(i,1).toString())){

@@ -17,8 +17,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -41,6 +44,8 @@ public class DlgCariReturJual extends javax.swing.JDialog {
     private int no=0,i=0;
     private String aktifkanbatch="no";
     private boolean sukses=true;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private volatile boolean ceksukses = false;
 
     /** Creates new form DlgProgramStudi
      * @param parent
@@ -101,19 +106,19 @@ public class DlgCariReturJual extends javax.swing.JDialog {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
-                        tampil();
+                        runBackground(() ->tampil());
                     }
                 }
                 @Override
                 public void removeUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
-                        tampil();
+                        runBackground(() ->tampil());
                     }
                 }
                 @Override
                 public void changedUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
-                        tampil();
+                        runBackground(() ->tampil());
                     }
                 }
             });
@@ -279,11 +284,6 @@ public class DlgCariReturJual extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setUndecorated(true);
         setResizable(false);
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowOpened(java.awt.event.WindowEvent evt) {
-                formWindowOpened(evt);
-            }
-        });
 
         internalFrame1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ Cari Retur Obat, Alkes & BHP Medis Dari Pembeli/Pasien ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50, 50, 50))); // NOI18N
         internalFrame1.setName("internalFrame1"); // NOI18N
@@ -659,7 +659,7 @@ public class DlgCariReturJual extends javax.swing.JDialog {
     }//GEN-LAST:event_TCariKeyPressed
 
     private void BtnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCariActionPerformed
-        tampil();
+        runBackground(() ->tampil());
     }//GEN-LAST:event_BtnCariActionPerformed
 
     private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnCariKeyPressed
@@ -677,7 +677,7 @@ public class DlgCariReturJual extends javax.swing.JDialog {
         nmbar.setText("");
         kdsat.setText("");
         nmsat.setText("");
-        tampil();
+        runBackground(() ->tampil());
     }//GEN-LAST:event_BtnAllActionPerformed
 
     private void BtnAllKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnAllKeyPressed
@@ -690,7 +690,6 @@ public class DlgCariReturJual extends javax.swing.JDialog {
 
     private void BtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPrintActionPerformed
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        BtnCariActionPerformed(evt);
         if(tabMode.getRowCount()==0){
             JOptionPane.showMessageDialog(null,"Maaf, data sudah habis. Tidak ada data yang bisa anda print...!!!!");
             TCari.requestFocus();
@@ -865,7 +864,7 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
 
                 Sequel.AutoComitTrue();
                 if(sukses==true){
-                    tampil();
+                    runBackground(() ->tampil());
                 } 
             }     
          } catch (Exception e) {
@@ -884,10 +883,6 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
   }       
     
 }//GEN-LAST:event_ppHapusActionPerformed
-
-    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-        tampil();
-    }//GEN-LAST:event_formWindowOpened
 
     /**
     * @param args the command line arguments
@@ -969,49 +964,31 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
         }
         Valid.tabelKosong(tabMode);
         try{
-            ps=koneksi.prepareStatement("select returjual.no_retur_jual,returjual.tgl_retur, "+
-                    "returjual.nip,petugas.nama,pasien.no_rkm_medis,pasien.nm_pasien,bangsal.nm_bangsal "+
-                    " from returjual inner join petugas inner join pasien inner join bangsal "+
-                    " inner join detreturjual inner join databarang inner join kodesatuan "+
-                    " on detreturjual.kode_brng=databarang.kode_brng "+
-                    " and returjual.kd_bangsal=bangsal.kd_bangsal "+
-                    " and returjual.no_rkm_medis=pasien.no_rkm_medis "+
-                    " and detreturjual.kode_sat=kodesatuan.kode_sat "+
-                    " and returjual.no_retur_jual=detreturjual.no_retur_jual "+
-                    " and returjual.nip=petugas.nip "+
-                    " where "+tanggal+noret+ptg+sat+bar+" and returjual.no_retur_jual like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and returjual.nip like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and petugas.nama like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and detreturjual.kode_brng like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and databarang.nama_brng like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and pasien.no_rkm_medis like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and pasien.nm_pasien like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and bangsal.nm_bangsal like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and detreturjual.nota_jual like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and kodesatuan.satuan like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and detreturjual.kode_sat like '%"+TCari.getText()+"%' "+
-                    " group by returjual.no_retur_jual order by returjual.tgl_retur,returjual.no_retur_jual ");
+            ps=koneksi.prepareStatement(
+                "select returjual.no_retur_jual,returjual.tgl_retur,returjual.nip,petugas.nama,pasien.no_rkm_medis,pasien.nm_pasien,bangsal.nm_bangsal from returjual "+
+                "inner join petugas on returjual.nip=petugas.nip inner join pasien on returjual.no_rkm_medis=pasien.no_rkm_medis "+
+                "inner join bangsal on returjual.kd_bangsal=bangsal.kd_bangsal inner join detreturjual on returjual.no_retur_jual=detreturjual.no_retur_jual "+
+                "inner join databarang on detreturjual.kode_brng=databarang.kode_brng inner join kodesatuan on detreturjual.kode_sat=kodesatuan.kode_sat "+
+                "where "+tanggal+noret+ptg+sat+bar+(TCari.getText().trim().equals("")?"":" and (returjual.no_retur_jual like '%"+TCari.getText()+"%' or "+
+                "returjual.nip like '%"+TCari.getText()+"%' or petugas.nama like '%"+TCari.getText()+"%' or detreturjual.kode_brng like '%"+TCari.getText()+"%' or "+
+                "databarang.nama_brng like '%"+TCari.getText()+"%' or pasien.no_rkm_medis like '%"+TCari.getText()+"%' or pasien.nm_pasien like '%"+TCari.getText()+"%' or "+
+                "bangsal.nm_bangsal like '%"+TCari.getText()+"%' or detreturjual.nota_jual like '%"+TCari.getText()+"%' or kodesatuan.satuan like '%"+TCari.getText()+"%' or "+
+                "detreturjual.kode_sat like '%"+TCari.getText()+"%') ")+" group by returjual.no_retur_jual order by returjual.tgl_retur,returjual.no_retur_jual"
+            );
             try {
                 rs=ps.executeQuery();
                 ttlretur=0;
                 while(rs.next()){
-                    tabMode.addRow(new Object[]{rs.getString(1),
-                                   rs.getString(2),
-                                   rs.getString(3)+", "+rs.getString(4),
-                                   rs.getString(5)+", "+rs.getString(6),
-                                   "Retur Jual : di "+rs.getString(7),"","","","",""
+                    tabMode.addRow(new Object[]{
+                        rs.getString(1),rs.getString(2),rs.getString(3)+", "+rs.getString(4),rs.getString(5)+", "+rs.getString(6),"Retur Jual : di "+rs.getString(7),"","","","",""
                     });
-                    ps2=koneksi.prepareStatement("select detreturjual.nota_jual,detreturjual.kode_brng,databarang.nama_brng, "+
-                            "detreturjual.kode_sat,kodesatuan.satuan,detreturjual.h_retur,detreturjual.jml_retur, "+
-                            "detreturjual.subtotal,detreturjual.no_batch,detreturjual.no_faktur from detreturjual inner join databarang inner join kodesatuan "+
-                            " on detreturjual.kode_brng=databarang.kode_brng "+
-                            " and detreturjual.kode_sat=kodesatuan.kode_sat where "+
-                            " detreturjual.no_retur_jual='"+rs.getString(1)+"' "+sat+bar+nonot+" and detreturjual.kode_brng like '%"+TCari.getText()+"%' or "+
-                            " detreturjual.no_retur_jual='"+rs.getString(1)+"' "+sat+bar+nonot+" and databarang.nama_brng like '%"+TCari.getText()+"%' or "+
-                            " detreturjual.no_retur_jual='"+rs.getString(1)+"' "+sat+bar+nonot+" and detreturjual.nota_jual like '%"+TCari.getText()+"%' or "+
-                            " detreturjual.no_retur_jual='"+rs.getString(1)+"' "+sat+bar+nonot+" and detreturjual.kode_sat like '%"+TCari.getText()+"%' or "+
-                            " detreturjual.no_retur_jual='"+rs.getString(1)+"' "+sat+bar+nonot+" and detreturjual.nota_jual like '%"+TCari.getText()+"%' or "+
-                            " detreturjual.no_retur_jual='"+rs.getString(1)+"' "+sat+bar+nonot+" and kodesatuan.satuan like '%"+TCari.getText()+"%' order by detreturjual.kode_brng  ");
+                    ps2=koneksi.prepareStatement(
+                        "select detreturjual.nota_jual,detreturjual.kode_brng,databarang.nama_brng,detreturjual.kode_sat,kodesatuan.satuan,detreturjual.h_retur,detreturjual.jml_retur, "+
+                        "detreturjual.subtotal,detreturjual.no_batch,detreturjual.no_faktur from detreturjual inner join databarang on detreturjual.kode_brng=databarang.kode_brng "+
+                        "inner join kodesatuan on detreturjual.kode_sat=kodesatuan.kode_sat "+
+                        "where detreturjual.no_retur_jual='"+rs.getString(1)+"' "+sat+bar+nonot+(TCari.getText().trim().equals("")?"":"and (detreturjual.kode_brng like '%"+TCari.getText()+"%' or "+
+                        "databarang.nama_brng like '%"+TCari.getText()+"%' or detreturjual.nota_jual like '%"+TCari.getText()+"%' or detreturjual.kode_sat like '%"+TCari.getText()+"%' or "+
+                        "detreturjual.nota_jual like '%"+TCari.getText()+"%' or kodesatuan.satuan like '%"+TCari.getText()+"%')")+" order by detreturjual.kode_brng  ");
                     try {
                         subtotal=0;
                         no=1;
@@ -1065,5 +1042,21 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
         }  */
     }
 
- 
+    private void runBackground(Runnable task) {
+        if (ceksukses) return;
+        ceksukses = true;
+
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+        executor.submit(() -> {
+            try {
+                task.run();
+            } finally {
+                ceksukses = false;
+                SwingUtilities.invokeLater(() -> {
+                    this.setCursor(Cursor.getDefaultCursor());
+                });
+            }
+        });
+    }
 }

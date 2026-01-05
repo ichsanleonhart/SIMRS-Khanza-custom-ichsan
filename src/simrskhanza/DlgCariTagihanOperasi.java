@@ -30,6 +30,7 @@ import keuangan.Jurnal;
 import laporan.DlgBerkasRawat;
 import rekammedis.MasterCariTemplateLaporanOperasi;
 import java.util.Date;
+<<<<<<< HEAD
 import org.apache.commons.io.FileUtils; // tambahan by ichsan
 import org.apache.http.client.HttpClient; // tambahan by ichsan
 import org.apache.http.client.methods.HttpPost; // tambahan by ichsan
@@ -37,6 +38,11 @@ import org.apache.http.entity.mime.HttpMultipartMode; // tambahan by ichsan
 import org.apache.http.entity.mime.MultipartEntity; // tambahan by ichsan
 import org.apache.http.entity.mime.content.ByteArrayBody; // tambahan by ichsan
 import org.apache.http.impl.client.DefaultHttpClient; // tambahan by ichsan
+=======
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.swing.SwingUtilities;
+>>>>>>> upstream/master
 
 public class DlgCariTagihanOperasi extends javax.swing.JDialog {
     private final DefaultTableModel tabMode;
@@ -48,6 +54,8 @@ public class DlgCariTagihanOperasi extends javax.swing.JDialog {
     private DlgCariPetugas petugas=new DlgCariPetugas( null,false);
     private DlgCariDokter dokter=new DlgCariDokter(null,false);
     private ResultSet rsrekening,rs,rs2;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private volatile boolean ceksukses = false;
     private int pilihan=0;
     private boolean sukses=true;
     private double ttljmdokter=0,ttljmpetugas=0,ttlpendapatan=0,ttlbhp=0;
@@ -118,19 +126,19 @@ public class DlgCariTagihanOperasi extends javax.swing.JDialog {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
-                        tampil();
+                        runBackground(() -> tampil());
                     }
                 }
                 @Override
                 public void removeUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
-                        tampil();
+                        runBackground(() -> tampil());
                     }
                 }
                 @Override
                 public void changedUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
-                        tampil();
+                        runBackground(() -> tampil());
                     }
                 }
             });
@@ -1988,7 +1996,7 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
     }//GEN-LAST:event_TCariKeyPressed
 
     private void BtnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCariActionPerformed
-        tampil();
+        runBackground(() -> tampil());
     }//GEN-LAST:event_BtnCariActionPerformed
 
     private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnCariKeyPressed
@@ -2003,7 +2011,7 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
         TCari.setText("");
         kdmem.setText("");
         nmmem.setText("");
-        tampil();
+        runBackground(() -> tampil());
     }//GEN-LAST:event_BtnAllActionPerformed
 
     private void BtnAllKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnAllKeyPressed
@@ -2216,7 +2224,7 @@ private void MnHapusTagihanOperasiActionPerformed(java.awt.event.ActionEvent evt
 
                     if(sukses==true){
                         Sequel.Commit();
-                        tampil();
+                        runBackground(() -> tampil());
                     }else{
                         JOptionPane.showMessageDialog(null,"Terjadi kesalahan saat pemrosesan data, transaksi dibatalkan.\nPeriksa kembali data sebelum melanjutkan menyimpan..!!");
                         Sequel.RollBack();
@@ -2289,7 +2297,7 @@ private void MnHapusObatOperasiActionPerformed(java.awt.event.ActionEvent evt) {
 
                     if(sukses==true){
                         Sequel.Commit();
-                        tampil();
+                        runBackground(() -> tampil());
                     }else{
                         JOptionPane.showMessageDialog(null,"Terjadi kesalahan saat pemrosesan data, transaksi dibatalkan.\nPeriksa kembali data sebelum melanjutkan menyimpan..!!");
                         Sequel.RollBack();
@@ -2304,7 +2312,7 @@ private void MnHapusObatOperasiActionPerformed(java.awt.event.ActionEvent evt) {
 }//GEN-LAST:event_MnHapusObatOperasiActionPerformed
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-        tampil();
+        runBackground(() -> tampil());
     }//GEN-LAST:event_formWindowOpened
 
     private void MnUbahOperatorPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MnUbahOperatorPetugasActionPerformed
@@ -2570,7 +2578,7 @@ private void MnHapusObatOperasiActionPerformed(java.awt.event.ActionEvent evt) {
                      kddrumum.getText(),tbDokter.getValueAt(tbDokter.getSelectedRow(),1).toString(),
                      tbDokter.getValueAt(tbDokter.getSelectedRow(),0).toString()
                 })==true){
-                tampil();
+                runBackground(() -> tampil());
                 dokter.dispose();
                 petugas.dispose();
                 WindowGantiDokterParamedis.dispose();
@@ -3836,4 +3844,21 @@ private void MnHapusObatOperasiActionPerformed(java.awt.event.ActionEvent evt) {
     }
 	//////////////////////// start - upload berkas digital perawatan by ichsan
  
+    private void runBackground(Runnable task) {
+        if (ceksukses) return;
+        ceksukses = true;
+
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+        executor.submit(() -> {
+            try {
+                task.run();
+            } finally {
+                ceksukses = false;
+                SwingUtilities.invokeLater(() -> {
+                    this.setCursor(Cursor.getDefaultCursor());
+                });
+            }
+        });
+    }
 }

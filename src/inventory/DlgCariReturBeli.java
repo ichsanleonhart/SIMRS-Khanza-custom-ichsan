@@ -20,8 +20,11 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -45,6 +48,8 @@ public class DlgCariReturBeli extends javax.swing.JDialog {
     private final Properties prop = new Properties();  
     private boolean sukses=true;
     private int i=0;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private volatile boolean ceksukses = false;
 
     /** Creates new form DlgProgramStudi
      * @param parent
@@ -139,19 +144,19 @@ public class DlgCariReturBeli extends javax.swing.JDialog {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
-                        tampil();
+                        runBackground(() ->tampil());
                     }
                 }
                 @Override
                 public void removeUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
-                        tampil();
+                        runBackground(() ->tampil());
                     }
                 }
                 @Override
                 public void changedUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
-                        tampil();
+                        runBackground(() ->tampil());
                     }
                 }
             });
@@ -275,7 +280,7 @@ public class DlgCariReturBeli extends javax.swing.JDialog {
 
         ppHapus.setBackground(new java.awt.Color(255, 255, 254));
         ppHapus.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
-        ppHapus.setForeground(new java.awt.Color(50,50,50));
+        ppHapus.setForeground(new java.awt.Color(50, 50, 50));
         ppHapus.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
         ppHapus.setText("Hapus Retur");
         ppHapus.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -292,13 +297,8 @@ public class DlgCariReturBeli extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setUndecorated(true);
         setResizable(false);
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowOpened(java.awt.event.WindowEvent evt) {
-                formWindowOpened(evt);
-            }
-        });
 
-        internalFrame1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ Cari Retur Obat, Alkes & BHP Medis Ke Suplier ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50,50,50))); // NOI18N
+        internalFrame1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ Cari Retur Obat, Alkes & BHP Medis Ke Suplier ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50, 50, 50))); // NOI18N
         internalFrame1.setName("internalFrame1"); // NOI18N
         internalFrame1.setLayout(new java.awt.BorderLayout(1, 1));
 
@@ -670,7 +670,7 @@ public class DlgCariReturBeli extends javax.swing.JDialog {
     }//GEN-LAST:event_TCariKeyPressed
 
     private void BtnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCariActionPerformed
-        tampil();
+        runBackground(() ->tampil());
     }//GEN-LAST:event_BtnCariActionPerformed
 
     private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnCariKeyPressed
@@ -688,7 +688,7 @@ public class DlgCariReturBeli extends javax.swing.JDialog {
         nmbar.setText("");
         kdsat.setText("");
         nmsat.setText("");
-        tampil();
+        runBackground(() ->tampil());
     }//GEN-LAST:event_BtnAllActionPerformed
 
     private void BtnAllKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnAllKeyPressed
@@ -701,7 +701,6 @@ public class DlgCariReturBeli extends javax.swing.JDialog {
 
     private void BtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPrintActionPerformed
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        BtnCariActionPerformed(evt);
         if(tabMode.getRowCount()==0){
             JOptionPane.showMessageDialog(null,"Maaf, data sudah habis. Tidak ada data yang bisa anda print...!!!!");
             TCari.requestFocus();
@@ -883,7 +882,7 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
                 
                 Sequel.AutoComitTrue();
                 if(sukses==true){
-                    tampil();
+                    runBackground(() ->tampil());
                 }
             }   
          } catch (Exception e) {
@@ -902,10 +901,6 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
   }       
     
 }//GEN-LAST:event_ppHapusActionPerformed
-
-    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-        tampil();
-    }//GEN-LAST:event_formWindowOpened
 
     /**
     * @param args the command line arguments
@@ -988,29 +983,18 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
         
         Valid.tabelKosong(tabMode);
         try{
-            ps=koneksi.prepareStatement("select returbeli.no_retur_beli,returbeli.tgl_retur, "+
-                    "returbeli.nip,petugas.nama,returbeli.kode_suplier,datasuplier.nama_suplier,bangsal.nm_bangsal "+
-                    " from returbeli inner join petugas inner join bangsal  "+
-                    " inner join detreturbeli inner join databarang inner join kodesatuan inner join datasuplier "+
-                    " on detreturbeli.kode_brng=databarang.kode_brng "+
-                    " and detreturbeli.kode_sat=kodesatuan.kode_sat "+
-                    " and returbeli.kd_bangsal=bangsal.kd_bangsal "+
-                    " and returbeli.kode_suplier=datasuplier.kode_suplier "+
-                    " and returbeli.no_retur_beli=detreturbeli.no_retur_beli "+
-                    " and returbeli.nip=petugas.nip "+
-                    " where "+tanggal+noret+ptg+sat+bar+" and returbeli.no_retur_beli like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and returbeli.nip like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and petugas.nama like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and detreturbeli.kode_brng like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and databarang.nama_brng like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and returbeli.kode_suplier like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and bangsal.nm_bangsal like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and datasuplier.nama_suplier like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and detreturbeli.no_faktur like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and detreturbeli.no_batch like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and kodesatuan.satuan like '%"+TCari.getText()+"%' or "+
-                    tanggal+noret+ptg+sat+bar+" and detreturbeli.kode_sat like '%"+TCari.getText()+"%' "+
-                    " group by returbeli.no_retur_beli order by returbeli.tgl_retur,returbeli.no_retur_beli ");
+            ps=koneksi.prepareStatement(
+                "select returbeli.no_retur_beli,returbeli.tgl_retur,returbeli.nip,petugas.nama,returbeli.kode_suplier,datasuplier.nama_suplier,bangsal.nm_bangsal "+
+                "from returbeli inner join petugas on returbeli.nip=petugas.nip inner join bangsal on returbeli.kd_bangsal=bangsal.kd_bangsal "+
+                "inner join detreturbeli on returbeli.no_retur_beli=detreturbeli.no_retur_beli inner join databarang on detreturbeli.kode_brng=databarang.kode_brng "+
+                "inner join kodesatuan on detreturbeli.kode_sat=kodesatuan.kode_sat inner join datasuplier on returbeli.kode_suplier=datasuplier.kode_suplier "+
+                "where "+tanggal+noret+ptg+sat+bar+(TCari.getText().trim().equals("")?"":
+                "and (returbeli.no_retur_beli like '%"+TCari.getText()+"%' or returbeli.nip like '%"+TCari.getText()+"%' or petugas.nama like '%"+TCari.getText()+"%' or "+
+                "detreturbeli.kode_brng like '%"+TCari.getText()+"%' or databarang.nama_brng like '%"+TCari.getText()+"%' or returbeli.kode_suplier like '%"+TCari.getText()+"%' or "+
+                "bangsal.nm_bangsal like '%"+TCari.getText()+"%' or datasuplier.nama_suplier like '%"+TCari.getText()+"%' or detreturbeli.no_faktur like '%"+TCari.getText()+"%' or "+
+                "detreturbeli.no_batch like '%"+TCari.getText()+"%' or kodesatuan.satuan like '%"+TCari.getText()+"%' or detreturbeli.kode_sat like '%"+TCari.getText()+"%') ")+
+                "group by returbeli.no_retur_beli order by returbeli.tgl_retur,returbeli.no_retur_beli "
+            );
             try {
                 rs=ps.executeQuery();
                 ttlretur=0;
@@ -1019,17 +1003,14 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
                         rs.getString(1),rs.getString(2),rs.getString(3)+", "+rs.getString(4),
                         rs.getString(5)+", "+rs.getString(6),"Retur Beli : ","di "+rs.getString(7),"","","",""
                     });
-                    ps2=koneksi.prepareStatement("select detreturbeli.no_faktur,detreturbeli.kode_brng,databarang.nama_brng, "+
-                            "detreturbeli.kode_sat,kodesatuan.satuan,detreturbeli.h_retur,detreturbeli.jml_retur, "+
-                            "detreturbeli.total,detreturbeli.no_batch from detreturbeli inner join databarang inner join kodesatuan "+
-                            " on detreturbeli.kode_brng=databarang.kode_brng "+
-                            " and detreturbeli.kode_sat=kodesatuan.kode_sat where "+
-                            " detreturbeli.no_retur_beli='"+rs.getString(1)+"' "+sat+bar+nofak+" and detreturbeli.kode_brng like '%"+TCari.getText()+"%' or "+
-                            " detreturbeli.no_retur_beli='"+rs.getString(1)+"' "+sat+bar+nofak+" and databarang.nama_brng like '%"+TCari.getText()+"%' or "+
-                            " detreturbeli.no_retur_beli='"+rs.getString(1)+"' "+sat+bar+nofak+" and detreturbeli.no_faktur like '%"+TCari.getText()+"%' or "+
-                            " detreturbeli.no_retur_beli='"+rs.getString(1)+"' "+sat+bar+nofak+" and detreturbeli.no_batch like '%"+TCari.getText()+"%' or "+
-                            " detreturbeli.no_retur_beli='"+rs.getString(1)+"' "+sat+bar+nofak+" and detreturbeli.kode_sat like '%"+TCari.getText()+"%' or "+
-                            " detreturbeli.no_retur_beli='"+rs.getString(1)+"' "+sat+bar+nofak+" and kodesatuan.satuan like '%"+TCari.getText()+"%' order by detreturbeli.kode_brng  ");
+                    ps2=koneksi.prepareStatement(
+                            "select detreturbeli.no_faktur,detreturbeli.kode_brng,databarang.nama_brng,detreturbeli.kode_sat,kodesatuan.satuan,detreturbeli.h_retur,detreturbeli.jml_retur, "+
+                            "detreturbeli.total,detreturbeli.no_batch from detreturbeli inner join databarang on detreturbeli.kode_brng=databarang.kode_brng "+
+                            "inner join kodesatuan on detreturbeli.kode_sat=kodesatuan.kode_sat "+
+                            "where detreturbeli.no_retur_beli='"+rs.getString(1)+"' "+sat+bar+nofak+
+                            (TCari.getText().trim().equals("")?"":"and (detreturbeli.kode_brng like '%"+TCari.getText()+"%' or databarang.nama_brng like '%"+TCari.getText()+"%' or "+
+                            "detreturbeli.no_faktur like '%"+TCari.getText()+"%' or detreturbeli.no_batch like '%"+TCari.getText()+"%' or detreturbeli.kode_sat like '%"+TCari.getText()+"%' or "+
+                            "kodesatuan.satuan like '%"+TCari.getText()+"%')")+" order by detreturbeli.kode_brng");
                     try {
                         subtotal=0;
                         int no=1;
@@ -1083,6 +1064,21 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
         }  
     }
 
+    private void runBackground(Runnable task) {
+        if (ceksukses) return;
+        ceksukses = true;
 
- 
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+        executor.submit(() -> {
+            try {
+                task.run();
+            } finally {
+                ceksukses = false;
+                SwingUtilities.invokeLater(() -> {
+                    this.setCursor(Cursor.getDefaultCursor());
+                });
+            }
+        });
+    }
 }

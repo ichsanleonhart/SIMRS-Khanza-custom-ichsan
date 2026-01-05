@@ -22,8 +22,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.table.DefaultTableModel;
@@ -62,6 +65,8 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
     private JsonNode root;
     private int i;
     private StringBuilder htmlContent;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private volatile boolean ceksukses = false;
     private PreparedStatement ps,ps2,ps3,ps4,ps5,psrekening;
     private ResultSet rs,rs2,rs3,rs5,rsrekening;
     private String kamar,namakamar,pemeriksaan="",pilihan="",status="",finger="",statushasil="", lokasifile="", SQLException="", FileName ="",kodeberkas=""; //tambahan ichsan FileName ="",kodeberkas="", lokasifile="" SQLException=""
@@ -142,21 +147,21 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
                 public void insertUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
                         statushasil="";
-                        tampil();
+                        runBackground(() -> tampil());
                     }
                 }
                 @Override
                 public void removeUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
                         statushasil="";
-                        tampil();
+                        runBackground(() -> tampil());
                     }
                 }
                 @Override
                 public void changedUpdate(DocumentEvent e) {
                     if(TCari.getText().length()>2){
                         statushasil="";
-                        tampil();
+                        runBackground(() -> tampil());
                     }
                 }
             });
@@ -1455,7 +1460,7 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
 
     private void BtnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCariActionPerformed
         statushasil="";
-        tampil();
+        runBackground(() -> tampil());
     }//GEN-LAST:event_BtnCariActionPerformed
 
     private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnCariKeyPressed
@@ -1474,7 +1479,7 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
         kdptg.setText("");
         nmptg.setText("");
         statushasil="";
-        tampil();
+        runBackground(() -> tampil());
     }//GEN-LAST:event_BtnAllActionPerformed
 
     private void BtnAllKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnAllKeyPressed
@@ -1755,7 +1760,7 @@ private void BtnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                         if(sukses==true){
                             Sequel.Commit();
                             statushasil="";
-                            tampil();
+                            runBackground(() -> tampil());
                         }else{
                             JOptionPane.showMessageDialog(null,"Terjadi kesalahan saat pemrosesan data, transaksi dibatalkan.\nPeriksa kembali data sebelum melanjutkan menyimpan..!!");
                             Sequel.RollBack();
@@ -1804,7 +1809,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         statushasil="";
-        tampil();
+        runBackground(() -> tampil());
     }//GEN-LAST:event_formWindowOpened
 
     private void MnCetakNotaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MnCetakNotaActionPerformed
@@ -1831,7 +1836,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
                         rs=ps4.executeQuery();
                         while(rs.next()){
                             Sequel.queryu("delete from temporary_radiologi");
-                            koneksi.setAutoCommit(false);
+                            Sequel.AutoComitFalse();
                             ps2=koneksi.prepareStatement(
                                 "select jns_perawatan_radiologi.kd_jenis_prw,jns_perawatan_radiologi.nm_perawatan,periksa_radiologi.biaya from periksa_radiologi inner join jns_perawatan_radiologi "+
                                 "on periksa_radiologi.kd_jenis_prw=jns_perawatan_radiologi.kd_jenis_prw where periksa_radiologi.no_rawat=? and periksa_radiologi.tgl_periksa=? "+
@@ -1865,7 +1870,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
                                     +"&tanggal="+rs.getString("tgl_periksa")+"&jam="+rs.getString("jam")+"&pjlab="+rs.getString("nm_dokter").replaceAll(" ","_")
                                     +"&petugas="+rs.getString("nama").replaceAll(" ","_")+"&kasir="+Sequel.cariIsi("select pegawai.nama from pegawai where pegawai.nik=?",akses.getkode())
                                     +"&usere="+koneksiDB.USERHYBRIDWEB()+"&passwordte="+koneksiDB.PASHYBRIDWEB());
-                            koneksi.setAutoCommit(true);  
+                            Sequel.AutoComitTrue();
                         }
                     } catch (Exception e) {
                         System.out.println("simrskhanza.DlgCariPeriksaRadiologi.MnCetakNotaActionPerformed() ps4 : "+e);
@@ -1886,6 +1891,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
     }//GEN-LAST:event_MnCetakNotaActionPerformed
 
     private void BtnPrint1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPrint1ActionPerformed
+<<<<<<< HEAD
         if(Kd2.getText().equals("")){
                JOptionPane.showMessageDialog(null,"Maaf, silahkan pilih data terlebih dahulu...!!!!"); 
         }else{
@@ -1937,16 +1943,47 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
                             "periksa_radiologi.BSF,periksa_radiologi.inak,periksa_radiologi.jml_penyinaran,periksa_radiologi.dosis from periksa_radiologi inner join jns_perawatan_radiologi "+
                             "on periksa_radiologi.kd_jenis_prw=jns_perawatan_radiologi.kd_jenis_prw where periksa_radiologi.no_rawat=? and periksa_radiologi.tgl_periksa=? "+
                             "and periksa_radiologi.jam=?"); 
+=======
+        if(tabMode.getRowCount()==0){
+            JOptionPane.showMessageDialog(null,"Maaf, data sudah habis...!!!!");
+            TCari.requestFocus();
+        }else if(tbDokter.getSelectedRow()<= -1){
+            JOptionPane.showMessageDialog(null,"Maaf, Silahkan pilih data..!!");
+        }else {
+            if(Kd2.getText().equals("")){
+                JOptionPane.showMessageDialog(null,"Maaf, silahkan pilih data terlebih dahulu...!!!!"); 
+            }else{
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                pemeriksaan="";
+>>>>>>> upstream/master
                 try {
-                    ps2.setString(1,NoRawatDicari.getText());
-                    ps2.setString(2,TglDicari.getText());
-                    ps2.setString(3,JamDicari.getText());
-                    rs2=ps2.executeQuery();
-                    while(rs2.next()){
-                        pemeriksaan=rs2.getString("nm_perawatan")+", "+pemeriksaan;
-                        kdpenjab=rs2.getString("kd_dokter");
-                        kdpetugas=rs2.getString("nip");
+                    ps2=koneksi.prepareStatement(
+                                "select jns_perawatan_radiologi.kd_jenis_prw,jns_perawatan_radiologi.nm_perawatan,periksa_radiologi.biaya,"+
+                                "periksa_radiologi.kd_dokter,periksa_radiologi.nip,periksa_radiologi.proyeksi,periksa_radiologi.kV,periksa_radiologi.mAS,periksa_radiologi.FFD,"+
+                                "periksa_radiologi.BSF,periksa_radiologi.inak,periksa_radiologi.jml_penyinaran,periksa_radiologi.dosis from periksa_radiologi inner join jns_perawatan_radiologi "+
+                                "on periksa_radiologi.kd_jenis_prw=jns_perawatan_radiologi.kd_jenis_prw where periksa_radiologi.no_rawat=? and periksa_radiologi.tgl_periksa=? "+
+                                "and periksa_radiologi.jam=?"); 
+                    try {
+                        ps2.setString(1,NoRawatDicari.getText());
+                        ps2.setString(2,TglDicari.getText());
+                        ps2.setString(3,JamDicari.getText());
+                        rs2=ps2.executeQuery();
+                        while(rs2.next()){
+                            pemeriksaan=rs2.getString("nm_perawatan")+", "+pemeriksaan;
+                            kdpenjab=rs2.getString("kd_dokter");
+                            kdpetugas=rs2.getString("nip");
+                        }
+                    } catch (Exception e) {
+                        System.out.println("simrskhanza.DlgCariPeriksaRadiologi.BtnPrint1ActionPerformed() ps2 : "+e);
+                    } finally{
+                        if(rs2!=null){
+                            rs2.close();
+                        }
+                        if(ps2!=null){
+                            ps2.close();
+                        }
                     }
+<<<<<<< HEAD
                 } catch (Exception e) {
                     System.out.println("simrskhanza.DlgCariPeriksaRadiologi.BtnPrint1ActionPerformed() ps2 : "+e);
                 } finally{
@@ -2030,6 +2067,80 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
             }                        
             
             this.setCursor(Cursor.getDefaultCursor());
+=======
+
+                } catch (Exception e) {
+                    System.out.println("Notifikasi Pemeriksaan : "+e);
+                }          
+                Sequel.cariIsi("select reg_periksa.no_rkm_medis from reg_periksa where reg_periksa.no_rawat=? ",NoRM,Kd2.getText());
+                Sequel.cariIsi("select pasien.jk from pasien where pasien.no_rkm_medis=? ",Jk,NoRM.getText());
+                Sequel.cariIsi("select pasien.umur from pasien where pasien.no_rkm_medis=?",Umur,NoRM.getText());
+                Sequel.cariIsi("select concat(pasien.alamat,', ',kelurahan.nm_kel,', ',kecamatan.nm_kec,', ',kabupaten.nm_kab) as alamat from pasien inner join kelurahan inner join kecamatan inner join kabupaten on pasien.kd_kel=kelurahan.kd_kel and pasien.kd_kec=kecamatan.kd_kec and pasien.kd_kab=kabupaten.kd_kab where no_rkm_medis=? ",Alamat,NoRM.getText());
+
+                kamar=Sequel.cariIsi("select ifnull(kamar_inap.kd_kamar,'') from kamar_inap where kamar_inap.no_rawat='"+Kd2.getText()+"' order by kamar_inap.tgl_masuk desc limit 1");
+                if(!kamar.equals("")){
+                    namakamar=kamar+", "+Sequel.cariIsi("select bangsal.nm_bangsal from bangsal inner join kamar on bangsal.kd_bangsal=kamar.kd_bangsal "+
+                                " where kamar.kd_kamar='"+kamar+"' ");            
+                    kamar="Kamar";
+                }else if(kamar.equals("")){
+                    kamar="Poli";
+                    namakamar=Sequel.cariIsi("select poliklinik.nm_poli from poliklinik inner join reg_periksa on poliklinik.kd_poli=reg_periksa.kd_poli "+
+                                "where reg_periksa.no_rawat='"+Kd2.getText()+"'");
+                }
+                Map<String, Object> param = new HashMap<>();
+                param.put("noperiksa",Kd2.getText());
+                param.put("norm",NoRM.getText());
+                param.put("namapasien",Sequel.cariIsi("select pasien.nm_pasien from pasien where pasien.no_rkm_medis=? ",NoRM.getText()));
+                param.put("jkel",Jk.getText());
+                param.put("umur",Umur.getText());
+                param.put("lahir",Sequel.cariIsi("select DATE_FORMAT(pasien.tgl_lahir,'%d-%m-%Y') from pasien where pasien.no_rkm_medis=? ",NoRM.getText()));
+                param.put("pengirim",tbDokter.getValueAt(tbDokter.getSelectedRow(),5).toString());
+                param.put("tanggal",Valid.SetTgl3(tbDokter.getValueAt(tbDokter.getSelectedRow(),3).toString()));
+                param.put("penjab",tbDokter.getValueAt(tbDokter.getSelectedRow(),6).toString());
+                param.put("petugas",tbDokter.getValueAt(tbDokter.getSelectedRow(),2).toString());
+                param.put("alamat",Alamat.getText());
+                param.put("kamar",kamar);
+                param.put("namakamar",namakamar);
+                param.put("pemeriksaan",pemeriksaan);
+                param.put("jam",tbDokter.getValueAt(tbDokter.getSelectedRow(),4).toString());
+                param.put("namars",akses.getnamars());
+                param.put("alamatrs",akses.getalamatrs());
+                param.put("kotars",akses.getkabupatenrs());
+                param.put("propinsirs",akses.getpropinsirs());
+                param.put("kontakrs",akses.getkontakrs());
+                param.put("emailrs",akses.getemailrs());
+                param.put("hasil",HasilPeriksa.getText());
+                param.put("logo",Sequel.cariGambar("select setting.logo from setting"));
+                finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",kdpenjab);
+                param.put("finger","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+tbDokter.getValueAt(tbDokter.getSelectedRow(),6).toString()+"\nID "+(finger.equals("")?kdpenjab:finger)+"\n"+Valid.SetTgl3(tbDokter.getValueAt(tbDokter.getSelectedRow(),3).toString()));  
+                finger=Sequel.cariIsi("select sha1(sidikjari.sidikjari) from sidikjari inner join pegawai on pegawai.id=sidikjari.id where pegawai.nik=?",kdpetugas);
+                param.put("finger2","Dikeluarkan di "+akses.getnamars()+", Kabupaten/Kota "+akses.getkabupatenrs()+"\nDitandatangani secara elektronik oleh "+tbDokter.getValueAt(tbDokter.getSelectedRow(),2).toString()+"\nID "+(finger.equals("")?kdpetugas:finger)+"\n"+Valid.SetTgl3(tbDokter.getValueAt(tbDokter.getSelectedRow(),3).toString()));  
+
+                pilihan = (String)JOptionPane.showInputDialog(null,"Silahkan pilih hasil pemeriksaan..!","Hasil Pemeriksaan",JOptionPane.QUESTION_MESSAGE,null,new Object[]{"Model 1","Model 2", "Model 3","PDF Model 1","PDF Model 2","PDF Model 3"},"Model 1");
+                switch (pilihan) {
+                    case "Model 1":
+                          Valid.MyReport("rptPeriksaRadiologi.jasper","report","::[ Pemeriksaan Radiologi ]::",param);
+                          break;
+                    case "Model 2":
+                          Valid.MyReport("rptPeriksaRadiologi2.jasper","report","::[ Pemeriksaan Radiologi ]::",param);
+                          break;
+                    case "Model 3":
+                          Valid.MyReport("rptPeriksaRadiologi3.jasper","report","::[ Pemeriksaan Radiologi ]::",param);
+                          break;
+                    case "PDF Model 1":
+                          Valid.MyReportPDF("rptPeriksaRadiologi.jasper","report","::[ Pemeriksaan Radiologi ]::",param);
+                          break;
+                    case "PDF Model 2":
+                          Valid.MyReportPDF("rptPeriksaRadiologi2.jasper","report","::[ Pemeriksaan Radiologi ]::",param);
+                          break;
+                    case "PDF Model 3":
+                          Valid.MyReportPDF("rptPeriksaRadiologi3.jasper","report","::[ Pemeriksaan Radiologi ]::",param);
+                          break;
+                }                        
+
+                this.setCursor(Cursor.getDefaultCursor());
+            }
+>>>>>>> upstream/master
         }
     }//GEN-LAST:event_BtnPrint1ActionPerformed
 
@@ -2042,32 +2153,39 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
     }//GEN-LAST:event_BtnPrint1KeyPressed
 
     private void BtnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSimpanActionPerformed
-        if(Kd2.getText().equals("")){
-               JOptionPane.showMessageDialog(null,"Maaf, silahkan pilih data terlebih dahulu...!!!!"); 
-        }else{
-            if(HasilPeriksa.getText().equals("")){
-                Sequel.queryu2("delete from hasil_radiologi where no_rawat=? and tgl_periksa=? and jam=?",3,new String[]{
-                    NoRawatDicari.getText(),TglDicari.getText(),JamDicari.getText()
-                });
+        if(tabMode.getRowCount()==0){
+            JOptionPane.showMessageDialog(null,"Maaf, data sudah habis...!!!!");
+            TCari.requestFocus();
+        }else if(tbDokter.getSelectedRow()<= -1){
+            JOptionPane.showMessageDialog(null,"Maaf, Silahkan pilih data..!!");
+        }else {
+            if(Kd2.getText().equals("")){
+                JOptionPane.showMessageDialog(null,"Maaf, silahkan pilih data terlebih dahulu...!!!!"); 
             }else{
-                Sequel.queryu2("delete from hasil_radiologi where no_rawat=? and tgl_periksa=? and jam=?",3,new String[]{
-                    NoRawatDicari.getText(),TglDicari.getText(),JamDicari.getText()
-                });
-                Sequel.menyimpan("hasil_radiologi","?,?,?,?","Hasil Pemeriksaan", 4,new String[]{
-                    NoRawatDicari.getText(),TglDicari.getText(),JamDicari.getText(),HasilPeriksa.getText()
-                });
-                if(akses.getjml2()>=1){
-                    NmDokterPj.setText(dokter.tampil3(akses.getkode()));
-                    if(!NmDokterPj.getText().equals("")){
-                        if(Sequel.queryu2tf("update periksa_radiologi set kd_dokter=? where no_rawat=? and tgl_periksa=? and jam=?",4,new String[]{
-                            akses.getkode(),NoRawatDicari.getText(),TglDicari.getText(),JamDicari.getText()
-                        })==true){
-                            tampil();
-                        } 
+                if(HasilPeriksa.getText().equals("")){
+                    Sequel.queryu2("delete from hasil_radiologi where no_rawat=? and tgl_periksa=? and jam=?",3,new String[]{
+                        NoRawatDicari.getText(),TglDicari.getText(),JamDicari.getText()
+                    });
+                }else{
+                    Sequel.queryu2("delete from hasil_radiologi where no_rawat=? and tgl_periksa=? and jam=?",3,new String[]{
+                        NoRawatDicari.getText(),TglDicari.getText(),JamDicari.getText()
+                    });
+                    Sequel.menyimpan("hasil_radiologi","?,?,?,?","Hasil Pemeriksaan", 4,new String[]{
+                        NoRawatDicari.getText(),TglDicari.getText(),JamDicari.getText(),HasilPeriksa.getText()
+                    });
+                    if(akses.getjml2()>=1){
+                        NmDokterPj.setText(dokter.tampil3(akses.getkode()));
+                        if(!NmDokterPj.getText().equals("")){
+                            if(Sequel.queryu2tf("update periksa_radiologi set kd_dokter=? where no_rawat=? and tgl_periksa=? and jam=?",4,new String[]{
+                                akses.getkode(),NoRawatDicari.getText(),TglDicari.getText(),JamDicari.getText()
+                            })==true){
+                                runBackground(() -> tampil());
+                            } 
+                        }
                     }
-                }
-            }   
-            JOptionPane.showMessageDialog(null,"Proses update selesai...!!!!"); 
+                }   
+                JOptionPane.showMessageDialog(null,"Proses update selesai...!!!!"); 
+            }
         }
     }//GEN-LAST:event_BtnSimpanActionPerformed
 
@@ -2089,7 +2207,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
                     tbDokter.getValueAt(tbDokter.getSelectedRow(),3).toString(),tbDokter.getValueAt(tbDokter.getSelectedRow(),4).toString()
                 }); 
                 statushasil="";
-                tampil();
+                runBackground(() -> tampil());
                 dokter.dispose();
                 petugas.dispose();
                 WindowGantiDokterParamedis.dispose();
@@ -2340,12 +2458,12 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
 
     private void ppSudahKeluarBacaanBtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ppSudahKeluarBacaanBtnPrintActionPerformed
         statushasil="concat(periksa_radiologi.no_rawat,periksa_radiologi.tgl_periksa,periksa_radiologi.jam) in (select concat(hasil_radiologi.no_rawat,hasil_radiologi.tgl_periksa,hasil_radiologi.jam) from hasil_radiologi) and ";
-        tampil();
+        runBackground(() -> tampil());
     }//GEN-LAST:event_ppSudahKeluarBacaanBtnPrintActionPerformed
 
     private void ppBelumKeluarBacaanBtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ppBelumKeluarBacaanBtnPrintActionPerformed
         statushasil="concat(periksa_radiologi.no_rawat,periksa_radiologi.tgl_periksa,periksa_radiologi.jam) not in (select concat(hasil_radiologi.no_rawat,hasil_radiologi.tgl_periksa,hasil_radiologi.jam) from hasil_radiologi) and ";
-        tampil();
+        runBackground(() -> tampil());
     }//GEN-LAST:event_ppBelumKeluarBacaanBtnPrintActionPerformed
 
     private void UploadRadiologiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UploadRadiologiActionPerformed
@@ -2899,7 +3017,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
     public void SetNoRw(String norw){
         NoRawat.setText(norw);
         statushasil="";
-        tampil();
+        runBackground(() -> tampil());
         Sequel.cariIsi("select reg_periksa.tgl_registrasi from reg_periksa where reg_periksa.no_rawat='"+norw+"'", Tgl1);
     }
     
@@ -3119,6 +3237,7 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
         }
     }
     
+<<<<<<< HEAD
     ////////////////////// start - fungsi upload pdf by ichsan
     private void UploadPDF(String FileName, String docpath) {
         try {
@@ -3303,4 +3422,23 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
     } 
     
     ////////////////////// end - fungsi upload pdf dan kirim pdf via WA  by ichsan
+=======
+    private void runBackground(Runnable task) {
+        if (ceksukses) return;
+        ceksukses = true;
+
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+        executor.submit(() -> {
+            try {
+                task.run();
+            } finally {
+                ceksukses = false;
+                SwingUtilities.invokeLater(() -> {
+                    this.setCursor(Cursor.getDefaultCursor());
+                });
+            }
+        });
+    }
+>>>>>>> upstream/master
 }

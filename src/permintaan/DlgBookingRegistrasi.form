@@ -467,9 +467,13 @@
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                       <StringArray count="1">
 <<<<<<< HEAD
+<<<<<<< HEAD
                         <StringItem index="0" value="25-03-2025"/>
 =======
                         <StringItem index="0" value="12-03-2025"/>
+>>>>>>> upstream/master
+=======
+                        <StringItem index="0" value="31-12-2025"/>
 >>>>>>> upstream/master
                       </StringArray>
                     </Property>
@@ -497,9 +501,13 @@
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                       <StringArray count="1">
 <<<<<<< HEAD
+<<<<<<< HEAD
                         <StringItem index="0" value="25-03-2025"/>
 =======
                         <StringItem index="0" value="12-03-2025"/>
+>>>>>>> upstream/master
+=======
+                        <StringItem index="0" value="31-12-2025"/>
 >>>>>>> upstream/master
                       </StringArray>
                     </Property>
@@ -541,9 +549,13 @@
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                       <StringArray count="1">
 <<<<<<< HEAD
+<<<<<<< HEAD
                         <StringItem index="0" value="25-03-2025"/>
 =======
                         <StringItem index="0" value="12-03-2025"/>
+>>>>>>> upstream/master
+=======
+                        <StringItem index="0" value="31-12-2025"/>
 >>>>>>> upstream/master
                       </StringArray>
                     </Property>
@@ -571,9 +583,13 @@
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                       <StringArray count="1">
 <<<<<<< HEAD
+<<<<<<< HEAD
                         <StringItem index="0" value="25-03-2025"/>
 =======
                         <StringItem index="0" value="12-03-2025"/>
+>>>>>>> upstream/master
+=======
+                        <StringItem index="0" value="31-12-2025"/>
 >>>>>>> upstream/master
                       </StringArray>
                     </Property>
@@ -736,9 +752,13 @@
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                       <StringArray count="1">
 <<<<<<< HEAD
+<<<<<<< HEAD
                         <StringItem index="0" value="25-03-2025 13:13:54"/>
 =======
                         <StringItem index="0" value="12-03-2025 22:18:41"/>
+>>>>>>> upstream/master
+=======
+                        <StringItem index="0" value="31-12-2025 12:16:40"/>
 >>>>>>> upstream/master
                       </StringArray>
                     </Property>
@@ -876,9 +896,13 @@
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                       <StringArray count="1">
 <<<<<<< HEAD
+<<<<<<< HEAD
                         <StringItem index="0" value="25-03-2025 13:13:54"/>
 =======
                         <StringItem index="0" value="12-03-2025 22:18:41"/>
+>>>>>>> upstream/master
+=======
+                        <StringItem index="0" value="31-12-2025 12:16:40"/>
 >>>>>>> upstream/master
                       </StringArray>
                     </Property>
