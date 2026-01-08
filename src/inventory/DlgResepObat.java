@@ -444,7 +444,7 @@ public final class DlgResepObat extends javax.swing.JDialog {
         ppResepObatTglExpired.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
         ppResepObatTglExpired.setForeground(new java.awt.Color(50, 50, 50));
         ppResepObatTglExpired.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
-        ppResepObatTglExpired.setText("Cetak Aturan Pakai Model 3");
+        ppResepObatTglExpired.setText("Cetak Aturan Pakai tgl ED");
         ppResepObatTglExpired.setActionCommand("Cetak Aturan Pakai tgl ED");
         ppResepObatTglExpired.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         ppResepObatTglExpired.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -895,7 +895,7 @@ public final class DlgResepObat extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "20-12-2025 02:15:09" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "08-01-2026 09:06:20" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -909,7 +909,7 @@ public final class DlgResepObat extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "20-12-2025 02:15:09" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "08-01-2026 09:06:21" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -1039,7 +1039,7 @@ public final class DlgResepObat extends javax.swing.JDialog {
         jLabel8.setBounds(0, 42, 95, 23);
 
         DTPBeri.setForeground(new java.awt.Color(50, 70, 50));
-        DTPBeri.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "20-12-2025" }));
+        DTPBeri.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "08-01-2026" }));
         DTPBeri.setDisplayFormat("dd-MM-yyyy");
         DTPBeri.setName("DTPBeri"); // NOI18N
         DTPBeri.setOpaque(false);
@@ -1806,7 +1806,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                     "resep_obat.tgl_perawatan=aturan_pakai.tgl_perawatan and " +
                     "resep_obat.jam=aturan_pakai.jam where resep_obat.no_resep=? and aturan_pakai.aturan<>''",NoResep.getText())>0){
                 Valid.MyReportqry("rptItemResep5.jasper","report","::[ Aturan Pakai Obat ]::",
-                    "select resep_obat.no_resep,resep_obat.tgl_perawatan,resep_obat.jam,pasien.tgl_lahir, "+
+                    "select DATE_FORMAT(databarang.expire, '%d-%m-%Y') as expire, resep_obat.no_resep,resep_obat.tgl_perawatan,resep_obat.jam,pasien.tgl_lahir, "+
                     "resep_obat.no_rawat,pasien.no_rkm_medis,pasien.nm_pasien,databarang.nama_brng,"+
                     "aturan_pakai.aturan,detail_pemberian_obat.jml,kodesatuan.satuan,pasien.jk,reg_periksa.umurdaftar,reg_periksa.sttsumur "+
                     "from resep_obat inner join reg_periksa inner join pasien inner join "+
