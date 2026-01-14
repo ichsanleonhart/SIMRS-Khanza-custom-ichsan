@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="null" pageWidth="595" pageHeight="842" columnWidth="557" leftMargin="19" rightMargin="19" topMargin="19" bottomMargin="19" uuid="34c13d5a-cd6b-451e-8001-9fd298d2274a">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="null" pageWidth="612" pageHeight="935" columnWidth="574" leftMargin="19" rightMargin="19" topMargin="19" bottomMargin="19" uuid="34c13d5a-cd6b-451e-8001-9fd298d2274a">
 	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
@@ -8,15 +8,8 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="lokal"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.unit." value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="cm"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="cm"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="546"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="440"/>
 	<parameter name="namars" class="java.lang.String"/>
@@ -522,7 +515,7 @@ INNER JOIN petugas p2 ON transfer_pasien_antar_ruang.nip_menerima = p2.nip]]>
 					<pen lineWidth="1.0" lineStyle="Solid"/>
 				</graphicElement>
 			</line>
-			<textField>
+			<textField pattern="dd-MMM-yyyy HH:mm">
 				<reportElement x="263" y="41" width="78" height="11" uuid="ca448e05-55ad-4a2d-96fb-37c3a27429c6">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -781,7 +774,7 @@ INNER JOIN petugas p2 ON transfer_pasien_antar_ruang.nip_menerima = p2.nip]]>
 				<reportElement stretchType="RelativeToBandHeight" x="267" y="124" width="1" height="50" uuid="2f9f6bcf-3baa-4545-9947-ec7ef892995d"/>
 			</line>
 		</band>
-		<band height="82">
+		<band height="81">
 			<staticText>
 				<reportElement positionType="Float" x="4" y="0" width="547" height="10" uuid="fbf4fe53-3994-45af-8613-8ad0b6c68cb5"/>
 				<textElement>
@@ -1151,7 +1144,7 @@ INNER JOIN petugas p2 ON transfer_pasien_antar_ruang.nip_menerima = p2.nip]]>
 				<textElement>
 					<font fontName="Tahoma" size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{suhu_sesudah_transfer}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{nadi_sesudah_transfer}]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="0" y="-2" width="1" height="80" uuid="940e5f0f-1f1b-4860-8141-894f0abcacd5"/>
@@ -1173,7 +1166,7 @@ INNER JOIN petugas p2 ON transfer_pasien_antar_ruang.nip_menerima = p2.nip]]>
 				</reportElement>
 			</line>
 		</band>
-		<band height="202">
+		<band height="312">
 			<staticText>
 				<reportElement positionType="Float" x="4" y="3" width="544" height="10" uuid="3c45c64e-3ca7-4bc4-8228-d8712c3d7a63">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -1193,7 +1186,7 @@ INNER JOIN petugas p2 ON transfer_pasien_antar_ruang.nip_menerima = p2.nip]]>
 				<text><![CDATA[Obat Telah Diberikan]]></text>
 			</staticText>
 			<textField>
-				<reportElement positionType="Float" x="30" y="26" width="518" height="53" uuid="44be5748-82b0-49c9-ab4f-44e07a8b2c8b">
+				<reportElement positionType="Float" x="30" y="26" width="518" height="102" uuid="44be5748-82b0-49c9-ab4f-44e07a8b2c8b">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
@@ -1212,7 +1205,7 @@ INNER JOIN petugas p2 ON transfer_pasien_antar_ruang.nip_menerima = p2.nip]]>
 				<text><![CDATA[:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement positionType="Float" x="10" y="159" width="61" height="10" uuid="ee6bce9e-eecf-4429-9d9d-def49589f784">
+				<reportElement positionType="Float" x="10" y="268" width="61" height="10" uuid="ee6bce9e-eecf-4429-9d9d-def49589f784">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
@@ -1221,7 +1214,7 @@ INNER JOIN petugas p2 ON transfer_pasien_antar_ruang.nip_menerima = p2.nip]]>
 				<text><![CDATA[Penunjang]]></text>
 			</staticText>
 			<staticText>
-				<reportElement positionType="Float" x="73" y="159" width="6" height="10" uuid="33f3ae4d-242e-4a99-b6ae-b7390fe6458b">
+				<reportElement positionType="Float" x="73" y="268" width="6" height="10" uuid="33f3ae4d-242e-4a99-b6ae-b7390fe6458b">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1231,7 +1224,7 @@ INNER JOIN petugas p2 ON transfer_pasien_antar_ruang.nip_menerima = p2.nip]]>
 				<text><![CDATA[:]]></text>
 			</staticText>
 			<textField>
-				<reportElement positionType="Float" x="22" y="171" width="526" height="27" uuid="52e0d028-1c40-4a1b-9ed6-dad8d67ae204">
+				<reportElement positionType="Float" x="22" y="280" width="526" height="27" uuid="52e0d028-1c40-4a1b-9ed6-dad8d67ae204">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
@@ -1240,7 +1233,7 @@ INNER JOIN petugas p2 ON transfer_pasien_antar_ruang.nip_menerima = p2.nip]]>
 				<textFieldExpression><![CDATA[$F{pemeriksaan_penunjang_yang_dilakukan}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement positionType="Float" x="18" y="84" width="100" height="10" uuid="1e08b1ea-dbc1-4dd6-b057-de145dc5dbf5">
+				<reportElement positionType="Float" x="17" y="133" width="100" height="10" uuid="1e08b1ea-dbc1-4dd6-b057-de145dc5dbf5">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
@@ -1249,7 +1242,7 @@ INNER JOIN petugas p2 ON transfer_pasien_antar_ruang.nip_menerima = p2.nip]]>
 				<text><![CDATA[Obat yang akan diberikan]]></text>
 			</staticText>
 			<staticText>
-				<reportElement positionType="Float" x="120" y="84" width="6" height="10" uuid="24073022-720c-4f8d-ac06-85eab1dc59a2">
+				<reportElement positionType="Float" x="119" y="133" width="6" height="10" uuid="24073022-720c-4f8d-ac06-85eab1dc59a2">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1259,7 +1252,7 @@ INNER JOIN petugas p2 ON transfer_pasien_antar_ruang.nip_menerima = p2.nip]]>
 				<text><![CDATA[:]]></text>
 			</staticText>
 			<textField>
-				<reportElement positionType="Float" x="28" y="97" width="520" height="55" uuid="91867b57-ff63-41f0-a4ee-823753cb7b53">
+				<reportElement positionType="Float" x="27" y="146" width="520" height="118" uuid="91867b57-ff63-41f0-a4ee-823753cb7b53">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
@@ -1268,27 +1261,27 @@ INNER JOIN petugas p2 ON transfer_pasien_antar_ruang.nip_menerima = p2.nip]]>
 				<textFieldExpression><![CDATA[$F{obat_yang_akan_diberikan}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="0" y="-2" width="1" height="204" uuid="fe4128af-a607-4e3c-9463-a115b3002e72"/>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="0" y="-2" width="1" height="313" uuid="fe4128af-a607-4e3c-9463-a115b3002e72"/>
 			</line>
 			<line>
-				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="556" y="-2" width="1" height="204" uuid="25e63a26-6a6a-4994-975a-297bb29f3ac4">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="556" y="-2" width="1" height="313" uuid="25e63a26-6a6a-4994-975a-297bb29f3ac4">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 			</line>
 			<line>
-				<reportElement positionType="Float" x="0" y="81" width="557" height="1" uuid="b4e8f103-4ef7-4853-a3e4-c1f5c0f9a01b">
+				<reportElement positionType="Float" x="0" y="130" width="557" height="1" uuid="b4e8f103-4ef7-4853-a3e4-c1f5c0f9a01b">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 			</line>
 			<line>
-				<reportElement positionType="Float" x="0" y="201" width="557" height="1" uuid="19b076bf-a955-4a14-b53e-e6922bca99ae">
+				<reportElement positionType="Float" x="0" y="310" width="557" height="1" uuid="19b076bf-a955-4a14-b53e-e6922bca99ae">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 			</line>
 			<line>
-				<reportElement positionType="Float" x="0" y="155" width="557" height="1" uuid="84ddb03f-ebe8-4066-8971-c8ad83743e94">
+				<reportElement positionType="Float" x="0" y="264" width="557" height="1" uuid="84ddb03f-ebe8-4066-8971-c8ad83743e94">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 			</line>

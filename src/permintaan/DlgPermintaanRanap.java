@@ -929,7 +929,7 @@ public class DlgPermintaanRanap extends javax.swing.JDialog {
                 
                 
                 runBackground(() ->tampil());
-                Sequel.mengedit("kamar","kd_kamar=?","status='DIBOOKING'",1,new String[]{KdKamar.getText()});
+                //Sequel.mengedit("kamar","kd_kamar=?","status='DIBOOKING'",1,new String[]{KdKamar.getText()});
                 emptTeks();
             }
         }
