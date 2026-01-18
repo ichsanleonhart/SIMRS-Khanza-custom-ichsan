@@ -20,26 +20,10 @@
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/keuangan/KeuanganValidasiPenagihanPiutang.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/inventory/DlgResepObat.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/simrskhanza/DlgTagihanOperasi.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/widget/MenuBar.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/bridging/PCareDataPendaftaran.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/simrskhanza/DlgCariPeriksaLab.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/permintaan/DlgPermintaanLaboratorium.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/permintaan/DlgPermintaanRanap.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/surat/SuratPersetujuanPenolakanTindakan.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/keuangan/DlgCariPerawatanRanap.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/rekammedis/RMRiwayatPerawatan.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/simrskhanza/frmUtama.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/keuangan/DlgBilingRalan.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/rekammedis/RMTransferPasienAntarRuang.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/keuangan/KeuanganPiutangBelumLunas.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/bridging/BPJSSuratKontrol.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/simrskhanza/DlgCariPeriksaRadiologi.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/simrskhanza/DlgReg.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/permintaan/DlgPermintaanKonsultasiMedik.java</file>
-            <file>file:/C:/GITHUB/SIMRS-Khanza-custom-ichsan/src/simrskhanza/DlgCariTagihanOperasi.java</file>
+            <file>file:/D:/WORK/GITHUB/SIMRS-Khanza-custom-ichsan/src/keuangan/DlgDetailJMDokter2.java</file>
+            <file>file:/D:/WORK/GITHUB/SIMRS-Khanza-custom-ichsan/src/keuangan/DlgDetailTindakan.java</file>
+            <file>file:/D:/WORK/GITHUB/SIMRS-Khanza-custom-ichsan/src/keuangan/DlgDetailJMDokter.java</file>
+            <file>file:/D:/WORK/GITHUB/SIMRS-Khanza-custom-ichsan/src/inventory/DlgResepObat.java</file>
         </group>
     </open-files>
 </project-private>
