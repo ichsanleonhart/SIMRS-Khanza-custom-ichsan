@@ -240,10 +240,28 @@ require_once '../../layout/header.php';
             </form>
         </div>
 
-        <?php if(isset($_GET['proses'])): ?>
-        
-        <div class="card card-success card-outline">
-            <div class="card-header"><h3 class="card-title">Hasil Rekapitulasi</h3></div>
+    <?php if(isset($_GET['proses'])): ?>
+    
+    <?php
+        $params_export = [
+            'tgl_awal'  => $tgl_awal,
+            'tgl_akhir' => $tgl_akhir,
+            'kd_dokter' => $kd_dokter,
+            'filter_shift' => $filter_shift,
+            'kategori'  => $kategori
+        ];
+        $url_export = "export_shift.php?" . http_build_query($params_export);
+    ?>
+
+    <div class="card card-success card-outline">
+        <div class="card-header">
+            <h3 class="card-title">Hasil Rekapitulasi</h3>
+            <div class="card-tools">
+                <a href="<?= $url_export ?>" target="_blank" class="btn btn-tool bg-success">
+                    <i class="fas fa-file-excel"></i> Download Excel
+                </a>
+            </div>
+        </div>
             <div class="card-body p-0">
                 <table id="tblSummary" class="table table-bordered table-striped table-hover">
                     <thead>
