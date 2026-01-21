@@ -8,23 +8,43 @@ if (!isset($_SESSION['login_user'])) {
     exit("Akses Ditolak");
 }
 
-// 1. AMBIL PARAMETER FILTER (Sama seperti ringkasan_shift.php)
-$user_dokter = $_SESSION['kd_dokter'] ?? '';
+// 1. AMBIL PARAMETER FILTER
+$user_dokter_login = $_SESSION['kd_dokter'] ?? '';
+$nama_dokter_login = $_SESSION['nama'] ?? '';
 $role = $_SESSION['role'];
+
+// Ambil filter dari URL
 $tgl_awal  = $_GET['tgl_awal'] ?? date('Y-m-d');
 $tgl_akhir = $_GET['tgl_akhir'] ?? date('Y-m-d');
-$kd_dokter = $_GET['kd_dokter'] ?? $user_dokter;
+$kd_dokter = $_GET['kd_dokter'] ?? $user_dokter_login; // Kode dokter yang DIPILIH
 $filter_shift = $_GET['filter_shift'] ?? 'all';
 $kategori  = $_GET['kategori'] ?? ['ralan_dr', 'ralan_pr', 'ranap_dr', 'ranap_pr', 'operasi', 'radiologi', 'laborat'];
 
+// --- LOGIKA PENENTUAN NAMA DOKTER UNTUK JUDUL ---
+$nama_dokter_judul = $nama_dokter_login; // Default nama sendiri
+
+// Jika yang dipilih BUKAN dokter yang login (Fitur Mengintip oleh Admin/Direktur)
+if ($kd_dokter != $user_dokter_login && !empty($kd_dokter)) {
+    try {
+        $stmt_dr = $pdo->prepare("SELECT nm_dokter FROM dokter WHERE kd_dokter = ?");
+        $stmt_dr->execute([$kd_dokter]);
+        $row_dr = $stmt_dr->fetch();
+        if ($row_dr) {
+            $nama_dokter_judul = $row_dr['nm_dokter'];
+        }
+    } catch (Exception $e) {
+        // Fallback jika error, biarkan default atau kosong
+    }
+}
+// ------------------------------------------------
+
 // 2. HEADER EXCEL
-$filename = "Laporan_Shift_" . $kd_dokter . "_" . $tgl_awal . "_sd_" . $tgl_akhir . ".xls";
+$filename = "Laporan_Shift_" . $kd_dokter . "-" . preg_replace('/[^A-Za-z0-9]/', '_', $nama_dokter_judul) . "_" . $tgl_awal . ".xls";
 header("Content-type: application/vnd-ms-excel");
 header("Content-Disposition: attachment; filename=$filename");
 
 $rekap_shift = [];
 $grand_total_periode = 0;
-
 try {
     $sql_parts = [];
     // Buffer waktu H-1 dan H+1 untuk shift malam lintas hari
@@ -136,7 +156,7 @@ try {
 <body>
     <h2>Laporan Detail Jasa Medis Per Shift</h2>
     <p>
-        Dokter: <?= $kd_dokter ?><br>
+        Dokter: <?= $kd_dokter ?>- <?= $nama_dokter_judul ?><br>
         Periode: <?= tanggal_indo($tgl_awal) ?> s/d <?= tanggal_indo($tgl_akhir) ?>
     </p>
 
