@@ -62,6 +62,20 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import simrskhanza.DlgKamarInap;
 import rekammedis.RMRiwayatPerawatan;
+import java.io.File; //tambahan by ichsan
+import laporan.DlgBerkasRawat;  //tambahan by ichsan
+import org.apache.commons.io.FileUtils; //tambahan by ichsan
+import org.apache.http.client.HttpClient; //tambahan by ichsan  
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpPost;  //tambahan by ichsan
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.entity.mime.HttpMultipartMode; //tambahan by ichsan
+import org.apache.http.entity.mime.MultipartEntity; //tambahan by ichsan
+import org.apache.http.entity.mime.content.ByteArrayBody; //tambahan by ichsan
+import org.apache.http.impl.client.DefaultHttpClient; //tambahan by ichsan
+
 
 
 /**
@@ -84,7 +98,7 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
     private BPJSCekReferensiKabupaten kabupaten=new BPJSCekReferensiKabupaten(null,false);
     private BPJSCekReferensiKecamatan kecamatan=new BPJSCekReferensiKecamatan(null,false);
     private String prb="",no_peserta="",link="",ADDANTRIANAPIMOBILEJKN="no",requestJson,URL="",query="",utc="",user="",kddokter="",tglkkl="0000-00-00",penunjang="",kodedokterreg="",kodepolireg="",
-            jammulai="",jamselesai="",datajam="",jeniskunjungan="",hari="",nomorreg="",respon="200",statuslanjut="";
+            jammulai="",jamselesai="",datajam="",jeniskunjungan="",hari="",nomorreg="",respon="200",statuslanjut="", FileName ="",kodeberkas=""; //tambahan FileName ="",kodeberkas=""; by ichsan
     private HttpHeaders headers;
     private HttpEntity requestEntity;
     private ObjectMapper mapper = new ObjectMapper();
@@ -577,6 +591,8 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
     private void initComponents() {
 
         Popup = new javax.swing.JPopupMenu();
+        UploadSEP = new javax.swing.JMenuItem();
+        ppBerkasDigital = new javax.swing.JMenuItem();
         ppSEP = new javax.swing.JMenuItem();
         ppSEP1 = new javax.swing.JMenuItem();
         ppSEP2 = new javax.swing.JMenuItem();
@@ -766,6 +782,10 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         btnSuplesi = new widget.Button();
         jLabel55 = new widget.Label();
         NoLP = new widget.TextBox();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTextArea2 = new javax.swing.JTextArea();
         internalFrame4 = new widget.InternalFrame();
         Scroll = new widget.ScrollPane();
         tbDataSEP = new widget.Table();
@@ -802,6 +822,39 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         BtnKeluar = new widget.Button();
 
         Popup.setName("Popup"); // NOI18N
+
+        UploadSEP.setBackground(new java.awt.Color(255, 255, 254));
+        UploadSEP.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
+        UploadSEP.setForeground(new java.awt.Color(50, 50, 50));
+        UploadSEP.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
+        UploadSEP.setText("Upload SEP ke Berkas Digital");
+        UploadSEP.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        UploadSEP.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        UploadSEP.setName("UploadSEP"); // NOI18N
+        UploadSEP.setPreferredSize(new java.awt.Dimension(300, 25));
+        UploadSEP.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                UploadSEPBtnPrintActionPerformed(evt);
+            }
+        });
+        Popup.add(UploadSEP);
+
+        ppBerkasDigital.setBackground(new java.awt.Color(255, 255, 254));
+        ppBerkasDigital.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
+        ppBerkasDigital.setForeground(new java.awt.Color(50, 50, 50));
+        ppBerkasDigital.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
+        ppBerkasDigital.setText("Berkas Digital Perawatan");
+        ppBerkasDigital.setActionCommand("Berkas Digital Perawatan");
+        ppBerkasDigital.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        ppBerkasDigital.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        ppBerkasDigital.setName("ppBerkasDigital"); // NOI18N
+        ppBerkasDigital.setPreferredSize(new java.awt.Dimension(300, 25));
+        ppBerkasDigital.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ppBerkasDigitalBtnPrintActionPerformed(evt);
+            }
+        });
+        Popup.add(ppBerkasDigital);
 
         ppSEP.setBackground(new java.awt.Color(255, 255, 254));
         ppSEP.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
@@ -1241,7 +1294,7 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         internalFrame5.add(jLabel26);
         jLabel26.setBounds(6, 32, 70, 23);
 
-        TanggalPulang.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-01-2026 09:47:42" }));
+        TanggalPulang.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-01-2026 08:44:44" }));
         TanggalPulang.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         TanggalPulang.setName("TanggalPulang"); // NOI18N
         TanggalPulang.setOpaque(false);
@@ -1287,7 +1340,7 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         internalFrame5.add(jLabel48);
         jLabel48.setBounds(291, 62, 120, 23);
 
-        TanggalKematian.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-01-2026" }));
+        TanggalKematian.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-01-2026" }));
         TanggalKematian.setDisplayFormat("dd-MM-yyyy");
         TanggalKematian.setEnabled(false);
         TanggalKematian.setName("TanggalKematian"); // NOI18N
@@ -1355,7 +1408,7 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         jLabel30.setBounds(0, 25, 102, 23);
 
         TanggalRujukKeluar.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalRujukKeluar.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-01-2026" }));
+        TanggalRujukKeluar.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-01-2026" }));
         TanggalRujukKeluar.setDisplayFormat("dd-MM-yyyy");
         TanggalRujukKeluar.setName("TanggalRujukKeluar"); // NOI18N
         TanggalRujukKeluar.setOpaque(false);
@@ -1538,7 +1591,7 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         jLabel50.setBounds(638, 55, 80, 23);
 
         TanggalKunjungRujukan.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalKunjungRujukan.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-01-2026" }));
+        TanggalKunjungRujukan.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-01-2026" }));
         TanggalKunjungRujukan.setDisplayFormat("dd-MM-yyyy");
         TanggalKunjungRujukan.setName("TanggalKunjungRujukan"); // NOI18N
         TanggalKunjungRujukan.setOpaque(false);
@@ -1808,7 +1861,7 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         jLabel20.setBounds(187, 102, 65, 23);
 
         TanggalSEP.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalSEP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-01-2026" }));
+        TanggalSEP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-01-2026" }));
         TanggalSEP.setDisplayFormat("dd-MM-yyyy");
         TanggalSEP.setName("TanggalSEP"); // NOI18N
         TanggalSEP.setOpaque(false);
@@ -1828,7 +1881,7 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         jLabel22.setBounds(0, 102, 90, 23);
 
         TanggalRujuk.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalRujuk.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-01-2026" }));
+        TanggalRujuk.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-01-2026" }));
         TanggalRujuk.setDisplayFormat("dd-MM-yyyy");
         TanggalRujuk.setName("TanggalRujuk"); // NOI18N
         TanggalRujuk.setOpaque(false);
@@ -2189,7 +2242,7 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         jLabel38.setBounds(594, 132, 40, 23);
 
         TanggalKKL.setForeground(new java.awt.Color(50, 70, 50));
-        TanggalKKL.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-01-2026" }));
+        TanggalKKL.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-01-2026" }));
         TanggalKKL.setDisplayFormat("dd-MM-yyyy");
         TanggalKKL.setEnabled(false);
         TanggalKKL.setName("TanggalKKL"); // NOI18N
@@ -2424,7 +2477,9 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
 
         btnRiwayat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         btnRiwayat.setMnemonic('X');
+        btnRiwayat.setText("Kontrol");
         btnRiwayat.setToolTipText("Alt+X");
+        btnRiwayat.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         btnRiwayat.setName("btnRiwayat"); // NOI18N
         btnRiwayat.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2432,7 +2487,7 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
             }
         });
         FormInput.add(btnRiwayat);
-        btnRiwayat.setBounds(669, 72, 28, 23);
+        btnRiwayat.setBounds(669, 72, 90, 23);
 
         btnSKDP.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         btnSKDP.setMnemonic('X');
@@ -2595,6 +2650,7 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
 
         btnRiwayatRujukan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         btnRiwayatRujukan.setMnemonic('X');
+        btnRiwayatRujukan.setText("Rujukan Baru");
         btnRiwayatRujukan.setToolTipText("Alt+X");
         btnRiwayatRujukan.setName("btnRiwayatRujukan"); // NOI18N
         btnRiwayatRujukan.addActionListener(new java.awt.event.ActionListener() {
@@ -2603,7 +2659,7 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
             }
         });
         FormInput.add(btnRiwayatRujukan);
-        btnRiwayatRujukan.setBounds(699, 72, 28, 23);
+        btnRiwayatRujukan.setBounds(750, 70, 120, 23);
 
         btnSuplesi.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         btnSuplesi.setMnemonic('X');
@@ -2637,6 +2693,28 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         });
         FormInput.add(NoLP);
         NoLP.setBounds(632, 162, 95, 23);
+
+        jScrollPane1.setName("jScrollPane1"); // NOI18N
+
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jTextArea1.setText("4. Pasien Rawat Inap\n-Jenis Pelayanan = Rawat Inap\n-Asal Rujukan RS (Apabila dari IGD)\n-Asal Rujukan FKTP (Apabila dari POLI)\n-Masukan Nomor SPRI\n-Tujuan Kunjungan = Normal\n-PPK Rujukan = Nama RS Kita\n\n5. Pasien Post Ranap\n-Poli Tujuan = Sesuai Ranap\n-No Rujukan = SEP Ranap\n- Tanggal Rujukan = Tanggal SEP Ranap \n                                 dibuat\n-Inputkan Sukon (SKDP)\n-Tujuan Kontrol = Normal\n\n6. Pasien IGD\n-Poli Tujuan = IGD\n- DOkter tujukan masukan DPJP\n-Tujuan Kunjungan = Normal");
+        jTextArea1.setName("jTextArea1"); // NOI18N
+        jScrollPane1.setViewportView(jTextArea1);
+
+        FormInput.add(jScrollPane1);
+        jScrollPane1.setBounds(990, 100, 230, 350);
+
+        jScrollPane2.setName("jScrollPane2"); // NOI18N
+
+        jTextArea2.setColumns(20);
+        jTextArea2.setRows(5);
+        jTextArea2.setText("1. Pasien dengan Rujukan baru\n- Tujuan Kunjungan = Normal\ndan yang lain kosongkan.\n\n2. Pasien dengan Kontrol Ulang\n-Tujuan Kunjungan = Konsul Dokter\n-Flag Prosedur & Penunjang = Kosong\n-Asesmen Pelayanan = Tujuan Kontrol\n\n3. Pasien pecah SEP (Internal)\n-Tujuan Kunjungan = Normal\n-Flag Prosedur & Penunjang = Kosong\n-Asesmen Pelayanan = 1. Poli Spesialis \n                                      tidak tersedia pada \n                                      hari sebelumnya\n-No Rujukan ambil dari rujukan induk");
+        jTextArea2.setName("jTextArea2"); // NOI18N
+        jScrollPane2.setViewportView(jTextArea2);
+
+        FormInput.add(jScrollPane2);
+        jScrollPane2.setBounds(750, 100, 230, 350);
 
         Scroll1.setViewportView(FormInput);
 
@@ -2682,7 +2760,7 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-01-2026" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-01-2026" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -2696,7 +2774,7 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-01-2026" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-01-2026" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -2787,7 +2865,7 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         panelGlass10.add(jLabel51);
 
         DTPCariInternal.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCariInternal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-01-2026" }));
+        DTPCariInternal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-01-2026" }));
         DTPCariInternal.setDisplayFormat("dd-MM-yyyy");
         DTPCariInternal.setName("DTPCariInternal"); // NOI18N
         DTPCariInternal.setOpaque(false);
@@ -2801,7 +2879,7 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         panelGlass10.add(jLabel52);
 
         DTPCariInternal2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCariInternal2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "10-01-2026" }));
+        DTPCariInternal2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22-01-2026" }));
         DTPCariInternal2.setDisplayFormat("dd-MM-yyyy");
         DTPCariInternal2.setName("DTPCariInternal2"); // NOI18N
         DTPCariInternal2.setOpaque(false);
@@ -5962,6 +6040,106 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_ppTampilSEPRawatInapBtnPrintActionPerformed
 
+    private void UploadSEPBtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UploadSEPBtnPrintActionPerformed
+        //FUNGSI UPLOAD PDF KE BERKAS DIGITAL PERAWATAN BY ICHSAN
+        FileName = "BERKAS_SEP_" + tbDataSEP.getValueAt(tbDataSEP.getSelectedRow(), 0).toString().trim() + "_" + tbDataSEP.getValueAt(tbDataSEP.getSelectedRow(), 3).toString().replaceAll(" ", "");
+        CreatePDF(FileName);
+        String filePath = "tmpPDF/" + FileName;
+        UploadPDF(FileName, "berkasrawat/pages/upload/");
+        HapusPDF();
+    }//GEN-LAST:event_UploadSEPBtnPrintActionPerformed
+
+    private void ppBerkasDigitalBtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ppBerkasDigitalBtnPrintActionPerformed
+        //GEN-FIRST:event_ppBerkasDigitalBtnPrintActionPerformed
+        //BUKA MENU BERKAS DIGITAL PERAWATAN BY ICHSAN
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        if(tabMode.getRowCount()==0){
+            JOptionPane.showMessageDialog(null,"Maaf, data sudah habis...!!!!");
+            TCari.requestFocus();
+        }else{
+            if(tbDataSEP.getSelectedRow()>-1){
+                if(!tbDataSEP.getValueAt(tbDataSEP.getSelectedRow(),1).toString().equals("")){
+                    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                    DlgBerkasRawat berkas=new DlgBerkasRawat(null,true);
+                    berkas.setJudul("::[ Berkas Digital Perawatan ]::","berkasrawat/pages");
+                    try {
+                        if(akses.gethapus_berkas_digital_perawatan()==true){
+                            berkas.loadURL("http://"+koneksiDB.HOSTHYBRIDWEB()+":"+koneksiDB.PORTWEB()+"/"+koneksiDB.HYBRIDWEB()+"/"+"berkasrawat/login2.php?act=login&usere="+koneksiDB.USERHYBRIDWEB()+"&passwordte="+koneksiDB.PASHYBRIDWEB()+"&no_rawat="+tbDataSEP.getValueAt(tbDataSEP.getSelectedRow(),1).toString());
+                        }else{
+                            berkas.loadURL("http://"+koneksiDB.HOSTHYBRIDWEB()+":"+koneksiDB.PORTWEB()+"/"+koneksiDB.HYBRIDWEB()+"/"+"berkasrawat/login2nonhapus.php?act=login&usere="+koneksiDB.USERHYBRIDWEB()+"&passwordte="+koneksiDB.PASHYBRIDWEB()+"&no_rawat="+tbDataSEP.getValueAt(tbDataSEP.getSelectedRow(),1).toString());
+                        }
+                    } catch (Exception ex) {
+                        System.out.println("Notifikasi : "+ex);
+                    }
+
+                    berkas.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+                    berkas.setLocationRelativeTo(internalFrame1);
+                    berkas.setVisible(true);
+                    this.setCursor(Cursor.getDefaultCursor());
+                }
+            }
+        }
+        this.setCursor(Cursor.getDefaultCursor());
+    }//GEN-LAST:event_ppBerkasDigitalBtnPrintActionPerformed
+
+    private void CreatePDF(String FileName) {   //isi kode ini, mengambil dari isi ppSEPBtnPrintActionPerformed (button untuk cetak PDF dari SEP / form apa pun itu)
+        if(TabRawat.getSelectedIndex()==1){
+            if(tbDataSEP.getSelectedRow()!= -1){
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
+                Map<String, Object> param = new HashMap<>();
+                param.put("namars",akses.getnamars());
+                param.put("alamatrs",akses.getalamatrs());
+                param.put("kotars",akses.getkabupatenrs());
+                param.put("propinsirs",akses.getpropinsirs());
+                param.put("kontakrs",akses.getkontakrs());
+                param.put("norawat",TNoRw.getText());
+                param.put("prb",Sequel.cariIsi("select bpjs_prb.prb from bpjs_prb where bpjs_prb.no_sep=?",tbDataSEP.getValueAt(tbDataSEP.getSelectedRow(),0).toString()));
+                param.put("noreg",Sequel.cariIsi("select no_reg from reg_periksa where no_rawat=?",TNoRw.getText()));
+                param.put("logo",Sequel.cariGambar("select gambar.bpjs from gambar")); 
+                param.put("parameter",tbDataSEP.getValueAt(tbDataSEP.getSelectedRow(),0).toString());
+                if(JenisPelayanan.getSelectedIndex()==0){
+                    Valid.MyReportPDFUpload("rptBridgingSEP5.jasper","report","::[ Cetak SEP ]::", FileName, param);
+                }else{
+                    Valid.MyReportPDFUpload("rptBridgingSEP6.jasper","report","::[ Cetak SEP ]::", FileName, param);
+                }                
+                this.setCursor(Cursor.getDefaultCursor());
+            }else{
+                JOptionPane.showMessageDialog(null,"Maaf, silahkan pilih data SEP yang mau dicetak...!!!!");
+                BtnBatal.requestFocus();
+            } 
+        }else if(TabRawat.getSelectedIndex()==2){
+            if(tbDataSEPInternal.getSelectedRow()!= -1){
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
+                Map<String, Object> param = new HashMap<>();
+                param.put("namars",akses.getnamars());
+                param.put("alamatrs",akses.getalamatrs());
+                param.put("kotars",akses.getkabupatenrs());
+                param.put("propinsirs",akses.getpropinsirs());
+                param.put("kontakrs",akses.getkontakrs());
+                param.put("norawat",TNoRw.getText());
+                param.put("prb",Sequel.cariIsi("select bpjs_prb.prb from bpjs_prb where bpjs_prb.no_sep=?",tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(),0).toString()));
+                param.put("noreg",Sequel.cariIsi("select no_reg from reg_periksa where no_rawat=?",TNoRw.getText()));
+                param.put("logo",Sequel.cariGambar("select gambar.bpjs from gambar")); param.put("no_sep",tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(),0).toString());
+                param.put("no_sep",tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(),0).toString());
+                param.put("noskdp",tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(),43).toString());
+                param.put("tglrujukan",tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(),5).toString());
+                param.put("kdpolitujuan",tbDataSEPInternal.getValueAt(tbDataSEPInternal.getSelectedRow(),15).toString());
+                if(JenisPelayanan.getSelectedIndex()==0){
+                    Valid.MyReportPDFUpload("rptBridgingSEPInternal5.jasper","report","::[ Cetak SEP Internal ]::", FileName, param);
+                }else{
+                    Valid.MyReportPDFUpload("rptBridgingSEPInternal6.jasper","report","::[ Cetak SEP Internal ]::", FileName, param);
+                }                
+                this.setCursor(Cursor.getDefaultCursor());
+            }else{
+                JOptionPane.showMessageDialog(null,"Maaf, silahkan pilih data SEP yang mau dicetak...!!!!");
+                BtnBatal.requestFocus();
+            } 
+        }
+    }
+    
+//////// end - fungsi uploadsep by ichsan
+    
+    
     /**
     * @param args the command line arguments
     */
@@ -6090,6 +6268,7 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
     private widget.TextBox TglLahir;
     private widget.ComboBox TipeRujukan;
     private widget.ComboBox TujuanKunjungan;
+    private javax.swing.JMenuItem UploadSEP;
     private javax.swing.JDialog WindowCariSEP;
     private javax.swing.JDialog WindowRujukan;
     private javax.swing.JDialog WindowUpdatePulang;
@@ -6168,10 +6347,15 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
     private widget.Label jLabel7;
     private widget.Label jLabel8;
     private widget.Label jLabel9;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextArea jTextArea2;
     private widget.panelisi panelGlass10;
     private widget.panelisi panelGlass8;
     private widget.panelisi panelGlass9;
     private javax.swing.JMenuItem ppAmbilSep;
+    private javax.swing.JMenuItem ppBerkasDigital;
     private javax.swing.JMenuItem ppCekSEPApotekBPJS;
     private javax.swing.JMenuItem ppDaftarRujukan;
     private javax.swing.JMenuItem ppDataIndukKecelakaan;
@@ -7206,6 +7390,57 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         }
         return statusantrean;
     }
+    
+    ////////////////////// start - fungsi upload pdf by ichsan
+    private void UploadPDF(String FileName, String docpath) {
+        try {
+            File file = new File("tmpPDF/" + FileName + ".pdf");
+            byte[] data = FileUtils.readFileToByteArray(file);
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpPost postRequest = new HttpPost("http://" + koneksiDB.HOSTHYBRIDWEB() + ":" + koneksiDB.PORTWEB() + "/" + koneksiDB.HYBRIDWEB() + "/upload.php?doc=" + docpath);
+            ByteArrayBody fileData = new ByteArrayBody(data, FileName + ".pdf");
+            MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+            reqEntity.addPart("file", fileData);
+            postRequest.setEntity(reqEntity);
+            httpClient.execute(postRequest);
+
+            // Menyimpan ke database
+            boolean uploadSuccess = false;
+            kodeberkas = Sequel.cariIsi("SELECT kode FROM master_berkas_digital WHERE nama LIKE '%Klaim%'");
+            if (Sequel.cariInteger("SELECT COUNT(no_rawat) AS jumlah FROM berkas_digital_perawatan WHERE lokasi_file='pages/upload/" + FileName + ".pdf'") > 0) {
+                uploadSuccess = Sequel.mengedittf("berkas_digital_perawatan", "lokasi_file=?","no_rawat=?,kode=?, lokasi_file=?", 4, new String[]{
+                    tbDataSEP.getValueAt(tbDataSEP.getSelectedRow(), 1).toString().trim(),kodeberkas,"pages/upload/" + FileName + ".pdf", "pages/upload/" + FileName + ".pdf"
+                });
+            } else {
+                uploadSuccess = Sequel.menyimpantf("berkas_digital_perawatan", "?,?,?", "No.Rawat", 3, new String[]{
+                    tbDataSEP.getValueAt(tbDataSEP.getSelectedRow(), 1).toString().trim(), kodeberkas, "pages/upload/" + FileName + ".pdf"
+                });
+            }
+
+            // Menampilkan notifikasi
+            if (uploadSuccess) {
+                JOptionPane.showMessageDialog(null, "Upload berhasil!", "Informasi", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Upload gagal disimpan ke database.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (Exception e) {
+            System.out.println("Upload error: " + e);
+            JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat upload: " + e.getMessage(), "Kesalahan", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void HapusPDF() {
+        File file = new File("tmpPDF");
+        String[] myFiles;
+        if (file.isDirectory()) {
+            myFiles = file.list();
+            for (int i = 0; i < myFiles.length; i++) {
+                File myFile = new File(file, myFiles[i]);
+                myFile.delete();
+            }
+        }
+    }
+    ////////////////////// end - fungsi upload pdf by ichsan
     
     private void runBackground(Runnable task) {
         if (ceksukses) return;

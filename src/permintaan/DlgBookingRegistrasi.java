@@ -9,8 +9,10 @@ import fungsi.akses;
 import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedWriter;
@@ -44,6 +46,8 @@ import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
+import simrskhanza.DlgCariCaraBayar;
 
 /**
  *
@@ -62,6 +66,7 @@ public class DlgBookingRegistrasi extends javax.swing.JDialog {
     private StringBuilder htmlContent;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private volatile boolean ceksukses = false;
+    private DlgCariCaraBayar penjab;
     
     
 
@@ -282,47 +287,7 @@ public class DlgBookingRegistrasi extends javax.swing.JDialog {
             @Override
             public void keyReleased(KeyEvent e) {}
         });
-        
-        pasien.penjab.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(akses.getform().equals("DlgBooking")){
-                    if(pasien.penjab.getTable().getSelectedRow()!= -1){
-                        kdpnj.setText(pasien.penjab.getTable().getValueAt(pasien.penjab.getTable().getSelectedRow(),1).toString());
-                        nmpnj.setText(pasien.penjab.getTable().getValueAt(pasien.penjab.getTable().getSelectedRow(),2).toString());
-                    }    
-                    kdpnj.requestFocus();
-                }
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        pasien.penjab.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(akses.getform().equals("DlgBooking")){
-                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                        pasien.penjab.dispose();
-                    }
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
+               
         try {
             aktifjadwal=koneksiDB.JADWALDOKTERDIREGISTRASI();
             URUTNOREG=koneksiDB.URUTNOREG();
@@ -1661,12 +1626,43 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     }//GEN-LAST:event_kdpnjKeyPressed
 
     private void btnPenjabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPenjabActionPerformed
-        akses.setform("DlgBooking");
-        pasien.penjab.onCari();
-        pasien.penjab.isCek();
-        pasien.penjab.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        pasien.penjab.setLocationRelativeTo(internalFrame1);
-        pasien.penjab.setVisible(true);
+        if (penjab == null || !penjab.isDisplayable()) {
+            penjab=new DlgCariCaraBayar(null,false);
+            penjab.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            penjab.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    if(penjab.getTable().getSelectedRow()!= -1){
+                        kdpnj.setText(penjab.getTable().getValueAt(penjab.getTable().getSelectedRow(),1).toString());
+                        nmpnj.setText(penjab.getTable().getValueAt(penjab.getTable().getSelectedRow(),2).toString());
+                    }    
+                    kdpnj.requestFocus();
+                    penjab=null;
+                }
+            }); 
+
+            penjab.getTable().addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                        penjab.dispose();
+                    } 
+                }
+            });   
+            penjab.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            penjab.setLocationRelativeTo(internalFrame1);
+        }
+               
+        if (penjab == null) return;
+        if (!penjab.isVisible()) {
+            penjab.emptTeks();
+            penjab.isCek();
+        }  
+        if (penjab.isVisible()) {
+            penjab.toFront();
+            return;
+        }    
+        penjab.setVisible(true);
     }//GEN-LAST:event_btnPenjabActionPerformed
 
     private void btnPenjabKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnPenjabKeyPressed
@@ -2317,19 +2313,6 @@ private void getData() {
         String detik = nol_detik + Integer.toString(nilai_detik);
         return jam+":"+menit+":"+detik;
     }
-
-    /* private void isBooking() {
-        if(Sequel.menyimpantf("booking_registrasi","?,?,?,?,?,?,?,?,?,?,?","Pasien dan Tanggal",11,new String[]{
-             Valid.SetTgl(TanggalBooking.getSelectedItem()+""),TanggalBooking.getSelectedItem().toString().substring(11,19),TNoRM.getText(),
-             Valid.SetTgl(TanggalPeriksa.getSelectedItem()+""),KdDokter.getText(),
-             KdPoli.getText(),NoReg.getText(),kdpnj.getText(),"0",
-             Valid.SetTgl(TanggalPeriksa.getSelectedItem()+"")+" "+TanggalBooking.getSelectedItem().toString().substring(11,19),
-             "Belum"
-           })==true){
-            emptTeks();
-            tampil();
-        } 
-    } */
     
     private void isBooking() {
     String tanggalBooking = Valid.SetTgl(TanggalBooking.getSelectedItem()+"") + " " + TanggalBooking.getSelectedItem().toString().substring(11,19);

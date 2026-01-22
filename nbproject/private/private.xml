@@ -5,7 +5,7 @@
             <url>src/simrskhanza/DlgCariPeriksaRadiologi.java</url>
             <bookmark id="2">
                 <name/>
-                <line>1861</line>
+                <line>1993</line>
                 <key/>
             </bookmark>
         </file>
@@ -13,15 +13,18 @@
             <url>src/keuangan/DlgPendapatanPerCaraBayar.java</url>
             <bookmark id="4">
                 <name/>
-                <line>558</line>
+                <line>557</line>
                 <key/>
             </bookmark>
         </file>
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/windiartonugroho/Documents/Pekerjaan/SIMRSKhanza/src/inventory/DlgBarang.java</file>
-            <file>file:/Users/windiartonugroho/Documents/Pekerjaan/SIMRSKhanza/src/inventory/DlgReturBeli.java</file>
+            <file>file:/D:/WORK/GITHUB/SIMRS-Khanza-custom-ichsan/src/bridging/PCareCekKartu.java</file>
+            <file>file:/D:/WORK/GITHUB/SIMRS-Khanza-custom-ichsan/nbproject/build-impl.xml</file>
+            <file>file:/D:/WORK/GITHUB/SIMRS-Khanza-custom-ichsan/src/surat/SuratKontrol.java</file>
+            <file>file:/D:/WORK/GITHUB/SIMRS-Khanza-custom-ichsan/src/kepegawaian/DlgCariDokter2.java</file>
+            <file>file:/D:/WORK/GITHUB/SIMRS-Khanza-custom-ichsan/src/permintaan/DlgBookingRegistrasi.java</file>
         </group>
     </open-files>
 </project-private>

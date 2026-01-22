@@ -25,8 +25,10 @@ import fungsi.validasi;
 import fungsi.akses;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.Connection;
@@ -38,20 +40,35 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JOptionPane;
+import javax.swing.WindowConstants;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.http.MediaType;
-import simrskhanza.DlgPasien;
-import simrskhanza.DlgPilihanCetakDokumen;
 import java.time.DayOfWeek;  //tambahan Ichsan
 import java.time.LocalDate;  //tambahan Ichsan
 import java.time.format.DateTimeFormatter;  //tambahan Ichsan
 import java.time.LocalDateTime;  //tambahan Ichsan
 import java.io.FileWriter;  //tambahan Ichsan
 import java.io.PrintWriter;  //tambahan Ichsan
-
+import simrskhanza.DlgPasien;
+import simrskhanza.DlgPilihanCetakDokumen;
+import simrskhanza.DlgCariBahasa;
+import simrskhanza.DlgCariCacatFisik;
+import simrskhanza.DlgCariCaraBayar;
+import simrskhanza.DlgCariPerusahaan;
+import simrskhanza.DlgCariSuku;
+import simrskhanza.DlgGolonganPolri;
+import simrskhanza.DlgGolonganTNI;
+import simrskhanza.DlgJabatanPolri;
+import simrskhanza.DlgJabatanTNI;
+import simrskhanza.DlgPangkatPolri;
+import simrskhanza.DlgPangkatTNI;
+import simrskhanza.DlgPasien;
+import simrskhanza.DlgPilihanCetakDokumen;
+import simrskhanza.DlgSatuanPolri;
+import simrskhanza.DlgSatuanTNI;
 
 
 /**
@@ -74,6 +91,7 @@ public final class PCareCekKartu extends javax.swing.JDialog {
     // ------------------------------------------------
     
     private DlgPasien pasien=new DlgPasien(null,false);
+    private DlgCariCaraBayar penjab;
     private ApiPcare api=new ApiPcare();
     private int pilih=0,p_no_ktp=0,p_tmp_lahir=0,p_nm_ibu=0,p_alamat=0,
             p_pekerjaan=0,p_no_tlp=0,p_umur=0,p_namakeluarga=0,p_no_peserta=0,
@@ -208,7 +226,7 @@ public final class PCareCekKartu extends javax.swing.JDialog {
             @Override
             public void keyReleased(KeyEvent e) {}
         }); 
-    
+         /*
         pasien.penjab.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(WindowEvent e) {}
@@ -247,7 +265,7 @@ public final class PCareCekKartu extends javax.swing.JDialog {
             }
             @Override
             public void keyReleased(KeyEvent e) {}
-        });
+        });  */
         
         pasien.kab.addWindowListener(new WindowListener() {
             @Override
@@ -338,7 +356,7 @@ public final class PCareCekKartu extends javax.swing.JDialog {
             @Override
             public void windowDeactivated(WindowEvent e) {}
         });
-        
+        /*
         pasien.perusahaan.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(WindowEvent e) {}
@@ -847,7 +865,7 @@ public final class PCareCekKartu extends javax.swing.JDialog {
             }
             @Override
             public void keyReleased(KeyEvent e) {}
-        });
+        }); */
         
         ChkCari.setSelected(false);
         isForm();
@@ -2982,20 +3000,7 @@ public final class PCareCekKartu extends javax.swing.JDialog {
         pasien.kab.dispose();
         pasien.kec.dispose();
         pasien.kel.dispose();
-        pasien.penjab.dispose();
         pasien.prop.dispose();
-        pasien.perusahaan.dispose();
-        pasien.bahasa.dispose();
-        pasien.cacat.dispose();
-        pasien.suku.dispose();
-        pasien.golongantni.dispose();
-        pasien.satuantni.dispose();
-        pasien.pangkattni.dispose();
-        pasien.jabatantni.dispose();
-        pasien.golonganpolri.dispose();
-        pasien.satuanpolri.dispose();
-        pasien.pangkatpolri.dispose();
-        pasien.jabatanpolri.dispose();
         akses.setAktif(false);
         dispose();
     }//GEN-LAST:event_BtnKeluarActionPerformed
@@ -3184,12 +3189,50 @@ public final class PCareCekKartu extends javax.swing.JDialog {
     }//GEN-LAST:event_KdpnjKeyPressed
 
     private void BtnPenjabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPenjabActionPerformed
-       akses.setform("PCareCekKartu");
-        pasien.penjab.isCek();
-        pasien.penjab.onCari();
-        pasien.penjab.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        pasien.penjab.setLocationRelativeTo(internalFrame1);
-        pasien.penjab.setVisible(true);
+       if (penjab == null || !penjab.isDisplayable()) {
+            penjab=new DlgCariCaraBayar(null,false);
+            penjab.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            penjab.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    if(penjab.getTable().getSelectedRow()!= -1){
+                        Kdpnj.setText(penjab.getTable().getValueAt(penjab.getTable().getSelectedRow(),1).toString());
+                        nmpnj.setText(penjab.getTable().getValueAt(penjab.getTable().getSelectedRow(),2).toString());
+                        if(tampilkantni.equals("Yes")){
+                            if(nmpnj.getText().toLowerCase().contains("tni")){
+                                chkTNI.setSelected(true);
+                            }
+                            if(nmpnj.getText().toLowerCase().contains("polri")){
+                                chkPolri.setSelected(true);
+                            }
+                        }
+                    } 
+                    penjab=null;
+                }
+            }); 
+
+            penjab.getTable().addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                        penjab.dispose();
+                    } 
+                }
+            });   
+            penjab.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            penjab.setLocationRelativeTo(internalFrame1);
+        }
+               
+        if (penjab == null) return;
+        if (!penjab.isVisible()) {
+            penjab.emptTeks();
+            penjab.isCek();
+        }  
+        if (penjab.isVisible()) {
+            penjab.toFront();
+            return;
+        }    
+        penjab.setVisible(true);
     }//GEN-LAST:event_BtnPenjabActionPerformed
 
     private void KelurahanMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_KelurahanMouseMoved
@@ -3713,11 +3756,46 @@ public final class PCareCekKartu extends javax.swing.JDialog {
     }//GEN-LAST:event_BtnCari1KeyPressed
 
     private void BtnSukuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSukuActionPerformed
-        akses.setform("PCareCekKartu");
-        pasien.suku.isCek();
-        pasien.suku.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        pasien.suku.setLocationRelativeTo(internalFrame1);
-        pasien.suku.setVisible(true);
+        DlgCariSuku suku=new DlgCariSuku(null,false);
+        suku.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(suku.getTable().getSelectedRow()!= -1){
+                    kdsuku.setText(suku.getTable().getValueAt(suku.getTable().getSelectedRow(),0).toString());
+                    nmsukubangsa.setText(suku.getTable().getValueAt(suku.getTable().getSelectedRow(),1).toString());
+                }  
+                kdsuku.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        suku.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    suku.dispose();
+                } 
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
+        suku.isCek();
+        suku.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+        suku.setLocationRelativeTo(internalFrame1);
+        suku.setVisible(true);
     }//GEN-LAST:event_BtnSukuActionPerformed
 
     private void BtnSukuKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnSukuKeyPressed
@@ -3731,11 +3809,46 @@ public final class PCareCekKartu extends javax.swing.JDialog {
     }//GEN-LAST:event_BtnSukuKeyPressed
 
     private void BtnBahasaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnBahasaActionPerformed
-        akses.setform("PCareCekKartu");
-        pasien.bahasa.isCek();
-        pasien.bahasa.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        pasien.bahasa.setLocationRelativeTo(internalFrame1);
-        pasien.bahasa.setVisible(true);
+        DlgCariBahasa bahasa=new DlgCariBahasa(null,false);
+        bahasa.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(bahasa.getTable().getSelectedRow()!= -1){
+                    kdbahasa.setText(bahasa.getTable().getValueAt(bahasa.getTable().getSelectedRow(),0).toString());
+                    nmbahasa.setText(bahasa.getTable().getValueAt(bahasa.getTable().getSelectedRow(),1).toString());
+                }  
+                kdbahasa.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        bahasa.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    bahasa.dispose();
+                } 
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
+        bahasa.isCek();
+        bahasa.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+        bahasa.setLocationRelativeTo(internalFrame1);
+        bahasa.setVisible(true);
     }//GEN-LAST:event_BtnBahasaActionPerformed
 
     private void BtnBahasaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnBahasaKeyPressed
@@ -3749,11 +3862,46 @@ public final class PCareCekKartu extends javax.swing.JDialog {
     }//GEN-LAST:event_BtnBahasaKeyPressed
 
     private void BtnCacatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCacatActionPerformed
-        akses.setform("PCareCekKartu");
-        pasien.cacat.isCek();
-        pasien.cacat.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        pasien.cacat.setLocationRelativeTo(internalFrame1);
-        pasien.cacat.setVisible(true);
+        DlgCariCacatFisik cacat=new DlgCariCacatFisik(null,false);
+        cacat.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(cacat.getTable().getSelectedRow()!= -1){
+                    kdcacat.setText(cacat.getTable().getValueAt(cacat.getTable().getSelectedRow(),0).toString());
+                    nmcacat.setText(cacat.getTable().getValueAt(cacat.getTable().getSelectedRow(),1).toString());
+                }  
+                kdcacat.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        cacat.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    cacat.dispose();
+                } 
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
+        cacat.isCek();
+        cacat.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+        cacat.setLocationRelativeTo(internalFrame1);
+        cacat.setVisible(true);
     }//GEN-LAST:event_BtnCacatActionPerformed
 
     private void BtnCacatKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnCacatKeyPressed
@@ -3770,11 +3918,46 @@ public final class PCareCekKartu extends javax.swing.JDialog {
     }//GEN-LAST:event_BtnCacatKeyPressed
 
     private void BtnPerusahaanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPerusahaanActionPerformed
-        akses.setform("PCareCekKartu");
-        pasien.perusahaan.isCek();
-        pasien.perusahaan.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        pasien.perusahaan.setLocationRelativeTo(internalFrame1);
-        pasien.perusahaan.setVisible(true);
+        DlgCariPerusahaan perusahaan=new DlgCariPerusahaan(null,false);
+        perusahaan.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(perusahaan.getTable().getSelectedRow()!= -1){
+                    kdperusahaan.setText(perusahaan.getTable().getValueAt(perusahaan.getTable().getSelectedRow(),0).toString());
+                    nmperusahaan.setText(perusahaan.getTable().getValueAt(perusahaan.getTable().getSelectedRow(),1).toString());
+                }  
+                kdperusahaan.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        perusahaan.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    perusahaan.dispose();
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
+        perusahaan.isCek();
+        perusahaan.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+        perusahaan.setLocationRelativeTo(internalFrame1);
+        perusahaan.setVisible(true);
     }//GEN-LAST:event_BtnPerusahaanActionPerformed
 
     private void BtnPerusahaanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnPerusahaanKeyPressed
@@ -3899,35 +4082,175 @@ public final class PCareCekKartu extends javax.swing.JDialog {
     }//GEN-LAST:event_chkTNIActionPerformed
 
     private void BtnGolonganTNIActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnGolonganTNIActionPerformed
-        akses.setform("PCareCekKartu");
-        pasien.golongantni.isCek();
-        pasien.golongantni.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        pasien.golongantni.setLocationRelativeTo(internalFrame1);
-        pasien.golongantni.setVisible(true);
+        DlgGolonganTNI golongantni=new DlgGolonganTNI(null,false);
+        golongantni.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(golongantni.getTable().getSelectedRow()!= -1){
+                    kdgolongantni.setText(golongantni.getTable().getValueAt(golongantni.getTable().getSelectedRow(),0).toString());
+                    nmgolongantni.setText(golongantni.getTable().getValueAt(golongantni.getTable().getSelectedRow(),1).toString());
+                }  
+                kdgolongantni.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        golongantni.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    golongantni.dispose();
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
+        golongantni.isCek();
+        golongantni.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+        golongantni.setLocationRelativeTo(internalFrame1);
+        golongantni.setVisible(true);
     }//GEN-LAST:event_BtnGolonganTNIActionPerformed
 
     private void BtnSatuanTNIActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSatuanTNIActionPerformed
-        akses.setform("PCareCekKartu");
-        pasien.satuantni.isCek();
-        pasien.satuantni.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        pasien.satuantni.setLocationRelativeTo(internalFrame1);
-        pasien.satuantni.setVisible(true);
+        DlgSatuanTNI satuantni=new DlgSatuanTNI(null,false);
+        satuantni.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(satuantni.getTable().getSelectedRow()!= -1){
+                    kdsatuantni.setText(satuantni.getTable().getValueAt(satuantni.getTable().getSelectedRow(),0).toString());
+                    nmsatuantni.setText(satuantni.getTable().getValueAt(satuantni.getTable().getSelectedRow(),1).toString());
+                }  
+                kdsatuantni.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        satuantni.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    satuantni.dispose();
+                } 
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
+        satuantni.isCek();
+        satuantni.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+        satuantni.setLocationRelativeTo(internalFrame1);
+        satuantni.setVisible(true);
     }//GEN-LAST:event_BtnSatuanTNIActionPerformed
 
     private void BtnPangkatTNIActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPangkatTNIActionPerformed
-        akses.setform("PCareCekKartu");
-        pasien.pangkattni.isCek();
-        pasien.pangkattni.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        pasien.pangkattni.setLocationRelativeTo(internalFrame1);
-        pasien.pangkattni.setVisible(true);
+        DlgPangkatTNI pangkattni=new DlgPangkatTNI(null,false);
+        pangkattni.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(pangkattni.getTable().getSelectedRow()!= -1){
+                    kdpangkattni.setText(pangkattni.getTable().getValueAt(pangkattni.getTable().getSelectedRow(),0).toString());
+                    nmpangkattni.setText(pangkattni.getTable().getValueAt(pangkattni.getTable().getSelectedRow(),1).toString());
+                }  
+                kdpangkattni.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        pangkattni.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    pangkattni.dispose();
+                } 
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
+        pangkattni.isCek();
+        pangkattni.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+        pangkattni.setLocationRelativeTo(internalFrame1);
+        pangkattni.setVisible(true);
     }//GEN-LAST:event_BtnPangkatTNIActionPerformed
 
     private void BtnJabatanTNIActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnJabatanTNIActionPerformed
-        akses.setform("PCareCekKartu");
-        pasien.jabatantni.isCek();
-        pasien.jabatantni.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        pasien.jabatantni.setLocationRelativeTo(internalFrame1);
-        pasien.jabatantni.setVisible(true);
+        DlgJabatanTNI jabatantni=new DlgJabatanTNI(null,false);
+        jabatantni.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(jabatantni.getTable().getSelectedRow()!= -1){
+                    kdjabatantni.setText(jabatantni.getTable().getValueAt(jabatantni.getTable().getSelectedRow(),0).toString());
+                    nmjabatantni.setText(jabatantni.getTable().getValueAt(jabatantni.getTable().getSelectedRow(),1).toString());
+                }  
+                kdjabatantni.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        jabatantni.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    jabatantni.dispose();
+                } 
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
+        jabatantni.isCek();
+        jabatantni.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+        jabatantni.setLocationRelativeTo(internalFrame1);
+        jabatantni.setVisible(true);
     }//GEN-LAST:event_BtnJabatanTNIActionPerformed
 
     private void chkPolriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkPolriActionPerformed
@@ -3953,35 +4276,175 @@ public final class PCareCekKartu extends javax.swing.JDialog {
     }//GEN-LAST:event_chkPolriActionPerformed
 
     private void BtnGolonganPolriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnGolonganPolriActionPerformed
-        akses.setform("PCareCekKartu");
-        pasien.golonganpolri.isCek();
-        pasien.golonganpolri.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        pasien.golonganpolri.setLocationRelativeTo(internalFrame1);
-        pasien.golonganpolri.setVisible(true);
+        DlgGolonganPolri golonganpolri=new DlgGolonganPolri(null,false);
+        golonganpolri.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(golonganpolri.getTable().getSelectedRow()!= -1){
+                    kdgolonganpolri.setText(golonganpolri.getTable().getValueAt(golonganpolri.getTable().getSelectedRow(),0).toString());
+                    nmgolonganpolri.setText(golonganpolri.getTable().getValueAt(golonganpolri.getTable().getSelectedRow(),1).toString());
+                }  
+                kdgolonganpolri.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        golonganpolri.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    golonganpolri.dispose();
+                } 
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
+        golonganpolri.isCek();
+        golonganpolri.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+        golonganpolri.setLocationRelativeTo(internalFrame1);
+        golonganpolri.setVisible(true);
     }//GEN-LAST:event_BtnGolonganPolriActionPerformed
 
     private void BtnSatuanPolriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSatuanPolriActionPerformed
-        akses.setform("PCareCekKartu");
-        pasien.satuanpolri.isCek();
-        pasien.satuanpolri.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        pasien.satuanpolri.setLocationRelativeTo(internalFrame1);
-        pasien.satuanpolri.setVisible(true);
+        DlgSatuanPolri satuanpolri=new DlgSatuanPolri(null,false);
+        satuanpolri.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(satuanpolri.getTable().getSelectedRow()!= -1){
+                    kdsatuanpolri.setText(satuanpolri.getTable().getValueAt(satuanpolri.getTable().getSelectedRow(),0).toString());
+                    nmsatuanpolri.setText(satuanpolri.getTable().getValueAt(satuanpolri.getTable().getSelectedRow(),1).toString());
+                }  
+                kdsatuanpolri.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        satuanpolri.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    satuanpolri.dispose();
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
+        satuanpolri.isCek();
+        satuanpolri.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+        satuanpolri.setLocationRelativeTo(internalFrame1);
+        satuanpolri.setVisible(true);
     }//GEN-LAST:event_BtnSatuanPolriActionPerformed
 
     private void BtnPangkatPolriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPangkatPolriActionPerformed
-        akses.setform("PCareCekKartu");
-        pasien.pangkatpolri.isCek();
-        pasien.pangkatpolri.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        pasien.pangkatpolri.setLocationRelativeTo(internalFrame1);
-        pasien.pangkatpolri.setVisible(true);
+        DlgPangkatPolri pangkatpolri=new DlgPangkatPolri(null,false);
+        pangkatpolri.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(pangkatpolri.getTable().getSelectedRow()!= -1){
+                    kdpangkatpolri.setText(pangkatpolri.getTable().getValueAt(pangkatpolri.getTable().getSelectedRow(),0).toString());
+                    nmpangkatpolri.setText(pangkatpolri.getTable().getValueAt(pangkatpolri.getTable().getSelectedRow(),1).toString());
+                }  
+                kdpangkatpolri.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        pangkatpolri.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    pangkatpolri.dispose();
+                } 
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
+        pangkatpolri.isCek();
+        pangkatpolri.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+        pangkatpolri.setLocationRelativeTo(internalFrame1);
+        pangkatpolri.setVisible(true);
     }//GEN-LAST:event_BtnPangkatPolriActionPerformed
 
     private void BtnJabatanPolriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnJabatanPolriActionPerformed
-        akses.setform("PCareCekKartu");
-        pasien.jabatanpolri.isCek();
-        pasien.jabatanpolri.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        pasien.jabatanpolri.setLocationRelativeTo(internalFrame1);
-        pasien.jabatanpolri.setVisible(true);
+        DlgJabatanPolri jabatanpolri=new DlgJabatanPolri(null,false);
+        jabatanpolri.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(jabatanpolri.getTable().getSelectedRow()!= -1){
+                    kdjabatanpolri.setText(jabatanpolri.getTable().getValueAt(jabatanpolri.getTable().getSelectedRow(),0).toString());
+                    nmjabatanpolri.setText(jabatanpolri.getTable().getValueAt(jabatanpolri.getTable().getSelectedRow(),1).toString());
+                }  
+                kdjabatanpolri.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        jabatanpolri.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    jabatanpolri.dispose();
+                }  
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
+        jabatanpolri.isCek();
+        jabatanpolri.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+        jabatanpolri.setLocationRelativeTo(internalFrame1);
+        jabatanpolri.setVisible(true);
     }//GEN-LAST:event_BtnJabatanPolriActionPerformed
 
     private void kdperusahaanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_kdperusahaanKeyPressed

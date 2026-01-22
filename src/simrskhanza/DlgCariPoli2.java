@@ -371,7 +371,7 @@ public final class DlgCariPoli2 extends javax.swing.JDialog {
     private widget.Table tbKamar;
     // End of variables declaration//GEN-END:variables
 
-    private void tampil() {
+    public void tampil() {
         Valid.tabelKosong(tabMode);
         try {
             file=new File("./cache/poli2.iyem");
