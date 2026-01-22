@@ -39,8 +39,10 @@ import fungsi.akses;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.Connection;
@@ -58,6 +60,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.SwingWorker;
+import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
@@ -73,27 +76,17 @@ public class DlgPasien extends javax.swing.JDialog {
     private sekuel Sequel=new sekuel();
     private validasi Valid=new validasi();
     private Connection koneksi=koneksiDB.condb();
-    public  DlgCariCaraBayar penjab=new DlgCariCaraBayar(null,false);
     public  DlgKabupaten kab=new DlgKabupaten(null,false);
     public  DlgPropinsi prop=new DlgPropinsi(null,false);
     public  DlgKecamatan kec=new DlgKecamatan(null,false);
     public  DlgKelurahan kel=new DlgKelurahan(null,false);
-    public  DlgCariPerusahaan perusahaan=new DlgCariPerusahaan(null,false);
-    public  DlgCariBahasa bahasa=new DlgCariBahasa(null,false);
-    public  DlgCariCacatFisik cacat=new DlgCariCacatFisik(null,false);
-    public  DlgCariSuku suku=new DlgCariSuku(null,false);
-    public  DlgGolonganTNI golongantni=new DlgGolonganTNI(null,false);
-    public  DlgSatuanTNI satuantni=new DlgSatuanTNI(null,false);
-    public  DlgPangkatTNI pangkattni=new DlgPangkatTNI(null,false);
-    public  DlgJabatanTNI jabatantni=new DlgJabatanTNI(null,false);
-    public  DlgGolonganPolri golonganpolri=new DlgGolonganPolri(null,false);
-    public  DlgSatuanPolri satuanpolri=new DlgSatuanPolri(null,false);
-    public  DlgPangkatPolri pangkatpolri=new DlgPangkatPolri(null,false);
-    public  DlgJabatanPolri jabatanpolri=new DlgJabatanPolri(null,false);
-    public  YaskiReferensiPropinsi propinsiref=new YaskiReferensiPropinsi(null,false);
-    public  YaskiReferensiKabupaten kabupatenref=new YaskiReferensiKabupaten(null,false);
-    public  YaskiReferensiKecamatan kecamatanref=new YaskiReferensiKecamatan(null,false);
-    public  YaskiReferensiKelurahan kelurahanref=new YaskiReferensiKelurahan(null,false);
+    private DlgCariSuku suku;
+    private DlgCariBahasa bahasa;
+    private DlgCariCacatFisik cacat;
+    private DlgCariCaraBayar penjab;
+    private DlgCariPerusahaan perusahaan;
+    private DlgGolonganTNI golongantni;
+    private DlgSatuanTNI satuantni;
     private int pilih=0,z=0,p_no_ktp=0,p_tmp_lahir=0,p_nm_ibu=0,p_alamat=0,
             p_pekerjaan=0,p_no_tlp=0,p_umur=0,p_namakeluarga=0,p_no_peserta=0,
             p_kelurahan=0,p_kecamatan=0,p_kabupaten=0,p_pekerjaanpj=0,
@@ -510,494 +503,6 @@ public class DlgPasien extends javax.swing.JDialog {
             });
         } 
         
-        penjab.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(penjab.getTable().getSelectedRow()!= -1){
-                        Kdpnj.setText(penjab.getTable().getValueAt(penjab.getTable().getSelectedRow(),1).toString());
-                        nmpnj.setText(penjab.getTable().getValueAt(penjab.getTable().getSelectedRow(),2).toString());
-                        if(tampilkantni.equals("Yes")){
-                            if(nmpnj.getText().toLowerCase().contains("tni")){
-                                chkTNI.setSelected(true);
-                            }
-                            if(nmpnj.getText().toLowerCase().contains("polri")){
-                                chkPolri.setSelected(true);
-                            }
-                        }
-                    }  
-                    Kdpnj.requestFocus();
-                }
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        penjab.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                        penjab.dispose();
-                    }                
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        perusahaan.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(perusahaan.getTable().getSelectedRow()!= -1){
-                        kdperusahaan.setText(perusahaan.getTable().getValueAt(perusahaan.getTable().getSelectedRow(),0).toString());
-                        nmperusahaan.setText(perusahaan.getTable().getValueAt(perusahaan.getTable().getSelectedRow(),1).toString());
-                    }  
-                    kdperusahaan.requestFocus();
-                }
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        perusahaan.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                        perusahaan.dispose();
-                    }                
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        golongantni.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(golongantni.getTable().getSelectedRow()!= -1){
-                        kdgolongantni.setText(golongantni.getTable().getValueAt(golongantni.getTable().getSelectedRow(),0).toString());
-                        nmgolongantni.setText(golongantni.getTable().getValueAt(golongantni.getTable().getSelectedRow(),1).toString());
-                    }  
-                    kdgolongantni.requestFocus();
-                }
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        golongantni.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                        golongantni.dispose();
-                    }                
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        jabatantni.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(jabatantni.getTable().getSelectedRow()!= -1){
-                        kdjabatantni.setText(jabatantni.getTable().getValueAt(jabatantni.getTable().getSelectedRow(),0).toString());
-                        nmjabatantni.setText(jabatantni.getTable().getValueAt(jabatantni.getTable().getSelectedRow(),1).toString());
-                    }  
-                    kdjabatantni.requestFocus();
-                }
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        jabatantni.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                        jabatantni.dispose();
-                    }                
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        satuantni.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(satuantni.getTable().getSelectedRow()!= -1){
-                        kdsatuantni.setText(satuantni.getTable().getValueAt(satuantni.getTable().getSelectedRow(),0).toString());
-                        nmsatuantni.setText(satuantni.getTable().getValueAt(satuantni.getTable().getSelectedRow(),1).toString());
-                    }  
-                    kdsatuantni.requestFocus();
-                }
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        satuantni.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                        satuantni.dispose();
-                    }                
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        pangkattni.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(pangkattni.getTable().getSelectedRow()!= -1){
-                        kdpangkattni.setText(pangkattni.getTable().getValueAt(pangkattni.getTable().getSelectedRow(),0).toString());
-                        nmpangkattni.setText(pangkattni.getTable().getValueAt(pangkattni.getTable().getSelectedRow(),1).toString());
-                    }  
-                    kdpangkattni.requestFocus();
-                }
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        pangkattni.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                        pangkattni.dispose();
-                    }                
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        golonganpolri.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(golonganpolri.getTable().getSelectedRow()!= -1){
-                        kdgolonganpolri.setText(golonganpolri.getTable().getValueAt(golonganpolri.getTable().getSelectedRow(),0).toString());
-                        nmgolonganpolri.setText(golonganpolri.getTable().getValueAt(golonganpolri.getTable().getSelectedRow(),1).toString());
-                    }  
-                    kdgolonganpolri.requestFocus();
-                }
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        golonganpolri.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                        golonganpolri.dispose();
-                    }                
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        jabatanpolri.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(jabatanpolri.getTable().getSelectedRow()!= -1){
-                        kdjabatanpolri.setText(jabatanpolri.getTable().getValueAt(jabatanpolri.getTable().getSelectedRow(),0).toString());
-                        nmjabatanpolri.setText(jabatanpolri.getTable().getValueAt(jabatanpolri.getTable().getSelectedRow(),1).toString());
-                    }  
-                    kdjabatanpolri.requestFocus();
-                }
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        jabatanpolri.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                        jabatanpolri.dispose();
-                    }                
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        satuanpolri.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(satuanpolri.getTable().getSelectedRow()!= -1){
-                        kdsatuanpolri.setText(satuanpolri.getTable().getValueAt(satuanpolri.getTable().getSelectedRow(),0).toString());
-                        nmsatuanpolri.setText(satuanpolri.getTable().getValueAt(satuanpolri.getTable().getSelectedRow(),1).toString());
-                    }  
-                    kdsatuanpolri.requestFocus();
-                }
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        satuanpolri.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                        satuanpolri.dispose();
-                    }                
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        pangkatpolri.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(pangkatpolri.getTable().getSelectedRow()!= -1){
-                        kdpangkatpolri.setText(pangkatpolri.getTable().getValueAt(pangkatpolri.getTable().getSelectedRow(),0).toString());
-                        nmpangkatpolri.setText(pangkatpolri.getTable().getValueAt(pangkatpolri.getTable().getSelectedRow(),1).toString());
-                    }  
-                    kdpangkatpolri.requestFocus();
-                }
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        pangkatpolri.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                        pangkatpolri.dispose();
-                    }                
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        bahasa.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(bahasa.getTable().getSelectedRow()!= -1){
-                        kdbahasa.setText(bahasa.getTable().getValueAt(bahasa.getTable().getSelectedRow(),0).toString());
-                        nmbahasa.setText(bahasa.getTable().getValueAt(bahasa.getTable().getSelectedRow(),1).toString());
-                    }  
-                    kdbahasa.requestFocus();
-                }
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        bahasa.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                        bahasa.dispose();
-                    }                
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        suku.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(suku.getTable().getSelectedRow()!= -1){
-                        kdsuku.setText(suku.getTable().getValueAt(suku.getTable().getSelectedRow(),0).toString());
-                        nmsukubangsa.setText(suku.getTable().getValueAt(suku.getTable().getSelectedRow(),1).toString());
-                    }  
-                    kdsuku.requestFocus();
-                }
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        suku.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                        suku.dispose();
-                    }                
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
         prop.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(WindowEvent e) {}
@@ -1152,226 +657,6 @@ public class DlgPasien extends javax.swing.JDialog {
             public void windowActivated(WindowEvent e) {}
             @Override
             public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        cacat.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(cacat.getTable().getSelectedRow()!= -1){
-                        kdcacat.setText(cacat.getTable().getValueAt(cacat.getTable().getSelectedRow(),0).toString());
-                        nmcacat.setText(cacat.getTable().getValueAt(cacat.getTable().getSelectedRow(),1).toString());
-                    }  
-                    kdcacat.requestFocus();
-                }
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        cacat.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(akses.getform().equals("DlgPasien")){
-                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                        cacat.dispose();
-                    }                
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        propinsiref.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(propinsiref.getTable().getSelectedRow()!= -1){   
-                    KdProp.setText(propinsiref.getTable().getValueAt(propinsiref.getTable().getSelectedRow(),1).toString());
-                    kdprop="";
-                    switch (pilih) {
-                        case 1:
-                            Propinsi.setText(propinsiref.getTable().getValueAt(propinsiref.getTable().getSelectedRow(),2).toString().toUpperCase());
-                            break;
-                        case 2:
-                            PropinsiPj.setText(propinsiref.getTable().getValueAt(propinsiref.getTable().getSelectedRow(),2).toString().toUpperCase());
-                            break;
-                        default:
-                            break;
-                    }
-                }                  
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        propinsiref.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                    propinsiref.dispose();
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        }); 
-        
-        kabupatenref.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(kabupatenref.getTable().getSelectedRow()!= -1){   
-                    KdKab.setText(kabupatenref.getTable().getValueAt(kabupatenref.getTable().getSelectedRow(),1).toString());
-                    kdkab="";
-                    switch (pilih) {
-                        case 1:
-                            Kabupaten.setText(kabupatenref.getTable().getValueAt(kabupatenref.getTable().getSelectedRow(),2).toString().toUpperCase());
-                            break;
-                        case 2:
-                            KabupatenPj.setText(kabupatenref.getTable().getValueAt(kabupatenref.getTable().getSelectedRow(),2).toString().toUpperCase());
-                            break;
-                        default:
-                            break;
-                    }
-                }                  
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        kabupatenref.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                    kabupatenref.dispose();
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        }); 
-        
-        kecamatanref.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(kecamatanref.getTable().getSelectedRow()!= -1){   
-                    KdKec.setText(kecamatanref.getTable().getValueAt(kecamatanref.getTable().getSelectedRow(),1).toString());
-                    kdkec="";
-                    switch (pilih) {
-                        case 1:
-                            Kecamatan.setText(kecamatanref.getTable().getValueAt(kecamatanref.getTable().getSelectedRow(),2).toString().toUpperCase());
-                            break;
-                        case 2:
-                            KecamatanPj.setText(kecamatanref.getTable().getValueAt(kecamatanref.getTable().getSelectedRow(),2).toString().toUpperCase());
-                            break;
-                        default:
-                            break;
-                    }
-                }                  
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        kecamatanref.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                    kecamatanref.dispose();
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
-        });
-        
-        kelurahanref.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(kelurahanref.getTable().getSelectedRow()!= -1){    
-                    KdKel.setText(kelurahanref.getTable().getValueAt(kelurahanref.getTable().getSelectedRow(),1).toString());
-                    kdkel="";
-                    switch (pilih) {
-                        case 1:
-                            Kelurahan.setText(kelurahanref.getTable().getValueAt(kelurahanref.getTable().getSelectedRow(),2).toString().toUpperCase());
-                            break;
-                        case 2:
-                            KelurahanPj.setText(kelurahanref.getTable().getValueAt(kelurahanref.getTable().getSelectedRow(),2).toString().toUpperCase());
-                            break;
-                        default:
-                            break;
-                    }
-                }                  
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });
-        
-        kelurahanref.getTable().addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode()==KeyEvent.VK_SPACE){
-                    kelurahanref.dispose();
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {}
         });
         
         try {
@@ -5632,19 +4917,6 @@ private void BtnKeluarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     kab.dispose();
     kec.dispose();
     kel.dispose();
-    penjab.dispose();
-    perusahaan.dispose();
-    bahasa.dispose();
-    cacat.dispose();
-    suku.dispose();
-    golongantni.dispose();
-    satuantni.dispose();
-    pangkattni.dispose();
-    jabatantni.dispose();
-    golonganpolri.dispose();
-    satuanpolri.dispose();
-    pangkatpolri.dispose();
-    jabatanpolri.dispose();
     DlgDemografi.dispose();
     dispose();
 }//GEN-LAST:event_BtnKeluarActionPerformed
@@ -5849,11 +5121,49 @@ private void KdpnjKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_Kdp
 }//GEN-LAST:event_KdpnjKeyPressed
 
 private void BtnPenjabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPenjabActionPerformed
-        akses.setform("DlgPasien");
-        penjab.isCek();
-        penjab.onCari();
-        penjab.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        penjab.setLocationRelativeTo(internalFrame1);
+        if (penjab == null || !penjab.isDisplayable()) {
+            penjab=new DlgCariCaraBayar(null,false);
+            penjab.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            penjab.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    if(penjab.getTable().getSelectedRow()!= -1){
+                        Kdpnj.setText(penjab.getTable().getValueAt(penjab.getTable().getSelectedRow(),1).toString());
+                        nmpnj.setText(penjab.getTable().getValueAt(penjab.getTable().getSelectedRow(),2).toString());
+                        if(tampilkantni.equals("Yes")){
+                            if(nmpnj.getText().toLowerCase().contains("tni")){
+                                chkTNI.setSelected(true);
+                            }
+                            if(nmpnj.getText().toLowerCase().contains("polri")){
+                                chkPolri.setSelected(true);
+                            }
+                        }
+                    } 
+                    penjab=null;
+                }
+            }); 
+
+            penjab.getTable().addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                        penjab.dispose();
+                    } 
+                }
+            });   
+            penjab.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            penjab.setLocationRelativeTo(internalFrame1);
+        }
+               
+        if (penjab == null) return;
+        if (!penjab.isVisible()) {
+            penjab.emptTeks();
+            penjab.isCek();
+        }  
+        if (penjab.isVisible()) {
+            penjab.toFront();
+            return;
+        }    
         penjab.setVisible(true);
 }//GEN-LAST:event_BtnPenjabActionPerformed
 
@@ -6172,6 +5482,51 @@ private void KelurahanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
             BtnKelurahan.requestFocus();
         }else{
             pilih=1;
+            YaskiReferensiKelurahan kelurahanref=new YaskiReferensiKelurahan(null,false);
+            kelurahanref.addWindowListener(new WindowListener() {
+                @Override
+                public void windowOpened(WindowEvent e) {}
+                @Override
+                public void windowClosing(WindowEvent e) {}
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    if(kelurahanref.getTable().getSelectedRow()!= -1){    
+                        KdKel.setText(kelurahanref.getTable().getValueAt(kelurahanref.getTable().getSelectedRow(),1).toString());
+                        kdkel="";
+                        switch (pilih) {
+                            case 1:
+                                Kelurahan.setText(kelurahanref.getTable().getValueAt(kelurahanref.getTable().getSelectedRow(),2).toString().toUpperCase());
+                                break;
+                            case 2:
+                                KelurahanPj.setText(kelurahanref.getTable().getValueAt(kelurahanref.getTable().getSelectedRow(),2).toString().toUpperCase());
+                                break;
+                            default:
+                                break;
+                        }
+                    }                  
+                }
+                @Override
+                public void windowIconified(WindowEvent e) {}
+                @Override
+                public void windowDeiconified(WindowEvent e) {}
+                @Override
+                public void windowActivated(WindowEvent e) {}
+                @Override
+                public void windowDeactivated(WindowEvent e) {}
+            });
+
+            kelurahanref.getTable().addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {}
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                        kelurahanref.dispose();
+                    }
+                }
+                @Override
+                public void keyReleased(KeyEvent e) {}
+            });
             kelurahanref.setPropinsi(KdKec.getText(),Kecamatan.getText());
             kelurahanref.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
             kelurahanref.setLocationRelativeTo(internalFrame1);
@@ -6203,6 +5558,51 @@ private void KecamatanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
             BtnKabupaten.requestFocus();
         }else{
             pilih=1;
+            YaskiReferensiKecamatan kecamatanref=new YaskiReferensiKecamatan(null,false);
+            kecamatanref.addWindowListener(new WindowListener() {
+                @Override
+                public void windowOpened(WindowEvent e) {}
+                @Override
+                public void windowClosing(WindowEvent e) {}
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    if(kecamatanref.getTable().getSelectedRow()!= -1){   
+                        KdKec.setText(kecamatanref.getTable().getValueAt(kecamatanref.getTable().getSelectedRow(),1).toString());
+                        kdkec="";
+                        switch (pilih) {
+                            case 1:
+                                Kecamatan.setText(kecamatanref.getTable().getValueAt(kecamatanref.getTable().getSelectedRow(),2).toString().toUpperCase());
+                                break;
+                            case 2:
+                                KecamatanPj.setText(kecamatanref.getTable().getValueAt(kecamatanref.getTable().getSelectedRow(),2).toString().toUpperCase());
+                                break;
+                            default:
+                                break;
+                        }
+                    }                  
+                }
+                @Override
+                public void windowIconified(WindowEvent e) {}
+                @Override
+                public void windowDeiconified(WindowEvent e) {}
+                @Override
+                public void windowActivated(WindowEvent e) {}
+                @Override
+                public void windowDeactivated(WindowEvent e) {}
+            });
+
+            kecamatanref.getTable().addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {}
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                        kecamatanref.dispose();
+                    }
+                }
+                @Override
+                public void keyReleased(KeyEvent e) {}
+            });
             kecamatanref.setPropinsi(KdKab.getText(),Kabupaten.getText());
             kecamatanref.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
             kecamatanref.setLocationRelativeTo(internalFrame1);
@@ -6234,6 +5634,51 @@ private void KabupatenKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
             BtnPropinsi.requestFocus();
         }else{
             pilih=1;
+            YaskiReferensiKabupaten kabupatenref=new YaskiReferensiKabupaten(null,false);
+            kabupatenref.addWindowListener(new WindowListener() {
+                @Override
+                public void windowOpened(WindowEvent e) {}
+                @Override
+                public void windowClosing(WindowEvent e) {}
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    if(kabupatenref.getTable().getSelectedRow()!= -1){   
+                        KdKab.setText(kabupatenref.getTable().getValueAt(kabupatenref.getTable().getSelectedRow(),1).toString());
+                        kdkab="";
+                        switch (pilih) {
+                            case 1:
+                                Kabupaten.setText(kabupatenref.getTable().getValueAt(kabupatenref.getTable().getSelectedRow(),2).toString().toUpperCase());
+                                break;
+                            case 2:
+                                KabupatenPj.setText(kabupatenref.getTable().getValueAt(kabupatenref.getTable().getSelectedRow(),2).toString().toUpperCase());
+                                break;
+                            default:
+                                break;
+                        }
+                    }                  
+                }
+                @Override
+                public void windowIconified(WindowEvent e) {}
+                @Override
+                public void windowDeiconified(WindowEvent e) {}
+                @Override
+                public void windowActivated(WindowEvent e) {}
+                @Override
+                public void windowDeactivated(WindowEvent e) {}
+            });
+
+            kabupatenref.getTable().addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {}
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                        kabupatenref.dispose();
+                    }
+                }
+                @Override
+                public void keyReleased(KeyEvent e) {}
+            }); 
             kabupatenref.setPropinsi(KdProp.getText(),Propinsi.getText());
             kabupatenref.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
             kabupatenref.setLocationRelativeTo(internalFrame1);
@@ -6671,7 +6116,52 @@ private void KabupatenMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:eve
                 BtnKabupaten.requestFocus();
             }else{
                 pilih=2;
-                kecamatanref.setPropinsi(KdKab.getText(),KabupatenPj.getText());
+                YaskiReferensiKecamatan kecamatanref=new YaskiReferensiKecamatan(null,false);
+                kecamatanref.addWindowListener(new WindowListener() {
+                    @Override
+                    public void windowOpened(WindowEvent e) {}
+                    @Override
+                    public void windowClosing(WindowEvent e) {}
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        if(kecamatanref.getTable().getSelectedRow()!= -1){   
+                            KdKec.setText(kecamatanref.getTable().getValueAt(kecamatanref.getTable().getSelectedRow(),1).toString());
+                            kdkec="";
+                            switch (pilih) {
+                                case 1:
+                                    Kecamatan.setText(kecamatanref.getTable().getValueAt(kecamatanref.getTable().getSelectedRow(),2).toString().toUpperCase());
+                                    break;
+                                case 2:
+                                    KecamatanPj.setText(kecamatanref.getTable().getValueAt(kecamatanref.getTable().getSelectedRow(),2).toString().toUpperCase());
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }                  
+                    }
+                    @Override
+                    public void windowIconified(WindowEvent e) {}
+                    @Override
+                    public void windowDeiconified(WindowEvent e) {}
+                    @Override
+                    public void windowActivated(WindowEvent e) {}
+                    @Override
+                    public void windowDeactivated(WindowEvent e) {}
+                });
+
+                kecamatanref.getTable().addKeyListener(new KeyListener() {
+                    @Override
+                    public void keyTyped(KeyEvent e) {}
+                    @Override
+                    public void keyPressed(KeyEvent e) {
+                        if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                            kecamatanref.dispose();
+                        }
+                    }
+                    @Override
+                    public void keyReleased(KeyEvent e) {}
+                });
+                kecamatanref.setPropinsi(KdKab.getText(),Kabupaten.getText());
                 kecamatanref.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
                 kecamatanref.setLocationRelativeTo(internalFrame1);
                 kecamatanref.setVisible(true);
@@ -6722,7 +6212,52 @@ private void KabupatenMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:eve
                 BtnPropinsi.requestFocus();
             }else{
                 pilih=2;
-                kabupatenref.setPropinsi(KdProp.getText(),PropinsiPj.getText());
+                YaskiReferensiKabupaten kabupatenref=new YaskiReferensiKabupaten(null,false);
+                kabupatenref.addWindowListener(new WindowListener() {
+                    @Override
+                    public void windowOpened(WindowEvent e) {}
+                    @Override
+                    public void windowClosing(WindowEvent e) {}
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        if(kabupatenref.getTable().getSelectedRow()!= -1){   
+                            KdKab.setText(kabupatenref.getTable().getValueAt(kabupatenref.getTable().getSelectedRow(),1).toString());
+                            kdkab="";
+                            switch (pilih) {
+                                case 1:
+                                    Kabupaten.setText(kabupatenref.getTable().getValueAt(kabupatenref.getTable().getSelectedRow(),2).toString().toUpperCase());
+                                    break;
+                                case 2:
+                                    KabupatenPj.setText(kabupatenref.getTable().getValueAt(kabupatenref.getTable().getSelectedRow(),2).toString().toUpperCase());
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }                  
+                    }
+                    @Override
+                    public void windowIconified(WindowEvent e) {}
+                    @Override
+                    public void windowDeiconified(WindowEvent e) {}
+                    @Override
+                    public void windowActivated(WindowEvent e) {}
+                    @Override
+                    public void windowDeactivated(WindowEvent e) {}
+                });
+
+                kabupatenref.getTable().addKeyListener(new KeyListener() {
+                    @Override
+                    public void keyTyped(KeyEvent e) {}
+                    @Override
+                    public void keyPressed(KeyEvent e) {
+                        if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                            kabupatenref.dispose();
+                        }
+                    }
+                    @Override
+                    public void keyReleased(KeyEvent e) {}
+                }); 
+                kabupatenref.setPropinsi(KdProp.getText(),Propinsi.getText());
                 kabupatenref.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
                 kabupatenref.setLocationRelativeTo(internalFrame1);
                 kabupatenref.setVisible(true);
@@ -6781,7 +6316,52 @@ private void KabupatenMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:eve
                 BtnKelurahan.requestFocus();
             }else{
                 pilih=2;
-                kelurahanref.setPropinsi(KdKec.getText(),KecamatanPj.getText());
+                YaskiReferensiKelurahan kelurahanref=new YaskiReferensiKelurahan(null,false);
+                kelurahanref.addWindowListener(new WindowListener() {
+                    @Override
+                    public void windowOpened(WindowEvent e) {}
+                    @Override
+                    public void windowClosing(WindowEvent e) {}
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        if(kelurahanref.getTable().getSelectedRow()!= -1){    
+                            KdKel.setText(kelurahanref.getTable().getValueAt(kelurahanref.getTable().getSelectedRow(),1).toString());
+                            kdkel="";
+                            switch (pilih) {
+                                case 1:
+                                    Kelurahan.setText(kelurahanref.getTable().getValueAt(kelurahanref.getTable().getSelectedRow(),2).toString().toUpperCase());
+                                    break;
+                                case 2:
+                                    KelurahanPj.setText(kelurahanref.getTable().getValueAt(kelurahanref.getTable().getSelectedRow(),2).toString().toUpperCase());
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }                  
+                    }
+                    @Override
+                    public void windowIconified(WindowEvent e) {}
+                    @Override
+                    public void windowDeiconified(WindowEvent e) {}
+                    @Override
+                    public void windowActivated(WindowEvent e) {}
+                    @Override
+                    public void windowDeactivated(WindowEvent e) {}
+                });
+
+                kelurahanref.getTable().addKeyListener(new KeyListener() {
+                    @Override
+                    public void keyTyped(KeyEvent e) {}
+                    @Override
+                    public void keyPressed(KeyEvent e) {
+                        if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                            kelurahanref.dispose();
+                        }
+                    }
+                    @Override
+                    public void keyReleased(KeyEvent e) {}
+                });
+                kelurahanref.setPropinsi(KdKec.getText(),Kecamatan.getText());
                 kelurahanref.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
                 kelurahanref.setLocationRelativeTo(internalFrame1);
                 kelurahanref.setVisible(true);
@@ -7842,18 +7422,82 @@ private void KabupatenMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:eve
     }//GEN-LAST:event_formWindowActivated
 
     private void BtnSukuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSukuActionPerformed
-        akses.setform("DlgPasien");
-        suku.isCek();
-        suku.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        suku.setLocationRelativeTo(internalFrame1);
+        if (suku == null || !suku.isDisplayable()) {
+            suku=new DlgCariSuku(null,false);
+            suku.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            suku.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    if(suku.getTable().getSelectedRow()!= -1){
+                        kdsuku.setText(suku.getTable().getValueAt(suku.getTable().getSelectedRow(),0).toString());
+                        nmsukubangsa.setText(suku.getTable().getValueAt(suku.getTable().getSelectedRow(),1).toString());
+                    }  
+                    kdsuku.requestFocus();
+                    suku=null;
+                }
+            }); 
+
+            suku.getTable().addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                        suku.dispose();
+                    } 
+                }
+            });   
+            suku.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            suku.setLocationRelativeTo(internalFrame1);
+        }
+               
+        if (suku == null) return;
+        if (!suku.isVisible()) {
+            suku.emptTeks();
+            suku.isCek();
+        }  
+        if (suku.isVisible()) {
+            suku.toFront();
+            return;
+        }    
         suku.setVisible(true);
     }//GEN-LAST:event_BtnSukuActionPerformed
 
     private void BtnBahasaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnBahasaActionPerformed
-        akses.setform("DlgPasien");
-        bahasa.isCek();
-        bahasa.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        bahasa.setLocationRelativeTo(internalFrame1);
+        if (bahasa == null || !bahasa.isDisplayable()) {
+            bahasa=new DlgCariBahasa(null,false);
+            bahasa.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            bahasa.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    if(bahasa.getTable().getSelectedRow()!= -1){
+                        kdbahasa.setText(bahasa.getTable().getValueAt(bahasa.getTable().getSelectedRow(),0).toString());
+                        nmbahasa.setText(bahasa.getTable().getValueAt(bahasa.getTable().getSelectedRow(),1).toString());
+                    }  
+                    kdbahasa.requestFocus(); 
+                    bahasa=null;
+                }
+            }); 
+
+            bahasa.getTable().addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                        bahasa.dispose();
+                    } 
+                }
+            });   
+            bahasa.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            bahasa.setLocationRelativeTo(internalFrame1);
+        }
+               
+        if (bahasa == null) return;
+        if (!bahasa.isVisible()) {
+            bahasa.emptTeks();
+            bahasa.isCek();
+        }  
+        if (bahasa.isVisible()) {
+            bahasa.toFront();
+            return;
+        }    
         bahasa.setVisible(true);
     }//GEN-LAST:event_BtnBahasaActionPerformed
 
@@ -7862,31 +7506,162 @@ private void KabupatenMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:eve
     }//GEN-LAST:event_kdperusahaanKeyPressed
 
     private void BtnPerusahaanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPerusahaanActionPerformed
-        akses.setform("DlgPasien");
-        perusahaan.isCek();
-        perusahaan.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        perusahaan.setLocationRelativeTo(internalFrame1);
+        if (perusahaan == null || !perusahaan.isDisplayable()) {
+            perusahaan=new DlgCariPerusahaan(null,false);
+            perusahaan.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            perusahaan.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    if(perusahaan.getTable().getSelectedRow()!= -1){
+                        kdperusahaan.setText(perusahaan.getTable().getValueAt(perusahaan.getTable().getSelectedRow(),0).toString());
+                        nmperusahaan.setText(perusahaan.getTable().getValueAt(perusahaan.getTable().getSelectedRow(),1).toString());
+                    }  
+                    kdperusahaan.requestFocus();
+                    perusahaan=null;
+                }
+            }); 
+
+            perusahaan.getTable().addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                        perusahaan.dispose();
+                    } 
+                }
+            });   
+            perusahaan.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            perusahaan.setLocationRelativeTo(internalFrame1);
+        }
+               
+        if (perusahaan == null) return;
+        if (!perusahaan.isVisible()) {
+            perusahaan.emptTeks();
+            perusahaan.isCek();
+        }  
+        if (perusahaan.isVisible()) {
+            perusahaan.toFront();
+            return;
+        }    
         perusahaan.setVisible(true);
     }//GEN-LAST:event_BtnPerusahaanActionPerformed
 
     private void BtnGolonganTNIActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnGolonganTNIActionPerformed
-        akses.setform("DlgPasien");
-        golongantni.isCek();
-        golongantni.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        golongantni.setLocationRelativeTo(internalFrame1);
+        if (golongantni == null || !golongantni.isDisplayable()) {
+            golongantni=new DlgGolonganTNI(null,false);
+            golongantni.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            golongantni.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    if(golongantni.getTable().getSelectedRow()!= -1){
+                        kdgolongantni.setText(golongantni.getTable().getValueAt(golongantni.getTable().getSelectedRow(),0).toString());
+                        nmgolongantni.setText(golongantni.getTable().getValueAt(golongantni.getTable().getSelectedRow(),1).toString());
+                    }  
+                    kdgolongantni.requestFocus();
+                    golongantni=null;
+                }
+            }); 
+
+            golongantni.getTable().addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                        golongantni.dispose();
+                    } 
+                }
+            });   
+            golongantni.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            golongantni.setLocationRelativeTo(internalFrame1);
+        }
+               
+        if (golongantni == null) return;
+        if (!golongantni.isVisible()) {
+            golongantni.emptTeks();
+            golongantni.isCek();
+        }  
+        if (golongantni.isVisible()) {
+            golongantni.toFront();
+            return;
+        }    
         golongantni.setVisible(true);
     }//GEN-LAST:event_BtnGolonganTNIActionPerformed
 
     private void BtnSatuanTNIActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSatuanTNIActionPerformed
-        akses.setform("DlgPasien");
-        satuantni.isCek();
-        satuantni.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        satuantni.setLocationRelativeTo(internalFrame1);
+        if (satuantni == null || !satuantni.isDisplayable()) {
+            satuantni=new DlgSatuanTNI(null,false);
+            satuantni.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            satuantni.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    if(satuantni.getTable().getSelectedRow()!= -1){
+                        kdsatuantni.setText(satuantni.getTable().getValueAt(satuantni.getTable().getSelectedRow(),0).toString());
+                        nmsatuantni.setText(satuantni.getTable().getValueAt(satuantni.getTable().getSelectedRow(),1).toString());
+                    }  
+                    kdsatuantni.requestFocus();
+                    satuantni=null;
+                }
+            }); 
+
+            satuantni.getTable().addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                        satuantni.dispose();
+                    } 
+                }
+            });   
+            satuantni.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            satuantni.setLocationRelativeTo(internalFrame1);
+        }
+               
+        if (satuantni == null) return;
+        if (!satuantni.isVisible()) {
+            satuantni.emptTeks();
+            satuantni.isCek();
+        }  
+        if (satuantni.isVisible()) {
+            satuantni.toFront();
+            return;
+        }    
         satuantni.setVisible(true);
     }//GEN-LAST:event_BtnSatuanTNIActionPerformed
 
     private void BtnPangkatTNIActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPangkatTNIActionPerformed
-        akses.setform("DlgPasien");
+        DlgPangkatTNI pangkattni=new DlgPangkatTNI(null,false);
+        pangkattni.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(pangkattni.getTable().getSelectedRow()!= -1){
+                    kdpangkattni.setText(pangkattni.getTable().getValueAt(pangkattni.getTable().getSelectedRow(),0).toString());
+                    nmpangkattni.setText(pangkattni.getTable().getValueAt(pangkattni.getTable().getSelectedRow(),1).toString());
+                }  
+                kdpangkattni.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        pangkattni.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    pangkattni.dispose();
+                } 
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
         pangkattni.isCek();
         pangkattni.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         pangkattni.setLocationRelativeTo(internalFrame1);
@@ -7894,7 +7669,42 @@ private void KabupatenMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:eve
     }//GEN-LAST:event_BtnPangkatTNIActionPerformed
 
     private void BtnJabatanTNIActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnJabatanTNIActionPerformed
-        akses.setform("DlgPasien");
+        DlgJabatanTNI jabatantni=new DlgJabatanTNI(null,false);
+        jabatantni.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(jabatantni.getTable().getSelectedRow()!= -1){
+                    kdjabatantni.setText(jabatantni.getTable().getValueAt(jabatantni.getTable().getSelectedRow(),0).toString());
+                    nmjabatantni.setText(jabatantni.getTable().getValueAt(jabatantni.getTable().getSelectedRow(),1).toString());
+                }  
+                kdjabatantni.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        jabatantni.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    jabatantni.dispose();
+                } 
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
         jabatantni.isCek();
         jabatantni.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         jabatantni.setLocationRelativeTo(internalFrame1);
@@ -7902,7 +7712,42 @@ private void KabupatenMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:eve
     }//GEN-LAST:event_BtnJabatanTNIActionPerformed
 
     private void BtnGolonganPolriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnGolonganPolriActionPerformed
-        akses.setform("DlgPasien");
+        DlgGolonganPolri golonganpolri=new DlgGolonganPolri(null,false);
+        golonganpolri.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(golonganpolri.getTable().getSelectedRow()!= -1){
+                    kdgolonganpolri.setText(golonganpolri.getTable().getValueAt(golonganpolri.getTable().getSelectedRow(),0).toString());
+                    nmgolonganpolri.setText(golonganpolri.getTable().getValueAt(golonganpolri.getTable().getSelectedRow(),1).toString());
+                }  
+                kdgolonganpolri.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        golonganpolri.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    golonganpolri.dispose();
+                } 
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
         golonganpolri.isCek();
         golonganpolri.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         golonganpolri.setLocationRelativeTo(internalFrame1);
@@ -7910,7 +7755,42 @@ private void KabupatenMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:eve
     }//GEN-LAST:event_BtnGolonganPolriActionPerformed
 
     private void BtnSatuanPolriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSatuanPolriActionPerformed
-        akses.setform("DlgPasien");
+        DlgSatuanPolri satuanpolri=new DlgSatuanPolri(null,false);
+        satuanpolri.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(satuanpolri.getTable().getSelectedRow()!= -1){
+                    kdsatuanpolri.setText(satuanpolri.getTable().getValueAt(satuanpolri.getTable().getSelectedRow(),0).toString());
+                    nmsatuanpolri.setText(satuanpolri.getTable().getValueAt(satuanpolri.getTable().getSelectedRow(),1).toString());
+                }  
+                kdsatuanpolri.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        satuanpolri.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    satuanpolri.dispose();
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
         satuanpolri.isCek();
         satuanpolri.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         satuanpolri.setLocationRelativeTo(internalFrame1);
@@ -7918,7 +7798,42 @@ private void KabupatenMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:eve
     }//GEN-LAST:event_BtnSatuanPolriActionPerformed
 
     private void BtnPangkatPolriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnPangkatPolriActionPerformed
-        akses.setform("DlgPasien");
+        DlgPangkatPolri pangkatpolri=new DlgPangkatPolri(null,false);
+        pangkatpolri.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(pangkatpolri.getTable().getSelectedRow()!= -1){
+                    kdpangkatpolri.setText(pangkatpolri.getTable().getValueAt(pangkatpolri.getTable().getSelectedRow(),0).toString());
+                    nmpangkatpolri.setText(pangkatpolri.getTable().getValueAt(pangkatpolri.getTable().getSelectedRow(),1).toString());
+                }  
+                kdpangkatpolri.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        pangkatpolri.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    pangkatpolri.dispose();
+                } 
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
         pangkatpolri.isCek();
         pangkatpolri.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         pangkatpolri.setLocationRelativeTo(internalFrame1);
@@ -7926,7 +7841,42 @@ private void KabupatenMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:eve
     }//GEN-LAST:event_BtnPangkatPolriActionPerformed
 
     private void BtnJabatanPolriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnJabatanPolriActionPerformed
-        akses.setform("DlgPasien");
+        DlgJabatanPolri jabatanpolri=new DlgJabatanPolri(null,false);
+        jabatanpolri.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(jabatanpolri.getTable().getSelectedRow()!= -1){
+                    kdjabatanpolri.setText(jabatanpolri.getTable().getValueAt(jabatanpolri.getTable().getSelectedRow(),0).toString());
+                    nmjabatanpolri.setText(jabatanpolri.getTable().getValueAt(jabatanpolri.getTable().getSelectedRow(),1).toString());
+                }  
+                kdjabatanpolri.requestFocus();
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        
+        jabatanpolri.getTable().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                    jabatanpolri.dispose();
+                }  
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
         jabatanpolri.isCek();
         jabatanpolri.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         jabatanpolri.setLocationRelativeTo(internalFrame1);
@@ -8128,6 +8078,51 @@ private void KabupatenMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:eve
             Kabupaten.requestFocus();
         }else if(evt.getKeyCode()==KeyEvent.VK_UP){
             pilih=1;
+            YaskiReferensiPropinsi propinsiref=new YaskiReferensiPropinsi(null,false);
+            propinsiref.addWindowListener(new WindowListener() {
+                @Override
+                public void windowOpened(WindowEvent e) {}
+                @Override
+                public void windowClosing(WindowEvent e) {}
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    if(propinsiref.getTable().getSelectedRow()!= -1){   
+                        KdProp.setText(propinsiref.getTable().getValueAt(propinsiref.getTable().getSelectedRow(),1).toString());
+                        kdprop="";
+                        switch (pilih) {
+                            case 1:
+                                Propinsi.setText(propinsiref.getTable().getValueAt(propinsiref.getTable().getSelectedRow(),2).toString().toUpperCase());
+                                break;
+                            case 2:
+                                PropinsiPj.setText(propinsiref.getTable().getValueAt(propinsiref.getTable().getSelectedRow(),2).toString().toUpperCase());
+                                break;
+                            default:
+                                break;
+                        }
+                    }                  
+                }
+                @Override
+                public void windowIconified(WindowEvent e) {}
+                @Override
+                public void windowDeiconified(WindowEvent e) {}
+                @Override
+                public void windowActivated(WindowEvent e) {}
+                @Override
+                public void windowDeactivated(WindowEvent e) {}
+            });
+
+            propinsiref.getTable().addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {}
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                        propinsiref.dispose();
+                    }
+                }
+                @Override
+                public void keyReleased(KeyEvent e) {}
+            }); 
             propinsiref.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
             propinsiref.setLocationRelativeTo(internalFrame1);
             propinsiref.setVisible(true);
@@ -8162,6 +8157,51 @@ private void KabupatenMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:eve
             KabupatenPj.requestFocus();
         }else if(evt.getKeyCode()==KeyEvent.VK_UP){
             pilih=2;
+            YaskiReferensiPropinsi propinsiref=new YaskiReferensiPropinsi(null,false);
+            propinsiref.addWindowListener(new WindowListener() {
+                @Override
+                public void windowOpened(WindowEvent e) {}
+                @Override
+                public void windowClosing(WindowEvent e) {}
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    if(propinsiref.getTable().getSelectedRow()!= -1){   
+                        KdProp.setText(propinsiref.getTable().getValueAt(propinsiref.getTable().getSelectedRow(),1).toString());
+                        kdprop="";
+                        switch (pilih) {
+                            case 1:
+                                Propinsi.setText(propinsiref.getTable().getValueAt(propinsiref.getTable().getSelectedRow(),2).toString().toUpperCase());
+                                break;
+                            case 2:
+                                PropinsiPj.setText(propinsiref.getTable().getValueAt(propinsiref.getTable().getSelectedRow(),2).toString().toUpperCase());
+                                break;
+                            default:
+                                break;
+                        }
+                    }                  
+                }
+                @Override
+                public void windowIconified(WindowEvent e) {}
+                @Override
+                public void windowDeiconified(WindowEvent e) {}
+                @Override
+                public void windowActivated(WindowEvent e) {}
+                @Override
+                public void windowDeactivated(WindowEvent e) {}
+            });
+
+            propinsiref.getTable().addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {}
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                        propinsiref.dispose();
+                    }
+                }
+                @Override
+                public void keyReleased(KeyEvent e) {}
+            }); 
             propinsiref.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
             propinsiref.setLocationRelativeTo(internalFrame1);
             propinsiref.setVisible(true);
@@ -8177,10 +8217,42 @@ private void KabupatenMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:eve
     }//GEN-LAST:event_btnPropinsiPjActionPerformed
 
     private void BtnCacatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCacatActionPerformed
-        akses.setform("DlgPasien");
-        cacat.isCek();
-        cacat.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        cacat.setLocationRelativeTo(internalFrame1);
+        if (cacat == null || !cacat.isDisplayable()) {
+            cacat=new DlgCariCacatFisik(null,false);
+            cacat.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            cacat.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    if(cacat.getTable().getSelectedRow()!= -1){
+                        kdcacat.setText(cacat.getTable().getValueAt(cacat.getTable().getSelectedRow(),0).toString());
+                        nmcacat.setText(cacat.getTable().getValueAt(cacat.getTable().getSelectedRow(),1).toString());
+                    }  
+                    kdcacat.requestFocus();
+                    cacat=null;
+                }
+            }); 
+
+            cacat.getTable().addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if(e.getKeyCode()==KeyEvent.VK_SPACE){
+                        cacat.dispose();
+                    } 
+                }
+            });   
+            cacat.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            cacat.setLocationRelativeTo(internalFrame1);
+        }
+               
+        if (cacat == null) return;
+        if (!cacat.isVisible()) {
+            cacat.emptTeks();
+            cacat.isCek();
+        }  
+        if (cacat.isVisible()) {
+            cacat.toFront();
+            return;
+        }    
         cacat.setVisible(true);
     }//GEN-LAST:event_BtnCacatActionPerformed
 

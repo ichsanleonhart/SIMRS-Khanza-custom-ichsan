@@ -31,6 +31,7 @@ import java.sql.ResultSet;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -1820,13 +1821,13 @@ private void kddokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
         if(evt.getKeyCode()==KeyEvent.VK_PAGE_DOWN){
             switch (pilihtable) {
                 case "rawat_inap_dr":
-                    nmdokter.setText(dokter.tampil3(kddokter.getText()));
+                    nmdokter.setText(Sequel.CariDokter(kddokter.getText()));
                     break;
                 case "rawat_inap_pr":
-                    nmdokter.setText(petugas.tampil3(kddokter.getText()));
+                    nmdokter.setText(Sequel.CariPetugas(kddokter.getText()));
                     break;
                 case "rawat_inap_drpr":
-                    nmdokter.setText(dokter.tampil3(kddokter.getText()));
+                    nmdokter.setText(Sequel.CariDokter(kddokter.getText()));
                     break;
             }
         }else if(evt.getKeyCode()==KeyEvent.VK_UP){
@@ -1896,7 +1897,7 @@ private void ppPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
 
     private void KdPtg2KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_KdPtg2KeyPressed
         if(evt.getKeyCode()==KeyEvent.VK_ENTER){
-            NmPtg2.setText(petugas.tampil3(KdPtg2.getText()));
+            NmPtg2.setText(Sequel.CariPetugas(KdPtg2.getText()));
         }else if(evt.getKeyCode()==KeyEvent.VK_UP){
             btnPetugasActionPerformed(null);
         }else if(evt.getKeyCode()==KeyEvent.VK_DOWN){
@@ -2050,7 +2051,7 @@ private void ppPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     private widget.Table tbKamar;
     // End of variables declaration//GEN-END:variables
 
-    public void tampil() { 
+    private void tampil() { 
         try{  
             jml=0;
             for(i=0;i<tbKamar.getRowCount();i++){
@@ -2587,7 +2588,7 @@ private void ppPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
         LCount.setText(""+tbKamar.getRowCount());
     }
     
-    public void tampil2() { 
+    private void tampil2() { 
         try{ 
             Valid.tabelKosong(tabMode);
             try {
@@ -3057,6 +3058,9 @@ private void ppPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
         LCount.setText(""+tbKamar.getRowCount());
     }
 
+    public void tampil3() { 
+        runBackground(() ->tampil2());
+    }
 
     private void emptTeks() {
         TCari.setText("");
@@ -3158,19 +3162,33 @@ private void ppPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     
     private void runBackground(Runnable task) {
         if (ceksukses) return;
+        if (executor.isShutdown() || executor.isTerminated()) return;
+        if (!isDisplayable()) return;
+
         ceksukses = true;
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-        executor.submit(() -> {
-            try {
-                task.run();
-            } finally {
-                ceksukses = false;
-                SwingUtilities.invokeLater(() -> {
-                    this.setCursor(Cursor.getDefaultCursor());
-                });
-            }
-        });
+        try {
+            executor.submit(() -> {
+                try {
+                    task.run();
+                } finally {
+                    ceksukses = false;
+                    SwingUtilities.invokeLater(() -> {
+                        if (isDisplayable()) {
+                            setCursor(Cursor.getDefaultCursor());
+                        }
+                    });
+                }
+            });
+        } catch (RejectedExecutionException ex) {
+            ceksukses = false;
+        }
+    }
+    
+    @Override
+    public void dispose() {
+        executor.shutdownNow();
+        super.dispose();
     }
 }

@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -254,31 +255,6 @@ public class DlgCariPengeluaranApotek extends javax.swing.JDialog {
             public void keyReleased(KeyEvent e) {}
         });
         
-        barang.jenis.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(akses.getform().equals("DlgCariPengeluaranApotek")){
-                    if(barang.jenis.getTable().getSelectedRow()!= -1){
-                        kdjenis.setText(barang.jenis.getTable().getValueAt(barang.jenis.getTable().getSelectedRow(),0).toString());
-                        nmjenis.setText(barang.jenis.getTable().getValueAt(barang.jenis.getTable().getSelectedRow(),1).toString());
-                    }                
-                    kdjenis.requestFocus();
-                }
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        });      
-        
         try {
             aktifkanbatch = koneksiDB.AKTIFKANBATCHOBAT();
             DEPOAKTIFOBAT = koneksiDB.DEPOAKTIFOBAT();
@@ -415,17 +391,17 @@ public class DlgCariPengeluaranApotek extends javax.swing.JDialog {
         label24.setName("label24"); // NOI18N
         label24.setPreferredSize(new java.awt.Dimension(68, 23));
         panelisi4.add(label24);
-        label24.setBounds(0, 10, 74, 23);
+        label24.setBounds(0, 10, 54, 23);
 
         kdjenis.setName("kdjenis"); // NOI18N
-        kdjenis.setPreferredSize(new java.awt.Dimension(80, 23));
+        kdjenis.setPreferredSize(new java.awt.Dimension(60, 23));
         kdjenis.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 kdjenisKeyPressed(evt);
             }
         });
         panelisi4.add(kdjenis);
-        kdjenis.setBounds(79, 10, 53, 23);
+        kdjenis.setBounds(59, 10, 53, 23);
 
         btnSatuan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         btnSatuan.setMnemonic('3');
@@ -448,7 +424,7 @@ public class DlgCariPengeluaranApotek extends javax.swing.JDialog {
             }
         });
         panelisi4.add(nmjenis);
-        nmjenis.setBounds(134, 10, 116, 23);
+        nmjenis.setBounds(114, 10, 136, 23);
 
         jPanel1.add(panelisi4, java.awt.BorderLayout.CENTER);
 
@@ -458,7 +434,7 @@ public class DlgCariPengeluaranApotek extends javax.swing.JDialog {
 
         label10.setText("Key Word :");
         label10.setName("label10"); // NOI18N
-        label10.setPreferredSize(new java.awt.Dimension(70, 23));
+        label10.setPreferredSize(new java.awt.Dimension(68, 23));
         panelisi1.add(label10);
 
         TCari.setName("TCari"); // NOI18N
@@ -791,12 +767,12 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
 
     private void kdptgKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_kdptgKeyPressed
         if(evt.getKeyCode()==KeyEvent.VK_PAGE_DOWN){
-            nmptg.setText(petugas.tampil3(kdptg.getText()));           
+            nmptg.setText(Sequel.CariPetugas(kdptg.getText()));           
         }else if(evt.getKeyCode()==KeyEvent.VK_PAGE_UP){
-            nmptg.setText(petugas.tampil3(kdptg.getText())); 
+            nmptg.setText(Sequel.CariPetugas(kdptg.getText())); 
             Tgl2.requestFocus();
         }else if(evt.getKeyCode()==KeyEvent.VK_ENTER){
-            nmptg.setText(petugas.tampil3(kdptg.getText())); 
+            nmptg.setText(Sequel.CariPetugas(kdptg.getText())); 
             kdbar.requestFocus(); 
         }else if(evt.getKeyCode()==KeyEvent.VK_UP){
             btnPetugasActionPerformed(null);
@@ -846,13 +822,35 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
     }//GEN-LAST:event_kdjenisKeyPressed
 
     private void btnSatuanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSatuanActionPerformed
-        akses.setform("DlgCariPengeluaranApotek");
-        barang.jenis.emptTeks();
-        barang.jenis.isCek();
-        barang.jenis.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
-        barang.jenis.setLocationRelativeTo(internalFrame1);
-        barang.jenis.setAlwaysOnTop(false);
-        barang.jenis.setVisible(true);
+        DlgCariJenis jenis = new DlgCariJenis(null, false);
+        jenis.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if (jenis.getTable().getSelectedRow() != -1) {
+                    kdjenis.setText(jenis.getTable().getValueAt(jenis.getTable().getSelectedRow(), 0).toString());
+                    nmjenis.setText(jenis.getTable().getValueAt(jenis.getTable().getSelectedRow(), 1).toString());
+                }
+            }
+
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
+        jenis.isCek();
+        jenis.setSize(internalFrame1.getWidth() - 20, internalFrame1.getHeight() - 20);
+        jenis.setLocationRelativeTo(internalFrame1);
+        jenis.setAlwaysOnTop(false);
+        jenis.setVisible(true);
     }//GEN-LAST:event_btnSatuanActionPerformed
 
     private void nmjenisKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_nmjenisKeyPressed
@@ -1125,48 +1123,40 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
     // End of variables declaration//GEN-END:variables
 
     private void tampil() {
-        tanggal="  pengeluaran_obat_bhp.tanggal between '"+Valid.SetTgl(Tgl1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(Tgl2.getSelectedItem()+"")+"' ";
+        tanggal="pengeluaran_obat_bhp.tanggal between '"+Valid.SetTgl(Tgl1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(Tgl2.getSelectedItem()+"")+"' ";
         nokeluar="";bang="";ptg="";jen="";bar="";
         if(!NoNota.getText().equals("")){
-            nokeluar=" and pengeluaran_obat_bhp.no_keluar='"+NoNota.getText()+"' ";
+            nokeluar="and pengeluaran_obat_bhp.no_keluar='"+NoNota.getText()+"' ";
         }        
         if(!nmgudang.getText().equals("")){
-            bang=" and bangsal.nm_bangsal='"+nmgudang.getText()+"' ";
+            bang="and pengeluaran_obat_bhp.kd_bangsal='"+kdgudang.getText()+"' ";
         }
         if(!nmptg.getText().equals("")){
-            ptg=" and petugas.nama='"+nmptg.getText()+"' ";
+            ptg="and pengeluaran_obat_bhp.nip='"+kdptg.getText()+"' ";
         }
         if(!nmjenis.getText().equals("")){
-            jen=" and jenis.nama='"+nmjenis.getText()+"' ";
+            jen="and databarang.kdjns='"+kdjenis.getText()+"' ";
         }
         if(!nmbar.getText().equals("")){
-            bar=" and databarang.nama_brng='"+nmbar.getText()+"' ";
+            bar="and detail_pengeluaran_obat_bhp.kode_brng='"+kdbar.getText()+"' ";
         }
 
         Valid.tabelKosong(tabMode);
         try{
             ps=koneksi.prepareStatement(
-                    "select pengeluaran_obat_bhp.no_keluar, pengeluaran_obat_bhp.tanggal, "+
-                    "pengeluaran_obat_bhp.nip,petugas.nama, "+
-                    "pengeluaran_obat_bhp.kd_bangsal,bangsal.nm_bangsal, "+
-                    "pengeluaran_obat_bhp.keterangan "+
-                    " from pengeluaran_obat_bhp inner join petugas inner join bangsal inner join jenis  "+
-                    " inner join detail_pengeluaran_obat_bhp inner join databarang "+
-                    " on detail_pengeluaran_obat_bhp.kode_brng=databarang.kode_brng "+
-                    " and pengeluaran_obat_bhp.kd_bangsal=bangsal.kd_bangsal "+
-                    " and pengeluaran_obat_bhp.no_keluar=detail_pengeluaran_obat_bhp.no_keluar "+
-                    " and pengeluaran_obat_bhp.nip=petugas.nip and databarang.kdjns=jenis.kdjns "+
-                    " where "+tanggal+nokeluar+bang+ptg+jen+bar+" and pengeluaran_obat_bhp.no_keluar like '%"+TCari.getText()+"%' or "+
-                    tanggal+nokeluar+bang+ptg+jen+bar+" and pengeluaran_obat_bhp.kd_bangsal like '%"+TCari.getText()+"%' or "+
-                    tanggal+nokeluar+bang+ptg+jen+bar+" and pengeluaran_obat_bhp.nip like '%"+TCari.getText()+"%' or "+
-                    tanggal+nokeluar+bang+ptg+jen+bar+" and petugas.nama like '%"+TCari.getText()+"%' or "+
-                    tanggal+nokeluar+bang+ptg+jen+bar+" and pengeluaran_obat_bhp.keterangan like '%"+TCari.getText()+"%' or "+
-                    tanggal+nokeluar+bang+ptg+jen+bar+" and detail_pengeluaran_obat_bhp.no_batch like '%"+TCari.getText()+"%' or "+
-                    tanggal+nokeluar+bang+ptg+jen+bar+" and detail_pengeluaran_obat_bhp.kode_brng like '%"+TCari.getText()+"%' or "+
-                    tanggal+nokeluar+bang+ptg+jen+bar+" and bangsal.nm_bangsal like '%"+TCari.getText()+"%' or "+
-                    tanggal+nokeluar+bang+ptg+jen+bar+" and databarang.nama_brng like '%"+TCari.getText()+"%' or "+
-                    tanggal+nokeluar+bang+ptg+jen+bar+" and jenis.nama like '%"+TCari.getText()+"%' "+
-                    " group by pengeluaran_obat_bhp.no_keluar order by pengeluaran_obat_bhp.tanggal,pengeluaran_obat_bhp.no_keluar ");
+                "select pengeluaran_obat_bhp.no_keluar,pengeluaran_obat_bhp.tanggal,pengeluaran_obat_bhp.nip,petugas.nama, "+
+                "pengeluaran_obat_bhp.kd_bangsal,bangsal.nm_bangsal,pengeluaran_obat_bhp.keterangan "+
+                "from pengeluaran_obat_bhp inner join petugas on pengeluaran_obat_bhp.nip=petugas.nip "+
+                "inner join bangsal on pengeluaran_obat_bhp.kd_bangsal=bangsal.kd_bangsal "+
+                "inner join detail_pengeluaran_obat_bhp on pengeluaran_obat_bhp.no_keluar=detail_pengeluaran_obat_bhp.no_keluar "+
+                "inner join databarang on detail_pengeluaran_obat_bhp.kode_brng=databarang.kode_brng inner join jenis on databarang.kdjns=jenis.kdjns  "+
+                "where "+tanggal+nokeluar+bang+ptg+jen+bar+(TCari.getText().trim().equals("")?"":"and (pengeluaran_obat_bhp.no_keluar like '%"+TCari.getText()+"%' or "+
+                "pengeluaran_obat_bhp.kd_bangsal like '%"+TCari.getText()+"%' or pengeluaran_obat_bhp.nip like '%"+TCari.getText()+"%' or "+
+                "petugas.nama like '%"+TCari.getText()+"%' or pengeluaran_obat_bhp.keterangan like '%"+TCari.getText()+"%' or "+
+                "detail_pengeluaran_obat_bhp.no_batch like '%"+TCari.getText()+"%' or detail_pengeluaran_obat_bhp.kode_brng like '%"+TCari.getText()+"%' or "+
+                "bangsal.nm_bangsal like '%"+TCari.getText()+"%' or databarang.nama_brng like '%"+TCari.getText()+"%' or "+
+                "jenis.nama like '%"+TCari.getText()+"%') ")+"group by pengeluaran_obat_bhp.no_keluar order by pengeluaran_obat_bhp.tanggal,pengeluaran_obat_bhp.no_keluar"
+            );
             try {
                 rs=ps.executeQuery();
                 ttl=0;
@@ -1181,16 +1171,15 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
                         "","No.Batch & Faktur","Barang","Jenis","Satuan","Harga","Jml","Total"
                     });
                     ps2=koneksi.prepareStatement(
-                            " select detail_pengeluaran_obat_bhp.kode_brng,databarang.nama_brng,detail_pengeluaran_obat_bhp.no_faktur,"+
-                            " jenis.nama,detail_pengeluaran_obat_bhp.harga_beli,detail_pengeluaran_obat_bhp.jumlah, "+
-                            " detail_pengeluaran_obat_bhp.kode_sat,detail_pengeluaran_obat_bhp.no_batch,detail_pengeluaran_obat_bhp.total from "+
-                            " detail_pengeluaran_obat_bhp inner join databarang inner join jenis "+
-                            " on detail_pengeluaran_obat_bhp.kode_brng=databarang.kode_brng "+
-                            " and databarang.kdjns=jenis.kdjns where "+
-                            " detail_pengeluaran_obat_bhp.no_keluar='"+rs.getString("no_keluar")+"' "+jen+bar+" and detail_pengeluaran_obat_bhp.kode_brng like '%"+TCari.getText()+"%' or "+
-                            " detail_pengeluaran_obat_bhp.no_keluar='"+rs.getString("no_keluar")+"' "+jen+bar+" and databarang.nama_brng like '%"+TCari.getText()+"%' or "+
-                            " detail_pengeluaran_obat_bhp.no_keluar='"+rs.getString("no_keluar")+"' "+jen+bar+" and detail_pengeluaran_obat_bhp.no_batch like '%"+TCari.getText()+"%' or "+
-                            " detail_pengeluaran_obat_bhp.no_keluar='"+rs.getString("no_keluar")+"' "+jen+bar+" and jenis.nama like '%"+TCari.getText()+"%' order by detail_pengeluaran_obat_bhp.kode_brng");
+                        "select detail_pengeluaran_obat_bhp.kode_brng,databarang.nama_brng,detail_pengeluaran_obat_bhp.no_faktur,"+
+                        "jenis.nama,detail_pengeluaran_obat_bhp.harga_beli,detail_pengeluaran_obat_bhp.jumlah, "+
+                        "detail_pengeluaran_obat_bhp.kode_sat,detail_pengeluaran_obat_bhp.no_batch,detail_pengeluaran_obat_bhp.total from "+
+                        "detail_pengeluaran_obat_bhp inner join databarang on detail_pengeluaran_obat_bhp.kode_brng=databarang.kode_brng "+
+                        "inner join jenis on databarang.kdjns=jenis.kdjns where detail_pengeluaran_obat_bhp.no_keluar='"+rs.getString("no_keluar")+"' "+
+                        jen+bar+(TCari.getText().trim().equals("")?"":"and (detail_pengeluaran_obat_bhp.kode_brng like '%"+TCari.getText()+"%' or "+
+                        "databarang.nama_brng like '%"+TCari.getText()+"%' or detail_pengeluaran_obat_bhp.no_batch like '%"+TCari.getText()+"%' or "+
+                        "jenis.nama like '%"+TCari.getText()+"%') ")+"order by detail_pengeluaran_obat_bhp.kode_brng"
+                    );
                     try {
                         rs2=ps2.executeQuery();
                         no=1;
@@ -1264,14 +1253,14 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
                     "pengeluaran_obat_bhp.kd_bangsal,bangsal.nm_bangsal,pengeluaran_obat_bhp.keterangan,detail_pengeluaran_obat_bhp.kode_brng,"+
                     "databarang.nama_brng,detail_pengeluaran_obat_bhp.no_faktur,jenis.nama as namajenis,detail_pengeluaran_obat_bhp.harga_beli,"+
                     "detail_pengeluaran_obat_bhp.jumlah, detail_pengeluaran_obat_bhp.kode_sat,detail_pengeluaran_obat_bhp.no_batch,"+
-                    " detail_pengeluaran_obat_bhp.total "+
-                    " from pengeluaran_obat_bhp inner join petugas inner join bangsal inner join jenis  "+
-                    " inner join detail_pengeluaran_obat_bhp inner join databarang "+
-                    " on detail_pengeluaran_obat_bhp.kode_brng=databarang.kode_brng "+
-                    " and pengeluaran_obat_bhp.kd_bangsal=bangsal.kd_bangsal "+
-                    " and pengeluaran_obat_bhp.no_keluar=detail_pengeluaran_obat_bhp.no_keluar "+
-                    " and pengeluaran_obat_bhp.nip=petugas.nip and databarang.kdjns=jenis.kdjns "+
-                    " where "+tanggal+nokeluar+bang+ptg+jen+bar+" and pengeluaran_obat_bhp.no_keluar like '%"+TCari.getText()+"%' or "+
+                    "detail_pengeluaran_obat_bhp.total "+
+                    "from pengeluaran_obat_bhp inner join petugas inner join bangsal inner join jenis  "+
+                    "inner join detail_pengeluaran_obat_bhp inner join databarang "+
+                    "on detail_pengeluaran_obat_bhp.kode_brng=databarang.kode_brng "+
+                    "and pengeluaran_obat_bhp.kd_bangsal=bangsal.kd_bangsal "+
+                    "and pengeluaran_obat_bhp.no_keluar=detail_pengeluaran_obat_bhp.no_keluar "+
+                    "and pengeluaran_obat_bhp.nip=petugas.nip and databarang.kdjns=jenis.kdjns "+
+                    "where "+tanggal+nokeluar+bang+ptg+jen+bar+" and pengeluaran_obat_bhp.no_keluar like '%"+TCari.getText()+"%' or "+
                     tanggal+nokeluar+bang+ptg+jen+bar+" and pengeluaran_obat_bhp.kd_bangsal like '%"+TCari.getText()+"%' or "+
                     tanggal+nokeluar+bang+ptg+jen+bar+" and pengeluaran_obat_bhp.nip like '%"+TCari.getText()+"%' or "+
                     tanggal+nokeluar+bang+ptg+jen+bar+" and petugas.nama like '%"+TCari.getText()+"%' or "+
@@ -1333,13 +1322,13 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
        sukses=true;
        try {
            ps=koneksi.prepareStatement(
-                   "select no_keluar, kd_bangsal from pengeluaran_obat_bhp where no_keluar=?");
+                   "select pengeluaran_obat_bhp.no_keluar,pengeluaran_obat_bhp.kd_bangsal from pengeluaran_obat_bhp where pengeluaran_obat_bhp.no_keluar=?");
            try {
               ps.setString(1,tbDokter.getValueAt(tbDokter.getSelectedRow(),0).toString().trim());
               rs=ps.executeQuery();
               if(rs.next()){
                   ps2=koneksi.prepareStatement(
-                       "select kode_brng,jumlah,no_batch,no_faktur from detail_pengeluaran_obat_bhp where no_keluar=? ");
+                       "select detail_pengeluaran_obat_bhp.kode_brng,detail_pengeluaran_obat_bhp.jumlah,detail_pengeluaran_obat_bhp.no_batch,detail_pengeluaran_obat_bhp.no_faktur from detail_pengeluaran_obat_bhp where detail_pengeluaran_obat_bhp.no_keluar=? ");
                   try {
                       ps2.setString(1,rs.getString(1));                
                       rs2=ps2.executeQuery();
@@ -1402,27 +1391,41 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
        } catch (Exception ex) {
            System.out.println(ex);
        } 
+       Sequel.AutoComitTrue();
        if(sukses==true){
            runBackground(() ->tampil());
        }
-       Sequel.AutoComitTrue();
     }
     
     private void runBackground(Runnable task) {
         if (ceksukses) return;
+        if (executor.isShutdown() || executor.isTerminated()) return;
+        if (!isDisplayable()) return;
+
         ceksukses = true;
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-        executor.submit(() -> {
-            try {
-                task.run();
-            } finally {
-                ceksukses = false;
-                SwingUtilities.invokeLater(() -> {
-                    this.setCursor(Cursor.getDefaultCursor());
-                });
-            }
-        });
+        try {
+            executor.submit(() -> {
+                try {
+                    task.run();
+                } finally {
+                    ceksukses = false;
+                    SwingUtilities.invokeLater(() -> {
+                        if (isDisplayable()) {
+                            setCursor(Cursor.getDefaultCursor());
+                        }
+                    });
+                }
+            });
+        } catch (RejectedExecutionException ex) {
+            ceksukses = false;
+        }
+    }
+    
+    @Override
+    public void dispose() {
+        executor.shutdownNow();
+        super.dispose();
     }
 }

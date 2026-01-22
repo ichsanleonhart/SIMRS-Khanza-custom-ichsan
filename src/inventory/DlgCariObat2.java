@@ -39,6 +39,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -2001,9 +2002,13 @@ private void ChkJlnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:
     private widget.Table tbObatRacikan;
     // End of variables declaration//GEN-END:variables
 
-    public void tampil() {   
+    public void tampil() {  
+        runBackground(() ->loadData()); 
+    }
+    
+    private void loadData() {        
         buatcacheberiobat();
-        runBackground(() ->tampilcacheberiobat()); 
+        tampilcacheberiobat();            
     }
     
     private void buatcacheberiobat(){
@@ -2702,13 +2707,13 @@ private void ChkJlnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:
     public void isCek(){  
         if(!DEPOAKTIFOBAT.equals("")){
             kdgudang.setText(DEPOAKTIFOBAT);
-            nmgudang.setText(caribangsal.tampil3(DEPOAKTIFOBAT));
+            nmgudang.setText(Sequel.CariBangsal(DEPOAKTIFOBAT));
         }else{
             kdgudang.setText(akses.getkdbangsal());
             if(akses.getkdbangsal().equals("")){
                 kdgudang.setText(bangsaldefault);
             } 
-            nmgudang.setText(caribangsal.tampil3(kdgudang.getText()));
+            nmgudang.setText(Sequel.CariBangsal(kdgudang.getText()));
         }
              
         if(TANGGALMUNDUR.equals("no")){
@@ -4446,19 +4451,33 @@ private void ChkJlnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:
     
     private void runBackground(Runnable task) {
         if (ceksukses) return;
+        if (executor.isShutdown() || executor.isTerminated()) return;
+        if (!isDisplayable()) return;
+
         ceksukses = true;
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-        executor.submit(() -> {
-            try {
-                task.run();
-            } finally {
-                ceksukses = false;
-                SwingUtilities.invokeLater(() -> {
-                    this.setCursor(Cursor.getDefaultCursor());
-                });
-            }
-        });
+        try {
+            executor.submit(() -> {
+                try {
+                    task.run();
+                } finally {
+                    ceksukses = false;
+                    SwingUtilities.invokeLater(() -> {
+                        if (isDisplayable()) {
+                            setCursor(Cursor.getDefaultCursor());
+                        }
+                    });
+                }
+            });
+        } catch (RejectedExecutionException ex) {
+            ceksukses = false;
+        }
+    }
+    
+    @Override
+    public void dispose() {
+        executor.shutdownNow();
+        super.dispose();
     }
 }
