@@ -106,15 +106,64 @@
                     <td width="100%">
                         <b>A. Tarif Ruang Perawatan</b><br>
                         <table class="default" width="99%" border="0" align="center" cellpadding="3px" cellspacing="0px">
-                            <tr class="text-dark">
-                                <td width="30%">Kelas 3</td><td width="20%">Rp. 130.000</td><td width="30%">VIP B</td><td width="20%">Rp. 390.000</td>
-                            </tr>
-                            <tr class="text-dark">
-                                <td width="30%">Kelas 2</td><td width="20%">Rp. 195.000</td><td width="30%">VIP A</td><td width="20%">Rp. 520.000</td>
-                            </tr>
-                            <tr class="text-dark">
-                                <td width="30%">Kelas 1</td><td width="20%">Rp. 260.000</td><td width="30%">VVIP</td><td width="20%">Rp. 750.000</td>
-                            </tr>
+                            <?php
+                                // 1. Ambil data, urutkan berdasarkan harga termurah ke termahal
+                                $_sql_tarif = "SELECT kelas, trf_kamar 
+                                               FROM kamar 
+                                               WHERE statusdata='1' 
+                                               AND kd_bangsal NOT LIKE '%ICU%' 
+                                               AND kd_bangsal NOT LIKE '%HCU%' 
+                                               AND kd_bangsal NOT LIKE '%BYI%' 
+                                               AND kd_bangsal NOT LIKE '%PRN%' 
+                                               AND kd_bangsal NOT LIKE '%ISO%' 
+                                               AND kd_bangsal NOT LIKE '%NCU%' 
+                                               AND kd_bangsal NOT LIKE '%PCU%' 
+                                               AND kd_bangsal NOT LIKE '%VK%' 
+                                               GROUP BY kelas, trf_kamar 
+                                               ORDER BY trf_kamar ASC";
+                                
+                                $hasil_tarif = bukaquery2($_sql_tarif);
+                                
+                                $data_kiri  = []; // Untuk Kelas 1, 2, 3
+                                $data_kanan = []; // Untuk VIP, Utama, VVIP, dll
+
+                                // 2. Pisahkan data ke dalam dua array (bucket)
+                                while ($row = mysqli_fetch_array($hasil_tarif)) {
+                                    // Cek apakah nama kelas mengandung angka 1, 2, atau 3
+                                    // Asumsi penamaan di database: "Kelas 1", "Kelas 2", "Kelas 3"
+                                    if (preg_match('/(1|2|3)/', $row['kelas'])) {
+                                        $data_kiri[] = $row;
+                                    } else {
+                                        $data_kanan[] = $row;
+                                    }
+                                }
+
+                                // 3. Tentukan jumlah baris maksimal untuk looping
+                                $max_rows = max(count($data_kiri), count($data_kanan));
+
+                                // 4. Loop untuk menampilkan baris per baris
+                                for ($i = 0; $i < $max_rows; $i++) {
+                                    echo "<tr class='text-dark'>";
+                                    
+                                    // --- KOLOM KIRI (Kelas Reguler) ---
+                                    if (isset($data_kiri[$i])) {
+                                        echo "<td width='30%'>".$data_kiri[$i]['kelas']."</td>";
+                                        echo "<td width='20%'>Rp. ".number_format($data_kiri[$i]['trf_kamar'], 0, ',', '.')."</td>";
+                                    } else {
+                                        echo "<td width='30%'>&nbsp;</td><td width='20%'>&nbsp;</td>";
+                                    }
+
+                                    // --- KOLOM KANAN (VIP/Lainnya) ---
+                                    if (isset($data_kanan[$i])) {
+                                        echo "<td width='30%'>".$data_kanan[$i]['kelas']."</td>";
+                                        echo "<td width='20%'>Rp. ".number_format($data_kanan[$i]['trf_kamar'], 0, ',', '.')."</td>";
+                                    } else {
+                                        echo "<td width='30%'>&nbsp;</td><td width='20%'>&nbsp;</td>";
+                                    }
+
+                                    echo "</tr>";
+                                }
+                            ?>
                         </table>
                     </td>
                 </tr>
@@ -141,13 +190,13 @@
                         <b>B. Angsuran Awal</b><br>
                         <table class="default" width="99%" border="0" align="center" cellpadding="3px" cellspacing="0px">
                             <tr class="text-dark">
-                                <td width="30%">Kelas 3</td><td width="20%">Rp. 1.000.000</td><td width="30%">VIP B</td><td width="20%">Rp. 2.000.000</td>
+                                <td width="30%">Kelas 3</td><td width="20%">Rp. 1.000.000</td><td width="30%">Kelas Utama</td><td width="20%">Rp. 2.000.000</td>
                             </tr>
                             <tr class="text-dark">
-                                <td width="30%">Kelas 2</td><td width="20%">Rp. 1.250.000</td><td width="30%">VVP A</td><td width="20%">Rp. 2.500.000</td>
+                                <td width="30%">Kelas 2</td><td width="20%">Rp. 1.250.000</td><td width="30%">Kelas VIP</td><td width="20%">Rp. 2.500.000</td>
                             </tr>
                             <tr class="text-dark">
-                                <td width="30%">Kelas 1</td><td width="20%">Rp. 1.500.000</td><td width="30%">VVIP</td><td width="20%">Rp. 3.000.000</td>
+                                <td width="30%">Kelas 1</td><td width="20%">Rp. 1.500.000</td><td width="30%">Kelas VVIP</td><td width="20%">Rp. 3.000.000</td>
                             </tr>
                         </table>
                     </td>
@@ -258,6 +307,9 @@
 							<tr class="text-dark">
                                 <td width="2%" valign="top">8.</td><td width="98%">Memberikan imbalan jasa atas pelayanan yang diterima</td>
                             </tr>
+							<tr class="text-dark">
+                                <td width="2%" valign="top">9.</td><td width="98%">Dilarang mengambil foto atau video di area Pelayanan Rumah Sakit</td>
+                            </tr>
                         </table>
                     </td>
                 </tr>
@@ -273,7 +325,7 @@
 																			<li>Saya sadar bahwa praktek kedokteran dan ilmu bedah bukanlah ilmu pasti dan saya mengakui bahwa tidak ada jaminan atas hasil apapun terhadap prosedur atau pemeriksaan apapun yang dilakukan kepada saya</li>
 																			<li>Saya mengerti dan memahami bahwa :</li>
 																				<ol type="1">
-																					<li>Saya memiliki hak utnuk menanyakan tentang pengobatan yagn diusulkan termasuk identitas setiap orang yang memberikan atau mengamati pengobatan setiap saat</li>        																		
+																					<li>Saya memiliki hak utnuk menanyakan tentang pengobatan yang diusulkan termasuk identitas setiap orang yang memberikan atau mengamati pengobatan setiap saat</li>        																		
 																					<li>Saya memiliki hak untuk persetujuan / menolak persetujuan untuk prosedur / terapi</li>
 																					<li>Banyak dokter pada staff medis rumah sakit yang bukan karyawan tetapi sebagai staff tamu yang telah diberikan hak untuk menggunakan fasilitas perawatan dan pengobatan pasien mereka</li>
 																				</ol>

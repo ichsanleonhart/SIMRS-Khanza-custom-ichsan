@@ -6906,7 +6906,7 @@ public final class DlgReg extends javax.swing.JDialog {
             ////////////////////Selesai tekan tombol checkin, dilanjutkan dengan script untuk mengirim pesan WA ke nomor hp pasien             
         try { //////////////// start - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
              if(koneksiDB.WANOTIFPASIEN().equals("yes")){
-                 kirimWhatsAppMessageMJKN();  //kirim pesan WA by ichsan
+                 //kirimWhatsAppMessageMJKN();  //kirim pesan WA by ichsan
                  reply = JOptionPane.showConfirmDialog(rootPane,"Mau sekalian bikin SEP..?","Konfirmasi",JOptionPane.YES_NO_OPTION);
                  if (reply == JOptionPane.YES_OPTION) {                                    
                                //MnSEPActionPerformed(new java.awt.event.ActionEvent(this, ActionEvent.ACTION_PERFORMED, "MnSEP")); // Trigger SEP action
@@ -7038,7 +7038,7 @@ public final class DlgReg extends javax.swing.JDialog {
              //////////////// fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
         try {
             if(koneksiDB.WANOTIFPASIEN().equals("yes")){   
-                kirimWhatsAppMessage();  //kirim pesan WA by ichsan                
+                //kirimWhatsAppMessage();  //kirim pesan WA by ichsan                
                 emptTeks();  //kosongkan isi form setelah tekan simpan
             }else{
                 emptTeks();  //kosongkan isi form setelah tekan simpan
