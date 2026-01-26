@@ -1020,7 +1020,7 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
             ppHapus.setEnabled(true);
         }else{
             ppHapus.setEnabled(false);
-        }  */
+        } */  
     }
 
     private void runBackground(Runnable task) {

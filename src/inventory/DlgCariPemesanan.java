@@ -1924,7 +1924,7 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
             //ppUbah.setEnabled(true);
         }else{
             ppHapus.setEnabled(false);
-            ppUbah.setEnabled(true);  //dibuat agar user bisa  mengakses menu ubah
+            ppUbah.setEnabled(true);  //dibuat agar user bisa  mengakses menu ubah by ichsan
         }        
         ppBayar.setEnabled(akses.getbayar_pemesanan_obat());
     }
