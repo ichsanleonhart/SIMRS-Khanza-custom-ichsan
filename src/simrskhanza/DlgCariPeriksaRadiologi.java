@@ -64,9 +64,7 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
     private sekuel Sequel=new sekuel();
     private validasi Valid=new validasi();
     private Jurnal jur=new Jurnal();
-    private Connection koneksi=koneksiDB.condb();
-    //private DlgCariDokter dokter=new DlgCariDokter(null,false);
-    //private DlgCariPetugas petugas=new DlgCariPetugas(null,false);
+    private Connection koneksi=koneksiDB.condb();    
     private DlgCariPasien member;
     private DlgCariPetugas petugas;
     private DlgCariDokter dokter;
@@ -97,7 +95,10 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
     public DlgCariPeriksaRadiologi(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-
+        // Instansiasi objek dialog agar tidak NullPointerException saat dipanggil listenernya di bawah - ichsan        
+        dokter=new DlgCariDokter(null,false);
+        petugas=new DlgCariPetugas(null,false);
+        //-------------------------------------
         Object[] row={"No.Rawat","Pasien","Petugas","Tgl.Periksa","Jam Periksa","Dokter Perujuk","Penanggung Jawab"};
         tabMode=new DefaultTableModel(null,row){
               @Override public boolean isCellEditable(int rowIndex, int colIndex){return false;}
