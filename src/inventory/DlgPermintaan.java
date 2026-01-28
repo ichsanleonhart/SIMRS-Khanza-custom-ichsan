@@ -1069,6 +1069,14 @@ private void tbDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_
             kdptg.setText(akses.getkode());
             BtnSimpan.setEnabled(akses.getpermintaan_medis());
             BtnTambah.setEnabled(akses.getobat());
+            
+            // --- PERBAIKAN DI SINI ---
+            // Cek apakah objek pegawai masih null. Jika iya, instansiasi dulu.
+            if(pegawai==null){
+                pegawai=new DlgCariPegawai(null,false);
+            }
+            // -------------------------
+            
             nmptg.setText(pegawai.tampil3(kdptg.getText()));
             if(!DEPOAKTIFOBAT.equals("")){
                 kdgudangasal.setText(DEPOAKTIFOBAT);
