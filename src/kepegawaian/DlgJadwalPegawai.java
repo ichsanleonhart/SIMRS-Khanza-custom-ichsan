@@ -877,8 +877,23 @@ public class DlgJadwalPegawai extends javax.swing.JDialog {
     }
     
     public void isCek(){
-        BtnSimpan.setEnabled(akses.getjadwal_pegawai());
-        BtnHapus.setEnabled(akses.getjadwal_pegawai());
+        //BtnSimpan.setEnabled(akses.getjadwal_pegawai());
+        //BtnHapus.setEnabled(akses.getjadwal_pegawai());
+        
+        // Mengambil jabatan user yang sedang login dari database
+        // akses.getkode() digunakan untuk mengambil NIK user aktif
+        String jabatanUser = Sequel.cariIsi("select jbtn from pegawai where nik='"+akses.getkode()+"'");
+
+        // Modif by Ichsan Validasi gabungan: 
+        // 1. Harus punya hak akses menu jadwal_pegawai (dari setting user)
+        // 2. DAN jabatan di tabel pegawai harus mengandung kata "HRD" (Case insensitive)
+        if(akses.getjadwal_pegawai() && jabatanUser.toUpperCase().contains("HRD")){
+            BtnSimpan.setEnabled(true);
+            BtnHapus.setEnabled(true);
+        }else{
+            BtnSimpan.setEnabled(false);
+            BtnHapus.setEnabled(false);
+        }
     }
     
     String konversi(int year, int month, int day){
