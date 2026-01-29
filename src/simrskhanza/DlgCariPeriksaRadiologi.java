@@ -1,15 +1,5 @@
 package simrskhanza;
-import bridging.ApiOrthanc;
-import bridging.OrthancDICOM;
-import com.fasterxml.jackson.databind.JsonNode;
-import kepegawaian.DlgCariPetugas;
-import keuangan.Jurnal;
-import fungsi.WarnaTable;
-import fungsi.batasInput;
-import fungsi.koneksiDB;
-import fungsi.sekuel;
-import fungsi.validasi;
-import fungsi.akses;
+// --- 1. Import Standar Java & Swing ---
 import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dimension;
@@ -19,9 +9,14 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -37,26 +32,58 @@ import javax.swing.table.TableColumn;
 import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
+
+// --- 2. Import Security & SSL (SOLUSI ERROR KAMU ADA DISINI) ---
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+// --- 3. Import Library Apache (HTTP Client) ---
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.codec.binary.Base64;
+
+// --- 4. Import Library Spring & Jackson (JSON) ---
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+// --- 5. Import Internal SIMRS Khanza ---
+import bridging.ApiOrthanc;
+import bridging.OrthancDICOM;
+import kepegawaian.DlgCariPetugas;
 import kepegawaian.DlgCariDokter;
+import keuangan.Jurnal;
+import fungsi.WarnaTable;
+import fungsi.batasInput;
+import fungsi.koneksiDB;
+import fungsi.sekuel;
+import fungsi.validasi;
+import fungsi.akses;
 import laporan.DlgBerkasRawat;
 import rekammedis.MasterCariTemplateHasilRadiologi;
 import rekammedis.RMRiwayatPerawatan;
-
-import java.io.File; //tambahan by ichsan
-import java.io.FileInputStream;
-import java.sql.SQLException;
-import org.apache.commons.io.FileUtils;  //tambahan ichsan
-import org.apache.http.HttpResponse; //tambahan ichsan
-import org.apache.http.client.HttpClient; //tambahan ichsan
-import org.apache.http.client.methods.HttpPost; //tambahan ichsan
-import org.apache.http.entity.mime.HttpMultipartMode; //tambahan ichsan
-import org.apache.http.entity.mime.MultipartEntity; //tambahan ichsan
-import org.apache.http.entity.mime.content.ByteArrayBody; //tambahan ichsan
-import org.apache.http.entity.mime.content.InputStreamBody; //tambahan ichsan
-import org.apache.http.impl.client.DefaultHttpClient; //tambahan ichsan
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import javax.swing.SwingUtilities;
+import org.apache.http.entity.mime.content.InputStreamBody;
 
 
 public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
@@ -76,7 +103,7 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
     private volatile boolean ceksukses = false;
     private PreparedStatement ps,ps2,ps3,ps4,ps5,psrekening;
     private ResultSet rs,rs2,rs3,rs5,rsrekening;
-    private String kamar,namakamar,pemeriksaan="",pilihan="",status="",finger="",statushasil="", lokasifile="", SQLException="", FileName ="",kodeberkas=""; //tambahan ichsan FileName ="",kodeberkas="", lokasifile="" SQLException=""
+    private String kamar,namakamar,pemeriksaan="",pilihan="",status="",finger="",statushasil="", lokasifile="", SQLException="", FileName ="",kodeberkas="", ObjectMapper=""; //tambahan ichsan FileName ="",kodeberkas="", lokasifile="" SQLException=""
     private double ttl=0,item=0;
     private double ttljmdokter=0,ttljmpetugas=0,ttlkso=0,ttlpendapatan=0,ttlbhp=0,ttljasasarana=0,ttljmperujuk=0,ttlmenejemen=0;;
     private String kdpetugas="",kdpenjab="",Suspen_Piutang_Radiologi_Ranap="",Radiologi_Ranap="",Beban_Jasa_Medik_Dokter_Radiologi_Ranap="",Utang_Jasa_Medik_Dokter_Radiologi_Ranap="",
@@ -451,6 +478,7 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
         tbListDicom = new widget.Table();
         panelGlass7 = new widget.panelisi();
         btnDicom = new widget.Button();
+        SimpanGambar = new widget.Button();
         PanelDataDicari = new widget.panelisi();
         label17 = new widget.Label();
         NoRawatDicari = new widget.Label();
@@ -1284,18 +1312,37 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
         });
         panelGlass7.add(btnDicom);
 
+        SimpanGambar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/upload24.png"))); // NOI18N
+        SimpanGambar.setMnemonic('T');
+        SimpanGambar.setText("Upload JPG ke Photo Radiologi");
+        SimpanGambar.setToolTipText("Alt+T");
+        SimpanGambar.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        SimpanGambar.setMaximumSize(new java.awt.Dimension(240, 34));
+        SimpanGambar.setMinimumSize(new java.awt.Dimension(240, 34));
+        SimpanGambar.setName("SimpanGambar"); // NOI18N
+        SimpanGambar.setPreferredSize(new java.awt.Dimension(190, 30));
+        SimpanGambar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SimpanGambarActionPerformed(evt);
+            }
+        });
+        SimpanGambar.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                SimpanGambarKeyPressed(evt);
+            }
+        });
+        panelGlass7.add(SimpanGambar);
+
         FormOrthan.add(panelGlass7, java.awt.BorderLayout.PAGE_END);
 
         TabData.addTab("Integrasi Orthanc", FormOrthan);
 
         PanelAccor.add(TabData, java.awt.BorderLayout.CENTER);
 
-        PanelDataDicari.setBackground(new java.awt.Color(255, 250, 250));
+        PanelDataDicari.setBackground(new java.awt.Color(255, 255, 255));
         PanelDataDicari.setBorder(null);
         PanelDataDicari.setName("PanelDataDicari"); // NOI18N
         PanelDataDicari.setPreferredSize(new java.awt.Dimension(100, 44));
-        PanelDataDicari.setWarnaAtas(new java.awt.Color(255, 250, 250));
-        PanelDataDicari.setWarnaBawah(new java.awt.Color(255, 250, 250));
         PanelDataDicari.setLayout(null);
 
         label17.setText("No.Rawat :");
@@ -2526,6 +2573,102 @@ if(Kd2.getText().equals("")){
         // TODO add your handling code here:
     }//GEN-LAST:event_NoHPWAPasienKeyPressed
 
+    private void SimpanGambarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SimpanGambarActionPerformed
+        // Validasi: Pastikan data terpilih
+        if (tabModeDicom.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(null, "Maaf, data DICOM belum dimuat...!!!!");
+            return;
+        }
+        if (tbListDicom.getSelectedRow() == -1) {
+            JOptionPane.showMessageDialog(null, "Maaf, Silahkan pilih Series DICOM terlebih dahulu..!!");
+            return;
+        }
+
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        try {
+            // 1. Siapkan Koneksi ke Orthanc
+            String auth = koneksiDB.USERORTHANC() + ":" + koneksiDB.PASSORTHANC();
+            byte[] encodedBytes = Base64.encodeBase64(auth.getBytes());
+            String authEncrypt = new String(encodedBytes);
+
+            // 2. Ambil Data Pasien dari Tabel GUI
+            String SeriesID = tbListDicom.getValueAt(tbListDicom.getSelectedRow(), 2).toString();
+            String SeriesShort = SeriesID.length() > 8 ? SeriesID.substring(SeriesID.length() - 8) : SeriesID;
+            
+            String NoRawat = tbDokter.getValueAt(tbDokter.getSelectedRow(), 0).toString();
+            String NoRawatClean = NoRawat.replaceAll("/", "").replaceAll(" ", "");
+            
+            String Tanggal = tbDokter.getValueAt(tbDokter.getSelectedRow(), 3).toString();
+            String Jam = tbDokter.getValueAt(tbDokter.getSelectedRow(), 4).toString();
+
+            // 3. Request ke API Orthanc
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Authorization", "Basic " + authEncrypt);
+            HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+            
+            // Ambil detail Series untuk mendapatkan list Instances (Gambar)
+            String requestJson = getRest().exchange(koneksiDB.URLORTHANC() + ":" + koneksiDB.PORTORTHANC() + "/series/" + SeriesID, HttpMethod.GET, requestEntity, String.class).getBody();
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(requestJson);
+
+            // 4. Siapkan Folder Lokal Sementara
+            File folder = new File("./gambarradiologi");
+            if (!folder.exists()) {
+                folder.mkdir();
+            }
+
+            // 5. Loop Download & Upload Setiap Gambar
+            int counter = 1;
+            int totalImages = 0;
+            for (JsonNode list : root.path("Instances")) {
+                // Konfigurasi Header untuk ambil gambar JPEG
+                headers = new HttpHeaders();
+                headers.add("Authorization", "Basic " + authEncrypt);
+                headers.add("Accept", "image/jpeg");
+                HttpEntity<String> entity = new HttpEntity<>(headers);
+
+                // A. Download dari Orthanc ke Memory (Byte Array)
+                ResponseEntity<byte[]> response = getRest().exchange(koneksiDB.URLORTHANC() + ":" + koneksiDB.PORTORTHANC() + "/instances/" + list.asText() + "/preview", HttpMethod.GET, entity, byte[].class);
+
+                // B. Simpan ke File Lokal
+                String fileName = NoRawatClean + "_" + counter + "_" + SeriesShort + ".jpg";
+                String localPath = "./gambarradiologi/" + fileName;
+                Files.write(Paths.get(localPath), response.getBody());
+
+                // C. Upload ke Server Webapps (via orthanc.php)
+                // Pastikan parameter 'doc' sesuai dengan folder di server
+                uploadImage(fileName, "radiologi/pages/upload");
+
+                // D. Insert ke Database (Table gambar_radiologi)
+                String serverPath = "pages/upload/" + fileName;
+                
+                // Cek duplikasi
+                if(Sequel.cariInteger("select count(no_rawat) from gambar_radiologi where no_rawat='"+NoRawat+"' and lokasi_gambar='"+serverPath+"'")==0){
+                     Sequel.menyimpan("gambar_radiologi", "'" + NoRawat + "','" + Tanggal + "','" + Jam + "','" + serverPath + "'", "Gambar Radiologi");
+                }
+                
+                counter++;
+                totalImages++;
+            }
+
+            JOptionPane.showMessageDialog(null, "Sukses! " + totalImages + " gambar berhasil di-upload ke server.");
+            
+            // Refresh tampilan
+            panggilPhoto(); 
+
+        } catch (Exception e) {
+            System.out.println("Error Upload: " + e);
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Gagal Error: " + e.getMessage());
+        } finally {
+            this.setCursor(Cursor.getDefaultCursor());
+        }
+    }//GEN-LAST:event_SimpanGambarActionPerformed
+
+    private void SimpanGambarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_SimpanGambarKeyPressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_SimpanGambarKeyPressed
+
     private void CreatePDFWA(String FileName) {
      if(Kd2.getText().equals("")){
                JOptionPane.showMessageDialog(null,"Maaf, silahkan pilih data terlebih dahulu...!!!!"); 
@@ -2714,6 +2857,7 @@ if(Kd2.getText().equals("")){
     private widget.ScrollPane Scroll3;
     private widget.ScrollPane Scroll4;
     private widget.ScrollPane Scroll5;
+    private widget.Button SimpanGambar;
     private widget.TextBox TCari;
     private javax.swing.JTabbedPane TabData;
     private widget.Tanggal Tgl1;
@@ -3321,6 +3465,54 @@ if(Kd2.getText().equals("")){
     
     ////////////////////// end - fungsi upload pdf dan kirim pdf via WA  by ichsan
 
+    
+    // --- MULAI BLOK KODE AUTO UPLOAD ORTHANC ---
+    
+    // 1. Method untuk Koneksi HTTP ke Orthanc (RestTemplate)
+    public RestTemplate getRest() throws NoSuchAlgorithmException, KeyManagementException {
+        SSLContext sslContext = SSLContext.getInstance("SSL");
+        TrustManager[] trustManagers = {
+            new X509TrustManager() {
+                public X509Certificate[] getAcceptedIssuers() {return null;}
+                public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
+                public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
+            }
+        };
+        sslContext.init(null, trustManagers, new SecureRandom());
+        SSLSocketFactory sslFactory = new SSLSocketFactory(sslContext, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+        Scheme scheme = new Scheme("https", 443, sslFactory);
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+        factory.getHttpClient().getConnectionManager().getSchemeRegistry().register(scheme);
+        return new RestTemplate(factory);
+    }
+
+    // 2. Method untuk Upload File dari Folder Lokal ke Server via PHP
+    void uploadImage(String FileName, String docpath) {
+        try {
+            File file = new File("gambarradiologi/" + FileName);
+            if(file.exists()){
+                byte[] data = FileUtils.readFileToByteArray(file);
+                HttpClient httpClient = new DefaultHttpClient();
+                // Menembak ke orthanc.php
+                HttpPost postRequest = new HttpPost("http://" + koneksiDB.HOSTHYBRIDWEB() + ":" + koneksiDB.PORTWEB() + "/" + koneksiDB.HYBRIDWEB() + "/orthanc.php?doc=" + docpath);
+                
+                ByteArrayBody fileData = new ByteArrayBody(data, FileName);
+                MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+                reqEntity.addPart("file", fileData);
+                postRequest.setEntity(reqEntity);
+                
+                httpClient.execute(postRequest);
+                // Opsional: Hapus file lokal setelah upload untuk menghemat ruang
+                // file.delete(); 
+            }
+        } catch (Exception e) {
+            System.out.println("Upload error: " + e);
+        }
+    }
+    // --- SELESAI BLOK KODE AUTO UPLOAD ORTHANC ---
+    
+    
+    
     private void runBackground(Runnable task) {
         if (ceksukses) return;
         ceksukses = true;
@@ -3338,5 +3530,7 @@ if(Kd2.getText().equals("")){
             }
         });
     }
+    
+    
 
 }

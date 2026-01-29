@@ -1,127 +1,121 @@
 <style>
     /* Reset & Base Style */
     * { box-sizing: border-box; }
-    body { font-family: Tahoma, Arial, sans-serif; font-size: 11px; margin: 0; }
+    body { font-family: Tahoma, Arial, sans-serif; font-size: 11px; margin: 0; line-height: 1.3; }
     
-    /* Table Styling agar mirip Jasper Report */
-    table.main-table { width: 100%; border-collapse: collapse; margin-bottom: 5px; page-break-inside: avoid; }
-    table.main-table td, table.main-table th { border: 1px solid #000; padding: 4px; vertical-align: top; }
+    /* Table Styling Utama */
+    table.main-table { width: 100%; border-collapse: collapse; margin-bottom: 0px; page-break-inside: avoid; table-layout: fixed; }
+    table.main-table td, table.main-table th { border: 1px solid #000; padding: 3px 5px; vertical-align: top; word-wrap: break-word; }
     
-    /* Header Specific */
-    .header-table { width: 100%; border-collapse: collapse; border: 1px solid #000; margin-bottom: 0; }
-    .header-table td { padding: 4px; vertical-align: middle; }
-    
-    /* Color Classes */
-    .bg-dark-red { background-color: #990000; color: #fff; font-weight: bold; text-align: center; padding: 5px; }
-    .bg-cream { background-color: #F5F5DC; font-weight: bold; } /* Warna krem untuk header section */
-    .text-center { text-align: center; }
-    .text-bold { font-weight: bold; }
-    .v-middle { vertical-align: middle; }
-    
-    /* Font Sizes */
+    /* Font Helpers */
     .fs-10 { font-size: 10px; }
     .fs-12 { font-size: 12px; }
     .fs-14 { font-size: 14px; }
+    .text-bold { font-weight: bold; }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    
+    /* Spesifik Triase */
+    .bg-triase { background-color: <?= $config['warna_bg'] ?>; color: <?= $config['warna_txt'] ?>; font-weight: bold; text-align: center; }
+    .bg-section { background-color: #E8E8AD; font-weight: bold; text-align: center; } /* Warna krem gelap khas Khanza */
 </style>
 
-<table class="header-table">
+<table class="main-table">
     <tr>
-        <td width="15%" class="text-center" style="border-right: 1px solid #000;">
-            <img src="<?= $logo_b64; ?>" style="width: 60px; height: 60px;">
+        <td width="8%" style="border-right: 0; vertical-align: middle;">
+            <img src="<?= $logo_b64 ?>" style="width: 55px;">
         </td>
-        
-        <td width="45%" class="text-center" style="border-right: 1px solid #000;">
-            <span class="fs-14 text-bold"><?= strtoupper($setting['nama_instansi']); ?></span><br>
-            <span class="fs-10"><?= $setting['alamat_instansi']; ?>, <?= $setting['kabupaten']; ?></span><br>
-            <span class="fs-10"><?= $setting['kontak']; ?> | E-mail: <?= $setting['email']; ?></span>
+        <td width="40%" style="border-left: 0; border-right: 2px solid #000;">
+            <div class="text-center">
+                <span class="fs-14 text-bold"><?= strtoupper($setting['nama_instansi']) ?></span><br>
+                <span class="fs-10">
+                    <?= $setting['alamat_instansi'] ?>, <?= $setting['kabupaten'] ?>, <?= $setting['propinsi'] ?><br>
+                    <?= $setting['kontak'] ?><br>
+                    E-mail : <?= $setting['email'] ?>
+                </span>
+            </div>
         </td>
-        
-        <td width="40%" style="vertical-align: top; padding: 2px 5px;">
-            <table width="100%" style="border: none;">
+        <td width="52%" style="padding: 0;">
+            <table width="100%" style="border-collapse: collapse; border: none;">
                 <tr>
-                    <td width="30%" style="border: none; font-size: 10px;">Nomor RM</td>
-                    <td style="border: none; font-size: 10px;">: <?= $d_umum['no_rkm_medis']; ?></td>
+                    <td width="35%" style="border:0; padding: 2px 5px;">Nomor RM</td>
+                    <td width="65%" style="border:0; padding: 2px 5px;">: <b><?= $d_umum['no_rkm_medis'] ?></b></td>
                 </tr>
                 <tr>
-                    <td style="border: none; font-size: 10px;">Nama</td>
-                    <td style="border: none; font-size: 10px;">: <?= $d_umum['nm_pasien']; ?></td>
+                    <td style="border:0; padding: 2px 5px;">Nama</td>
+                    <td style="border:0; padding: 2px 5px;">: <?= $d_umum['nm_pasien'] ?></td>
                 </tr>
                 <tr>
-                    <td style="border: none; font-size: 10px;">Tanggal Lahir</td>
-                    <td style="border: none; font-size: 10px;">: <?= formatTgl($d_umum['tgl_lahir']); ?></td>
+                    <td style="border:0; padding: 2px 5px;">Tanggal Lahir</td>
+                    <td style="border:0; padding: 2px 5px;">: <?= date('d-m-Y', strtotime($d_umum['tgl_lahir'])) ?></td>
                 </tr>
                 <tr>
-                    <td style="border: none; font-size: 10px;">Jenis Kelamin</td>
-                    <td style="border: none; font-size: 10px;">: <?= $d_umum['jk'] == 'L' ? 'Laki-Laki' : 'Perempuan'; ?></td>
+                    <td style="border:0; padding: 2px 5px;">Jenis Kelamin</td>
+                    <td style="border:0; padding: 2px 5px;">: <?= ($d_umum['jk']=='L'?'Laki-laki':'Perempuan') ?></td>
                 </tr>
             </table>
         </td>
     </tr>
 </table>
 
-<table style="width: 100%; border-collapse: collapse; border: 1px solid #000; border-top: none;">
+<table class="main-table">
     <tr>
-        <td class="bg-dark-red">TRIASE PASIEN GAWAT DARURAT</td>
+        <td class="bg-triase" style="padding: 5px; border-top: 0;">
+            TRIASE PASIEN GAWAT DARURAT
+        </td>
     </tr>
     <tr>
-        <td class="text-center" style="border-bottom: 1px solid #000; padding: 3px; font-size: 10px;">
+        <td class="text-center fs-10" style="border-top: 0;">
             Triase dilakukan segera setelah pasien datang dan sebelum pasien/ keluarga mendaftar di TPP IGD
         </td>
     </tr>
 </table>
 
-<table class="main-table" style="border-top: none;">
+<table class="main-table">
     <tr>
-        <td width="50%" style="border-bottom: 1px solid #000;">
-            Tanggal Kunjungan : <?= formatTgl($d_umum['tgl_registrasi']); ?>
+        <td width="50%">Tanggal Kunjungan : <?= date('d-m-Y', strtotime($tgl_triase_fix)) ?></td>
+        <td width="50%">Pukul : <?= date('H:i:s', strtotime($tgl_triase_fix)) ?></td>
+    </tr>
+</table>
+<table class="main-table">
+    <tr>
+        <td width="30%">Cara Datang</td>
+        <td width="70%"><?= $d_umum['cara_masuk'] ?? '-' ?></td>
+    </tr>
+    <tr>
+        <td width="30%">Macam Kasus</td>
+        <td width="70%"><?= $d_umum['macam_kasus'] ?? '-' ?></td>
+    </tr>
+</table>
+
+<table class="main-table">
+    <tr class="bg-section">
+        <td width="30%">KETERANGAN</td>
+        <td width="70%">TRIASE <?= $config['sub_judul'] ?></td>
+    </tr>
+    <tr>
+        <td height="60">
+            <b class="fs-10">ANAMNESA SINGKAT</b>
         </td>
-        <td width="50%" style="border-bottom: 1px solid #000;">
-            Pukul : <?= formatJam($d_umum['tgl_registrasi']); ?>
-        </td>
-    </tr>
-    
-    <tr>
-        <td width="20%">Cara Datang</td>
-        <td width="80%"><?= $d_khusus['caradatang'] ?? '-'; ?></td> </tr>
-    <tr>
-        <td>Macam Kasus</td>
-        <td><?= $d_umum['macam_kasus'] ?? '-'; ?></td>
-    </tr>
-
-    <tr class="bg-cream">
-        <td class="text-center">KETERANGAN</td>
-        <td class="text-center">TRIASE <?= $tipe_triase; ?></td>
-    </tr>
-
-    <tr>
-        <td style="height: 50px;">KELUHAN UTAMA</td>
-        <td><?= $d_khusus['keluhanutama'] ?? '-'; ?></td>
-    </tr>
-
-    <tr>
-        <td>TANDA VITAL</td>
         <td>
-            Suhu (C) : <?= $d_khusus['suhu'] ?? '-'; ?>, 
-            Nyeri : <?= $d_khusus['nyeri'] ?? '-'; ?>, 
-            Tensi : <?= $d_khusus['tensi'] ?? '-'; ?>, 
-            Nadi(/menit) : <?= $d_khusus['nadi'] ?? '-'; ?>, 
-            Saturasi O2(%) : <?= $d_khusus['saturasi'] ?? '-'; ?>, 
-            Respirasi(/menit) : <?= $d_khusus['rr'] ?? '-'; ?>
+            <?= !empty($d_umum['keluhan_utama']) ? nl2br($d_umum['keluhan_utama']) : '-' ?>
         </td>
     </tr>
-
     <tr>
-        <td>KEBUTUHAN KHUSUS</td>
-        <td><?= $d_khusus['kebutuhan_khusus'] ?? '-'; ?></td>
-    </tr>
-
-    <tr>
-        <td class="bg-cream text-center">PEMERIKSAAN</td>
-        <td style="background-color: <?= $config['warna_bg']; ?>; color: <?= $config['warna_txt']; ?>; font-weight: bold; text-align: center;">
-            <?= $config['sub_judul']; ?>
+        <td>
+            <b class="fs-10">TANDA VITAL</b>
+        </td>
+        <td>
+            Suhu (C) : <?= $d_umum['suhu'] ?>, Nyeri : <?= $d_umum['nyeri'] ?>, Tensi : <?= $d_umum['tensi'] ?>, Nadi(/menit) : <?= $d_umum['nadi'] ?>, Saturasi O²(%) : <?= $d_umum['saturasi_o2'] ?>, Respirasi(/menit) : <?= $d_umum['napas'] ?>
         </td>
     </tr>
+</table>
 
+<table class="main-table">
+    <tr class="bg-section text-center">
+        <td width="30%">PEMERIKSAAN</td>
+        <td class="bg-triase" width="70%">URGENSI</td>
+    </tr>
     <?php if(!empty($checklist_data)): ?>
         <?php foreach($checklist_data as $check): ?>
         <tr>
@@ -132,42 +126,45 @@
         </tr>
         <?php endforeach; ?>
     <?php else: ?>
-        <tr>
-            <td>PEMERIKSAAN FISIK</td>
-            <td style="background-color: <?= $config['warna_bg']; ?>; color: <?= $config['warna_txt']; ?>;">-</td>
-        </tr>
+        <tr><td colspan="2" class="text-center">- Tidak ada data checklist -</td></tr>
     <?php endif; ?>
-
     <tr>
         <td>PLAN</td>
-        <td style="background-color: <?= $config['warna_bg']; ?>; color: <?= $config['warna_txt']; ?>;">
-            <?= $d_khusus['plan'] ?? $d_khusus['keterangan'] ?? '-'; ?>
+        <td style="background-color: <?= $config['warna_bg']; ?>; color: <?= $config['warna_txt']; ?>;"><?= $d_khusus['plan'] ?? 'Zona Kuning' ?></td>
+    </tr>
+</table>
+
+<table class="main-table">
+    <tr class="bg-section text-center">
+		<td width="30%"> &nbsp; </td>
+        <td width="70%"class="text-center">
+            Petugas Triase
         </td>
     </tr>
-
-    <tr class="bg-cream">
-        <td></td>
-        <td class="text-center">Petugas Triase <?= ucfirst(strtolower($tipe_triase)); ?></td>
-    </tr>
-	
-	 <tr>
-        <td>Tanggal & Jam</td>
-        <td><?= formatTgl($d_khusus['tanggaltriase'] ?? $d_umum['tgl_registrasi']); ?> </td>
-    </tr>
-	
-	 <tr>
-        <td>Catatan</td>
-        <td><?= $d_khusus['keterangan'] ?? '-'; ?></td>
-    </tr>
-
     <tr>
-        <td> Dokter/Petugas Jaga IGD</td>
-        <td class="text-center">
-            <?php if(!empty($qr_b64)): ?>
-            <img src="<?= $qr_b64; ?>" style="width: 100px; height: 100px;">
+        <td width="30%">Tanggal & Jam</td>
+        <td width="70%"><?= formatTgl($tgl_triase_fix) ?></td>
+    </tr>
+    <tr>
+        <td width="30%">Catatan</td>
+        <td width="70%">
+            <?= !empty($d_khusus['catatan']) ? nl2br($d_khusus['catatan']) : '-' ?>
+        </td>
+    </tr>
+    <tr>
+        <td width="30%" style="border-top: 0;">Dokter/Petugas Jaga IGD</td>
+        <td width="70%" style="border-top: 0; vertical-align: middle; height: 70px;">            
+            <?php 
+            // 1. Render QR Code DULUAN dengan float right agar posisi aman
+            if($qr_b64): ?>
+                <div style="float: right; margin-right: 10px;">
+                    <img src="<?= $qr_b64 ?>" width="60">
+                </div>
             <?php endif; ?>
-			<br>
-			<?= $nama_perawat; ?>
+
+            <div style="margin-top: 15px; float: left;">
+                <?= $nama_perawat ?>
+            </div>
         </td>
     </tr>
 </table>
