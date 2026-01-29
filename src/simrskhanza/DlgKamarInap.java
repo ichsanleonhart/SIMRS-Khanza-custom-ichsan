@@ -9484,7 +9484,8 @@ public class DlgKamarInap extends javax.swing.JDialog {
         "Izin menginformasikan terkait perawatan Anda di " + akses.getnamars() + " dengan nomor rawat " + TNoRwCari.getText() + 
         " dinyatakan telah selesai proses administrasinya dan sudah diperbolehkan untuk pulang.\n\n" +
         "Mohon bersabar menunggu konfirmasi dari petugas rawat inap untuk edukasi perihal obat pulang dan surat kontrol pada kunjungan selanjutnya. \n \n" +                
-        "Terima kasih atas perhatiannya. \n Semoga lekas sembuh. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
+        "Terima kasih atas perhatiannya. \n Semoga lekas sembuh. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F"+
+        "\n (Mohon untuk menyimpan nomor ini ke kontak Anda, dan membalas pesan ini dengan tulisan *OK* 0xF0 0x9F 0x91 0x8B) \n";
 
     // Insert into wa_outbox
     try {

@@ -3560,7 +3560,8 @@ private void kirimWhatsAppMessage() {
         pesan += "Note: Untuk pasien umum atau asuransi swasta, silakan hubungi bagian pendaftaran (nomor ini) untuk informasi lebih lanjut.\n\n";
     }
     pesan += "Terima kasih atas waktu yang diberikan, semoga Anda dan keluarga selalu diberikan kesehatan.\n\n" +  //ini isi paragraf penutup
-             "*Pendaftaran " + akses.getnamars() + "*\n";
+             "*Pendaftaran " + akses.getnamars() + "*\n"+
+             "\n (Mohon untuk menyimpan nomor ini ke kontak Anda, dan membalas pesan ini dengan tulisan *OK* 0xF0 0x9F 0x91 0x8B) \n";
 
     // Insert into wa_outbox
     try {

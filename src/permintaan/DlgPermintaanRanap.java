@@ -1001,7 +1001,8 @@ public class DlgPermintaanRanap extends javax.swing.JDialog {
     // Membuat isi pesan ke dalam whatsapp
     String pesan = salampembuka + "0xF0 0x9F 0x91 0x8B  0xF0 0x9F 0x98 0x8A \n \n" +
         "Anda direncanakan masuk ke dalam perawatan inap di " + akses.getnamars() + " dari layanan rawat jalan "+ Poli.getText() +" dengan kamar tujuan : " + NmBangsal.getText() +         
-        "\n \n Mohon bersabar menunggu konfirmasi dari perawat untuk peroses pemindahannya, ya. 0xF0 0x9F 0x99 0x8F \n \n" ;
+        "\n \n Mohon bersabar menunggu konfirmasi dari perawat untuk peroses pemindahannya, ya. 0xF0 0x9F 0x99 0x8F \n \n"+
+        "\n (Mohon untuk menyimpan nomor ini ke kontak Anda, dan membalas pesan ini dengan tulisan *OK* 0xF0 0x9F 0x91 0x8B) \n";;
         
 
     // Insert into wa_outbox

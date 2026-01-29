@@ -3285,7 +3285,8 @@ if(Kd2.getText().equals("")){
             "Berikut kami kirimkan berkas PDF untuk hasil pemeriksaannya. \n" +
             "Silakan unduh file terlampir. \n \n"+
             "Terima kasih atas perhatiannya. \n Salam sehat. \n \n" +
-            "*Unit Radiologi " + akses.getnamars() + "*";        
+            "*Unit Radiologi " + akses.getnamars() + "*"+
+            "\n (Mohon untuk menyimpan nomor ini ke kontak Anda, dan membalas pesan ini dengan tulisan *OK* 0xF0 0x9F 0x91 0x8B) \n";
         
         // Step 11: Insert message into WA outbox
         // KODE UNTUK KIRIM WA BY ICHSAN

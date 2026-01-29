@@ -1270,7 +1270,8 @@ public class SuratKontrol extends javax.swing.JDialog {
         "0xF0 0x9F 0x93 0x84 Apabila ada perubahan jadwal atau kendala, silakan balas pesan ini.\n\n" +
         "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F"+
         "\n \n ====\n"+
-        "_Ini adalah pesan otomatis berdasarkan nomor pasien yang terdaftar di " + akses.getnamars() + ". Anda bisa membalas pesan ini untuk konfirmasi apabila terdapat kekeliruan._";
+        "_Ini adalah pesan otomatis berdasarkan nomor pasien yang terdaftar di " + akses.getnamars() + ". Anda bisa membalas pesan ini untuk konfirmasi apabila terdapat kekeliruan._"+
+        "\n (Mohon untuk menyimpan nomor ini ke kontak Anda, dan membalas pesan ini dengan tulisan *OK* 0xF0 0x9F 0x91 0x8B) \n";
 
     // Insert into wa_outbox
     try {
@@ -1412,7 +1413,8 @@ public class SuratKontrol extends javax.swing.JDialog {
         "0xF0 0x9F 0x8F 0xA0 *Lokasi map* :" + googleMapUrl + " \n\n" +
         infoAntrian + // Menggunakan variabel infoAntrian yang sudah disesuaikan            
         "0xF0 0x9F 0x93 0x84 Jangan lupa untuk menunjukkan surat kontrol yang telah diisi oleh dokter. Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
-        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F";
+        "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. \n 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F"+
+        "\n (Mohon untuk menyimpan nomor ini ke kontak Anda, dan membalas pesan ini dengan tulisan *OK* 0xF0 0x9F 0x91 0x8B) \n";
 
     // Insert into wa_outbox
     try {

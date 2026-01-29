@@ -3651,7 +3651,8 @@ private void UploadPDF(String FileName, String docpath) {
             "Berikut kami kirimkan berkas PDF untuk Resume Medis Anda. \n" +
             "Silakan unduh file terlampir. \n \n"+
             "Terima kasih atas perhatiannya. \n Salam sehat. \n \n" +
-            "*Unit Rawat Inap " + akses.getnamars() + "*";        
+            "*Unit Rawat Inap " + akses.getnamars() + "*"+
+            "\n (Mohon untuk menyimpan nomor ini ke kontak Anda, dan membalas pesan ini dengan tulisan *OK* 0xF0 0x9F 0x91 0x8B) \n";
         
         // Step 10: Insert message into WA outbox
         // KODE UNTUK KIRIM WA BY ICHSAN

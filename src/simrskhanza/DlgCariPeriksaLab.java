@@ -7415,7 +7415,8 @@ private void ppUploadPDFBtnPrintActionPerformed(java.awt.event.ActionEvent evt) 
             "Berikut kami kirimkan berkas PDF untuk hasil pemeriksaannya. \n" +
             "Silakan unduh file terlampir. \n \n"+
             "Terima kasih atas perhatiannya. \n Salam sehat. 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F  \n \n" +
-            "*Unit Radiologi " + akses.getnamars() + "*";      
+            "*Unit Laboratorium " + akses.getnamars() + "*" +
+            "\n (Mohon untuk menyimpan nomor ini ke kontak Anda, dan membalas pesan ini dengan tulisan *OK* 0xF0 0x9F 0x91 0x8B) \n";
         
         // Step 10: Insert message into WA outbox
         // KODE UNTUK KIRIM WA BY ICHSAN

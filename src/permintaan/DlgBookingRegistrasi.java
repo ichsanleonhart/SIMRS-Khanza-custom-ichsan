@@ -1333,9 +1333,9 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         // System.out.println("Debug: Panjang No Rawat = " + no_rawat.length());
         
         //////////////kirim WA ke Pasien setelah regist dari menu booking
-        kirimWhatsAppMessageRegistBooking();  //kirim pesan WA by ichsan 
-        JOptionPane.showMessageDialog(null, "OK, pasien sudah ter-regist ke pendaftaran. \n "
-                + "Sambil ditunggu WA bukti registrasi-nya otomatis dikirim bot yah~  ;-)");
+        // kirimWhatsAppMessageRegistBooking();  //kirim pesan WA by ichsan 
+        // JOptionPane.showMessageDialog(null, "OK, pasien sudah ter-regist ke pendaftaran. \n "
+         //       + "Sambil ditunggu WA bukti registrasi-nya otomatis dikirim bot yah~  ;-)");
         
         //tampil();
         runBackground(() -> tampil());
@@ -1919,7 +1919,8 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         "0xF0 0x9F 0x8C 0x8F Lokasi map : " + googleMapUrl + " \n\n" +            
         "0xF0 0x9F 0x93 0x84 Mohon konfirmasi menuju bagian admisi. Jika ada perubahan jadwal atau kendala, silakan balas pesan ini.\n" +
         "Terima kasih atas perhatiannya, dan kami tunggu kedatangannya! \n Salam sehat. 0xF0 0x9F 0x99 0x8F 0xF0 0x9F 0x99 0x8F"+
-        "*Pendaftaran " + akses.getnamars() + "*";
+        "*Pendaftaran " + akses.getnamars() + "*"+
+        "\n (Mohon untuk menyimpan nomor ini ke kontak Anda, dan membalas pesan ini dengan tulisan *OK* 0xF0 0x9F 0x91 0x8B) \n";
 
     // Insert into wa_outbox
     try {
