@@ -209,10 +209,30 @@ while($row = $res_dr->fetch_assoc()){ $dokters[] = $row; }
         myTable = $('#dataTable').DataTable({
             "responsive": true, 
             "dom": 'Bfrtip',
-            "buttons": [ 
+            /*"buttons": [ 
                 { extend: 'excel', className: 'btn-sm btn-success', title: 'Laporan Rincian Tindakan' },
                 { extend: 'print', className: 'btn-sm btn-secondary' } 
-            ],
+            ], */
+			"buttons": [ 
+    { 
+        extend: 'excelHtml5', 
+        className: 'btn-sm btn-success', 
+        title: 'Laporan Rincian Tindakan',
+        exportOptions: {
+            columns: ':visible',
+            format: {
+                body: function(data, row, column, node) {
+                    // Kolom 6 & 7 adalah Rupiah
+                    if (column === 6 || column === 7) {
+                        return typeof data === 'string' ? data.replace(/[^\d,-]/g, '').replace(',', '.') : data;
+                    }
+                    return data;
+                }
+            }
+        }
+    },
+    { extend: 'print', className: 'btn-sm btn-secondary' } 
+],
             "pageLength": 25,
             "deferRender": true,
             "processing": true,

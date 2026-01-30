@@ -178,7 +178,44 @@ $tgl_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : date('Y-m-d');
             "responsive": true,
             "dom": 'Bfrtip',
             "buttons": [
-                { extend: 'excelHtml5', className: 'btn btn-success btn-sm', text: '<i class="fas fa-file-excel"></i> Excel', title: 'Laporan Stok Opname' },
+                { 
+                    extend: 'excelHtml5', 
+                    className: 'btn btn-success btn-sm', 
+                    text: '<i class="fas fa-file-excel"></i> Excel', 
+                    title: 'Laporan Stok Opname',
+                    exportOptions: {
+                        columns: ':visible',
+                        format: {
+                            body: function(data, row, column, node) {
+                                var str = (data === null || data === undefined) ? '' : String(data);
+
+                                // 1. KOLOM ANGKA & SELISIH (Index 5, 6, 7, 8)
+                                // Col 5: Selisih (ada <span>), Col 6-8: Rupiah (ada titik)
+                                if (column === 5 || column === 6 || column === 7 || column === 8) {
+                                    // Hapus tag HTML dulu (untuk membuang <span> pada kolom selisih)
+                                    let clean = str.replace(/<[^>]+>/g, "");
+                                    // Bersihkan format angka (hapus titik ribuan, ganti koma jadi titik)
+                                    return clean.replace(/[^\d,-]/g, '').replace(',', '.');
+                                }
+
+                                // 2. KOLOM NAMA BARANG (Index 2)
+                                // Format aslinya: <b>Nama</b><br><small>Kode</small>
+                                if (column === 2 && str.indexOf('<') > -1) {
+                                    // Ganti <br> dengan " - " agar Nama dan Kode terpisah rapi
+                                    // Lalu hapus sisa tag HTML
+                                    return str.replace(/<br\s*\/?>/gi, " - ").replace(/<[^>]+>/g, "").trim();
+                                }
+
+                                // Pembersihan Umum untuk kolom lain yang mungkin ada HTML
+                                if (str.indexOf('<') > -1) {
+                                     return str.replace(/<[^>]+>/g, "").trim();
+                                }
+
+                                return data;
+                            }
+                        }
+                    }
+                },
                 { extend: 'pdfHtml5', className: 'btn btn-danger btn-sm', text: '<i class="fas fa-file-pdf"></i> PDF', orientation: 'landscape' },
                 { extend: 'print', className: 'btn btn-secondary btn-sm', text: '<i class="fas fa-print"></i> Print' }
             ],

@@ -152,14 +152,38 @@ require_once('includes/header.php');
                 }
             },
             "pageLength": 10,
-            "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
+            "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
             "dom": 'Bfrtip',
             "buttons": [
                 {
                     extend: 'excelHtml5',
-                    text: '<i class="fas fa-file-excel me-1"></i> Export Excel',
+                    text: '<i class="fas fa-file-excel me-1"></i> Export Excel (pilih dulu [Show all rows])',
                     className: 'btn btn-success btn-sm mb-3',
-                    title: 'Laporan Billing Rawat Jalan'
+                    title: 'Laporan Billing Rawat Jalan',
+                    exportOptions: {
+                        columns: ':visible:not(:last-child)', // Jangan export kolom Aksi
+                        format: {
+                            body: function(data, row, column, node) {
+                                var str = (data === null || data === undefined) ? '' : String(data);
+
+                                // 1. KOLOM RUPIAH (Biaya Obat & Total Tagihan)
+                                if (column === 4 || column === 5) {
+                                     // Regex ini otomatis membuang huruf/html, sisakan angka, koma, minus
+                                     return str.replace(/[^\d,-]/g, '').replace(',', '.');
+                                }
+                                
+                                // 2. KOLOM TEKS (Pasien, Dokter, Penjamin, Status)
+                                // Jika mengandung tag HTML
+                                if (str.indexOf('<') > -1) {
+                                    // Ganti <br> dengan " - " agar baris baru terbaca rapi di Excel
+                                    // Lalu hapus semua tag HTML (<...>)
+                                    return str.replace(/<br\s*\/?>/gi, " - ").replace(/<[^>]+>/g, "").trim();
+                                }
+
+                                return data;
+                            }
+                        }
+                    }
                 },
                 {
                     extend: 'pageLength',

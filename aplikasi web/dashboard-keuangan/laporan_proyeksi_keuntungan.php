@@ -202,8 +202,34 @@ while($row = $res_pj->fetch_assoc()){ $penjabs[] = $row; }
         // Init DataTables
         tablePasien = $('#tablePasien').DataTable({
             "responsive": true, "pageLength": 10, "dom": 'Bfrtip',
-            "buttons": [ {extend: 'excel', title: 'Laporan Obat Pasien', className: 'btn-sm btn-success'} ],
-            "order": [[ 0, "desc" ]],
+            //"buttons": [ {extend: 'excel', title: 'Laporan Obat Pasien', className: 'btn-sm btn-success'} ],
+            buttons: [ {
+                extend: 'excelHtml5', 
+                title: 'Laporan Pemberian Obat Ke Pasien', // Sesuaikan judul per tabel (Obat Pasien / Obat Bebas)
+                className: 'btn-sm btn-success',
+                exportOptions: {
+                    columns: ':visible',
+                    format: {
+                        body: function(data, row, column, node) {
+                            // 1. FORMAT RUPIAH (Kolom 4 & 5)
+                            if (column === 4 || column === 5) {
+                                return typeof data === 'string' ? data.replace(/[^\d,-]/g, '').replace(',', '.') : data;
+                            }
+
+                            // 2. BERSIHKAN HTML (Untuk kolom No. Rawat/Nota yang ada <br> dan <small>)
+                            if (typeof data === 'string') {
+                                // Ganti tag <br> dengan tanda strip " - " agar teks tidak menempel
+                                let text = data.replace(/<br\s*\/?>/gi, " - ");
+                                // Hapus semua tag HTML lain (<small>, <span>, dll)
+                                return text.replace(/<[^>]+>/g, "").trim();
+                            }
+
+                            return data;
+                        }
+                    }
+                }
+            } ],
+			"order": [[ 0, "desc" ]],
             "columns": [
                 { "data": "tanggal", render: function(d){ return d.split(' ')[0]; } },
                 { "data": "no_rawat", render: function(d,t,r){ return '<small>'+d+'<br>'+r.nm_pasien+'</small>'; } },
@@ -216,8 +242,34 @@ while($row = $res_pj->fetch_assoc()){ $penjabs[] = $row; }
 
         tableBebas = $('#tableBebas').DataTable({
             "responsive": true, "pageLength": 10, "dom": 'Bfrtip',
-            "buttons": [ {extend: 'excel', title: 'Laporan Obat Bebas', className: 'btn-sm btn-info'} ],
-            "order": [[ 0, "desc" ]],
+            //"buttons": [ {extend: 'excel', title: 'Laporan Obat Bebas', className: 'btn-sm btn-info'} ],
+            buttons: [ {
+                extend: 'excelHtml5', 
+                title: 'Laporan Obat Bebas', // Sesuaikan judul per tabel (Obat Pasien / Obat Bebas)
+                className: 'btn-sm btn-success',
+                exportOptions: {
+                    columns: ':visible',
+                    format: {
+                        body: function(data, row, column, node) {
+                            // 1. FORMAT RUPIAH (Kolom 4 & 5)
+                            if (column === 4 || column === 5) {
+                                return typeof data === 'string' ? data.replace(/[^\d,-]/g, '').replace(',', '.') : data;
+                            }
+
+                            // 2. BERSIHKAN HTML (Untuk kolom No. Rawat/Nota yang ada <br> dan <small>)
+                            if (typeof data === 'string') {
+                                // Ganti tag <br> dengan tanda strip " - " agar teks tidak menempel
+                                let text = data.replace(/<br\s*\/?>/gi, " - ");
+                                // Hapus semua tag HTML lain (<small>, <span>, dll)
+                                return text.replace(/<[^>]+>/g, "").trim();
+                            }
+
+                            return data;
+                        }
+                    }
+                }
+            } ],
+			"order": [[ 0, "desc" ]],
             "columns": [
                 { "data": "tanggal" },
                 { "data": "nota_jual", render: function(d,t,r){ return '<small>'+d+'<br>'+(r.pembeli || '-')+'</small>'; } },

@@ -188,9 +188,49 @@ while($row = $res_pj->fetch_assoc()){ $penjabs[] = $row; }
             "responsive": false, // Matikan responsive agar scrollX bekerja
             "scrollX": true,     // Aktifkan scroll horizontal
             "dom": 'Bfrtip', 
-            "buttons": [
+            /* "buttons": [
                 { extend: 'excelHtml5', className: 'btn btn-success btn-sm', text: '<i class="fas fa-file-excel"></i> Excel Full', title: 'Analisa Data Lengkap' },
                 { extend: 'print', className: 'btn btn-secondary btn-sm', text: '<i class="fas fa-print"></i> Print' }
+            ],  */
+			"buttons": [
+                { 
+                    extend: 'excelHtml5', 
+                    className: 'btn btn-success btn-sm', 
+                    text: '<i class="fas fa-file-excel"></i> Excel Full', 
+                    title: 'Analisa Data Lengkap',
+                    exportOptions: {
+                        // Pastikan kolom Aksi (terakhir) tidak ikut
+                        columns: ':visible:not(:last-child)',
+                        format: {
+                            body: function(data, row, column, node) {
+                                // 1. KHUSUS KOLOM RUPIAH (Index 20)
+                                if (column === 20) {
+                                    return typeof data === 'string' ?
+                                        data.replace(/\./g, '').replace(',', '.') :
+                                        data;
+                                }
+
+                                // 2. KHUSUS KOLOM TEXT LAINNYA (Untuk membersihkan <span class="badge">)
+                                // Jika data adalah string dan mengandung tanda kurung siku HTML (<)
+                                if (typeof data === 'string' && data.indexOf('<') > -1) {
+                                    // Regex ini akan menghapus semua tag HTML dan menyisakan teksnya saja
+                                    // Contoh: <span class="badge">Baru</span>  Menjadi:  Baru
+                                    return data.replace(/<[^>]+>/g, "").trim();
+                                }
+
+                                return data;
+                            }
+                        }
+                    }
+                },
+                { 
+                    extend: 'print', 
+                    className: 'btn btn-secondary btn-sm', 
+                    text: '<i class="fas fa-print"></i> Print',
+                    exportOptions: {
+                        columns: ':visible:not(:last-child)' 
+                    }
+                }
             ],
             "pageLength": 25,
             "columns": [

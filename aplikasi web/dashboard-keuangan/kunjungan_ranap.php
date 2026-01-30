@@ -159,10 +159,31 @@ require_once('includes/header.php');
             "buttons": [
                 {
                     extend: 'excelHtml5',
-                    text: '<i class="fas fa-file-excel me-1"></i> Export Excel',
+                    text: '<i class="fas fa-file-excel me-1"></i> Export Excel (pilih dulu [Show all rows])',
                     className: 'btn btn-success btn-sm mb-3',
                     title: 'Laporan Billing Rawat Inap',
-                    exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7] }
+                    exportOptions: {
+                        columns: ':visible:not(:last-child)', // Jangan export kolom Aksi
+                        format: {
+                            body: function(data, row, column, node) {
+                                var str = (data === null || data === undefined) ? '' : String(data);
+
+                                // 1. KOLOM RUPIAH (Plafon, Estimasi, Selisih)
+                                if (column === 4 || column === 5 || column === 6) {
+                                     return str.replace(/[^\d,-]/g, '').replace(',', '.');
+                                }
+                                
+                                // 2. KOLOM TEKS (Pasien, Dokter, Kamar, Penjamin, Status)
+                                if (str.indexOf('<') > -1) {
+                                    // Ganti <br> dengan " - "
+                                    // Hapus HTML tag
+                                    return str.replace(/<br\s*\/?>/gi, " - ").replace(/<[^>]+>/g, "").trim();
+                                }
+
+                                return data;
+                            }
+                        }
+                    }
                 },
                 {
                     extend: 'pageLength',

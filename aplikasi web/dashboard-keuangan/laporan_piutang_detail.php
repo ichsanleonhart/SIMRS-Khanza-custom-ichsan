@@ -407,12 +407,40 @@ $date_range = new DatePeriod($start_date, $interval, $end_date);
     }
 
     $(document).ready(function() {
-        $('table').DataTable({ 
+        /*$('table').DataTable({ 
             "responsive": true, 
             "order": [[ 0, "desc" ]],
             "pageLength": 10, 
             "lengthChange": false 
-        });
+        }); */
+		$('table').DataTable({ 
+    "responsive": true, 
+    "order": [[ 0, "desc" ]],
+    "pageLength": 10, 
+    "lengthChange": false,
+    "dom": 'Bfrtip',
+    "buttons": [
+        {
+            extend: 'excelHtml5',
+            className: 'btn btn-success btn-sm',
+            title: 'Export Data',
+            exportOptions: {
+                columns: ':visible:not(:last-child)', // Cegah kolom Aksi ikut ter-export
+                format: {
+                    body: function(data, row, column, node) {
+                        // DETEKSI OTOMATIS:
+                        // Jika data mengandung "Rp" atau pola angka ribuan (1.000)
+                        if (typeof data === 'string' && (data.includes('Rp') || /^\d{1,3}(\.\d{3})+/.test(data))) {
+                             // Hapus Rp, Hapus Titik, Ganti Koma jadi Titik (untuk desimal Excel)
+                             return data.replace(/[^\d,-]/g, '').replace(',', '.');
+                        }
+                        return data;
+                    }
+                }
+            }
+        }
+    ]
+});
         
         $(document).on('click', '.btn-lihat-nota', function() {
             var noRawat = $(this).data('norawat');

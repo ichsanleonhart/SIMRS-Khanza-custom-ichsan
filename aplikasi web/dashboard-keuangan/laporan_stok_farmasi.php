@@ -208,8 +208,49 @@ while($row = $res_bangsal->fetch_assoc()){
         tableStok = $('#tableStok').DataTable({
             "responsive": true,
             "dom": 'Bfrtip',
-            "buttons": [ 'excel', 'print' ],
-            "pageLength": 10,
+            //"buttons": [ 'excel', 'print' ],
+            buttons: [ 
+                {
+                    extend: 'excelHtml5',
+                    title: 'Laporan Stok Farmasi',
+                    className: 'btn btn-success btn-sm',
+                    exportOptions: {
+                        columns: ':visible:not(:last-child)', // Cegah kolom Aksi ikut ter-export
+                        format: {
+                            body: function(data, row, column, node) {
+                                // PENTING: Paksa data jadi String dulu agar tidak crash pada tipe Number (Stok)
+                                var strData = (data === null || data === undefined) ? '' : String(data);
+
+                                // 1. KHUSUS KOLOM ANGKA (Stok: Col 2 & Aset: Col 3)
+                                if (column === 2 || column === 3) {
+                                    // Hapus tag HTML (jika ada)
+                                    let clean = strData.replace(/<[^>]+>/g, "");
+                                    // Bersihkan karakter non-angka (kecuali koma & minus)
+                                    // Ganti koma desimal jadi titik (standar Excel)
+                                    return clean.replace(/[^\d,-]/g, '').replace(',', '.');
+                                }
+
+                                // 2. BERSIHKAN HTML PADA KOLOM TEKS (Misal: Nama Obat)
+                                // Ganti <br> dengan strip " - " supaya tidak nempel
+                                if (strData.indexOf('<') > -1) {
+                                    return strData.replace(/<br\s*\/?>/gi, " - ").replace(/<[^>]+>/g, "").trim();
+                                }
+
+                                return data;
+                            }
+                        }
+                    }
+                }, 
+                {
+                    extend: 'print',
+                    className: 'btn btn-secondary btn-sm',
+                    text: '<i class="fas fa-print"></i> Print',
+                    exportOptions: {
+                        columns: ':visible:not(:last-child)'
+                    }
+                } 
+            ],
+			"pageLength": 10,
             "order": [[ 2, "desc" ]], 
             "columns": [
                 { "data": "nama_brng", 
