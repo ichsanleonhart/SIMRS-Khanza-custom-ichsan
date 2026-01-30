@@ -1704,7 +1704,7 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
         // Updated SET clause and parameter count (19)
         if(Sequel.mengedittf("catatan_observasi_ranap","tgl_perawatan=? and jam_rawat=? and no_rawat=?","no_rawat=?,tgl_perawatan=?,jam_rawat=?,gcs=?,td=?,hr=?,rr=?,suhu=?,spo2=?,nip=?,ivfd=?,bak=?,bab=?,intake=?,muntah=?,keterangan=?",19,new String[]{
             TNoRw.getText(),Valid.SetTgl(Tanggal.getSelectedItem()+""),Jam.getSelectedItem()+":"+Menit.getSelectedItem()+":"+Detik.getSelectedItem(),
-            GCS.getText(),TD.getText(),HR.getText(),RR.getText(),Suhu.getText(),SPO.getText(),NIP.getText(),
+            GCS.getText(),TD.getText(),HR.getText(),RR.getText(),Suhu.getText(),SPO.getText(),KdPetugas.getText(),
             // Added new field values
             IVFD.getText(), BAK.getText(), BAB.getText(), Intake.getText(), Muntah.getText(), Keterangan.getText(),
             // WHERE clause parameters
@@ -1772,7 +1772,7 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
         // Updated SQL parameter count (16) and added new field values
         if(Sequel.menyimpantf("catatan_observasi_ranap","?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?","Data",16,new String[]{
                 TNoRw.getText(),Valid.SetTgl(Tanggal.getSelectedItem()+""),Jam.getSelectedItem()+":"+Menit.getSelectedItem()+":"+Detik.getSelectedItem(),
-                GCS.getText(),TD.getText(),HR.getText(),RR.getText(),Suhu.getText(),SPO.getText(),NIP.getText(),
+                GCS.getText(),TD.getText(),HR.getText(),RR.getText(),Suhu.getText(),SPO.getText(),KdPetugas.getText(),
                 // Added new field values
                 IVFD.getText(), BAK.getText(), BAB.getText(), Intake.getText(), Muntah.getText(), Keterangan.getText()
         })==true){
@@ -1780,7 +1780,7 @@ public final class RMDataCatatanObservasiRanap extends javax.swing.JDialog {
             tabMode.addRow(new String[]{
                 TNoRw.getText(),TNoRM.getText(),TPasien.getText(),Umur.getText(),JK.getText(),TglLahir.getText(),
                 Valid.SetTgl(Tanggal.getSelectedItem()+""),Jam.getSelectedItem()+":"+Menit.getSelectedItem()+":"+Detik.getSelectedItem(),
-                GCS.getText(),TD.getText(),HR.getText(),RR.getText(),Suhu.getText(),SPO.getText(),NIP.getText(),NamaPetugas.getText(),
+                GCS.getText(),TD.getText(),HR.getText(),RR.getText(),Suhu.getText(),SPO.getText(),KdPetugas.getText(),NmPetugas.getText(),
                 // Added new field values to table view
                 IVFD.getText(), BAK.getText(), BAB.getText(), Intake.getText(), Muntah.getText(), Keterangan.getText()
             });
