@@ -1,8 +1,6 @@
 <?php
 session_start();
 require_once('../../conf/conf.php');
-require_once('../conf/config_whatsapp.php'); // Load Config
-
 if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
 ?>
 <!DOCTYPE html>
@@ -115,8 +113,6 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
 
 <script>
     let table;
-    // Ambil Config dari PHP ke JS
-    const enableWA = <?php echo $kirim_notif_wa; ?>; 
 
     $(document).ready(function() {
         const today = new Date().toISOString().split('T')[0];
@@ -141,9 +137,12 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
             columns: [
                 { data: 'tanggal', render: d => d },
                 
+                // --- FIXED LOGIC WARNA BADGE ---
                 { data: 'nama', render: (data, type, row) => {
+                    // Gunakan sisa_cuti_angka untuk logika warna
                     let sisaVal = parseInt(row.sisa_cuti_angka);
                     let badgeColor = sisaVal > 0 ? 'bg-blue-900 border-blue-700 text-blue-200' : 'bg-red-900 border-red-700 text-red-200';
+                    
                     return `<div>
                                 <div class="font-bold text-white text-base">${data}</div>
                                 <div class="text-xs text-gray-400 mb-1">${row.nik} - ${row.nama_dep ?? '-'}</div>
@@ -187,6 +186,7 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
                     if(row.status_persetujuan_HRD === 'Disetujui' || row.status_persetujuan_HRD === 'Ditolak') {
                         return `<span class="text-xs text-gray-500">Selesai</span>`;
                     }
+                    // KIRIM PARAMETER YANG SUDAH DIPISAH (ANGKA & DISPLAY)
                     return `<div class="flex gap-1 justify-center">
                                 <button onclick="proses('${row.no_pengajuan}', 'Disetujui', '${row.sisa_cuti_angka}', '${row.jumlah}', '${row.sisa_cuti_display}')" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded text-xs font-bold" title="Setujui">ACC</button>
                                 <button onclick="proses('${row.no_pengajuan}', 'Ditolak', 0, 0, '')" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded text-xs font-bold">TOLAK</button>
@@ -216,12 +216,15 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
         window.open(url, '_blank');
     }
 
+    // --- FIX LOGIC MATEMATIKA ---
     function proses(no_pengajuan, status, sisaAngka, jumlahDiajukan, sisaDisplay) {
         let title, htmlMsg, icon;
         
         if (status === 'Disetujui') {
             title = 'Setujui Pengajuan?';
             icon = 'question';
+            
+            // Hitung menggunakan data Angka Murni
             let sisaInt = parseInt(sisaAngka);
             let jmlInt = parseInt(jumlahDiajukan);
             let sisaSetelahCuti = sisaInt - jmlInt;
@@ -229,15 +232,17 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
             let warningSisa = "";
             if (sisaSetelahCuti < 0) {
                 warningSisa = `<div class='bg-red-900/50 border border-red-500 p-2 rounded text-red-200 text-xs mb-3 text-left'>
-                                ⚠️ <b>PERINGATAN:</b> Sisa cuti (${sisaDisplay}) tidak cukup. 
+                                ⚠️ <b>PERINGATAN:</b> Sisa cuti pegawai (${sisaDisplay}) 
+                                tidak mencukupi untuk pengajuan ini (${jmlInt} hari). 
                                 <br>Sisa akan menjadi <b>minus (${sisaSetelahCuti})</b>.
                                </div>`;
             } else {
                 warningSisa = `<div class='bg-blue-900/30 border border-blue-500 p-2 rounded text-blue-200 text-xs mb-3 text-left'>
-                                ℹ️ Sisa cuti: <b>${sisaDisplay}</b>.
-                                <br>Setelah disetujui sisa: <b>${sisaSetelahCuti} Hari</b>.
+                                ℹ️ Sisa cuti saat ini: <b>${sisaDisplay}</b>.
+                                <br>Setelah disetujui sisa menjadi: <b>${sisaSetelahCuti} Hari</b>.
                                </div>`;
             }
+
             htmlMsg = `${warningSisa} Jadwal pegawai akan otomatis berubah menjadi 'Cuti'.`;
         } else {
             title = 'Tolak Pengajuan?';
@@ -255,46 +260,19 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
             background: '#1f2937', color: '#fff'
         }).then((result) => {
             if (result.isConfirmed) {
-                
-                // --- LOGIKA NOTIFIKASI WA (JIKA DIAKTIFKAN DI CONFIG) ---
-                if (enableWA === 1) {
-                    Swal.fire({
-                        title: 'Kirim Notifikasi WA?',
-                        text: `Kirim pesan WhatsApp otomatis ke pegawai terkait status ${status} ini?`,
-                        icon: 'info',
-                        showCancelButton: true,
-                        confirmButtonText: 'Ya, Kirim WA',
-                        cancelButtonText: 'Tidak Perlu',
-                        confirmButtonColor: '#10b981',
-                        background: '#1f2937', color: '#fff'
-                    }).then((waResult) => {
-                        let kirimWa = waResult.isConfirmed; // True/False
-                        eksekusiProses(no_pengajuan, status, kirimWa);
-                    });
-                } else {
-                    // Jika fitur dimatikan, langsung proses tanpa WA
-                    eksekusiProses(no_pengajuan, status, false);
-                }
+                $.post('api_cuti.php?act=approve', {
+                    no_pengajuan: no_pengajuan,
+                    status: status
+                }, function(res) {
+                    if(res.status === 'success') {
+                        Swal.fire({title: 'Berhasil', text: res.message, icon: 'success', background: '#1f2937', color: '#fff'});
+                        reloadTable();
+                    } else {
+                        Swal.fire({title: 'Gagal', text: res.message, icon: 'error', background: '#1f2937', color: '#fff'});
+                    }
+                }, 'json');
             }
         });
-    }
-
-    function eksekusiProses(no_pengajuan, status, kirimWa) {
-        // Tampilkan loading
-        Swal.fire({title: 'Memproses...', didOpen: () => Swal.showLoading(), background: '#1f2937', color: '#fff'});
-
-        $.post('api_cuti.php?act=approve', {
-            no_pengajuan: no_pengajuan,
-            status: status,
-            kirim_wa: kirimWa // Kirim flag ke backend
-        }, function(res) {
-            if(res.status === 'success') {
-                Swal.fire({title: 'Berhasil', text: res.message, icon: 'success', background: '#1f2937', color: '#fff'});
-                reloadTable();
-            } else {
-                Swal.fire({title: 'Gagal', text: res.message, icon: 'error', background: '#1f2937', color: '#fff'});
-            }
-        }, 'json');
     }
 </script>
 </body>

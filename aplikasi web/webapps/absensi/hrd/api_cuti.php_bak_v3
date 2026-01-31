@@ -1,7 +1,6 @@
 <?php
 session_start();
 require_once('../../conf/conf.php');
-require_once('../conf/config_whatsapp.php'); // Load Config WA
 
 if (!isset($_SESSION['hrd_login'])) {
     if(isset($_GET['act']) && $_GET['act']=='export_excel'){ die("Akses ditolak."); }
@@ -13,10 +12,7 @@ if (!isset($_SESSION['hrd_login'])) {
 $act = isset($_GET['act']) ? $_GET['act'] : '';
 $konektor = bukakoneksi();
 
-// Tentukan Actor (NIP HRD) untuk Audit Trail
-$actor = isset($_SESSION['username']) ? $_SESSION['username'] : 'HRD';
-
-// --- 1. LIST DATA ---
+// --- 1. LIST DATA (FIXED LOGIC) ---
 if ($act == 'list') {
     header('Content-Type: application/json');
     $query = build_query_cuti($_GET);
@@ -24,6 +20,7 @@ if ($act == 'list') {
     $data = [];
     
     while($r = mysqli_fetch_assoc($hasil)) {
+        // LOGIC SISA CUTI PER TAHUN
         $tahun_ajuan = date('Y', strtotime($r['tanggal_awal']));
         $nik_peg = $r['nik'];
         
@@ -37,7 +34,10 @@ if ($act == 'list') {
         $sisa = 12 - $terpakai;
         if($sisa < 0) $sisa = 0;
         
+        // --- PERBAIKAN DI SINI ---
+        // Kirim Angka Murni untuk Logic JS
         $r['sisa_cuti_angka'] = (int)$sisa; 
+        // Kirim Teks Formatted untuk Tampilan UI
         $r['sisa_cuti_display'] = "$sisa (Thn $tahun_ajuan)"; 
         
         $data[] = $r;
@@ -72,31 +72,27 @@ elseif ($act == 'export_excel') {
     <?php exit;
 }
 
-// --- 3. APPROVE / REJECT (DENGAN AUDIT & WA FIXED) ---
+// --- 3. APPROVE ---
 elseif ($act == 'approve') {
     header('Content-Type: application/json');
     $no_pengajuan = validTeks($_POST['no_pengajuan']);
     $status_hrd   = validTeks($_POST['status']); 
-    $kirim_wa     = isset($_POST['kirim_wa']) ? $_POST['kirim_wa'] : 'false'; 
     
-    $data_cuti = fetch_assoc("SELECT pc.*, p.nama FROM pengajuan_cuti pc JOIN pegawai p ON pc.nik=p.nik WHERE pc.no_pengajuan='$no_pengajuan'");
+    $data_cuti = fetch_assoc("SELECT * FROM pengajuan_cuti WHERE no_pengajuan='$no_pengajuan'");
     if(!$data_cuti) { echo json_encode(['status'=>'error', 'message'=>'Data tidak ditemukan']); exit; }
 
-    $nik_pegawai = $data_cuti['nik'];
-    $nama_pegawai = $data_cuti['nama'];
-    $tgl_awal = $data_cuti['tanggal_awal'];
-    $tgl_akhir = $data_cuti['tanggal_akhir'];
     $pesan_tambahan = "";
 
-    // LOGIKA UPDATE DATA
     if ($status_hrd == 'Disetujui') {
         $sql_update = "UPDATE pengajuan_cuti SET status='Disetujui', status_persetujuan_HRD='Disetujui', waktu_disetujui_HRD=NOW(), waktu_disetujui_atasan=IF(waktu_disetujui_atasan IS NULL, NOW(), waktu_disetujui_atasan) WHERE no_pengajuan='$no_pengajuan'";
         
-        $hasil_update = update_jadwal_otomatis($nik_pegawai, $tgl_awal, $tgl_akhir);
+        $hasil_update = update_jadwal_otomatis($data_cuti['nik'], $data_cuti['tanggal_awal'], $data_cuti['tanggal_akhir']);
         
+        // Update Saldo (Arsip)
         if(trim(strtolower($data_cuti['urgensi'])) == 'tahunan') {
             $jml = $data_cuti['jumlah'];
-            mysqli_query($konektor, "UPDATE pegawai SET cuti_diambil = cuti_diambil + $jml WHERE nik='$nik_pegawai'");
+            $nik = $data_cuti['nik'];
+            mysqli_query($konektor, "UPDATE pegawai SET cuti_diambil = cuti_diambil + $jml WHERE nik='$nik'");
         }
         $pesan_tambahan = " (" . $hasil_update . ")";
         
@@ -105,78 +101,6 @@ elseif ($act == 'approve') {
     }
 
     if(mysqli_query($konektor, $sql_update)) {
-        
-        // --- A. INSERT AUDIT TRAIL ---
-        $keterangan_audit = "HRD APPROVAL: Menetapkan status '$status_hrd' untuk pengajuan cuti No. $no_pengajuan a.n $nama_pegawai ($nik_pegawai).";
-        $log_sql = mysqli_real_escape_string($konektor, $keterangan_audit);
-        mysqli_query($konektor, "INSERT INTO trackersql (tanggal, sqle, usere) VALUES (NOW(), '$log_sql', '$actor')");
-
-        // --- B. KIRIM NOTIFIKASI WA (FIX FORMAT & SOURCE) ---
-        if ($kirim_notif_wa == 1 && $kirim_wa == 'true') {
-            
-            // 1. Cari Nomor HP
-            $no_hp = "";
-            $cek_petugas = fetch_assoc("SELECT no_telp FROM petugas WHERE nip='$nik_pegawai'");
-            if ($cek_petugas && !empty($cek_petugas['no_telp'])) {
-                $no_hp = $cek_petugas['no_telp'];
-            } else {
-                $cek_dokter = fetch_assoc("SELECT no_telp FROM dokter WHERE kd_dokter='$nik_pegawai'");
-                if ($cek_dokter && !empty($cek_dokter['no_telp'])) {
-                    $no_hp = $cek_dokter['no_telp'];
-                }
-            }
-
-            // 2. Format Nomor & Kirim
-            if (!empty($no_hp)) {
-                
-                // --- FIX: FORMAT NOMOR WA ---
-                // Bersihkan karakter aneh
-                $no_hp = preg_replace('/[^0-9]/', '', $no_hp);
-                
-                // Ubah 08xxx jadi 628xxx
-                if (substr($no_hp, 0, 1) == '0') {
-                    $no_hp = '62' . substr($no_hp, 1);
-                }
-                
-                // Tambahkan @c.us jika belum ada
-                $no_hp_ready = $no_hp . "@c.us";
-                // ----------------------------
-
-                if ($status_hrd == 'Disetujui') {
-                    $pesan = "Halo Kak *$nama_pegawai* ,\n\n" .
-                             "Kabar baik! Pengajuan cuti kamu untuk tanggal *$tgl_awal s.d $tgl_akhir* telah *DISETUJUI* oleh HRD. \n\n" .
-                             "Sistem jadwal sudah otomatis disesuaikan. Selamat beristirahat dan jaga kesehatan ya! 🌴✨\n\n" .
-                             "_- HRD RS (Pesan Otomatis)_";
-                } else {
-                    $pesan = "Halo Kak *$nama_pegawai* 👋,\n\n" .
-                             "Mohon maaf, pengajuan cuti kamu untuk tanggal *$tgl_awal s.d $tgl_akhir* saat ini *BELUM DAPAT DISETUJUI* (Ditolak) oleh HRD. ❌\n\n" .
-                             "Silakan hubungi bagian kepegawaian untuk informasi lebih lanjut. Tetap semangat! \n\n" .
-                             "_- HRD (Pesan Otomatis)_";
-                }
-
-                $konektor_wa = mysqli_connect($wa_db_host, $wa_db_user, $wa_db_pass, $wa_db_name);
-                if ($konektor_wa) {
-                    $pesan_safe = mysqli_real_escape_string($konektor_wa, $pesan);
-                    $hp_safe = mysqli_real_escape_string($konektor_wa, $no_hp_ready);
-                    
-                    // --- FIX: INSERT DENGAN SOURCE 'Khanza' ---
-                    $q_wa = "INSERT INTO wa_outbox (nowa, pesan, tanggal_jam, status, sender, source) 
-                             VALUES ('$hp_safe', '$pesan_safe', NOW(), 'ANTRIAN', 'NODEJS', 'Khanza')";
-                    
-                    if(mysqli_query($konektor_wa, $q_wa)) {
-                        $pesan_tambahan .= " + Notif WA Terkirim";
-                    } else {
-                        $pesan_tambahan .= " (Gagal Insert WA: ".mysqli_error($konektor_wa).")";
-                    }
-                    mysqli_close($konektor_wa);
-                } else {
-                    $pesan_tambahan .= " (Gagal Koneksi Server WA)";
-                }
-            } else {
-                $pesan_tambahan .= " (No HP Tidak Ditemukan)";
-            }
-        }
-
         echo json_encode(['status'=>'success', 'message'=>"Berhasil $status_hrd." . $pesan_tambahan]);
     } else {
         echo json_encode(['status'=>'error', 'message'=>'DB Error: '.mysqli_error($konektor)]);
@@ -184,7 +108,7 @@ elseif ($act == 'approve') {
     exit;
 }
 
-// --- HELPER FUNCTIONS ---
+// --- HELPER ---
 function update_jadwal_otomatis($nik, $tgl_awal, $tgl_akhir) {
     global $konektor;
     $peg = fetch_assoc("SELECT id FROM pegawai WHERE nik='$nik'");
