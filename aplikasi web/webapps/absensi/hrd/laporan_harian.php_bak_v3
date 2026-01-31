@@ -19,15 +19,38 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
+        /* Styling Khusus DataTables di Dark Mode */
         .dataTables_wrapper .dataTables_length select, 
         .dataTables_wrapper .dataTables_filter input {
-            border: 1px solid #4b5563; border-radius: 0.375rem; padding: 0.25rem 0.5rem; background-color: #1f2937; color: white;
+            border: 1px solid #4b5563;
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            background-color: #1f2937;
+            color: white;
         }
-        .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing, .dataTables_wrapper .dataTables_paginate { color: #d1d5db !important; }
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: #2563eb !important; border-color: #2563eb !important; color: white !important; }
-        .dataTables_wrapper .dataTables_paginate .paginate_button { color: white !important; }
-        table.dataTable tbody tr { background-color: #1f2937; color: #d1d5db; }
-        table.dataTable tbody tr:hover { background-color: #374151; }
+        .dataTables_wrapper .dataTables_length, 
+        .dataTables_wrapper .dataTables_filter, 
+        .dataTables_wrapper .dataTables_info, 
+        .dataTables_wrapper .dataTables_processing, 
+        .dataTables_wrapper .dataTables_paginate {
+            color: #d1d5db !important;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #2563eb !important;
+            border-color: #2563eb !important;
+            color: white !important;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            color: white !important;
+        }
+        table.dataTable tbody tr {
+            background-color: #1f2937;
+            color: #d1d5db;
+        }
+        table.dataTable tbody tr:hover {
+            background-color: #374151; /* Hover effect */
+        }
+        /* Hide default border */
         table.dataTable.no-footer { border-bottom: 1px solid #374151; }
     </style>
 </head>
@@ -88,8 +111,7 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
                         <th class="py-3 text-center">Status</th>
                         <th class="py-3 text-center">Telat</th>
                         <th class="py-3 text-center">Durasi</th>
-                        <th class="py-3 text-center">Foto Masuk</th>
-                        <th class="py-3 text-center">Foto Pulang</th>
+                        <th class="py-3 text-center">Foto</th>
                         <th class="py-3">Catatan</th>
                     </tr>
                 </thead>
@@ -111,6 +133,7 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
         let table;
 
         $(document).ready(function() {
+            // 1. Load Dropdown Departemen
             $.get('api_laporan.php?act=get_dep', function(res) {
                 try {
                     const data = JSON.parse(res);
@@ -120,37 +143,14 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
                 } catch(e) {}
             });
 
+            // 2. Inisialisasi DataTable
             table = $('#tabelAbsen').DataTable({
                 responsive: true,
                 dom: 'Bfrtip',
                 buttons: [
-                    { 
-                        extend: 'excel', 
-                        className: 'bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs mr-1 border-none font-bold',
-                        title: 'Laporan Absensi',
-                        exportOptions: {
-                            columns: ':visible',
-                            orthogonal: 'export' // PENTING: Gunakan data 'export' bukan 'display'
-                        }
-                    },
-                    { 
-                        extend: 'pdf', 
-                        className: 'bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs mr-1 border-none font-bold',
-                        title: 'Laporan Absensi',
-                        orientation: 'landscape',
-                        exportOptions: {
-                            columns: ':visible',
-                            orthogonal: 'export' 
-                        }
-                    },
-                    { 
-                        extend: 'print', 
-                        className: 'bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-xs mr-1 border-none font-bold',
-                        exportOptions: {
-                            columns: ':visible',
-                            orthogonal: 'display' // Print tetap pakai tampilan cantik
-                        }
-                    }
+                    { extend: 'excel', className: 'bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs mr-1 border-none font-bold' },
+                    { extend: 'pdf', className: 'bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs mr-1 border-none font-bold' },
+                    { extend: 'print', className: 'bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-xs mr-1 border-none font-bold' }
                 ],
                 language: {
                     search: "Cari:",
@@ -159,14 +159,11 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
                     paginate: { first: "Awal", last: "Akhir", next: "Maju", previous: "Mundur" },
                     emptyTable: "Tidak ada data absensi pada periode ini"
                 },
-                order: [[2, 'desc'], [0, 'asc']], 
+                order: [[2, 'desc'], [0, 'asc']], // Urutkan berdasarkan Tanggal (Terbaru), lalu Nama (A-Z)
                 
                 columns: [
-                    // 1. Nama Pegawai (Export: Nama Saja)
+                    // 1. Nama Pegawai
                     { data: 'nama', render: function(data, type, row) {
-                        if (type === 'export') {
-                            return `${row.nama} (${row.nik})`;
-                        }
                         return `<div>
                                     <div class="font-bold text-white text-sm">${row.nama}</div>
                                     <div class="text-xs text-blue-400 font-mono">${row.nik}</div>
@@ -174,110 +171,100 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
                                 </div>`;
                     }},
                     
-                    // 2. Shift (Export: Teks Saja)
-                    { data: 'shift', className: "text-center", render: function(data, type, row) {
-                        if (type === 'export' || type === 'sort') return data;
-                        
-                        let colorClass = 'bg-gray-700 text-gray-300 border-gray-600';
+                    // 2. Shift (Warna-Warni sesuai Shift)
+                    { data: 'shift', className: "text-center", render: function(data) {
+                        let colorClass = 'bg-gray-700 text-gray-300 border-gray-600'; // Default Abu
                         let val = data.toLowerCase();
-                        if(val.includes('pagi')) colorClass = 'bg-green-900 text-green-200 border-green-700'; 
-                        else if(val.includes('siang')) colorClass = 'bg-yellow-900 text-yellow-200 border-yellow-700'; 
-                        else if(val.includes('malam')) colorClass = 'bg-blue-900 text-blue-200 border-blue-700';
+
+                        if(val.includes('pagi')) {
+                            colorClass = 'bg-green-900 text-green-200 border-green-700'; // Hijau
+                        } else if(val.includes('siang')) {
+                            colorClass = 'bg-yellow-900 text-yellow-200 border-yellow-700'; // Kuning
+                        } else if(val.includes('malam')) {
+                            colorClass = 'bg-blue-900 text-blue-200 border-blue-700'; // Biru
+                        }
+
                         return `<span class="${colorClass} px-2 py-1 rounded text-[10px] border font-bold uppercase tracking-wider">${data}</span>`;
                     }},
 
-                    // 3. Tanggal (SOLUSI HRD: Sort & Export pakai ISO Date)
+                    // 3. Tanggal (Dari Jam Datang)
                     { data: 'jam_datang', render: function(data, type, row) {
-                        if (!data) return '-';
-                        // Jika Excel/Sort: Kirim format YYYY-MM-DD
-                        if (type === 'sort' || type === 'export' || type === 'type') {
-                            return data.substring(0, 10); 
-                        }
-                        // Jika Tampil: Kirim Format Indonesia Cantik
                         let date = new Date(data);
                         let options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
                         return `<div class="text-sm text-gray-200 font-medium">${date.toLocaleDateString('id-ID', options)}</div>`;
                     }},
 
-                    // 4. Jam Masuk (Export: Jam Saja)
+                    // 4. Jam Masuk
                     { data: 'display_masuk', className: "text-center", render: function(data, type, row) {
-                        if (type === 'export') return data;
                         return `<div>
                                     <span class="text-green-400 font-mono font-bold text-sm bg-green-900/30 px-2 py-1 rounded border border-green-900/50">${data}</span>
                                     <div class="text-[10px] text-gray-500 mt-1">Jadwal: ${row.jadwal_masuk}</div>
                                 </div>`;
                     }},
 
-                    // 5. Jam Pulang (Export: Jam Saja)
+                    // 5. Jam Pulang
                     { data: 'display_pulang', className: "text-center", render: function(data, type, row) {
-                        if (type === 'export') return data;
                         let display = (data === '-' || !data) 
                             ? '<span class="text-yellow-500 text-xs animate-pulse">--:--</span>'
                             : `<span class="text-yellow-400 font-mono font-bold text-sm bg-yellow-900/30 px-2 py-1 rounded border border-yellow-900/50">${data}</span>`;
+                        
                         return `<div>
                                     ${display}
                                     <div class="text-[10px] text-gray-500 mt-1">Jadwal: ${row.jadwal_pulang}</div>
                                 </div>`;
                     }},
-
-                    // 6. Status (Export: Teks Saja)
-                    { data: 'status', className: "text-center", render: function(data, type, row) {
-                        if (type === 'export') return data;
-                        let badgeClass = 'bg-green-900 text-green-200 border-green-700'; 
+                    
+                    // 6. Status (Traffic Light)
+                    { data: 'status', className: "text-center", render: function(data) {
+                        let badgeClass = 'bg-green-900 text-green-200 border-green-700'; // Default Hijau
                         let icon = '✅';
-                        if(data.includes('Terlambat')) { badgeClass = 'bg-red-900 text-red-200 border-red-700'; icon = '⚠️'; } 
-                        else if(data.includes('PSW')) { badgeClass = 'bg-yellow-900 text-yellow-200 border-yellow-700'; icon = '🛑'; }
-                        return `<span class="${badgeClass} px-2 py-1 rounded text-[10px] font-bold border flex items-center justify-center gap-1 w-fit mx-auto whitespace-nowrap shadow-sm">${icon} ${data}</span>`;
+
+                        if(data.includes('Terlambat')) {
+                            badgeClass = 'bg-red-900 text-red-200 border-red-700'; // Merah jika telat
+                            icon = '⚠️';
+                        } else if(data.includes('PSW')) {
+                            badgeClass = 'bg-yellow-900 text-yellow-200 border-yellow-700'; // Kuning jika PSW
+                            icon = '🛑';
+                        }
+
+                        return `<span class="${badgeClass} px-2 py-1 rounded text-[10px] font-bold border flex items-center justify-center gap-1 w-fit mx-auto whitespace-nowrap shadow-sm">
+                                    ${icon} ${data}
+                                </span>`;
                     }},
 
                     // 7. Telat
-                    { data: 'telat', className: "text-center", render: function(data, type, row) {
-                        if(!data || data === '') return (type === 'export') ? '' : '<span class="text-gray-600">-</span>';
-                        if (type === 'export') return data;
+                    { data: 'telat', className: "text-center", render: function(data) {
+                        if(!data || data === '') return '<span class="text-gray-600">-</span>';
                         return `<span class="text-red-400 font-bold font-mono text-xs">${data}</span>`;
                     }},
 
                     // 8. Durasi
-                    { data: 'durasi', className: "text-center", render: function(data, type, row) {
+                    { data: 'durasi', className: "text-center", render: function(data) {
                         if(!data) return '-';
-                        if (type === 'export') return data;
                         let jam = parseInt(data.split(':')[0]);
                         let color = (jam < 7) ? 'text-orange-400' : 'text-gray-300';
                         return `<span class="${color} font-mono font-bold text-xs">${data}</span>`;
                     }},
-                    
-                    // 9. Foto Masuk (Export: URL/Info)
+
+                    // 9. Foto
                     { data: 'photo', className: "text-center", render: function(data, type, row) {
-                        if (type === 'export') return (data && data !== '-') ? 'Ada' : '-';
                         let imgPath = "../../" + data;
-                        return `<button onclick="lihatFoto('${imgPath}', '${row.nama}', 'MASUK')" class="text-green-400 hover:text-white transition bg-gray-800 p-1.5 rounded-lg border border-gray-600 hover:border-green-400 shadow">
+                        return `<button onclick="lihatFoto('${imgPath}', '${row.nama}')" class="text-blue-400 hover:text-white transition bg-gray-800 p-1.5 rounded-lg border border-gray-600 hover:border-blue-400 shadow">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
                                 </button>`;
                     }},
-
-                    // 10. Foto Pulang (Export: URL/Info)
-                    { data: 'photo_out', className: "text-center", render: function(data, type, row) {
-                        if (type === 'export') return (data && data !== '-') ? 'Ada' : '-';
-                        if(!data || data === '-') return '<span class="text-gray-600">-</span>';
-                        let imgPath = "../../" + data;
-                        return `<button onclick="lihatFoto('${imgPath}', '${row.nama}', 'PULANG')" class="text-yellow-400 hover:text-white transition bg-gray-800 p-1.5 rounded-lg border border-gray-600 hover:border-yellow-400 shadow">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                    </svg>
-                                </button>`;
-                    }},
-
-                    // 11. Catatan
-                    { data: 'catatan', render: function(data, type, row) {
-                        if (type === 'export') return data;
+                    
+                    // 10. Catatan (Full View)
+                    { data: 'catatan', render: function(data) {
                         return `<span class="text-xs text-gray-400 italic block whitespace-pre-wrap">${data || '-'}</span>`;
                     }}
                 ]
             });
 
+            // Filter Dropdown Change Event
             $('#filter_masalah').on('change', function() {
                 let val = $(this).val();
                 table.column(5).search(val).draw();
@@ -290,18 +277,18 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
             const tgl1 = $('#tgl1').val();
             const tgl2 = $('#tgl2').val();
             const dep = $('#dep').val();
+            
             $('#filter_masalah').val(''); 
             table.search('').columns().search('').draw();
+
             table.ajax.url(`api_laporan.php?act=get_data&tgl1=${tgl1}&tgl2=${tgl2}&dep=${dep}`).load();
         }
 
-        function lihatFoto(url, nama, tipe) {
-            let label = tipe === 'MASUK' ? 'Bukti Masuk' : 'Bukti Pulang';
+        function lihatFoto(url, nama) {
             Swal.fire({
                 title: nama,
-                text: label,
                 imageUrl: url,
-                imageAlt: label,
+                imageAlt: 'Bukti Absen',
                 imageHeight: 400,
                 background: '#1f2937',
                 color: '#fff',
