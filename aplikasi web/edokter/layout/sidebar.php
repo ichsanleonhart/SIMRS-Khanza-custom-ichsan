@@ -40,6 +40,22 @@
               <p>Laporan Per Shift</p>
             </a>
           </li>
+		  
+		  <li class="nav-header">PELAYANAN</li>
+		  
+		  <li class="nav-item">
+            <a href="<?= BASE_URL ?>/modul/ralan/index.php" class="nav-link <?= ($menu == 'ralan') ? 'active' : '' ?>">
+              <i class="nav-icon fas fa-stethoscope"></i>
+              <p>Rawat Jalan (CPPT)</p>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a href="<?= BASE_URL ?>/modul/konsultasi/index.php" class="nav-link <?= ($menu == 'konsultasi') ? 'active' : '' ?>">
+              <i class="nav-icon fas fa-user-md"></i>
+              <p>Konsultasi Medik</p>
+            </a>
+          </li>
 
           </ul>
       </nav>

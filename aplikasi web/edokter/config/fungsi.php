@@ -79,4 +79,17 @@ function get_vip_users() {
         'admin_keuangan' // Tambahkan sesuai kebutuhan
     ];
 }
+
+// FUNGSI PENCATAT AUDIT TRAIL (TRACKERSQL)
+function catat_tracker($pdo, $sql_text) {
+    try {
+        $user_track = $_SESSION['login_user'] ?? 'super admin';
+        $tgl_track  = date('Y-m-d H:i:s');
+        
+        $stmt = $pdo->prepare("INSERT INTO trackersql (tanggal, sqle, usere) VALUES (?, ?, ?)");
+        $stmt->execute([$tgl_track, $sql_text, $user_track]);
+    } catch (Exception $e) {
+        // Silent error agar tidak mengganggu proses utama jika log penuh/gagal
+    }
+}
 ?>
