@@ -33,40 +33,47 @@ if (!isset($_SESSION['hrd_login'])) { header("Location: login.php"); exit(); }
 
     <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
         <form id="formManual">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="md:col-span-2">
+                    <label class="block text-gray-400 text-sm mb-2">Pilih Pegawai</label>
+                    <select id="pegawai" name="nik" class="w-full bg-gray-900" required>
+                        <option value="">Cari Nama / NIK...</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="mb-4">
-                <label class="block text-gray-400 text-sm mb-2">Pilih Pegawai</label>
-                <select id="pegawai" name="nik" class="w-full bg-gray-900" required>
-                    <option value="">Cari Nama / NIK...</option>
+                <label class="block text-gray-400 text-sm mb-2">Shift</label>
+                <select id="shift" name="shift" class="w-full bg-gray-900 border border-gray-600 rounded p-2.5 text-white h-[42px]" required>
+                    <option value="">- Pilih Pegawai Dulu -</option>
                 </select>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="grid grid-cols-2 gap-4 mb-4 border-t border-gray-700 pt-4">
                 <div>
-                    <label class="block text-gray-400 text-sm mb-2">Shift</label>
-                    <select id="shift" name="shift" class="w-full bg-gray-900 border border-gray-600 rounded p-2.5 text-white h-[42px]" required>
-                        <option value="">- Pilih Pegawai Dulu -</option>
-                    </select>
+                    <label class="block text-green-400 text-sm mb-1 font-bold">Tanggal Masuk</label>
+                    <input type="date" name="tgl_masuk" id="tgl_masuk" value="<?= date('Y-m-d') ?>" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" required>
                 </div>
                 <div>
-                    <label class="block text-gray-400 text-sm mb-2">Tanggal</label>
-                    <input type="date" name="tanggal" value="<?= date('Y-m-d') ?>" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white h-[42px]" required>
+                    <label class="block text-green-400 text-sm mb-1 font-bold">Jam Masuk</label>
+                    <input type="time" name="jam_masuk" value="07:00" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" required>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-gray-700">
                 <div>
-                    <label class="block text-green-400 text-sm mb-2 font-bold">Jam Masuk (Aktual)</label>
-                    <input type="time" name="jam_masuk" value="07:00" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" required>
+                    <label class="block text-red-400 text-sm mb-1 font-bold">Tanggal Pulang</label>
+                    <input type="date" name="tgl_pulang" id="tgl_pulang" value="<?= date('Y-m-d') ?>" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" required>
                 </div>
                 <div>
-                    <label class="block text-red-400 text-sm mb-2 font-bold">Jam Pulang (Aktual)</label>
+                    <label class="block text-red-400 text-sm mb-1 font-bold">Jam Pulang</label>
                     <input type="time" name="jam_pulang" value="14:00" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" required>
                 </div>
             </div>
 
             <div class="mb-6">
                 <label class="block text-gray-400 text-sm mb-2">Catatan / Keterangan</label>
-                <textarea name="catatan" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" rows="2" placeholder="Contoh: Lupa absen, Mesin Error, dll." required></textarea>
+                <textarea name="catatan" class="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white" rows="2" placeholder="Contoh: Lupa absen, Mesin Error, Shift Malam Lintas Hari" required></textarea>
             </div>
 
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded transition">
@@ -91,6 +98,12 @@ $(document).ready(function() {
         }
     });
 
+    // Helper: Jika Tanggal Masuk berubah, Tanggal Pulang otomatis mengikuti (Default behavior)
+    // HRD tetap bisa merubah tanggal pulang secara manual jika shift malam
+    $('#tgl_masuk').on('change', function() {
+        $('#tgl_pulang').val($(this).val());
+    });
+
     // Load Shift saat Pegawai dipilih
     $('#pegawai').on('select2:select', function (e) {
         let nik = e.params.data.id;
@@ -106,9 +119,19 @@ $(document).ready(function() {
     // Submit
     $('#formManual').on('submit', function(e) {
         e.preventDefault();
+        
+        // Validasi Pre-Submit untuk UX
+        let tglMasuk = $('#tgl_masuk').val();
+        let tglPulang = $('#tgl_pulang').val();
+        
+        if (tglPulang < tglMasuk) {
+            Swal.fire('Error Tanggal', 'Tanggal Pulang tidak boleh lebih lampau dari Tanggal Masuk', 'error');
+            return;
+        }
+
         Swal.fire({
             title: 'Simpan Presensi?',
-            text: "Pastikan data jam masuk dan pulang sudah benar.",
+            text: "Pastikan data jam dan tanggal (terutama lintas hari) sudah benar.",
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Ya, Simpan'
