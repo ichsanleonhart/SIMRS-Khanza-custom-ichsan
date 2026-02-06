@@ -5873,7 +5873,7 @@ public final class PCareCekKartu extends javax.swing.JDialog {
              // Jika gagal buat antrean, STOP. Jangan lanjut ke PCare.
              if(SimpanAntrianOnSite()==false){                 
                  // Tapi jika ingin "maksa" lanjut PCare meski antrean gagal, hapus baris "return;"
-                 return; //hapus ini jika kekeuh pengen lanjut Pcare meski antrol gagal
+                 //return; //hapus ini jika kekeuh pengen lanjut Pcare meski antrol gagal
              }
         }
         try {
@@ -6154,25 +6154,65 @@ public final class PCareCekKartu extends javax.swing.JDialog {
                                 }
                                 // ========================================================================
                                 
-                            } else if(code.equals("201")){
-                                statusantrean=false;
-                                // STRATEGI RUMAH AWAL:
-                                // Jika 201 (Sudah Terdaftar), kita anggap TRUE agar sistem lanjut membuat data kunjungan PCare (Shell/Rumah Awal).
-                                if(message.toLowerCase().contains("sudah terdaftar")){
-                                    statusantrean=true; 
+                                // [FIX ADDED BY GEMINI]
+                                // Simpan Flag Task 0 agar Worker PHP bisa mengenali pasien ini untuk dikirim Task 1 (Hadir)
+                                try {
+                                    PreparedStatement psTask = koneksi.prepareStatement(
+                                        "INSERT INTO referensi_mobilejkn_bpjs_taskid (no_rawat, taskid, waktu) VALUES (?, ?, NOW())"
+                                    );
+                                    try {
+                                        psTask.setString(1, TNoRw.getText());
+                                        psTask.setString(2, "0"); // Task 0 = Add Antrean
+                                        psTask.executeUpdate();
+                                    } catch (Exception e) {
+                                        System.out.println("Gagal simpan referensi taskid 0: " + e);
+                                        // Abaikan duplicate entry jika sudah ada
+                                    } finally {
+                                        if(psTask != null) psTask.close();
+                                    }
+                                } catch (Exception ex) {
+                                    System.out.println("Error Insert Task 0: " + ex);
+                                }
+                                
+                            } else if (code.equals("201")) {
+                            // STRATEGI RUMAH AWAL:
+                                // Jika 201 (Sudah Terdaftar), kita anggap TRUE agar sistem lanjut.
+                                if (message.toLowerCase().contains("sudah terdaftar")) {
+                                    statusantrean = true;
                                     catatLog("RESULT: WARNING 201 (Sudah Terdaftar). Bypass -> Lanjut create Kunjungan.");
+        
+                                    // [PENTING] Tambahkan juga Insert Task 0 disini!
+                                    // Karena "Sudah Terdaftar" berarti di BPJS sudah ada, Worker tetap butuh Task 0 untuk kirim Task 1.
+                                    try {
+                                        PreparedStatement psTask = koneksi.prepareStatement("INSERT INTO referensi_mobilejkn_bpjs_taskid (no_rawat, taskid, waktu) VALUES (?, ?, NOW())");
+                                        try {
+                                            psTask.setString(1, TNoRw.getText());
+                                            psTask.setString(2, "0");
+                                            psTask.executeUpdate();
+                                        } catch (Exception e) { /*abaikan duplicate*/ } finally { if(psTask != null) psTask.close(); }
+                                    } catch (Exception ex) {}
+
                                 } else {
-                                    JOptionPane.showMessageDialog(null,"Gagal Antrean (201): "+message);
+                                    // --- LOGIKA 201 TAPI ERROR LAIN (Misal: Kuota Penuh) ---
+                                    statusantrean = false; 
+                                    JOptionPane.showMessageDialog(null, "Gagal Antrean (201): " + message);
+        
+                                    // [TRACKER SQL GAGAL]
+                                    catatTrackerGagal(TNoRw.getText(), TNm.getText(), message);
                                 }
                             } else {
-                                statusantrean=false;
-                                JOptionPane.showMessageDialog(null,"Gagal Antrean ("+code+"): "+message);
+                                // --- LOGIKA ERROR LAINNYA (400, 500, dll) ---
+                                statusantrean = false;
+                                JOptionPane.showMessageDialog(null, "Gagal Antrean (" + code + "): " + message);
+    
+                                // [TRACKER SQL GAGAL]
+                                catatTrackerGagal(TNoRw.getText(), TNm.getText(), "Code: " + code + " - " + message);
                             }
                         }else{
                             statusantrean=false;
                             JOptionPane.showMessageDialog(null,"Jadwal Dokter tidak ditemukan untuk hari "+hari+" di database lokal!");
                             catatLog("ERROR: Jadwal Lokal Kosong untuk hari " + hari);
-                        }
+                        } 
                         rscari.close();
                     } catch (Exception ex) {
                         statusantrean=false;
@@ -6194,6 +6234,30 @@ public final class PCareCekKartu extends javax.swing.JDialog {
             catatLog("EXCEPTION KONEKSI: " + ex);
         }
         return statusantrean;
+    }
+        
+        // Helper untuk mencatat Log Kegagalan ke TrackerSQL (Sesuai Request User)
+    private void catatTrackerGagal(String noRawat, String namaPasien, String pesanError) {
+        try {
+            PreparedStatement psLog = koneksi.prepareStatement(
+                "INSERT INTO trackersql(tanggal, sqle, usere) VALUES (NOW(), ?, ?)"
+            );
+            try {
+                String pesanLog = "GAGAL ADD ANTREAN (" + pesanError + "), TAPI USER BERSIKERAS LANJUT REGISTRASI UNTUK " + namaPasien + " DAN " + noRawat;
+                
+                psLog.setString(1, pesanLog);
+                psLog.setString(2, akses.getkode()); // Mengambil NIP/Kode user yang sedang login
+                psLog.executeUpdate();
+            
+                System.out.println("Sukses catat tracker gagal: " + pesanLog);
+            } catch (Exception e) {
+                System.out.println("Gagal simpan log trackersql: " + e);
+            } finally {
+                if (psLog != null) psLog.close();
+            }
+        } catch (Exception ex) {
+        System.out.println("Error Koneksi Log Tracker: " + ex);
+        }
     }
 
     // ========================================================================

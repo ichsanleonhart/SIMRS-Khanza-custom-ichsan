@@ -11157,6 +11157,18 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                 } catch (Exception ex) {
                                     System.out.println("Error Log Tracker: " + ex);
                                 }
+								
+				// Simpan Flag Task 0 (Trigger Worker PHP)
+                                try {
+                                    PreparedStatement psTask = koneksi.prepareStatement(
+                                        "INSERT INTO referensi_mobilejkn_bpjs_taskid (no_rawat, taskid, waktu) VALUES (?, ?, NOW())"
+                                    );
+                                    try {
+                                        psTask.setString(1, TNoRw.getText());
+                                        psTask.setString(2, "0"); 
+                                        psTask.executeUpdate();
+                                    } catch (Exception e) { /*abaikan duplicate*/ } finally { if(psTask != null) psTask.close(); }
+                                } catch (Exception ex) { }
                                 // ========================================================================
                                 
                                 
@@ -11165,13 +11177,28 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                 if(message.toLowerCase().contains("sudah terdaftar")){
                                     statusantrean=true;
                                     System.out.println(">> HASIL: SUKSES 201 (BYPASS)");
+                                    // TETAP SIMPAN TASK 0 UNTUK TRIGGER WORKER
+                                    try {
+                                        PreparedStatement psTask = koneksi.prepareStatement(
+                                            "INSERT INTO referensi_mobilejkn_bpjs_taskid (no_rawat, taskid, waktu) VALUES (?, ?, NOW())"
+                                        );
+                                        try {
+                                            psTask.setString(1, TNoRw.getText());
+                                            psTask.setString(2, "0"); 
+                                            psTask.executeUpdate();
+                                        } catch (Exception e) { /*abaikan duplicate*/ } finally { if(psTask != null) psTask.close(); }
+                                    } catch (Exception ex) { }	
                                 } else {
                                     statusantrean=false;
                                     JOptionPane.showMessageDialog(null,"Gagal Antrean (201): "+message);
+									// [AUDIT TRAIL] GAGAL TAPI LANJUT
+                                    catatTrackerGagal(TNoRw.getText(), TPasien.getText(), message);
                                 }
                             } else {
                                 statusantrean=false;
                                 JOptionPane.showMessageDialog(null,"Gagal Antrean ("+code+"): "+message);
+								// [AUDIT TRAIL] GAGAL TAPI LANJUT
+                                catatTrackerGagal(TNoRw.getText(), TPasien.getText(), "Code: "+code+" - "+message);
                             }
                         }else{
                             statusantrean=false;
@@ -11352,6 +11379,35 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
         // Fallback ke message exception biasa
         return ex.getMessage();
     }
+	
+	// ========================================================================
+    // HELPER KHUSUS LOGGING KEGAGALAN (AUDIT TRAIL)
+    // ========================================================================
+    private void catatTrackerGagal(String noRawat, String namaPasien, String pesanError) {
+        try {
+            PreparedStatement psLog = koneksi.prepareStatement(
+                "INSERT INTO trackersql(tanggal, sqle, usere) VALUES (NOW(), ?, ?)"
+            );
+            try {
+                // CAPSLOCK & DRAMATIS (Sesuai Request)
+                String pesanLogLengkap = "GAGAL ADD ANTREAN (" + pesanError + "), " +
+                                         "TAPI USER BERSIKERAS LANJUT REGISTRASI UNTUK " + 
+                                         "[" + namaPasien + "] DAN [" + noRawat + "]";
+                
+                psLog.setString(1, pesanLogLengkap);
+                psLog.setString(2, akses.getkode()); 
+                
+                psLog.executeUpdate();
+            } catch (Exception e) {
+                System.out.println("Gagal catat tracker gagal: " + e);
+            } finally {
+                if (psLog != null) psLog.close();
+            }
+        } catch (Exception ex) {
+            System.out.println("Koneksi Tracker Error: " + ex);
+        }
+    }
+	
     // ========================================================================
     private void runBackground(Runnable task) {
     if (ceksukses) return;
