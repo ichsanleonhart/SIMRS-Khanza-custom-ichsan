@@ -20,6 +20,12 @@
 		<a href="laporan_semongko.php" class="list-group-item list-group-item-action <?= ($page=='laporan_semongko.php')?'active':'' ?>">
             <i class="fas fa-bed w-25 text-center"></i> Laporan Semongko
         </a>
+		<a href="laporan_indikator_ranap.php" class="list-group-item list-group-item-action <?= ($page=='laporan_indikator_ranap.php')?'active':'' ?>">
+            <i class="fas fa-chart-line w-25 text-center"></i> BoR, LOS, TOI, dll
+        </a>
+		<a href="laporan_penyakit.php" class="list-group-item list-group-item-action <?= ($page=='laporan_penyakit.php')?'active':'' ?>">
+            <i class="fas fa-disease w-25 text-center"></i> Laporan Penyakit
+        </a>
         
         <small class="text-uppercase text-white-50 px-3 mt-4 mb-1" style="font-size:0.7rem">Akun</small>
         <a href="logout.php" class="list-group-item list-group-item-action text-danger">
