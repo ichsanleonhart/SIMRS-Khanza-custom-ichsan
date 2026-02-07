@@ -1,7 +1,7 @@
 <?php
-// [2025-11-16] Selalu beri komentar.
+// [2026-02-07] REVISI TOTAL: SOPHISTICATED RESEND WORKER
 // File: resend_worker.php
-// Fungsi: Worker Manual (Logic Non-BPJS = Kosong & Log Debugging).
+// Fungsi: Mengirim ulang data antrean (Add, Hadir, Batal) dengan validasi ketat & debug detail.
 
 set_time_limit(0);
 ini_set('memory_limit', '-1');
@@ -30,11 +30,13 @@ function getHariIndonesia($date) {
 function logTracker($pdo, $msg) {
     try {
         $stmt = $pdo->prepare("INSERT INTO trackersql (tanggal, sqle, usere) VALUES (NOW(), ?, ?)");
-        $stmt->execute([$msg, 'Admin Utama']);
+        $stmt->execute([$msg, 'Admin Resend']);
     } catch (Exception $e) { }
 }
 
 try {
+    // 1. QUERY UTAMA (STRICT FILTER BPJS)
+    // Kita filter kd_pj di SQL agar pasien umum TIDAK PERNAH TERAMBIL.
     $sql = "SELECT 
                 rp.no_reg, rp.no_rawat, rp.tgl_registrasi, rp.jam_reg, 
                 rp.kd_dokter, d.nm_dokter, 
@@ -50,6 +52,7 @@ try {
             INNER JOIN maping_dokter_pcare mdp ON rp.kd_dokter = mdp.kd_dokter
             INNER JOIN maping_poliklinik_pcare mpp ON rp.kd_poli = mpp.kd_poli_rs
             WHERE rp.tgl_registrasi BETWEEN :tgl_mulai AND :tgl_akhir
+            AND (rp.kd_pj = 'BPJ' OR rp.kd_pj = 'BPJ ') -- [STRICT FILTER]
             ORDER BY rp.tgl_registrasi ASC, rp.jam_reg ASC"; 
             
     $stmt = $pdo->prepare($sql);
@@ -58,26 +61,27 @@ try {
 
     $totalData = count($registrasi);
     $processed = 0;
+    $failed = 0;
 
     foreach ($registrasi as $reg) {
         $noRawat = $reg['no_rawat'];
         $hariRegistrasi = getHariIndonesia($reg['tgl_registrasi']);
         
-        // [BARU] Variable Debugging
-        $debugTime = "Tgl Reg: " . $reg['tgl_registrasi'] . " " . $reg['jam_reg'] . " | NoRawat: " . $noRawat;
-
+        // Cek Status Task Lokal
         $stmtTask = $pdo->prepare("SELECT taskid FROM referensi_mobilejkn_bpjs_taskid WHERE no_rawat = ?");
         $stmtTask->execute([$noRawat]);
         $existingTasks = $stmtTask->fetchAll(PDO::FETCH_COLUMN);
 
-        // LOGIKA PENENTUAN NOMOR KARTU (NON-BPJS = KOSONG)
-        $nomorKartu = "";
-        if (stripos($reg['kd_pj'], 'BPJ') !== false) {
-            $nomorKartu = trim($reg['no_peserta']);
-            if (strlen($nomorKartu) < 10) $nomorKartu = "";
+        // Validasi Nomor Kartu
+        $nomorKartu = trim($reg['no_peserta']);
+        if (strlen($nomorKartu) < 10 || $nomorKartu == '-') {
+            $log[] = "[SKIP] $noRawat: No Peserta Invalid ($nomorKartu)";
+            continue;
         }
 
-        // --- TASK 0: ADD ANTREAN ---
+        // ====================================================================
+        // TASK 0: ADD ANTREAN
+        // ====================================================================
         if (!in_array('0', $existingTasks)) {
             $stmtJadwal = $pdo->prepare("SELECT jam_mulai, jam_selesai FROM jadwal WHERE kd_dokter = ? AND kd_poli = ? AND hari_kerja = ?");
             $stmtJadwal->execute([$reg['kd_dokter'], $reg['kd_poli'], $hariRegistrasi]);
@@ -103,28 +107,48 @@ try {
                     "keterangan" => "Peserta harap 30 menit lebih awal guna pencatatan administrasi."
                 ];
 
-                $resp = $bpjs->request('antrean/add', 'POST', $payloadAdd, $debugTime);
+                $resp = $bpjs->request('antrean/add', 'POST', $payloadAdd);
                 $code = $resp['metadata']['code'] ?? 0;
+                $msg  = $resp['metadata']['message'] ?? '';
 
-                if ($code == 200 || $code == 1 || $code == 201) {
+                // Handle 200 (Sukses) atau 201 + "Sudah Terdaftar" (Bypass)
+                if ($code == 200 || ($code == 201 && stripos($msg, 'sudah terdaftar') !== false)) {
                     $ins0 = $pdo->prepare("INSERT IGNORE INTO referensi_mobilejkn_bpjs_taskid (no_rawat, taskid, waktu) VALUES (?, ?, ?)");
                     $ins0->execute([$noRawat, '0', $waktuRegistrasiAsli]);
                     
-                    logTracker($pdo, "Sukses Resend Add Antrean (Task 0). No.Rawat: $noRawat");
-                    $log[] = "[ADD] $noRawat Sukses (Code $code)";
+                    $statusMsg = ($code == 200) ? "Sukses" : "Bypass antrol (Sudah Terdaftar)";
+                    logTracker($pdo, "Resend Task 0 $statusMsg. No.Rawat: $noRawat");
+                    $log[] = "[ADD] $noRawat: $statusMsg";
+                    
+                    // Update array task lokal agar Task 1 bisa lanjut di loop ini
+                    $existingTasks[] = '0'; 
                     $processed++;
+                } else {
+                    $log[] = "[GAGAL ADD] $noRawat: $code - $msg";
+                    $failed++;
                 }
+            } else {
+                $log[] = "[SKIP ADD] $noRawat: Jadwal Dokter Tidak Ditemukan";
             }
         }
 
-        // --- TASK 1: UPDATE HADIR ---
-        if (!in_array('1', $existingTasks)) {
+        // ====================================================================
+        // TASK 1: UPDATE HADIR (PANGGIL)
+        // Syarat: Harus punya Task 0 (atau baru saja sukses dibuat di atas)
+        // ====================================================================
+        if (in_array('0', $existingTasks) && !in_array('1', $existingTasks)) {
+            // Ambil waktu SOAP dokter
             $stmtPeriksa = $pdo->prepare("SELECT tgl_perawatan, jam_rawat FROM pemeriksaan_ralan WHERE no_rawat = ? LIMIT 1");
             $stmtPeriksa->execute([$noRawat]);
             $periksa = $stmtPeriksa->fetch();
 
             if ($periksa) {
-                $waktuTask1 = strtotime($periksa['tgl_perawatan'] . ' ' . $periksa['jam_rawat']) * 1000;
+                $waktuSoapString = $periksa['tgl_perawatan'] . ' ' . $periksa['jam_rawat'];
+                $waktuTask1 = strtotime($waktuSoapString) * 1000;
+                
+                // Debug Info
+                $serverTime = date('Y-m-d H:i:s');
+                
                 $payloadHadir = [
                     "tanggalperiksa" => $reg['tgl_registrasi'],
                     "kodepoli" => trim($reg['kd_poli_pcare']),
@@ -133,27 +157,30 @@ try {
                     "waktu" => $waktuTask1
                 ];
 
-                $resp = $bpjs->request('antrean/panggil', 'POST', $payloadHadir, $debugTime);
+                $resp = $bpjs->request('antrean/panggil', 'POST', $payloadHadir);
                 $code = $resp['metadata']['code'] ?? 0;
+                $msg  = $resp['metadata']['message'] ?? '';
 
-                // [PERBAIKAN LOGIKA] Hapus 201 dari kondisi sukses
-                if ($code == 200 || $code == 1) {
+                if ($code == 200) {
                     $ins1 = $pdo->prepare("INSERT IGNORE INTO referensi_mobilejkn_bpjs_taskid (no_rawat, taskid, waktu) VALUES (?, ?, ?)");
-                    $ins1->execute([$noRawat, '1', $periksa['tgl_perawatan'] . ' ' . $periksa['jam_rawat']]);
+                    $ins1->execute([$noRawat, '1', $waktuSoapString]);
 
-                    logTracker($pdo, "Sukses Resend Update Hadir (Task 1). No.Rawat: $noRawat");
-                    $log[] = "[HADIR] $noRawat Update Sukses";
+                    logTracker($pdo, "Resend antrol Task 1 Sukses. No.Rawat: $noRawat");
+                    $log[] = "[HADIR] $noRawat Sukses (SOAP: $waktuSoapString)";
                     $processed++;
                 } else {
-                    // Tambahan log khusus resend agar ketahuan kenapa gagal
-                    $message = $resp['metadata']['message'] ?? 'No Message';
-                    $log[] = "[GAGAL HADIR] $noRawat: $code - $message";
+                    $errMsg = "[GAGAL HADIR] $noRawat: $code - $msg | SOAP: $waktuSoapString | Server: $serverTime";
+                    $log[] = $errMsg;
+                    $failed++;
                 }
             }
         }
 
-        // --- TASK 2: BATAL ---
-        if ($reg['stts'] == 'Batal' && !in_array('2', $existingTasks)) {
+        // ====================================================================
+        // TASK 2: BATAL
+        // Syarat: Status Batal & Punya Task 0 & Belum punya Task 2
+        // ====================================================================
+        if ($reg['stts'] == 'Batal' && in_array('0', $existingTasks) && !in_array('2', $existingTasks)) {
             $payloadBatal = [
                 "tanggalperiksa" => $reg['tgl_registrasi'],
                 "kodepoli" => trim($reg['kd_poli_pcare']),
@@ -161,22 +188,27 @@ try {
                 "alasan" => "Pasien membatalkan pendaftaran"
             ];
 
-            $resp = $bpjs->request('antrean/batal', 'POST', $payloadBatal, $debugTime);
+            $resp = $bpjs->request('antrean/batal', 'POST', $payloadBatal);
             $code = $resp['metadata']['code'] ?? 0;
+            $msg  = $resp['metadata']['message'] ?? '';
 
-            if ($code == 200 || $code == 1 || $code == 201) {
+            if ($code == 200) {
                 $ins2 = $pdo->prepare("INSERT IGNORE INTO referensi_mobilejkn_bpjs_taskid (no_rawat, taskid, waktu) VALUES (?, ?, ?)");
                 $ins2->execute([$noRawat, '2', date('Y-m-d H:i:s')]);
-                logTracker($pdo, "Sukses Resend Batal (Task 2). No.Rawat: $noRawat");
-                $log[] = "[BATAL] $noRawat Update Sukses";
+                
+                logTracker($pdo, "Resend antrol Task 2 (Batal) Sukses. No.Rawat: $noRawat");
+                $log[] = "[BATAL] $noRawat Sukses";
                 $processed++;
+            } else {
+                $log[] = "[GAGAL BATAL] $noRawat: $code - $msg";
+                $failed++;
             }
         }
     }
 
     echo json_encode([
         'status' => 'success', 
-        'message' => "Selesai tgl $tglMulai. Data: $totalData. Terupdate: $processed.",
+        'message' => "Proses Selesai. Total Data: $totalData. Berhasil: $processed. Gagal: $failed.",
         'logs' => $log
     ]);
 
