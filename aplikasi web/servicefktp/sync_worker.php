@@ -1,5 +1,5 @@
 <?php
-// [2026-02-07] REVISI DEBUGGER MODE: SUPER DETAIL LOGGING
+// [2026-02-08] REVISI ANTI-CRASH DATABASE (SANITASI KARAKTER)
 // File: sync_worker.php
 
 require_once 'config.php';
@@ -16,23 +16,42 @@ class AntrolWorker {
     }
 
     private function log($msg) {
-        // Tambahkan timestamp di setiap baris log agar presisi
         $this->logs[] = "[" . date('H:i:s') . "] " . $msg;
+    }
+
+    // [SAFETY] Fungsi pembersih karakter aneh/emoji (PENTING UNTUK KHANZA)
+    private function cleanStr($str) {
+        // Hanya izinkan karakter ASCII standar (32-126)
+        // Membuang Emoji dan karakter 4-byte lainnya.
+        return preg_replace('/[^\x20-\x7E]/', '', $str ?? '');
     }
 
     private function catatTracker($tanggal, $jsonResponse, $pesanManusia) {
         try {
-            $sqleContent = "[BPJS RESPONSE]: " . $jsonResponse . "\n\n" . 
-                           "[KETERANGAN]: " . $pesanManusia;
+            if ($jsonResponse === false || $jsonResponse === null) {
+                $jsonResponse = "Invalid JSON/Binary Data";
+            }
+
+            // Gabungkan string
+            $rawContent = "[BPJS RESPONSE]: " . $jsonResponse . "\n\n" . 
+                          "[KETERANGAN]: " . $pesanManusia;
+            
+            // [CRITICAL FIX] Sanitasi string sebelum INSERT
+            $sqleContent = $this->cleanStr($rawContent);
 
             $sql = "INSERT INTO trackersql (tanggal, sqle, usere) VALUES (:tgl, :sqle, 'aplikasi_bridging')";
+            
+            if (!$this->pdo) return; // Silent fail jika koneksi putus
+
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([
                 'tgl' => $tanggal,
                 'sqle' => $sqleContent
             ]);
+
         } catch (Exception $e) {
-            // Silent fail untuk tracker agar tidak mengganggu flow utama
+            // Error tracker jangan mematikan flow utama, cukup log saja
+            $this->log("ERROR TRACKER: " . $this->cleanStr($e->getMessage()));
         }
     }
 
@@ -51,9 +70,7 @@ class AntrolWorker {
     public function run() {
         $tglSekarang = date('Y-m-d');
         
-        // =========================================================================
         // 1. QUERY TASK 1 (HADIR)
-        // =========================================================================
         $sqlHadir = "SELECT 
                         reg_periksa.no_rawat, 
                         pasien.no_peserta, 
@@ -69,14 +86,12 @@ class AntrolWorker {
                      WHERE reg_periksa.tgl_registrasi = :tgl
                      AND reg_periksa.kd_pj = 'BPJ'
                      
-                     -- CEK SUDAH ADA TASK 0 (ADD)
                      AND reg_periksa.no_rawat IN (
                         SELECT referensi_mobilejkn_bpjs_taskid.no_rawat 
                         FROM referensi_mobilejkn_bpjs_taskid 
                         WHERE referensi_mobilejkn_bpjs_taskid.taskid = '0'
                      )
                      
-                     -- CEK BELUM ADA TASK 1 (HADIR)
                      AND reg_periksa.no_rawat NOT IN (
                         SELECT referensi_mobilejkn_bpjs_taskid.no_rawat 
                         FROM referensi_mobilejkn_bpjs_taskid 
@@ -93,9 +108,7 @@ class AntrolWorker {
             $this->prosesHadir($row);
         }
 
-        // =========================================================================
         // 2. QUERY TASK 2 (BATAL)
-        // =========================================================================
         $sqlBatal = "SELECT 
                         reg_periksa.no_rawat, 
                         pasien.no_peserta, 
@@ -107,14 +120,12 @@ class AntrolWorker {
                      AND reg_periksa.kd_pj = 'BPJ'
                      AND reg_periksa.stts = 'Batal'
                      
-                     -- SUDAH ADA TASK 0
                      AND reg_periksa.no_rawat IN (
                         SELECT referensi_mobilejkn_bpjs_taskid.no_rawat 
                         FROM referensi_mobilejkn_bpjs_taskid 
                         WHERE referensi_mobilejkn_bpjs_taskid.taskid = '0'
                      )
                      
-                     -- BELUM ADA TASK 2
                      AND reg_periksa.no_rawat NOT IN (
                         SELECT referensi_mobilejkn_bpjs_taskid.no_rawat 
                         FROM referensi_mobilejkn_bpjs_taskid 
@@ -134,19 +145,17 @@ class AntrolWorker {
     }
 
     private function prosesHadir($row) {
-        // Ambil cara bayar aktual saat ini (Realtime check)
+        // Double Check Cara Bayar
         $stmtCek = $this->pdo->prepare("SELECT kd_pj FROM reg_periksa WHERE no_rawat = ?");
         $stmtCek->execute([$row['no_rawat']]);
         $pjAktual = $stmtCek->fetchColumn();
 
-        if (trim($pjAktual) !== 'BPJ') { // Sesuaikan 'BPJ' dengan kode di database
+        if (trim($pjAktual) !== 'BPJ') { 
             $this->log("SKIP " . $row['no_rawat'] . ": Pasien Non-BPJS (Cara Bayar: $pjAktual).");
-            // Opsional: Hapus sampah Task 0 agar tidak dicek lagi selamanya
-            // $this->pdo->exec("DELETE FROM referensi_mobilejkn_bpjs_taskid WHERE no_rawat = '{$row['no_rawat']}'");
             return;
         }
-		
-		$kdPoliBpjs = $this->getKodePoliBpjs($row['kd_poli']);
+
+        $kdPoliBpjs = $this->getKodePoliBpjs($row['kd_poli']);
         
         if (empty($kdPoliBpjs)) {
             $this->log("SKIP " . $row['no_rawat'] . ": Mapping Poli Kosong.");
@@ -158,14 +167,9 @@ class AntrolWorker {
             return;
         }
 
-        // --- DEBUG WAKTU ---
         $waktuSoapString = $row['tgl_perawatan'] . ' ' . $row['jam_rawat'];
         $timestampMilis = strtotime($waktuSoapString) * 1000; 
         
-        // String balik untuk cek validitas manusia
-        $checkDate = date('Y-m-d H:i:s', $timestampMilis / 1000);
-        $serverTime = date('Y-m-d H:i:s');
-
         $payload = [
             "kodepoli" => $kdPoliBpjs,
             "nomorkartu" => trim($row['no_peserta']),
@@ -174,7 +178,6 @@ class AntrolWorker {
             "waktu" => $timestampMilis 
         ];
 
-        // LOGGING SEBELUM KIRIM
         $this->log("SENDING HADIR " . $row['no_rawat'] . "...");
         
         $response = $this->bpjs->request('antrean/panggil', 'POST', $payload);
@@ -185,24 +188,14 @@ class AntrolWorker {
             $insert = $this->pdo->prepare("INSERT INTO referensi_mobilejkn_bpjs_taskid (no_rawat, taskid, waktu) VALUES (?, '1', ?)");
             $insert->execute([$row['no_rawat'], $waktuSoapString]);
 
-            $this->catatTracker(date('Y-m-d H:i:s'), json_encode($response), "Sukses Update Status antrol HADIR (Trigger: SOAP Dokter)");
-            $this->log("✅ SUKSES " . $row['no_rawat'] . " | Msg: $message");
+            $this->catatTracker(date('Y-m-d H:i:s'), json_encode($response), "Sukses Update Status HADIR (Trigger: SOAP Dokter)");
+            $this->log("[OK] SUKSES " . $row['no_rawat'] . " | Msg: $message"); // Emoji dihapus
         } else {
-            // --- LOGGING SUPER DETAIL SAAT ERROR ---
-            $errMsg = "❌ GAGAL " . $row['no_rawat'] . " | Code: $code | Msg: $message\n";
-            $errMsg .= "      >> DEBUG WAKTU:\n";
-            $errMsg .= "         - Input Dokter: $waktuSoapString\n";
-            $errMsg .= "         - Dikirim (ms): $timestampMilis ($checkDate)\n";
-            $errMsg .= "         - Jam Server  : $serverTime\n";
-            $errMsg .= "      >> DEBUG DATA:\n";
-            $errMsg .= "         - Poli Kirim  : $kdPoliBpjs\n";
-            $errMsg .= "         - Kartu Kirim : " . trim($row['no_peserta']) . "\n";
-            $errMsg .= "      >> RAW RESPONSE:\n";
-            $errMsg .= "         " . json_encode($response);
-            
+            $errMsg = "[GAGAL] " . $row['no_rawat'] . " | Code: $code | Msg: $message"; // Emoji dihapus
+            // Debug info
+            $errMsg .= " | SOAP: $waktuSoapString | Kirim: $timestampMilis";
             $this->log($errMsg);
-            
-            $this->catatTracker(date('Y-m-d H:i:s'), json_encode($response), "GAGAL Kirim antrol Hadir. Error: $message");
+            $this->catatTracker(date('Y-m-d H:i:s'), json_encode($response), "GAGAL Kirim Hadir: $message");
         }
     }
 
@@ -233,13 +226,10 @@ class AntrolWorker {
             $insert = $this->pdo->prepare("INSERT INTO referensi_mobilejkn_bpjs_taskid (no_rawat, taskid, waktu) VALUES (?, '2', NOW())");
             $insert->execute([$row['no_rawat']]);
 
-            $this->catatTracker(date('Y-m-d H:i:s'), json_encode($response), "Sukses Batal Antrean antrol");
-            $this->log("✅ SUKSES BATAL " . $row['no_rawat']);
+            $this->catatTracker(date('Y-m-d H:i:s'), json_encode($response), "Sukses Batal Antrean");
+            $this->log("[OK] SUKSES BATAL " . $row['no_rawat']); // Emoji dihapus
         } else {
-            // DETAIL ERROR BATAL
-            $errMsg = "❌ GAGAL BATAL " . $row['no_rawat'] . " | Code: $code | Msg: $message\n";
-            $errMsg .= "      >> PAYLOAD: " . json_encode($payload);
-            $this->log($errMsg);
+            $this->log("[GAGAL] BATAL " . $row['no_rawat'] . ": " . $message);
         }
     }
 }

@@ -1,5 +1,5 @@
 <?php
-// [2025-11-16] Selalu beri komentar.
+// [2026-02-08] UPDATE: Auto-Refresh Midnight & Strict Filter BPJS
 // File: monitor_antrol.php
 // Fungsi: Monitoring kelengkapan bridging Antrean Online (Antrol) vs Registrasi RS.
 
@@ -9,8 +9,7 @@ $tgl1 = isset($_GET['tgl1']) ? $_GET['tgl1'] : date('Y-m-d');
 $tgl2 = isset($_GET['tgl2']) ? $_GET['tgl2'] : date('Y-m-d');
 
 // QUERY ANALISA KELENGKAPAN ANTROL
-// Kita Left Join dari reg_periksa ke referensi_mobilejkn_bpjs_taskid
-// untuk melihat mana yang NULL (Belum di-bridging).
+// [FIX] Gunakan filter BPJS yang konsisten dengan Worker (BPJ atau BPJ+Spasi)
 
 $sql = "SELECT 
             rp.no_rawat, rp.no_reg, rp.tgl_registrasi, rp.jam_reg, 
@@ -32,7 +31,7 @@ $sql = "SELECT
         INNER JOIN dokter d ON rp.kd_dokter = d.kd_dokter
         INNER JOIN poliklinik p ON rp.kd_poli = p.kd_poli
         
-        WHERE rp.kd_pj = 'BPJ' -- Hanya Pasien BPJS
+        WHERE (rp.kd_pj = 'BPJ' OR rp.kd_pj = 'BPJ')
         AND rp.tgl_registrasi BETWEEN :tgl1 AND :tgl2
         ORDER BY rp.tgl_registrasi DESC, rp.jam_reg DESC";
 
@@ -87,23 +86,29 @@ function renderCheck($waktu, $labelSuccess = 'OK') {
                     AUDIT <span class="text-blue-400">ANTREAN ONLINE</span>
                 </h1>
                 <p class="text-xs text-gray-400 mt-1">Evaluasi kedisiplinan bridging Antrol petugas registrasi</p>
+                <div id="refreshStatus" class="text-[10px] text-gray-500 mt-1">Auto-check date active...</div>
             </div>
             
             <div class="flex gap-2 items-center bg-gray-800 p-2 rounded-lg border border-gray-700">
                 <label class="text-sm text-gray-300 font-bold">Periode:</label>
-                <form method="GET" class="flex gap-2 items-center">
-                    <input type="date" name="tgl1" value="<?= $tgl1 ?>" class="bg-gray-700 text-white border border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500">
+                <form method="GET" class="flex gap-2 items-center" id="filterForm">
+                    <input type="date" id="tgl1" name="tgl1" value="<?= $tgl1 ?>" class="bg-gray-700 text-white border border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500">
                     <span class="text-gray-400 text-sm">s.d</span>
-                    <input type="date" name="tgl2" value="<?= $tgl2 ?>" class="bg-gray-700 text-white border border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500">
+                    <input type="date" id="tgl2" name="tgl2" value="<?= $tgl2 ?>" class="bg-gray-700 text-white border border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500">
                     <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded text-sm font-bold ml-2">
                         Tampilkan
                     </button>
                 </form>
             </div>
 
-            <a href="index.php" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-bold">
-                Home
-            </a>
+            <div class="flex gap-2">
+                <button onclick="window.location.reload()" class="bg-gray-600 hover:bg-gray-500 text-white px-3 py-2 rounded text-sm font-bold">
+                    Refresh
+                </button>
+                <a href="index.php" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-bold">
+                    Home
+                </a>
+            </div>
         </div>
 
         <div class="bg-gray-800 rounded-lg shadow-xl p-4 border border-gray-700 overflow-x-auto">
@@ -183,6 +188,7 @@ function renderCheck($waktu, $labelSuccess = 'OK') {
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function() {
+            // DataTables
             $('#antrolTable').DataTable({
                 "pageLength": 50, 
                 "ordering": false, 
@@ -193,6 +199,34 @@ function renderCheck($waktu, $labelSuccess = 'OK') {
                     "paginate": { "next": ">", "previous": "<" }
                 }
             });
+
+            // ========================================================
+            // AUTO-REFRESH MIDNIGHT LOGIC
+            // ========================================================
+            function checkDateMismatch() {
+                const now = new Date();
+                
+                // Format YYYY-MM-DD local time
+                const offset = now.getTimezoneOffset() * 60000;
+                const localISOTime = new Date(now - offset).toISOString().slice(0, 10);
+                
+                const currentInputDate = $('#tgl2').val(); // Ambil tanggal akhir di input
+
+                // Jika tanggal hari ini SUDAH LEBIH MAJU dari tanggal di input
+                // Artinya sudah ganti hari tapi page belum direfresh
+                if (currentInputDate && localISOTime > currentInputDate) {
+                    console.log("Date mismatch detected! Reloading page...");
+                    window.location.href = window.location.pathname; // Reload ke URL dasar (biar ambil default date baru)
+                }
+            }
+
+            // Cek setiap 1 menit (60000 ms)
+            setInterval(checkDateMismatch, 60000);
+            
+            // Juga auto-reload halaman setiap 15 menit untuk update data status
+            setTimeout(function() {
+                window.location.reload();
+            }, 15 * 60 * 1000); 
         });
     </script>
 </body>

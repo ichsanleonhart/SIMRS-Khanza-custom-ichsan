@@ -11196,7 +11196,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                 }
                             } else {
                                 statusantrean=false;
-                                JOptionPane.showMessageDialog(null,"Gagal Antrean ("+code+"): "+message);
+                                JOptionPane.showMessageDialog(null,"Gagal Antrean / antrol ("+code+"): "+message);
 								// [AUDIT TRAIL] GAGAL TAPI LANJUT
                                 catatTrackerGagal(TNoRw.getText(), TPasien.getText(), "Code: "+code+" - "+message);
                             }
@@ -11380,8 +11380,8 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
         return ex.getMessage();
     }
 	
-	// ========================================================================
-    // HELPER KHUSUS LOGGING KEGAGALAN (AUDIT TRAIL)
+    // ========================================================================
+    // HELPER KHUSUS LOGGING KEGAGALAN (AUDIT TRAIL) - SAFE & SANITIZED
     // ========================================================================
     private void catatTrackerGagal(String noRawat, String namaPasien, String pesanError) {
         try {
@@ -11389,17 +11389,29 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                 "INSERT INTO trackersql(tanggal, sqle, usere) VALUES (NOW(), ?, ?)"
             );
             try {
-                // CAPSLOCK & DRAMATIS (Sesuai Request)
-                String pesanLogLengkap = "GAGAL ADD ANTREAN (" + pesanError + "), " +
+                // [SAFETY FIX] Buang karakter non-ASCII (Emoji, Simbol aneh) agar DB Khanza tidak crash
+                String safeError = "";
+                if(pesanError != null){
+                     safeError = pesanError.replaceAll("[^\\x20-\\x7E]", "");
+                }
+                
+                String safeNama = "";
+                if(namaPasien != null){
+                    safeNama = namaPasien.replaceAll("[^\\x20-\\x7E]", "");
+                }
+
+                // Format Pesan (CAPSLOCK)
+                String pesanLogLengkap = "GAGAL ADD ANTROL (" + safeError + "), " +
                                          "TAPI USER BERSIKERAS LANJUT REGISTRASI UNTUK " + 
-                                         "[" + namaPasien + "] DAN [" + noRawat + "]";
+                                         "[" + safeNama + "] DAN [" + noRawat + "]";
                 
                 psLog.setString(1, pesanLogLengkap);
                 psLog.setString(2, akses.getkode()); 
                 
                 psLog.executeUpdate();
+                System.out.println("Sukses catat tracker gagal: " + pesanLogLengkap);
             } catch (Exception e) {
-                System.out.println("Gagal catat tracker gagal: " + e);
+                System.out.println("Gagal simpan log trackersql: " + e);
             } finally {
                 if (psLog != null) psLog.close();
             }

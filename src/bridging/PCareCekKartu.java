@@ -6236,27 +6236,37 @@ public final class PCareCekKartu extends javax.swing.JDialog {
         return statusantrean;
     }
         
-        // Helper untuk mencatat Log Kegagalan ke TrackerSQL (Sesuai Request User)
+        // ========================================================================
+    // HELPER KHUSUS LOGGING KEGAGALAN (AUDIT TRAIL) - SAFE VERSION
+    // ========================================================================
     private void catatTrackerGagal(String noRawat, String namaPasien, String pesanError) {
         try {
             PreparedStatement psLog = koneksi.prepareStatement(
                 "INSERT INTO trackersql(tanggal, sqle, usere) VALUES (NOW(), ?, ?)"
             );
             try {
-                String pesanLog = "GAGAL ADD ANTREAN (" + pesanError + "), TAPI USER BERSIKERAS LANJUT REGISTRASI UNTUK " + namaPasien + " DAN " + noRawat;
+                // 1. Sanitasi pesan error dari karakter aneh/emoji (Hanya izinkan ASCII standar)
+                // Regex [^\\x20-\\x7E] akan membuang karakter di luar range ASCII cetak.
+                String safeError = pesanError.replaceAll("[^\\x20-\\x7E]", ""); 
                 
-                psLog.setString(1, pesanLog);
-                psLog.setString(2, akses.getkode()); // Mengambil NIP/Kode user yang sedang login
+                // 2. Format Pesan Log (CAPSLOCK & DRAMATIS)
+                String pesanLogLengkap = "GAGAL ADD ANTREAN ANTROL (" + safeError + "), " +
+                                         "TAPI USER BERSIKERAS LANJUT REGISTRASI UNTUK " + 
+                                         "[" + namaPasien + "] DAN [" + noRawat + "]";
+                
+                psLog.setString(1, pesanLogLengkap);
+                psLog.setString(2, akses.getkode()); 
+                
                 psLog.executeUpdate();
-            
-                System.out.println("Sukses catat tracker gagal: " + pesanLog);
+                System.out.println("Sukses catat tracker gagal: " + pesanLogLengkap);
+                
             } catch (Exception e) {
                 System.out.println("Gagal simpan log trackersql: " + e);
             } finally {
                 if (psLog != null) psLog.close();
             }
         } catch (Exception ex) {
-        System.out.println("Error Koneksi Log Tracker: " + ex);
+            System.out.println("Koneksi Tracker Error: " + ex);
         }
     }
 
