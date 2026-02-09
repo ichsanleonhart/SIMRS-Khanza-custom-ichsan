@@ -11012,6 +11012,8 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
         
         System.out.println("\n========== [DEBUG] MULAI BRIDGING ANTREAN (PCareDataPendaftaran) ==========");
         System.out.println("[DEBUG] No Rawat: " + TNoRw.getText());
+        CatatLog("\n========== [DEBUG] MULAI BRIDGING ANTREAN (PCareDataPendaftaran) ==========");
+        CatatLog("[DEBUG] No Rawat: " + TNoRw.getText());
         
         try {
             // Query Data Pasien & Registrasi
@@ -11078,7 +11080,12 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                 if(rsDok.next()){
                                     kodeDokterBPJS = rsDok.getString("kd_dokter_pcare");
                                 } else {
-                                    kodeDokterBPJS = KdTenagaMedis.getText(); 
+                                    //kodeDokterBPJS = KdTenagaMedis.getText(); 
+                                    // STOP JIKA MAPPING KOSONG
+                                    System.out.println("[STOP] Mapping Dokter Kosong");
+                                    JOptionPane.showMessageDialog(null, "Mapping Dokter PCare Belum Ada!");
+                                    catatTrackerGagal(TNoRw.getText(), TPasien.getText(), "Mapping Dokter Kosong (KD: "+rs.getString("kd_dokter")+")");
+                                    return false;
                                 }
                                 rsDok.close(); psDok.close();
                             } catch(Exception e){ kodeDokterBPJS = KdTenagaMedis.getText(); }
@@ -11120,11 +11127,13 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                         "}";
                             
                             System.out.println(">> KIRIM JSON ANTREAN: " + requestJson);
+                            CatatLog(">> KIRIM JSON ANTREAN: " + requestJson);
                             requestEntity = new HttpEntity(requestJson,headers);
                             
                             // 6. TEMBAK API
                             String rawResponse = apimobilejkn.getRest().exchange(koneksiDB.URLMOBILEJKNFKTP()+"/antrean/add", HttpMethod.POST, requestEntity, String.class).getBody();
                             System.out.println(">> RESPON BPJS: " + rawResponse);
+                            CatatLog(">> RESPON BPJS: " + rawResponse);
                             
                             root = mapper.readTree(rawResponse);
                             nameNode = root.path("metadata"); 
@@ -11135,13 +11144,14 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                             if(code.equals("200")){
                                 statusantrean=true; // SUKSES MURNI
                                 System.out.println(">> HASIL: SUKSES 200");
+                                CatatLog(">> HASIL: SUKSES 200");
                                 
                                  // ========================================================================
                                 // [TAMBAHAN] LOGGING KE TABLE TRACKERSQL  -- ichsan (20251130)
                                 // ========================================================================
                                 try {
                                     // Gunakan PreparedStatement baru (psLog) agar tidak memutus loop rs utama
-                                    PreparedStatement psLog = koneksi.prepareStatement("insert into trackersql(tanggal, sqle, usere) values(now(),?,?)");
+                                    PreparedStatement psLog = koneksi.prepareStatement("insert into trackersql(tanggal, sqle, usere) values(NOW(),?,?)");
                                     try {
                                         // Isi Log: Menyebutkan sukses dan No Rawat pasien
                                         psLog.setString(1, "Sukses Add Antrol Mobile JKN OnSite. No.Rawat: " + TNoRw.getText());
@@ -11151,6 +11161,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                                         psLog.executeUpdate();
                                     } catch (Exception e) {
                                         System.out.println("Gagal menyimpan log trackersql: " + e);
+                                        CatatLog("Gagal menyimpan log trackersql: " + e);
                                     } finally {
                                         if(psLog != null) psLog.close();
                                     }
@@ -11204,19 +11215,23 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                             statusantrean=false;
                             // JOptionPane.showMessageDialog(null,"Jadwal Dokter tidak ditemukan untuk hari "+hari+" di database lokal!");
                             System.out.println(">> ERROR: Jadwal Dokter Kosong di DB Lokal");
+                            CatatLog(">> ERROR: Jadwal Dokter Kosong di DB Lokal");
                         }
                         rscari.close();
                     } catch (Exception ex) {
                         statusantrean=false;
                         System.out.println("Error Request Antrean: "+ex);
+                        CatatLog("Error Request Antrean: "+ex);
                     } 
                     pscari.close();
                 } else {
                     System.out.println(">> ERROR: Data Registrasi Tidak Ditemukan di Query");
+                    CatatLog(">> ERROR: Data Registrasi Tidak Ditemukan di Query");
                 }
             } catch (Exception ex) {
                 statusantrean=false;
                 System.out.println("Error Query Pasien: "+ex);
+                CatatLog("Error Query Pasien: "+ex);
             } finally{
                 if(rs!=null){ rs.close(); }
                 if(ps!=null){ ps.close(); }
@@ -11230,10 +11245,10 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
         return statusantrean;
     }
         
-        // ========================================================================
+    // ========================================================================
     //  HELPER METHODS ADOPSI (UNTUK VALIDASI DATA KE BPJS)
     // ========================================================================
-    private void catatLog(String pesan) {
+    private void CatatLog(String pesan) {
         try {
             // Log akan tersimpan di folder project dengan nama log_antrean_bpjs.txt
             FileWriter fw = new FileWriter("log_antrean_bpjs.txt", true);
@@ -11381,28 +11396,29 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
     }
 	
     // ========================================================================
-    // HELPER KHUSUS LOGGING KEGAGALAN (AUDIT TRAIL) - SAFE & SANITIZED
+    // HELPER KHUSUS LOGGING KEGAGALAN (AUDIT TRAIL) - FULLY SANITIZED
     // ========================================================================
     private void catatTrackerGagal(String noRawat, String namaPasien, String pesanError) {
         try {
-            PreparedStatement psLog = koneksi.prepareStatement(
+            // Gunakan koneksi baru sebentar untuk menjamin log tersimpan
+            Connection koneksiLog = koneksiDB.condb();
+            if(koneksiLog == null) return;
+
+            PreparedStatement psLog = koneksiLog.prepareStatement(
                 "INSERT INTO trackersql(tanggal, sqle, usere) VALUES (NOW(), ?, ?)"
             );
             try {
-                // [SAFETY FIX] Buang karakter non-ASCII (Emoji, Simbol aneh) agar DB Khanza tidak crash
+                // 1. Sanitasi PESAN ERROR (Buang Emoji)
                 String safeError = "";
-                if(pesanError != null){
-                     safeError = pesanError.replaceAll("[^\\x20-\\x7E]", "");
-                }
+                if(pesanError != null) safeError = pesanError.replaceAll("[^\\x20-\\x7E]", "");
                 
+                // 2. Sanitasi NAMA PASIEN (Buang Emoji/Karakter Aneh) -- [INI YANG BARU]
                 String safeNama = "";
-                if(namaPasien != null){
-                    safeNama = namaPasien.replaceAll("[^\\x20-\\x7E]", "");
-                }
+                if(namaPasien != null) safeNama = namaPasien.replaceAll("[^\\x20-\\x7E]", "");
 
                 // Format Pesan (CAPSLOCK)
                 String pesanLogLengkap = "GAGAL ADD ANTROL (" + safeError + "), " +
-                                         "TAPI USER BERSIKERAS LANJUT REGISTRASI UNTUK " + 
+                                         "TAPI USER BERSIKERAS LANJUT REGISTRASI UNTUK PASIEN " + 
                                          "[" + safeNama + "] DAN [" + noRawat + "]";
                 
                 psLog.setString(1, pesanLogLengkap);
@@ -11410,6 +11426,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
                 
                 psLog.executeUpdate();
                 System.out.println("Sukses catat tracker gagal: " + pesanLogLengkap);
+                
             } catch (Exception e) {
                 System.out.println("Gagal simpan log trackersql: " + e);
             } finally {
