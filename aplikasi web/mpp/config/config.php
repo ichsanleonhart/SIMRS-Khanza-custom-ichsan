@@ -1,26 +1,23 @@
 <?php
 // File: config/config.php
 
-// 1. Deteksi Base URL otomatis
+// 1. Deteksi Base URL otomatis (Untuk Dashboard MPP sendiri)
+// Ini boleh dinamis karena Dashboardnya ada di laptopmu.
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https://" : "http://";
 $base_url = $protocol . $_SERVER['HTTP_HOST'] . "/mpp/";
 
-// 2. Konfigurasi Lokasi Webapps (Khanza Original)
-// Ganti IP jika di server production. Untuk XAMPP biarkan localhost.
-if ($_SERVER['HTTP_HOST'] == 'localhost') {
-    $webapps_url = "http://192.168.1.5/webapps/"; 
-} else {
-    // Sesuaikan IP Public / Domain RS nanti
-    $webapps_url = "http://" . $_SERVER['HTTP_HOST'] . "/webapps/";
-}
+// 2. Konfigurasi Lokasi Webapps (SUMBER GAMBAR KHANZA)
+// PENTING: Jangan pakai logika if localhost. Tembak langsung ke IP Server Khanza.
+// IP ini adalah lokasi fisik dimana folder "webapps/radiologi" berada.
+$webapps_url = "https://aplikasi.rssuliawati.com/webapps/"; 
 
-// 3. Path Absolut (PENTING untuk include file PHP)
+// 3. Path Absolut
 define('BASE_PATH', dirname(__DIR__) . '/');
 
-// 4. Security Keys (Hardcoded sesuai request)
+// 4. Security Keys
 define('AES_KEY_USER', 'nur');
 define('AES_KEY_PASS', 'windi');
 
-// 5. Timezone Indonesia
+// 5. Timezone
 date_default_timezone_set('Asia/Jakarta');
 ?>

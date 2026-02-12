@@ -14,10 +14,20 @@
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
 
 <script>
-    $(document).ready(function() {
-        $('#sidebarToggle, #sidebarOverlay').click(function() {
-            $('#mainSidebar').toggleClass('show');
-            $('#sidebarOverlay').toggleClass('show');
+    $(document).ready(function () {
+        // Toggle Sidebar
+        $('#sidebarCollapse').on('click', function () {
+            // 1. Toggle class 'active' di sidebar
+            $('#sidebar').toggleClass('active');
+            
+            // 2. Toggle overlay (Hanya efek di mobile krn CSS desktop display:none)
+            $('#mobileOverlay').toggleClass('active');
+        });
+
+        // Klik Overlay (Tutup Sidebar di Mobile)
+        $('#mobileOverlay').on('click', function () {
+            $('#sidebar').removeClass('active');
+            $(this).removeClass('active');
         });
     });
 </script>
