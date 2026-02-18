@@ -28,11 +28,7 @@ import java.awt.Cursor;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -56,8 +52,6 @@ public final class ApotekBPJSCekReferensiFaskes extends javax.swing.JDialog {
     private JsonNode root;
     private JsonNode nameNode;
     private JsonNode response;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private volatile boolean ceksukses = false;
 
     /** Creates new form DlgKamar
      * @param parent
@@ -96,19 +90,19 @@ public final class ApotekBPJSCekReferensiFaskes extends javax.swing.JDialog {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
                     if(diagnosa.getText().length()>2){
-                        runBackground(() ->tampil(diagnosa.getText()));
+                        tampil(diagnosa.getText());
                     }
                 }
                 @Override
                 public void removeUpdate(DocumentEvent e) {
                     if(diagnosa.getText().length()>2){
-                        runBackground(() ->tampil(diagnosa.getText()));
+                        tampil(diagnosa.getText());
                     }
                 }
                 @Override
                 public void changedUpdate(DocumentEvent e) {
                     if(diagnosa.getText().length()>2){
-                        runBackground(() ->tampil(diagnosa.getText()));
+                        tampil(diagnosa.getText());
                     }
                 }
             });
@@ -279,10 +273,12 @@ public final class ApotekBPJSCekReferensiFaskes extends javax.swing.JDialog {
 
     private void diagnosaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_diagnosaKeyPressed
         if(evt.getKeyCode()==KeyEvent.VK_ENTER){
-            runBackground(() ->tampil(diagnosa.getText()));
+            tampil(diagnosa.getText());
+            tampil2(diagnosa.getText());
             BtnPrint.requestFocus();
         }else if(evt.getKeyCode()==KeyEvent.VK_PAGE_DOWN){
-            runBackground(() ->tampil(diagnosa.getText()));
+            tampil(diagnosa.getText());
+            tampil2(diagnosa.getText());
         }else if(evt.getKeyCode()==KeyEvent.VK_PAGE_UP){
             BtnKeluar.requestFocus();
         }else if(evt.getKeyCode()==KeyEvent.VK_UP){
@@ -291,11 +287,10 @@ public final class ApotekBPJSCekReferensiFaskes extends javax.swing.JDialog {
     }//GEN-LAST:event_diagnosaKeyPressed
 
     private void BtnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCariActionPerformed
-        if(diagnosa.getText().trim().equals("")){
-            JOptionPane.showMessageDialog(rootPane,"Masukkan keyword terlebih dahulu...!");
-        }else{
-            runBackground(() ->tampil(diagnosa.getText()));
-        }
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        tampil(diagnosa.getText());
+        tampil2(diagnosa.getText());
+        this.setCursor(Cursor.getDefaultCursor());
     }//GEN-LAST:event_BtnCariActionPerformed
 
     private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnCariKeyPressed
@@ -335,7 +330,7 @@ public final class ApotekBPJSCekReferensiFaskes extends javax.swing.JDialog {
     private widget.Table tbKamar;
     // End of variables declaration//GEN-END:variables
 
-    private void tampil(String faskes) {
+    public void tampil(String faskes) {
         try {
             Valid.tabelKosong(tabMode);
             headers = new HttpHeaders();
@@ -367,18 +362,39 @@ public final class ApotekBPJSCekReferensiFaskes extends javax.swing.JDialog {
                 }
             }else {
                 System.out.println("Notif Faskes 1 : "+nameNode.path("message").asText());              
-            }   
+            }
+            
+            // Request data untuk referensi PPK tingkat 2
+            URL = link + "/referensi/ppk/2/" + faskes;
+            root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.GET, requestEntity, String.class).getBody());
+            nameNode = root.path("metaData");
+
+            if (nameNode.path("code").asText().equals("200")) {
+                tabMode.addRow(new Object[]{"B", "Faskes 2", ""});
+                response = mapper.readTree(api.Decrypt(root.path("response").asText(), utc));
+
+                if (response.path("list").isArray()) {
+                    i = 1;
+                    for (JsonNode list : response.path("list")) {
+                        tabMode.addRow(new Object[]{
+                            i + ".", list.path("kode").asText(),
+                            list.path("nama").asText()
+                        });
+                        i++;
+                    }
+                }
+            } else {
+                System.out.println("Notif Faskes 2: " + nameNode.path("message").asText());
+            }
         } catch (Exception ex) {
             System.out.println("Notifikasi : "+ex);
             if(ex.toString().contains("UnknownHostException")){
                 JOptionPane.showMessageDialog(rootPane,"Koneksi ke server BPJS terputus...!");
             }
         }
-        if(i>1){
-            tabMode.addRow(new Object[]{
-                "","",""
-            });
-        }
+    }    
+    
+    public void tampil2(String faskes) {        
         try {
             headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -391,7 +407,10 @@ public final class ApotekBPJSCekReferensiFaskes extends javax.swing.JDialog {
             URL = link+"/referensi/ppk/2/"+faskes;	
             root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.GET, requestEntity, String.class).getBody());
             nameNode = root.path("metaData");
-            if(nameNode.path("code").asText().equals("200")){ 
+            if(nameNode.path("message").asText().equals("Sukses")){ 
+                tabMode.addRow(new Object[]{
+                    "","",""
+                });
                 tabMode.addRow(new Object[]{
                     "B","Faskes 2/RS",""
                 });
@@ -420,37 +439,5 @@ public final class ApotekBPJSCekReferensiFaskes extends javax.swing.JDialog {
  
     public JTable getTable(){
         return tbKamar;
-    }
-    
-    private void runBackground(Runnable task) {
-        if (ceksukses) return;
-        if (executor.isShutdown() || executor.isTerminated()) return;
-        if (!isDisplayable()) return;
-
-        ceksukses = true;
-        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-        try {
-            executor.submit(() -> {
-                try {
-                    task.run();
-                } finally {
-                    ceksukses = false;
-                    SwingUtilities.invokeLater(() -> {
-                        if (isDisplayable()) {
-                            setCursor(Cursor.getDefaultCursor());
-                        }
-                    });
-                }
-            });
-        } catch (RejectedExecutionException ex) {
-            ceksukses = false;
-        }
-    }
-    
-    @Override
-    public void dispose() {
-        executor.shutdownNow();
-        super.dispose();
     }
 }
