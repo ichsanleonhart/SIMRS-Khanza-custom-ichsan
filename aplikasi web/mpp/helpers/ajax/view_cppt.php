@@ -2,7 +2,7 @@
 // File: modules/ranap/ajax/view_cppt.php
 // Deskripsi: Menampilkan Riwayat CPPT (SOAP + Instruksi & Evaluasi)
 
-$base_path = dirname(dirname(dirname(__DIR__)));
+$base_path = dirname(dirname(__DIR__));
 require_once $base_path . '/config/config.php'; // Load config untuk URL
 require_once $base_path . '/config/database.php';
 

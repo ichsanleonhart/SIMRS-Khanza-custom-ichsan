@@ -38,24 +38,25 @@ function is_folder_active($folder_names) {
 
     <ul class="list-unstyled components">
         
+        <?php if (cekAkses('mpp_skrining')): ?>
         <li class="mb-1">
-            <a href="../../modules/dashboard/index.php" class="<?= is_active('index.php') && !is_folder_active(['ranap', 'ralan', 'mpp']) ? 'active' : '' ?>">
+            <a href="<?= $base_url ?>modules/dashboard/index.php" class="<?= is_active('index.php') && !is_folder_active(['ranap', 'ralan', 'mpp', 'edokter']) ? 'active' : '' ?>">
                 <i class="fas fa-tachometer-alt"></i> Dashboard Umum
             </a>
         </li>
 
         <li class="mb-1">
-            <a href="#menuKunjungan" data-bs-toggle="collapse" aria-expanded="<?= is_folder_active(['ranap', 'ralan']) ? 'true' : 'false' ?>" class="dropdown-toggle">
+            <a href="#menuKunjungan" data-bs-toggle="collapse" aria-expanded="<?= is_folder_active(['ranap', 'ralan']) && !is_folder_active('edokter') ? 'true' : 'false' ?>" class="dropdown-toggle">
                 <i class="fas fa-hospital-user"></i> Monitoring Kunjungan
             </a>
-            <ul class="collapse list-unstyled <?= is_folder_active(['ranap', 'ralan']) ? 'show' : '' ?>" id="menuKunjungan">
+            <ul class="collapse list-unstyled <?= is_folder_active(['ranap', 'ralan']) && !is_folder_active('edokter') ? 'show' : '' ?>" id="menuKunjungan">
                 <li>
-                    <a href="../../modules/ranap/index.php" class="<?= is_folder_active('ranap') ? 'active' : '' ?>">
+                    <a href="<?= $base_url ?>modules/ranap/index.php" class="<?= is_folder_active('ranap') ? 'active' : '' ?>">
                         <i class="fas fa-procedures"></i> Rawat Inap
                     </a>
                 </li>
                 <li>
-                    <a href="../../modules/ralan/index.php" class="<?= is_folder_active('ralan') ? 'active' : '' ?>">
+                    <a href="<?= $base_url ?>modules/ralan/index.php" class="<?= is_folder_active('ralan') && !is_folder_active('edokter') ? 'active' : '' ?>">
                         <i class="fas fa-wheelchair"></i> Rawat Jalan
                     </a>
                 </li>
@@ -68,21 +69,52 @@ function is_folder_active($folder_names) {
             </a>
             <ul class="collapse list-unstyled <?= is_folder_active('mpp') ? 'show' : '' ?>" id="menuMPP">
                 <li>
-                    <a href="../../modules/mpp/index.php" class="<?= is_active('index.php') && is_folder_active('mpp') ? 'active' : '' ?>">
+                    <a href="<?= $base_url ?>modules/mpp/index.php" class="<?= is_active('index.php') && is_folder_active('mpp') ? 'active' : '' ?>">
                         <i class="fas fa-chart-pie"></i> Dashboard & Analisa
                     </a>
                 </li>
                 <li>
-                    <a href="../../modules/mpp/master_masalah.php" class="<?= is_active('master_masalah.php') ? 'active' : '' ?>">
+                    <a href="<?= $base_url ?>modules/mpp/master_masalah.php" class="<?= is_active('master_masalah.php') ? 'active' : '' ?>">
                         <i class="fas fa-database"></i> Master Masalah
                     </a>
                 </li>
             </ul>
         </li>
+        <?php endif; ?>
+		
+        <?php if (cekAkses('soap_perawatan')): ?>
+        <li class="mb-1 <?= cekAkses('mpp_skrining') ? 'mt-3' : '' ?>">
+            <a href="#menuEDokter" data-bs-toggle="collapse" aria-expanded="<?= is_folder_active('edokter') ? 'true' : 'false' ?>" class="dropdown-toggle text-warning">
+                <i class="fas fa-user-md"></i> E-Dokter
+            </a>
+            <ul class="collapse list-unstyled <?= is_folder_active('edokter') ? 'show' : '' ?>" id="menuEDokter">
+                <li>
+                    <a href="<?= $base_url ?>modules/edokter/ralan/index.php" class="<?= is_folder_active('edokter/ralan') ? 'active' : '' ?>">
+                        <i class="fas fa-stethoscope"></i> Poliklinik (Ralan)
+                    </a>
+                </li>
+                <li>
+                    <a href="<?= $base_url ?>modules/edokter/ranap/index.php" class="<?= is_folder_active('edokter/ranap') ? 'active' : '' ?>">
+                        <i class="fas fa-bed"></i> Bangsal (Ranap)
+                    </a>
+                </li>
+				<li>
+                    <a href="<?= $base_url ?>modules/edokter/jasmed/index.php" class="<?= is_folder_active('edokter/jasmed') ? 'active' : '' ?>">
+                        <i class="fas fa-wallet"></i> Hitung Jasmed
+                    </a>
+                </li>
+				<li>
+                    <a href="<?= $base_url ?>modules/edokter/konsultasi/index.php" class="<?= is_folder_active('edokter/konsultasi') ? 'active' : '' ?>">
+                        <i class="fas fa-comments-medical"></i> Konsultasi Medis
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <?php endif; ?>
 
         <li class="nav-header text-uppercase small text-muted mt-4 mb-2 px-3 fw-bold" style="font-size:0.7rem; color: white !important;">Akun</li>
         <li>
-            <a href="../../modules/auth/logout.php" class="text-danger-emphasis">
+            <a href="<?= $base_url ?>modules/auth/logout.php" class="text-danger-emphasis">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
         </li>
@@ -99,7 +131,7 @@ function is_folder_active($folder_names) {
             </button>
 
             <span class="navbar-brand fw-bold text-dark fs-6">
-                Sistem MPP <span class="fw-light text-muted d-none d-sm-inline">Terintegrasi</span>
+                Sistem Terintegrasi <span class="fw-light text-muted d-none d-sm-inline">MPP & E-Dokter</span>
             </span>
 
             <div class="ms-auto">
@@ -108,7 +140,7 @@ function is_folder_active($folder_names) {
                         <i class="far fa-user me-1"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                        <li><a class="dropdown-item text-danger" href="../../modules/auth/logout.php">Logout</a></li>
+                        <li><a class="dropdown-item text-danger" href="<?= $base_url ?>modules/auth/logout.php">Logout</a></li>
                     </ul>
                 </div>
             </div>

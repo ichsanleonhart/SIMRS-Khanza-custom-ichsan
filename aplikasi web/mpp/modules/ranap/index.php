@@ -292,13 +292,14 @@ $(document).ready(function() {
 
     $('#table-ranap tbody').on('click', '.btn-modal', function() {
         var type = $(this).data('type');
-        var no_rawat = $(this).data('id');
-        var url = '', title = '';
+        var no_rawat = $(this).data('id');        
+        var url = '../../helpers/ajax/view_' + type + '.php';
+        var title = ''; 
 
-        if(type === 'billing') { url = 'ajax/view_billing.php'; title = 'Rincian Biaya'; }
-        else if(type === 'cppt') { url = 'ajax/view_cppt.php'; title = 'CPPT'; }
-        else if(type === 'lab') { url = 'ajax/view_lab.php'; title = 'Hasil Lab'; }
-        else if(type === 'rad') { url = 'ajax/view_rad.php'; title = 'Hasil Radiologi'; }
+        if(type === 'billing') { title = 'Rincian Biaya'; }
+        else if(type === 'cppt') { title = 'CPPT'; }
+        else if(type === 'lab') { title = 'Hasil Lab'; }
+        else if(type === 'rad') { title = 'Hasil Radiologi'; }
         
         $('#modalTitle').html(title);
         $('#modalContent').html('<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>');

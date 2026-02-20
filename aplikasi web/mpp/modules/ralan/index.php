@@ -200,8 +200,8 @@ $(document).ready(function() {
 
     $('#table-ralan tbody').on('click', '.btn-modal', function() {
         var type = $(this).data('type');
-        var no_rawat = $(this).data('id');
-        var url = '../ranap/ajax/view_' + type + '.php'; 
+        var no_rawat = $(this).data('id'); // [FIX 1] Menangkap no_rawat
+        var url = '../../helpers/ajax/view_' + type + '.php'; // [FIX 2] Path langsung mengarah ke helpers
         var title = '';
 
         if(type === 'billing') title = 'Rincian Biaya Rawat Jalan';

@@ -2,7 +2,7 @@
 // config/database.php
 
 // Ganti sesuai settingan server lokal/server RS
-$host = '192.168.0.2';
+$host = 'localhost';
 $db   = 'sik_master'; // Sesuaikan nama database SIK Khanza
 $user = 'client';
 $pass = 'epotoransu';

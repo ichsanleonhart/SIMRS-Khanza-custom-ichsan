@@ -4,7 +4,7 @@
 // 1. Deteksi Base URL otomatis (Untuk Dashboard MPP sendiri)
 // Ini boleh dinamis karena Dashboardnya ada di laptopmu.
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https://" : "http://";
-$base_url = $protocol . $_SERVER['HTTP_HOST'] . "/mpp/";
+$base_url = $protocol . $_SERVER['HTTP_HOST'] . "/mpp2/";
 
 // 2. Konfigurasi Lokasi Webapps (SUMBER GAMBAR KHANZA)
 // PENTING: Jangan pakai logika if localhost. Tembak langsung ke IP Server Khanza.

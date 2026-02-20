@@ -2,7 +2,7 @@
 // File: modules/ranap/ajax/view_rad.php
 // Deskripsi: View Hasil Radiologi (Clean Version)
 
-$base_path = dirname(dirname(dirname(__DIR__)));
+$base_path = dirname(dirname(__DIR__));
 
 // 1. Load Config (Sekarang $webapps_url pasti http://192.168.1.5/webapps/)
 if (file_exists($base_path . '/config/config.php')) {

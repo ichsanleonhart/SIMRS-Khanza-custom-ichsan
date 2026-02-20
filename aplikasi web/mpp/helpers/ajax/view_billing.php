@@ -2,7 +2,7 @@
 // File: modules/ranap/ajax/view_billing.php
 // Deskripsi: Rincian Billing (Replikasi 100% data_rincian_billing.php V29)
 
-$base_path = dirname(dirname(dirname(__DIR__)));
+$base_path = dirname(dirname(__DIR__));
 require_once $base_path . '/config/database.php';
 
 ini_set('display_errors', 0);

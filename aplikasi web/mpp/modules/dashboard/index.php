@@ -6,6 +6,10 @@ require_once '../../helpers/auth_helper.php';
 
 // Cek Login
 cekLogin();
+if (!cekAkses('mpp_skrining')) {
+    header("Location: " . $base_url . "modules/edokter/ralan/index.php");
+    exit;
+}
 
 // LOAD LAYOUT
 require_once '../../layout/header.php';
