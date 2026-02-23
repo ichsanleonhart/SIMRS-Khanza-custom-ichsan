@@ -24,7 +24,8 @@ $sql_kamar = "SELECT CONCAT(b.nm_bangsal, ' (', k.kelas, ')') AS nm_bangsal_kela
                      SUM(CASE WHEN k.status='KOSONG' THEN 1 ELSE 0 END) AS kosong
               FROM kamar k
               JOIN bangsal b ON k.kd_bangsal = b.kd_bangsal
-              GROUP BY nm_bangsal_kelas
+              WHERE k.statusdata = '1'
+              GROUP BY nm_bangsal_kelas, k.kelas, b.nm_bangsal
               ORDER BY k.kelas ASC, b.nm_bangsal ASC";
 $res_kamar = bukaquery($sql_kamar);
 $count_kamar = mysqli_num_rows($res_kamar);

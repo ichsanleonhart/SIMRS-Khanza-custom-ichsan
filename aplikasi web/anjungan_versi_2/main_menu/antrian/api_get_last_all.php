@@ -39,16 +39,8 @@ $setting = fetch_assoc("SELECT nama_instansi, alamat_instansi, kabupaten FROM se
         <pre id="farmasi"></pre>
       </div>
       <div class="menu-column">
-        <h3>Lab. Patologi Klinis</h3>
-        <pre id="labpk"></pre>
-      </div>
-      <div class="menu-column">
-        <h3>Lab. Patologi Anatomi</h3>
-        <pre id="labpa"></pre>
-      </div>
-      <div class="menu-column">
-        <h3>Lab. Microbiologi & Biomolekuler</h3>
-        <pre id="labmicro"></pre>
+        <h3>Lab Gabungan (PK, PA, MB)</h3>
+        <pre id="labgabung"></pre>
       </div>
       <div class="menu-column">
         <h3>Radiologi</h3>
@@ -76,9 +68,7 @@ $setting = fetch_assoc("SELECT nama_instansi, alamat_instansi, kabupaten FROM se
   function refreshAll() {
     loadPanel("poli", "get_last.php");
     loadPanel("farmasi", "get_last_farmasi.php");
-    loadPanel("labpk", "get_last_pk.php");
-    loadPanel("labpa", "get_last_pa.php");
-    loadPanel("labmicro", "get_last_mb.php");
+    loadPanel("labgabung", "get_last_lab.php");   // ✅ hanya satu endpoint gabungan
     loadPanel("radiologi", "get_last_rad.php");
   }
 

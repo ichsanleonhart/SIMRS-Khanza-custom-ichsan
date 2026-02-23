@@ -105,7 +105,7 @@ $count = mysqli_num_rows($result);
           <h3><?= sensorNama($row['nm_pasien']) ?> (<?= $row['jk'] ?>)</h3>
           <div class="kelas">No. Rawat: <?= $row['no_rawat'] ?></div>
           <div class="detail">
-            <div class="label">Umur</div><div><?= hitungUmur($row['tgl_lahir']) ?> th</div>
+            <div class="label">Umur</div><div><?= hitungUmur($row['tgl_lahir']) ?> </div>
             <div class="label">Tanggal</div><div><?= $row['tanggal'] ?></div>
             <div class="label">Mulai</div><div><?= $row['jam_mulai'] ?> - Selesai: <?= $row['jam_selesai'] ?></div>
             <div class="label">Operasi</div><div><?= $row['nm_perawatan'] ?></div>

@@ -82,12 +82,34 @@ while($row = mysqli_fetch_assoc($res_pasien)) {
     $pasienHariIni[] = $row;
 }
 
+/* --- Ambil daftar pasien bypass (status=2 dan 3, hari ini) --- */
+$sql_pasien_bypass = "SELECT a.no_rawat, r.no_reg,r.kd_poli, ps.nm_pasien, d.nm_dokter, p.nm_poli, pj.png_jawab,
+                             a.status AS status_antripoli
+                      FROM antripoli a
+                      JOIN reg_periksa r ON a.no_rawat = r.no_rawat
+                      JOIN pasien ps ON r.no_rkm_medis = ps.no_rkm_medis
+                      JOIN dokter d ON a.kd_dokter = d.kd_dokter
+                      JOIN poliklinik p ON a.kd_poli = p.kd_poli
+                      JOIN penjab pj ON r.kd_pj = pj.kd_pj
+                      WHERE a.status IN ('2','3')
+                        AND r.tgl_registrasi = '$today'
+                      ORDER BY r.jam_reg ASC";
+$res_pasien_bypass = bukaquery($sql_pasien_bypass);
+$pasienBypass = [];
+
+while($row = mysqli_fetch_assoc($res_pasien_bypass)) {
+    $row['nm_pasien_bersih'] = cleanNamaPasien($row['nm_pasien']);
+    $row['nm_pasien'] = $row['nm_pasien_bersih'];
+    $pasienBypass[] = $row;
+}
+
 /* --- Output JSON lengkap --- */
 echo json_encode([
-    'antrian'       => $pasienHariIni,
-    'calledNow'     => $called ?: null,   // jalur resmi, nm_pasien bersih
-    'calledLast'    => $last ?: null,     // jalur resmi, nm_pasien bersih
-    'pasienHariIni' => $pasienHariIni     // jalur bypass: nm_pasien mentah + nm_pasien_bersih
+    'antrian'     => $pasienHariIni,   // daftar resmi dari reg_periksa (Belum)
+    'calledNow'   => $called ?: null,  // pasien aktif (nm_pasien sudah dibersihkan)
+    'calledLast'  => $last ?: null,    // panggilan terakhir (nm_pasien sudah dibersihkan)
+    'pasienHariIni' => $pasienHariIni,
+    'bypass'      => $pasienBypass     // daftar bypass dari antripoli (status 2/3 hari ini, nm_pasien mentah + nm_pasien_bersih)
 ], JSON_UNESCAPED_UNICODE);
 
 ?>

@@ -150,11 +150,7 @@ function renderStatus($status, $type = 'mandatory') {
                                 if($hasil){ while ($row = mysqli_fetch_assoc($hasil)) { $is_igd = ($row['kd_poli'] == 'IGDK'); ?>
                                     <tr>
                                         <td><span class="fw-bold d-block"><?= $row['no_rawat'] ?></span><small class="text-muted"><?= $row['tgl_closing'] ?></small></td>
-                                        <td>
-                                            <div class="fw-bold text-truncate" style="max-width:150px;"><?= $row['nm_pasien'] ?></div>
-                                            <small class="d-block text-secondary" style="font-size:0.75rem"><?= $row['no_rkm_medis'] ?></small>
-                                            <small class="text-primary text-truncate d-block" style="max-width:150px;"><?= $row['nm_dokter'] ?></small>
-                                        </td>
+                                        <td><div class="fw-bold text-truncate" style="max-width:150px;"><?= $row['nm_pasien'] ?></div><small class="text-primary text-truncate d-block" style="max-width:150px;"><?= $row['nm_dokter'] ?></small></td>
                                         <td><span class="badge bg-light text-dark border d-block mb-1"><?= $row['no_sep'] ?></span><span class="badge <?= ($row['status_lanjut']=='Ralan')?'bg-success':'bg-pink' ?>"><?= $row['status_lanjut'] ?></span></td>
                                         <td class="text-center"><?= renderStatus($row['ada_resume']) ?></td>
                                         <td class="text-center"><?= renderStatus($row['ada_billing']) ?></td>
@@ -195,8 +191,7 @@ function renderStatus($status, $type = 'mandatory') {
 
     $(document).ready(function() {
         $('#tablePasien').DataTable({
-            dom: 'Bfrtip', pageLength: 15,
-            // UPDATE: ordering: false DIHAPUS agar fitur sorting aktif kembali
+            dom: 'Bfrtip', pageLength: 15, ordering: false,
             buttons: [ { extend: 'excel', className: 'btn btn-success btn-sm', text: '<i class=\"fas fa-file-excel me-1\"></i> Excel' } ],
             language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/id.json' }
         });

@@ -55,3 +55,29 @@
     font-size: 15px;
     color: #fff;
 }
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    /* susun vertikal: foto di atas, teks di bawah */
+    align-items: center;
+    /* rata tengah */
+}
+
+.foto-dokter img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    /* jarak ke teks di bawah */
+    padding: 4px;
+    border: 2px solid #4fc3f7;
+    /* opsional: bingkai */
+}
+
+.info-dokter {
+    text-align: center;
+    /* teks rata tengah */
+    width: 100%;
+}

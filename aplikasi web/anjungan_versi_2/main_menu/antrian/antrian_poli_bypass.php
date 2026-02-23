@@ -29,7 +29,7 @@ $setting = fetch_assoc("SELECT nama_instansi, alamat_instansi, kabupaten FROM se
 
   <!-- Perhatikan: class dashboard bypass -->
   <main class="dashboard bypass">
-    <h2>DAFTAR PASIEN HARI INI</h2>
+    <h2>DAFTAR PANGGIL ULANG PASIEN HARI INI</h2>
     <div class="poli-grid"><em>Memuat data pasien...</em></div>
   </main>
 
@@ -43,82 +43,68 @@ $setting = fetch_assoc("SELECT nama_instansi, alamat_instansi, kabupaten FROM se
 
   <script>
   function renderPasien(pasienList) {
-    if (!pasienList || pasienList.length === 0) {
-      document.querySelector('.poli-grid').innerHTML =
-        `<div><em>Belum Ada Pasien Terdaftar</em></div>`;
-      return;
-    }
+  if (!pasienList || pasienList.length === 0) {
+    document.querySelector('.poli-grid').innerHTML =
+      `<div><em>Belum Ada Pasien Dipanggil Hari Ini</em></div>`;
+    return;
+  }
 
-    let html = `<table class="full-table">
-                  <thead>
-                    <tr>
-                      <th>No. Reg</th>
-                      <th>No. Rawat</th>
-                      <th>Nama Pasien</th>
-                      <th>Status</th>
-                      <th>Bayar</th>
-                      <th>Poli</th>
-                      <th>Dokter</th>
-                      <th>PANGGIL</th>
-                    </tr>
-                  </thead>
-                  <tbody>`;
+  let html = `<table class="full-table">
+                <thead>
+                  <tr>
+                    <th>No. Reg</th>
+                    <th>No. Rawat</th>
+                    <th>Nama Pasien</th>
+                    <th>Bayar</th>
+                    <th>Poli</th>
+                    <th>Dokter</th>
+                    <th>PANGGIL ULANG</th>
+                  </tr>
+                </thead>
+                <tbody>`;
 
-    // filter hanya pasien dengan stts = "Belum"
-    pasienList.filter(p => p.stts.toLowerCase() === "belum").forEach(p => {
-      html += `<tr>
-                 <td>${p.no_reg}</td>
-                 <td>${p.no_rawat}</td>
-                 <td>${p.nm_pasien}</td> <!-- tampilkan mentah di tabel -->
-                 <td>${p.stts}</td>
-                 <td>${p.png_jawab}</td>
-                 <td>${p.nm_poli}</td>
-                 <td>${p.nm_dokter}</td>`;
+  pasienList.forEach(p => {
+    html += `<tr>
+               <td>${p.no_reg}</td>
+               <td>${p.no_rawat}</td>
+               <td>${p.nm_pasien}</td> <!-- tampilkan mentah -->
+               <td>${p.png_jawab || ""}</td>
+               <td>${p.nm_poli}</td>
+               <td>${p.nm_dokter}</td>
+               <td><button class="btn-panggil" onclick='bypassPanggil(${JSON.stringify(p)})'>PANGGIL ULANG</button></td>
+             </tr>`;
+  });
 
-      // tombol aktif hanya jika status_antripoli = 2 atau 3
-      if (p.status_antripoli == "2" || p.status_antripoli == "3") {
-        html += `<td><button class="btn-panggil" onclick='bypassPanggil(${JSON.stringify(p)})'>PANGGIL ULANG</button></td>`;
-      } else {
-        html += `<td><button class="btn-panggil" disabled>PANGGIL ULANG</button></td>`;
+  html += `</tbody></table>`;
+  document.querySelector('.poli-grid').innerHTML = html;
+}
+
+function bypassPanggil(pasien) {
+  let namaBersih = pasien.nm_pasien_bersih || pasien.nm_pasien;
+  localStorage.setItem("bypassCall", JSON.stringify(pasien));
+
+  let notif = document.getElementById("notif");
+  notif.innerText = "Pasien " + namaBersih + " dipanggil (bypass).";
+  notif.style.display = "block";
+  setTimeout(() => { notif.style.display = "none"; }, 3000);
+
+  if (typeof playSuaraPanggil === "function") {
+    playSuaraPanggil(namaBersih);
+  }
+}
+
+// Ambil data pasien dari get_last.php (pakai field bypass)
+setInterval(() => {
+  fetch('get_last.php')
+    .then(res => res.json())
+    .then(data => {
+      if (data.bypass) {
+        renderPasien(data.bypass);
       }
+    })
+    .catch(err => console.error('Error get_last:', err));
+}, 3000);
 
-      html += `</tr>`;
-    });
-
-    html += `</tbody></table>`;
-    document.querySelector('.poli-grid').innerHTML = html;
-  }
-
-  function bypassPanggil(pasien) {
-    // Jalur bypass: gunakan nm_pasien_bersih dari JSON
-    let namaBersih = pasien.nm_pasien_bersih || pasien.nm_pasien;
-
-    // Simpan ke localStorage sebagai bypass panggilan
-    localStorage.setItem("bypassCall", JSON.stringify(pasien));
-
-    // Notifikasi inline
-    let notif = document.getElementById("notif");
-    notif.innerText = "Pasien " + namaBersih + " dipanggil (bypass).";
-    notif.style.display = "block";
-    setTimeout(() => { notif.style.display = "none"; }, 3000);
-
-    // Suara panggilan (fungsi dari suara.js)
-    if (typeof playSuaraPanggil === "function") {
-      playSuaraPanggil(namaBersih); // hanya kirim nama bersih
-    }
-  }
-
-  // Ambil data pasien dari get_last.php
-  setInterval(() => {
-    fetch('get_last.php')
-      .then(res => res.json())
-      .then(data => {
-        if (data.pasienHariIni) {
-          renderPasien(data.pasienHariIni);
-        }
-      })
-      .catch(err => console.error('Error get_last:', err));
-  }, 3000);
   </script>
 </body>
 </html>

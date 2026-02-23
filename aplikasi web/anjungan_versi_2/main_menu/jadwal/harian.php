@@ -11,18 +11,19 @@ $setting = fetch_assoc("SELECT nama_instansi, alamat_instansi, kabupaten FROM se
 // Tentukan hari (default: hari ini)
 $hari_ini = date('l');
 $mapHari = [
-    'Sunday' => 'AKHAD',
-    'Monday' => 'SENIN',
-    'Tuesday' => 'SELASA',
+    'Sunday'    => 'AKHAD',
+    'Monday'    => 'SENIN',
+    'Tuesday'   => 'SELASA',
     'Wednesday' => 'RABU',
-    'Thursday' => 'KAMIS',
-    'Friday' => 'JUMAT',
-    'Saturday' => 'SABTU'
+    'Thursday'  => 'KAMIS',
+    'Friday'    => 'JUMAT',
+    'Saturday'  => 'SABTU'
 ];
 $hari = $mapHari[$hari_ini];
 
 // Ambil data jadwal dokter untuk hari ini
-$sql = "SELECT d.nm_dokter, p.nm_poli, j.hari_kerja, j.jam_mulai, j.jam_selesai, pg.photo
+$sql = "SELECT d.nm_dokter, p.nm_poli, j.hari_kerja, j.jam_mulai, j.jam_selesai, pg.photo,
+               j.kd_dokter, j.kd_poli, j.kuota
         FROM jadwal j
         JOIN dokter d ON j.kd_dokter = d.kd_dokter
         JOIN poliklinik p ON j.kd_poli = p.kd_poli
@@ -43,14 +44,32 @@ while($row = mysqli_fetch_assoc($result)) {
         ];
     }
     $dokterData[$nama]['jadwal'][] = [
-        'poli'   => $row['nm_poli'],
-        'mulai'  => $row['jam_mulai'],
-        'selesai'=> $row['jam_selesai']
+        'poli'      => $row['nm_poli'],
+        'mulai'     => $row['jam_mulai'],
+        'selesai'   => $row['jam_selesai'],
+        'kd_dokter' => $row['kd_dokter'],
+        'kd_poli'   => $row['kd_poli'],
+        'kuota'     => $row['kuota']
     ];
 }
 
 // Hitung jumlah card
 $count = count($dokterData);
+
+// === Tambahan: mode JSON ===
+if (isset($_GET['format']) && $_GET['format'] === 'json') {
+    header('Content-Type: application/json; charset=utf-8');
+
+    // pastikan semua string diubah ke UTF-8
+    array_walk_recursive($dokterData, function (&$item) {
+        if (is_string($item)) {
+            $item = mb_convert_encoding($item, 'UTF-8', 'auto');
+        }
+    });
+
+    echo json_encode(array_values($dokterData), JSON_UNESCAPED_UNICODE);
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -78,8 +97,8 @@ $count = count($dokterData);
     <div class="grid <?= ($count >= 6 ? 'scrollable' : '') ?>">
       <?php foreach($dokterData as $dokter): ?>
         <?php
-        $photo = $dokter['photo']; // pastikan hanya nama file, bukan path lengkap
-        $baseFolder = basename(dirname(dirname(__DIR__))); // hasilnya 'rs'
+        $photo = $dokter['photo'];
+        $baseFolder = basename(dirname(dirname(__DIR__)));
         $foto = !empty($photo) ? "/{$baseFolder}/webapps/penggajian/{$photo}" : '';
         ?>
         <div class="card jadwal-card">
@@ -120,16 +139,16 @@ $count = count($dokterData);
   <!-- Auto scroll vertikal hanya jika scrollable -->
   <script>
     document.querySelectorAll('.grid.scrollable').forEach(grid => {
-      let direction = 1; // 1 = turun, -1 = naik
+      let direction = 1;
       function autoScroll() {
         grid.scrollTop += direction;
         if (grid.scrollTop + grid.clientHeight >= grid.scrollHeight) {
-          direction = -1; // ganti arah ke atas
+          direction = -1;
         } else if (grid.scrollTop <= 0) {
-          direction = 1; // ganti arah ke bawah
+          direction = 1;
         }
       }
-      setInterval(autoScroll, 50); // kecepatan scroll
+      setInterval(autoScroll, 50);
     });
   </script>
 </body>

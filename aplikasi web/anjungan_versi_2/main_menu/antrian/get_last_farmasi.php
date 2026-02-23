@@ -19,7 +19,7 @@ $sql_nonracik = "SELECT rd.no_resep, ro.no_rawat, ps.nm_pasien,
                  JOIN reg_periksa rp ON ro.no_rawat = rp.no_rawat
                  JOIN pasien ps ON rp.no_rkm_medis = ps.no_rkm_medis
                  JOIN dokter d ON ro.kd_dokter = d.kd_dokter
-                 WHERE ro.status='ralan' AND ro.tgl_peresepan='$today' AND rp.stts = 'Belum'
+                 WHERE ro.status='ralan' AND ro.tgl_peresepan='$today'
                  ORDER BY ro.jam_peresepan DESC";
 $res_nonracik = bukaquery2($sql_nonracik);
 $nonracikan = [];
@@ -27,8 +27,27 @@ while ($row = mysqli_fetch_assoc($res_nonracik)) {
     $row['jam_validasi'] = $row['jam_peresepan'];
     $row['nm_pasien_bersih'] = cleanNamaPasien($row['nm_pasien']);
     $row['nm_pasien'] = $row['nm_pasien_bersih'];
-    $nonracikan[] = $row;
+
+    $no_resep = $row['no_resep'];
+    if (!isset($nonracikan[$no_resep])) {
+        $nonracikan[$no_resep] = [
+            'no_resep' => $no_resep,
+            'no_rawat' => $row['no_rawat'],
+            'nm_pasien' => $row['nm_pasien'],
+            'nm_dokter' => $row['nm_dokter'],
+            'tgl_peresepan' => $row['tgl_peresepan'],
+            'jam_peresepan' => $row['jam_peresepan'],
+            'jam_penyerahan' => $row['jam_penyerahan'],
+            'items' => []
+        ];
+    }
+    $nonracikan[$no_resep]['items'][] = [
+        'kode_brng' => $row['kode_brng'],
+        'jml' => $row['jml'],
+        'aturan_pakai' => $row['aturan_pakai']
+    ];
 }
+$nonracikan = array_values($nonracikan); // ubah ke array numerik
 
 /* --- Racikan --- */
 $sql_racik = "SELECT rr.no_resep, ro.no_rawat, ps.nm_pasien,
@@ -40,7 +59,7 @@ $sql_racik = "SELECT rr.no_resep, ro.no_rawat, ps.nm_pasien,
               JOIN reg_periksa rp ON ro.no_rawat = rp.no_rawat
               JOIN pasien ps ON rp.no_rkm_medis = ps.no_rkm_medis
               JOIN dokter d ON ro.kd_dokter = d.kd_dokter
-              WHERE ro.status='ralan' AND ro.tgl_peresepan='$today' AND rp.stts = 'Belum'
+              WHERE ro.status='ralan' AND ro.tgl_peresepan='$today'
               ORDER BY ro.jam_peresepan DESC";
 $res_racik = bukaquery2($sql_racik);
 $racikan = [];
@@ -48,8 +67,30 @@ while ($row = mysqli_fetch_assoc($res_racik)) {
     $row['jam_validasi'] = $row['jam_peresepan'];
     $row['nm_pasien_bersih'] = cleanNamaPasien($row['nm_pasien']);
     $row['nm_pasien'] = $row['nm_pasien_bersih'];
-    $racikan[] = $row;
+
+    $no_resep = $row['no_resep'];
+    if (!isset($racikan[$no_resep])) {
+        $racikan[$no_resep] = [
+            'no_resep' => $no_resep,
+            'no_rawat' => $row['no_rawat'],
+            'nm_pasien' => $row['nm_pasien'],
+            'nm_dokter' => $row['nm_dokter'],
+            'tgl_peresepan' => $row['tgl_peresepan'],
+            'jam_peresepan' => $row['jam_peresepan'],
+            'jam_penyerahan' => $row['jam_penyerahan'],
+            'items' => []
+        ];
+    }
+    $racikan[$no_resep]['items'][] = [
+        'no_racik' => $row['no_racik'],
+        'nama_racik' => $row['nama_racik'],
+        'kd_racik' => $row['kd_racik'],
+        'jml_dr' => $row['jml_dr'],
+        'aturan_pakai' => $row['aturan_pakai'],
+        'keterangan' => $row['keterangan']
+    ];
 }
+$racikan = array_values($racikan); // ubah ke array numerik
 
 /* --- Gabungan Resep --- */
 $gabunganResep = array_merge($nonracikan, $racikan);
@@ -121,4 +162,3 @@ $output = [
 
 echo json_encode($output, JSON_UNESCAPED_UNICODE);
 exit;
-?>

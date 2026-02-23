@@ -63,7 +63,7 @@ $setting = fetch_assoc("SELECT nama_instansi, alamat_instansi, kabupaten FROM se
 
       <!-- Kolom Antrian -->
       <div class="menu-column">
-        <h3>ANTRIAN</h3>
+        <h3>ANTRIAN DAN ANJUNGAN</h3>
         <div class="menu-cards">
           <a href="antrian/antrian_poli.php" target="_blank">
             <img src="assets/img/antrian_poli.png" alt="Poli">
@@ -73,21 +73,17 @@ $setting = fetch_assoc("SELECT nama_instansi, alamat_instansi, kabupaten FROM se
             <img src="assets/img/antrian_farmasi.png" alt="Farmasi">
             <span>Farmasi</span>
           </a>
-          <a href="antrian/antrian_lab_pk.php" target="_blank">
-            <img src="assets/img/lab_pk.png" alt="Lab PK">
-            <span>Lab. PK</span>
-          </a>
-          <a href="antrian/antrian_lab_pa.php" target="_blank">
-            <img src="assets/img/lab_pa.png" alt="Lab PA">
-            <span>Lab. PA</span>
-          </a>
-          <a href="antrian/antrian_lab_mb.php" target="_blank">
-            <img src="assets/img/lab_micro.png" alt="Lab Micro">
-            <span>Lab. Micro</span>
+          <a href="antrian/antrian_lab_gabung.php" target="_blank">
+            <img src="assets/img/lab_gabung.png" alt="Lab Gabung">
+            <span>Laboratorium</span>
           </a>
           <a href="antrian/antrian_rad.php" target="_blank">
             <img src="assets/img/radiologi.png" alt="Radiologi">
             <span>Radiologi</span>
+          </a>
+          <a href="anjungan/anjungan.php" target="_blank">
+            <img src="assets/img/anjungan.png" alt="Anjungan">
+            <span>Anjungan Mandiri</span>
           </a>
         </div>
 

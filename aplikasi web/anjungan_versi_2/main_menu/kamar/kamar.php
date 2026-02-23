@@ -9,13 +9,14 @@ include_once '../conf/helpers.php';
 $setting = fetch_assoc("SELECT nama_instansi, alamat_instansi, kabupaten FROM setting LIMIT 1");
 
 // Ambil data kamar + nama bangsal + kelas dari tabel kamar
-$sql = "SELECT b.nm_bangsal, k.kelas,
+$sql = "SELECT b.nm_bangsal, k.kelas, k.statusdata,
                COUNT(k.kd_kamar) AS jumlah,
                SUM(CASE WHEN k.status='ISI' THEN 1 ELSE 0 END) AS terisi,
                SUM(CASE WHEN k.status='KOSONG' THEN 1 ELSE 0 END) AS kosong
         FROM kamar k
         JOIN bangsal b ON k.kd_bangsal = b.kd_bangsal
-        GROUP BY b.nm_bangsal, k.kelas
+        Where k.statusdata = '1'
+        GROUP BY b.nm_bangsal, k.kelas, k.statusdata
         ORDER BY k.kelas ASC";
 $result = bukaquery($sql);
 

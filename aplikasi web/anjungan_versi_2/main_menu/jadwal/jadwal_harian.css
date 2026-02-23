@@ -118,6 +118,8 @@ h2 br {
     margin-right: 12px;
     /* jarak ke teks */
     padding: 4px;
+    border: 2px solid #4fc3f7;
+    /* opsional: bingkai */
 }
 
 .info-dokter {
