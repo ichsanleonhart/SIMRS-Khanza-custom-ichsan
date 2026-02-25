@@ -23,7 +23,7 @@ try {
     // Query menggunakan LEFT JOIN dpjp_ranap agar pasien tanpa DPJP tetap terbaca
     $sql = "SELECT ki.no_rawat, r.no_rkm_medis, p.nm_pasien, p.jk, 
             ki.tgl_masuk, ki.jam_masuk, ki.stts_pulang, k.kd_kamar, b.nm_bangsal, pj.png_jawab,
-            dr.kd_dokter as dpjp, 
+            dr.kd_dokter as dpjp, d_dpjp.nm_dokter as nm_dpjp, 
             (SELECT COUNT(*) FROM pemeriksaan_ranap pr WHERE pr.no_rawat = ki.no_rawat) as ttv_count,
             (SELECT COUNT(*) FROM resume_pasien_ranap res WHERE res.no_rawat = ki.no_rawat) as resume_count 
             FROM kamar_inap ki
@@ -32,7 +32,8 @@ try {
             JOIN kamar k ON ki.kd_kamar = k.kd_kamar
             JOIN bangsal b ON k.kd_bangsal = b.kd_bangsal
             JOIN penjab pj ON r.kd_pj = pj.kd_pj 
-            LEFT JOIN dpjp_ranap dr ON ki.no_rawat = dr.no_rawat ";
+            LEFT JOIN dpjp_ranap dr ON ki.no_rawat = dr.no_rawat
+            LEFT JOIN dokter d_dpjp ON dr.kd_dokter = d_dpjp.kd_dokter ";
 
     $params = [];
     $sql .= " WHERE 1=1 ";
@@ -121,6 +122,8 @@ require_once '../../../layout/sidebar.php';
                             <small class="text-muted">RM: <?= $row['no_rkm_medis'] ?> | <?= $row['no_rawat'] ?></small>
                             <?php if(empty($row['dpjp'])): ?>
                                 <br><span class="badge bg-danger mt-1"><i class="fas fa-exclamation-triangle"></i> DPJP belum diset!</span>
+                            <?php else: ?>
+                                <br><span class="badge bg-success mt-1"><i class="fas fa-user-md"></i> DPJP: <?= $row['nm_dpjp'] ?></span>
                             <?php endif; ?>
                         </td>
                         <td>

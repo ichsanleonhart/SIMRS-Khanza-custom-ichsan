@@ -281,9 +281,15 @@ if ($status_pulang == 'Masih Dirawat') {
 
 // Search
 if (!empty($search)) {
-    $where .= " AND (ki.no_rawat LIKE ? OR p.nm_pasien LIKE ? OR d.nm_dokter LIKE ? OR b.nm_bangsal LIKE ?) ";
+    $where .= " AND (
+        ki.no_rawat LIKE ? 
+        OR p.nm_pasien LIKE ? 
+        OR d.nm_dokter LIKE ? 
+        OR b.nm_bangsal LIKE ? 
+        OR EXISTS (SELECT 1 FROM dpjp_ranap dr_search JOIN dokter d2_search ON dr_search.kd_dokter = d2_search.kd_dokter WHERE dr_search.no_rawat = ki.no_rawat AND d2_search.nm_dokter LIKE ?)
+    ) ";
     $s_wild = "%$search%";
-    $params[] = $s_wild; $params[] = $s_wild; $params[] = $s_wild; $params[] = $s_wild;
+    $params[] = $s_wild; $params[] = $s_wild; $params[] = $s_wild; $params[] = $s_wild; $params[] = $s_wild;
 }
 
 // Order By
@@ -355,7 +361,11 @@ foreach ($raw_data as $r) {
     // 4. Dokter DPJP
     $dpjp = $r['nm_dokter'];
     $q_dpjp = fetchOne($pdo, "SELECT d.nm_dokter FROM dpjp_ranap dr JOIN dokter d ON dr.kd_dokter = d.kd_dokter WHERE dr.no_rawat=? LIMIT 1", [$r['no_rawat']]);
-    if($q_dpjp) $dpjp = $q_dpjp['nm_dokter'];
+    if($q_dpjp) {
+        $dpjp = "<span class='text-success fw-bold'><i class='fas fa-user-md'></i> DPJP: " . $q_dpjp['nm_dokter'] . "</span>";
+    } else {
+        $dpjp = "<span class='text-danger fw-bold'><i class='fas fa-exclamation-triangle'></i> DPJP belum diset!</span><br><span style='font-size:0.7rem'>(Awal: " . $r['nm_dokter'] . ")</span>";
+    }
 
     $data_json[] = [
         "waktu_short" => formatTglSingkat($r['tgl_masuk'] . ' ' . $r['jam_masuk']),

@@ -208,7 +208,7 @@ $(document).ready(function() {
                 "data": "kamar",
                 "render": function(data, type, row) {
                     return `<div class="small fw-bold text-primary text-wrap">${data}</div>
-                            <div class="small text-muted text-wrap" style="font-size:0.75rem">${row.dokter}</div>`;
+                            <div class="small text-muted text-wrap mt-1" style="font-size:0.75rem">${row.dokter}</div>`;
                 }
             },
 
