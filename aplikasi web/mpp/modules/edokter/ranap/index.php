@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // File: modules/edokter/ranap/index.php
 require_once '../../../config/config.php';
 require_once '../../../config/database.php';
@@ -6,7 +6,6 @@ require_once '../../../helpers/auth_helper.php';
 
 cekLogin();
 
-// Cek Super Admin atau Hak Akses
 $is_superadmin = isset($_SESSION['role']) && $_SESSION['role'] === 'superadmin';
 if (!$is_superadmin && !cekAkses('soap_perawatan')) { 
     die("Akses Ditolak: Anda tidak memiliki hak akses E-Dokter."); 
@@ -14,16 +13,18 @@ if (!$is_superadmin && !cekAkses('soap_perawatan')) {
 
 $kd_dokter = $_SESSION['user_id']; 
 
-// Filter
 $stts_pulang = $_GET['stts'] ?? 'Belum';
 $tgl_awal  = $_GET['tgl_awal'] ?? date('Y-m-d', strtotime('-7 days')); 
 $tgl_akhir = $_GET['tgl_akhir'] ?? date('Y-m-d');
 
 try {
-    // Query menggunakan LEFT JOIN dpjp_ranap agar pasien tanpa DPJP tetap terbaca
+    // FIX: Gunakan subquery untuk DPJP agar tidak terjadi row multiplication
+    // akibat relasi 1-to-many di tabel dpjp_ranap.
+    // Semua pasien aktif ditampilkan (sesuai view monitoring kunjungan).
     $sql = "SELECT ki.no_rawat, r.no_rkm_medis, p.nm_pasien, p.jk, 
             ki.tgl_masuk, ki.jam_masuk, ki.stts_pulang, k.kd_kamar, b.nm_bangsal, pj.png_jawab,
-            dr.kd_dokter as dpjp, d_dpjp.nm_dokter as nm_dpjp, 
+            (SELECT dr2.kd_dokter FROM dpjp_ranap dr2 WHERE dr2.no_rawat = ki.no_rawat LIMIT 1) as dpjp,
+            (SELECT d2.nm_dokter FROM dpjp_ranap dr2 JOIN dokter d2 ON dr2.kd_dokter = d2.kd_dokter WHERE dr2.no_rawat = ki.no_rawat LIMIT 1) as nm_dpjp,
             (SELECT COUNT(*) FROM pemeriksaan_ranap pr WHERE pr.no_rawat = ki.no_rawat) as ttv_count,
             (SELECT COUNT(*) FROM resume_pasien_ranap res WHERE res.no_rawat = ki.no_rawat) as resume_count 
             FROM kamar_inap ki
@@ -31,18 +32,10 @@ try {
             JOIN pasien p ON r.no_rkm_medis = p.no_rkm_medis 
             JOIN kamar k ON ki.kd_kamar = k.kd_kamar
             JOIN bangsal b ON k.kd_bangsal = b.kd_bangsal
-            JOIN penjab pj ON r.kd_pj = pj.kd_pj 
-            LEFT JOIN dpjp_ranap dr ON ki.no_rawat = dr.no_rawat
-            LEFT JOIN dokter d_dpjp ON dr.kd_dokter = d_dpjp.kd_dokter ";
+            JOIN penjab pj ON r.kd_pj = pj.kd_pj ";
 
     $params = [];
     $sql .= " WHERE 1=1 ";
-
-    // Tampilkan pasien jika DPJP adalah dokter login saat ini, ATAU belum di-set sama sekali
-    if (!$is_superadmin) {
-        $sql .= " AND (dr.kd_dokter = :dokter OR dr.kd_dokter IS NULL) ";
-        $params['dokter'] = $kd_dokter;
-    }
 
     if ($stts_pulang == 'Belum') {
         $sql .= " AND ki.stts_pulang = '-' ";
@@ -136,7 +129,6 @@ require_once '../../../layout/sidebar.php';
                             <?php else: ?>
                                 <span class="badge bg-warning text-dark" title="CPPT Belum Diisi"><i class="fas fa-exclamation"></i> No CPPT</span>
                             <?php endif; ?>
-
                             <?php if($row['resume_count'] > 0): ?>
                                 <span class="badge bg-success" title="Resume Medis Sudah Dibuat"><i class="fas fa-file-medical"></i> Resume</span>
                             <?php else: ?>
@@ -144,9 +136,20 @@ require_once '../../../layout/sidebar.php';
                             <?php endif; ?>
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-primary btn-sm btn-periksa fw-bold" data-rawat="<?= $row['no_rawat'] ?>" data-nama="<?= $row['nm_pasien'] ?>">
-                                <i class="fas fa-laptop-medical"></i> ERM
-                            </button>
+                            <div class="dropdown">
+                                <button class="btn btn-primary btn-sm fw-bold dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-bars"></i> Aksi
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow">
+                                    <li><h6 class="dropdown-header text-primary fw-bold"><i class="fas fa-notes-medical"></i> Layanan Medis</h6></li>
+                                    <li><a class="dropdown-item btn-periksa" href="#" data-action="cppt" data-rawat="<?= $row['no_rawat'] ?>" data-nama="<?= htmlspecialchars($row['nm_pasien'], ENT_QUOTES) ?>"><i class="fas fa-edit me-2 text-primary"></i> Input CPPT</a></li>
+                                    <li><a class="dropdown-item btn-periksa" href="#" data-action="resep" data-rawat="<?= $row['no_rawat'] ?>" data-nama="<?= htmlspecialchars($row['nm_pasien'], ENT_QUOTES) ?>"><i class="fas fa-pills me-2 text-warning"></i> Resep Obat</a></li>
+                                    <li><a class="dropdown-item btn-periksa" href="#" data-action="resume" data-rawat="<?= $row['no_rawat'] ?>" data-nama="<?= htmlspecialchars($row['nm_pasien'], ENT_QUOTES) ?>"><i class="fas fa-file-medical me-2 text-success"></i> Resume Medis</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header text-info fw-bold"><i class="fas fa-folder-open"></i> Rekam Medis</h6></li>
+                                    <li><a class="dropdown-item btn-periksa" href="#" data-action="history" data-rawat="<?= $row['no_rawat'] ?>" data-nama="<?= htmlspecialchars($row['nm_pasien'], ENT_QUOTES) ?>"><i class="fas fa-history me-2 text-secondary"></i> Riwayat Pasien</a></li>
+                                </ul>
+                            </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -163,27 +166,44 @@ require_once '../../../layout/sidebar.php';
                 <h5 class="modal-title fw-bold" id="ermTitle"><i class="fas fa-laptop-medical"></i> E-Rekam Medis Inap</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body bg-light p-2">
-                <ul class="nav nav-tabs fw-bold flex-nowrap overflow-auto" id="ermTabs" role="tablist" style="white-space: nowrap;">
-                    <?php if(!$is_superadmin): ?>
-                        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-cppt"><i class="fas fa-edit"></i> Input CPPT</a></li>
-                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-resume"><i class="fas fa-file-medical"></i> Input Resume</a></li>
-                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-resep"><i class="fas fa-pills"></i> Input Resep</a></li>
-                    <?php endif; ?>
-                    <li class="nav-item"><a class="nav-link <?= $is_superadmin ? 'active' : '' ?> load-ajax" data-type="cppt" data-bs-toggle="tab" href="#tab-history"><i class="fas fa-history"></i> Riwayat CPPT</a></li>
-                    <li class="nav-item"><a class="nav-link load-ajax" data-type="lab" data-bs-toggle="tab" href="#tab-lab"><i class="fas fa-flask"></i> Hasil Lab</a></li>
-                    <li class="nav-item"><a class="nav-link load-ajax" data-type="rad" data-bs-toggle="tab" href="#tab-rad"><i class="fas fa-x-ray"></i> Radiologi</a></li>
-                </ul>
-
-                <div class="tab-content bg-white border border-top-0 p-3" style="min-height: 80vh;">
-                    <?php if(!$is_superadmin): ?>
-                        <div class="tab-pane fade show active" id="tab-cppt"></div>
-                        <div class="tab-pane fade" id="tab-resume"></div>
-                        <div class="tab-pane fade" id="tab-resep"></div>
-                    <?php endif; ?>
-                    <div class="tab-pane fade <?= $is_superadmin ? 'show active' : '' ?>" id="tab-history"></div>
-                    <div class="tab-pane fade" id="tab-lab"></div>
-                    <div class="tab-pane fade" id="tab-rad"></div>
+            <div class="modal-body bg-light p-0">
+                <div class="row g-0" style="height: calc(100vh - 55px);">
+                    <div class="col-md-5 border-end d-flex flex-column h-100">
+                        <div class="bg-white px-2 pt-2 border-bottom flex-shrink-0">
+                            <?php if(!$is_superadmin): ?>
+                            <ul class="nav nav-tabs fw-bold flex-nowrap overflow-auto" id="leftTabs" role="tablist" style="white-space: nowrap;">
+                                <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-cppt"><i class="fas fa-edit"></i> CPPT</a></li>
+                                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-resep"><i class="fas fa-pills"></i> Resep</a></li>
+                                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-resume"><i class="fas fa-file-medical"></i> Resume</a></li>
+                            </ul>
+                            <?php else: ?>
+                            <div class="py-2 ps-2 text-muted small"><i class="fas fa-lock me-1"></i> Mode Superadmin - Input Dikunci</div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="tab-content flex-grow-1 overflow-auto bg-white p-3" id="leftTabContent">
+                            <?php if(!$is_superadmin): ?>
+                                <div class="tab-pane fade show active" id="tab-cppt"></div>
+                                <div class="tab-pane fade" id="tab-resep"></div>
+                                <div class="tab-pane fade" id="tab-resume"></div>
+                            <?php else: ?>
+                                <div class="alert alert-warning mt-3"><i class="fas fa-lock me-2"></i>Mode Super Admin: Pengisian dikunci.</div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="col-md-7 d-flex flex-column h-100">
+                        <div class="bg-white px-2 pt-2 border-bottom flex-shrink-0">
+                            <ul class="nav nav-tabs fw-bold flex-nowrap overflow-auto" id="rightTabs" role="tablist" style="white-space: nowrap;">
+                                <li class="nav-item"><a class="nav-link active load-ajax" data-type="cppt" data-bs-toggle="tab" href="#tab-history"><i class="fas fa-history"></i> Riwayat Pasien</a></li>
+                                <li class="nav-item"><a class="nav-link load-ajax" data-type="lab" data-bs-toggle="tab" href="#tab-lab"><i class="fas fa-flask"></i> Hasil Lab</a></li>
+                                <li class="nav-item"><a class="nav-link load-ajax" data-type="rad" data-bs-toggle="tab" href="#tab-rad"><i class="fas fa-x-ray"></i> Radiologi</a></li>
+                            </ul>
+                        </div>
+                        <div class="tab-content flex-grow-1 overflow-auto bg-light p-3" id="rightTabContent">
+                            <div class="tab-pane fade show active" id="tab-history"></div>
+                            <div class="tab-pane fade" id="tab-lab"></div>
+                            <div class="tab-pane fade" id="tab-rad"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -204,40 +224,74 @@ $(document).ready(function() {
         "language": { "search": "Cari Pasien/RM/Kamar:" }
     });
 
-    $('#tblRanap tbody').on('click', '.btn-periksa', function() {
-        activeNoRawat = $(this).data('rawat');
-        var nama = $(this).data('nama');
-        
+    // ======================================================
+    // Klik item di dropdown Aksi
+    // ======================================================
+    $('#tblRanap tbody').on('click', '.btn-periksa', function(e) {
+        e.preventDefault();
+        var actionType = $(this).data('action');
+        activeNoRawat   = $(this).data('rawat');
+        var nama        = $(this).data('nama');
+
         $('#ermTitle').html('<i class="fas fa-laptop-medical"></i> ERM Ranap: ' + nama + ' (' + activeNoRawat + ')');
+
+        // Reset panel kanan
         $('#tab-history, #tab-lab, #tab-rad').html('<div class="text-center mt-5"><div class="spinner-border text-primary"></div></div>');
-        
+
         if (!isSuperadmin) {
+            // CPPT & Resume: load langsung (tidak punya Select2 isu)
             $('#tab-cppt').html('<div class="text-center mt-5"><div class="spinner-border text-primary"></div></div>');
             $('#tab-cppt').load('form_cppt.php?no_rawat=' + activeNoRawat);
-            
+
             $('#tab-resume').html('<div class="text-center mt-5"><div class="spinner-border text-success"></div></div>');
             $('#tab-resume').load('form_resume.php?no_rawat=' + activeNoRawat);
 
-            $('#tab-resep').html('<div class="text-center mt-5"><div class="spinner-border text-warning"></div></div>');
-            $('#tab-resep').load('form_resep.php?no_rawat=' + activeNoRawat);
+            // FIX RACE CONDITION SELECT2:
+            // Jangan load form_resep.php sekarang — simpan data & tandai belum loaded.
+            // Form akan diload SETELAH modal selesai animasi (shown.bs.modal).
+            $('#tab-resep').html('<div class="text-center mt-5"><div class="spinner-border text-warning"></div></div>')
+                           .data('no-rawat', activeNoRawat)
+                           .data('loaded', false);
 
-            $('#ermTabs a[href="#tab-cppt"]').tab('show');
-        } else {
-            $('#ermTabs a[href="#tab-history"]').tab('show').trigger('shown.bs.tab');
+            // Aktifkan tab kiri sesuai aksi
+            if      (actionType === 'cppt')   { $('#leftTabs a[href="#tab-cppt"]').tab('show'); }
+            else if (actionType === 'resep')  { $('#leftTabs a[href="#tab-resep"]').tab('show'); }
+            else if (actionType === 'resume') { $('#leftTabs a[href="#tab-resume"]').tab('show'); }
+            else                              { $('#leftTabs a[href="#tab-cppt"]').tab('show'); }
         }
-        
+
+        $('#rightTabs a[href="#tab-history"]').tab('show').trigger('shown.bs.tab');
         $('#modalERM').modal('show');
     });
 
-    $('.load-ajax').on('shown.bs.tab', function (e) {
+    // ======================================================
+    // FIX: Load form_resep.php SETELAH modal selesai animasi buka
+    // Ini mencegah race condition Select2 (dropdownParent belum visible)
+    // ======================================================
+    $('#modalERM').on('shown.bs.modal', function() {
+        if (isSuperadmin) return;
+        var $tabResep = $('#tab-resep');
+        if (!$tabResep.data('loaded') && $tabResep.data('no-rawat')) {
+            var noRawat = $tabResep.data('no-rawat');
+            $tabResep.load('form_resep.php?no_rawat=' + noRawat, function() {
+                $tabResep.data('loaded', true);
+            });
+        }
+    });
+
+    // ======================================================
+    // Load AJAX panel kanan (Riwayat / Lab / Rad)
+    // ======================================================
+    $(document).on('shown.bs.tab', '.load-ajax', function (e) {
         var targetTab = $(e.target).attr("href");
         var type = $(e.target).data("type");
         var url = baseUrl + 'helpers/ajax/view_' + type + '.php';
-        
-        if ($(targetTab).html().includes('spinner-border')) {
+
+        if ($(targetTab).html().includes('spinner-border') || $(targetTab).is(':empty')) {
+            $(targetTab).html('<div class="text-center mt-5"><div class="spinner-border text-primary"></div></div>');
             $.post(url, { no_rawat: activeNoRawat }, function(data) {
                 $(targetTab).html(data);
-            }).fail(function(xhr) {
+            }).fail(function() {
                 $(targetTab).html('<div class="alert alert-danger">Gagal memuat data.</div>');
             });
         }

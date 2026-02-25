@@ -1,0 +1,53 @@
+# File: .antigravityrules
+# Aturan global komprehensif untuk agen Antigravity di environment Windows (XAMPP).
+# Prioritas utama: Keamanan tingkat tinggi, larangan penggunaan alias, dan mencegah halusinasi OS Linux.
+
+ENV: Windows, PHP 7.3, Apache2, PowerShell, XAMPP
+PHP_PATH: "C:\xampp\php\php.exe"
+MYSQL_PATH: "C:\xampp\mysql\bin\mysql.exe"
+
+# 1. ATURAN PATH DAN DIREKTORI (MENCEGAH HALUSINASI LINUX):
+# - DILARANG mengasumsikan struktur direktori ala Linux seperti '/var/www/html'.
+# - Direktori root web saat ini adalah 'C:\xampp\htdocs\'.
+# - Gunakan backslash '\' untuk path Windows native, atau forward slash '/' jika mengeksekusi skrip internal PHP.
+
+# 2. ATURAN EKSEKUSI PHP:
+# - Selalu gunakan 'cmd /c' dikombinasikan dengan PHP_PATH absolut demi keamanan.
+Always use 'cmd /c C:\xampp\php\php.exe' for PHP execution to prevent path hijacking and terminal hanging.
+
+# 3. ATURAN PERINTAH SISTEM OPERASI (POWERSHELL STRICT MODE):
+# - DILARANG KERAS menggunakan utilitas Linux: grep, sed, awk, head, tail, cat, ls, rm, cp, mv.
+# - DILARANG KERAS menggunakan alias PowerShell (misal: 'ls', 'rm', 'cat'). 
+# - Selalu gunakan command asli PowerShell secara penuh.
+# Mapping wajib untuk Agen:
+#   - Baca file: Get-Content
+#   - Cari teks: Select-String
+#   - Hapus file: Remove-Item
+#   - Kopi file: Copy-Item
+#   - Pindah file: Move-Item
+#   - List direktori: Get-ChildItem
+
+# 4. ATURAN KEAMANAN DATABASE DAN KODE:
+# - Eksekusi shell untuk MySQL wajib menggunakan MYSQL_PATH absolut.
+# - DILARANG KERAS berasumsi atau membayangkan struktur tabel database yang baru.
+# - Agen WAJIB bertanya struktur tabel ('DESCRIBE nama_tabel') kepada pengguna sebelum membuat atau mengeksekusi query.
+# - Agen WAJIB menerapkan prinsip kehati-hatian tingkat tinggi terhadap SQL Injection, XSS attack, manipulasi Tokenize, dan Session Injector di setiap baris kode yang disarankan.
+
+# 5. ATURAN KOMUNIKASI DAN OUTPUT AGEN:
+# - Berikan jawaban langsung, jangan melakukan sugarcoating. Katakan tidak jika instruksi tidak bisa dilakukan dengan aman.
+# - Prioritaskan menampilkan kode secara utuh agar bisa langsung di-copy paste oleh pengguna.
+# - Selalu berikan komentar di dalam kode untuk mempermudah pengguna mempelajari fungsi tersebut.
+# - DILARANG menggunakan alias pada query SQL (seperti 'SELECT a.id FROM table a') kecuali benar-benar tidak terhindarkan.
+
+# 6. ATURAN PEMAHAMAN DATABASE:
+# - Referensi struktur tabel absolut ada di file 'schema_sik_master.sql' di root direktori.
+# - DILARANG KERAS berasumsi atau mengarang kolom tabel.
+# - Jika diminta membuat query SQL, WAJIB membaca struktur tabel yang relevan dari 'schema.sql' menggunakan Select-String terlebih dahulu.
+# - Jika struktur tabel tidak ada di 'schema.sql', WAJIB bertanya kepada pengguna.
+
+# 7. ATURAN MANIPULASI FILE (MENGATASI BUG MULTI_REPLACE DAN WRITE_TO_FILE):
+# - DILARANG menggunakan tool internal 'multi_replace'. Tool ini selalu gagal di environment Windows karena masalah CRLF vs LF.
+# - Jika harus mengedit file, WAJIB gunakan tool untuk menulis ulang seluruh file (overwrite keseluruhan) atau gunakan 'write_to_file'.
+# - Jika internal tool masih gagal, agen WAJIB langsung melakukan fallback menggunakan perintah native PowerShell:
+#   Untuk menimpa file: Set-Content -Path "lokasi\file.php" -Value "kode utuh" -Encoding UTF8
+#   Untuk menambah di akhir file: Add-Content -Path "lokasi\file.php" -Value "kode tambahan" -Encoding UTF8

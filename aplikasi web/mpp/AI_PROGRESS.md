@@ -4,18 +4,11 @@ File ini digunakan untuk sinkronisasi konteks AI di berbagai *device* (Komputer 
 
 ## 🟢 Status Saat Ini (25 Februari 2026)
 - **Modul**: `modules/edokter/ranap/index.php`
-- **Pencapaian Terakhir**: Memperbaiki sistem pencarian dan tampilan DPJP di tabel pasien rawat inap E-Dokter. Mengubah query menjadi `LEFT JOIN` ke tabel `dokter` sehingga nama DPJP muncul bila sudah diset.
+- **Pencapaian Terakhir**: Berhasil merombak UI/UX form ERM. Tombol aksi tunggal telah diubah menjadi **Dropdown** dengan kategori per menu. Modal raksasa dengan banyak *tab* kini diganti menjadi *single modal* yang meload satu *form* saja via AJAX agar aplikasi jauh lebih ringan dan UI/UX lebih rapi.
 
 ## 🟡 Rencana Selanjutnya (Next Action)
 
-### 1. Rombak UI/UX Tombol Aksi (ERM)
-- **Masalah Saat Ini**: Form ERM (E-Rekam Medis) menggunakan satu modal raksasa dengan banyak tab (CPPT, Resume, Resep, Lab, Rad, dll). Berpotensi membingungkan user jika menu bertambah banyak.
-- **Solusi**: 
-  - Ubah tombol tunggal [ ERM ] di kolom aksi menjadi **Tombol Dropdown**.
-  - Kategorikan menu (*Medis, Penunjang, Lainnya*, dll).
-  - Setiap menu memanggil modul/modal yang super ringan dan fokus hanya pada satu *form* (misal: klik CPPT hanya memunculkan form CPPT).
-
-### 2. Integrasi Form Medis dengan Logic SIMKES Khanza (Java -> PHP)
+### 1. Integrasi Form Medis dengan Logic SIMKES Khanza (Java -> PHP)
 - **Tujuan**: Menerjemahkan logika simpan/update/hapus dari kode `*.java` aplikasi *desktop* Khanza menjadi PHP.
 - **Workflow**:
   1. *User* menyediakan *path* ke file java referensi (atau *paste* di obrolan).

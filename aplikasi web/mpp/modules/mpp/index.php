@@ -5,7 +5,10 @@ require_once '../../config/database.php';
 require_once '../../helpers/auth_helper.php';
 
 cekLogin();
-if (!cekAkses('mpp_skrining')) { die("Akses Ditolak"); }
+if (!cekAkses('mpp_skrining')) {
+    header("Location: " . $base_url . "modules/dashboard/index.php");
+    exit;
+}
 
 require_once '../../layout/header.php';
 require_once '../../layout/sidebar.php';

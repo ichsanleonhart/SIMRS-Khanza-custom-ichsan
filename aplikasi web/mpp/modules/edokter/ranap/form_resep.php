@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // File: modules/edokter/ranap/form_resep.php
 require_once '../../../config/config.php'; 
 require_once '../../../config/database.php';
@@ -193,10 +193,17 @@ try { $metode_racik = $pdo->query("SELECT kd_racik, nm_racik FROM metode_racik")
 $(document).ready(function() {
     var ajaxObatUrl = '<?= $base_url ?>helpers/ajax/ajax_obat.php';
     var ajaxAturanUrl = '<?= $base_url ?>helpers/ajax/ajax_aturan.php';
+
+    // WAJIB: Cegah Bootstrap modal merampas fokus dari Select2 search input
+    if (typeof $.fn.modal !== 'undefined' && typeof $.fn.modal.Constructor !== 'undefined') {
+        $.fn.modal.Constructor.prototype._enforceFocus = function() {};
+    }
     
-    $.fn.modal.Constructor.prototype._enforceFocus = function() {};
 
     // Inisialisasi Select2
+    // Destroy instance lama sebelum re-init (cegah konflik)
+    try { $('.select-obat').select2('destroy'); } catch(e) {}
+    try { $('.select-aturan').select2('destroy'); } catch(e) {}
     $('.select-obat').select2({
         placeholder: 'Ketik nama obat (Stok > 0)...', dropdownParent: $('#modalERM .modal-content'),
         ajax: { url: ajaxObatUrl, dataType: 'json', delay: 300, data: function (p) { return { q: p.term }; }, processResults: function (d) { return { results: d.results }; }, cache: true }
@@ -267,8 +274,6 @@ $(document).ready(function() {
         </tr>`;
         $('#rowEmptyUmum').remove(); $('#tblUmum tbody').append(row);
         
-        var hiddenInputs = $(row).find('input[type="hidden"]').clone();
-        $('#formResepRanap').append(hiddenInputs);
 
         $('#obat_umum').val(null).trigger('change'); $('#jml_umum').val(''); $('#aturan_umum').val(null).trigger('change');
     });
@@ -296,8 +301,6 @@ $(document).ready(function() {
         </tr>`;
         $('#rowEmptyRacikan').remove(); $('#tblRacikan tbody').append(row);
         
-        var hiddenInputs = $(row).find('input[type="hidden"]').clone();
-        $('#formResepRanap').append(hiddenInputs);
 
         no_racik_counter++; $('#nama_racikan').val(''); $('#jml_racikan').val(''); $('#aturan_racikan').val(null).trigger('change');
     });
@@ -330,8 +333,6 @@ $(document).ready(function() {
         </div>`;
         $('#detailList_' + target_no_racik).append(detailHtml);
         
-        var hiddenInputs = $(detailHtml).find('input[type="hidden"]').clone();
-        $('#formResepRanap').append(hiddenInputs);
 
         $('#obat_racik_det').val(null).trigger('change'); $('#kandungan_racik_det').val(''); $('#txt_kapasitas_det').val(''); $('#jml_racik_det').val('');
     });
@@ -350,8 +351,6 @@ $(document).ready(function() {
         </tr>`;
         $('#rowEmptyPulang').remove(); $('#tblPulang tbody').append(row);
         
-        var hiddenInputs = $(row).find('input[type="hidden"]').clone();
-        $('#formResepPulang').append(hiddenInputs);
 
         $('#obat_pulang').val(null).trigger('change'); $('#jml_pulang').val(''); $('#aturan_pulang').val(null).trigger('change');
     });

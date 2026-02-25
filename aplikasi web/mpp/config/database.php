@@ -2,7 +2,7 @@
 // File: config/database.php
 
 // Ganti sesuai settingan database kamu
-$host = '192.168.196.122';
+$host = '192.168.1.5';
 $db   = 'sik_master'; // Sesuai nama schema di file sql
 $user = 'client';       // Default XAMPP
 $pass = 'epotoransu';           // Default XAMPP kosong

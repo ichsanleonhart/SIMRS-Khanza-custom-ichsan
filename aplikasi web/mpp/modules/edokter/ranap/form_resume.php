@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // File: modules/edokter/ranap/form_resume.php
 require_once '../../../config/config.php';
 require_once '../../../config/database.php';
@@ -278,7 +278,12 @@ $(document).ready(function() {
             success: function(res) {
                 btn.prop('disabled', false).html(ori);
                 if(res.status == 'success') {
-                    alert("SUKSES: " + res.message + "\n\nSilakan lanjutkan mengisi form di Tab lain atau tutup jendela ini.");
+                    // Tampilkan notif inline
+var $notif = $('<div class="alert alert-success alert-dismissible py-2 mb-3"><i class="fas fa-check-circle me-1"></i><strong>Resume tersimpan!</strong> ' + res.message + '<button type="button" class="btn-close py-2" data-bs-dismiss="alert"></button></div>');
+                    if ($('#resume-notif').length) { $('#resume-notif').html($notif); } else { $('#formResumeRanap').prepend($notif); }
+                    setTimeout(function(){ $notif.fadeOut(500); }, 4000);
+                    // Auto-refresh riwayat di panel kanan
+                    if (typeof refreshRiwayat === 'function') { refreshRiwayat(); }
                 } else {
                     alert("GAGAL: " + res.message);
                 }

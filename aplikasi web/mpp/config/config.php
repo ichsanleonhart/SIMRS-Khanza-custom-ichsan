@@ -6,7 +6,7 @@
 $base_url = "//" . $_SERVER['HTTP_HOST'] . "/mpp/";
 
 // 2. Konfigurasi Lokasi Webapps (SUMBER GAMBAR KHANZA)
-$webapps_url = "http://localhost/webapps/";
+$webapps_url = "http://192.168.1.5/webapps/";
 
 // 3. Path Absolut
 define('BASE_PATH', dirname(__DIR__) . '/');

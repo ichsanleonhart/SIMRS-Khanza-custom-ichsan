@@ -9,15 +9,28 @@ session_start();
 if (isset($_SESSION['is_login']) && $_SESSION['is_login'] === true) {
     if (isset($_SESSION['role']) && $_SESSION['role'] === 'superadmin') {
         header("Location: " . $base_url . "modules/dashboard/index.php");
-    } elseif (isset($_SESSION['hak_akses']['mpp_skrining']) && $_SESSION['hak_akses']['mpp_skrining'] === 'true') {
-        header("Location: " . $base_url . "modules/dashboard/index.php");
-    } else {
-        header("Location: " . $base_url . "modules/edokter/ralan/index.php");
+        exit;
     }
-    exit;
+    elseif (isset($_SESSION['hak_akses']['mpp_skrining']) && $_SESSION['hak_akses']['mpp_skrining'] === 'true') {
+        header("Location: " . $base_url . "modules/dashboard/index.php");
+        exit;
+    }
+    elseif (isset($_SESSION['hak_akses']['soap_perawatan']) && $_SESSION['hak_akses']['soap_perawatan'] === 'true') {
+        header("Location: " . $base_url . "modules/edokter/index.php");
+        exit;
+    }
+    else {
+        // Hancurkan session jika tidak punya hak sama sekali
+        session_destroy();
+        header("Location: " . $base_url . "modules/auth/login.php?error=no_access");
+        exit;
+    }
 }
 
 $error = '';
+if (isset($_GET['error']) && $_GET['error'] === 'no_access') {
+    $error = "Akses Ditolak: Anda tidak memiliki hak akses di sistem ini.";
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
@@ -41,19 +54,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Verifikasi User Biasa
     if ($user_data && $user_data['dekripsi_pass'] === $password) {
-        
+
         // --- GATEKEEPER: Cek keberadaan user di tabel roles ---
         $stmt_role = $pdo->prepare("SELECT role FROM roles WHERE username = ?");
         $stmt_role->execute([$username]);
         $role_data = $stmt_role->fetch();
 
         if ($role_data) {
-            $login_sukses = true;
-        } else {
+            // --- GATEKEEPER MINIMAL HAK AKSES ---
+            if ($user_data['mpp_skrining'] !== 'true' && $user_data['soap_perawatan'] !== 'true') {
+                $error = "Login Gagal: Anda tidak memiliki hak akses MPP maupun E-Dokter.";
+            }
+            else {
+                $login_sukses = true;
+            }
+        }
+        else {
             $error = "Login Gagal: Akun Anda belum terdaftar sebagai pengguna portal MPP/E-Dokter.";
         }
-        
-    } else {
+
+    }
+    else {
         // --- SKENARIO 2: CEK TABEL ADMIN (Super Admin IT) ---
         $stmt_admin = $pdo->prepare("
             SELECT 
@@ -68,8 +89,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($admin_data && $admin_data['dekripsi_pass'] === $password) {
             $login_sukses = true;
             $role = 'superadmin';
-        } else {
-            if (empty($error)) $error = "Username atau Password salah.";
+        }
+        else {
+            if (empty($error))
+                $error = "Username atau Password salah.";
         }
     }
 
@@ -80,30 +103,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['is_login'] = true;
         $_SESSION['user_id'] = $username;
         $_SESSION['role'] = $role;
-        
+
         // Simpan hak akses spesifik jika user biasa
         if ($role === 'user') {
             $_SESSION['hak_akses'] = [
                 'mpp_skrining' => $user_data['mpp_skrining'],
-				'soap_perawatan' => $user_data['soap_perawatan']
+                'soap_perawatan' => $user_data['soap_perawatan']
             ];
         }
 
         // --- CATAT KE TRACKER ---
         try {
-            $tgl = date('Y-m-d'); $jam = date('H:i:s');
+            $tgl = date('Y-m-d');
+            $jam = date('H:i:s');
             $pdo->prepare("INSERT INTO tracker (nip, tgl_login, jam_login) VALUES (?, ?, ?)")->execute([$username, $tgl, $jam]);
-        } catch (Exception $e) {}
+        }
+        catch (Exception $e) {
+        }
 
         // --- SMART REDIRECT ---
         // Lempar ke halaman yang sesuai dengan hak aksesnya
         if ($role === 'superadmin' || (isset($user_data['mpp_skrining']) && $user_data['mpp_skrining'] === 'true')) {
             header("Location: " . $base_url . "modules/dashboard/index.php");
-        } elseif (isset($user_data['soap_perawatan']) && $user_data['soap_perawatan'] === 'true') {
+        }
+        elseif (isset($user_data['soap_perawatan']) && $user_data['soap_perawatan'] === 'true') {
             header("Location: " . $base_url . "modules/edokter/index.php");
-        } else {
+        }
+        else {
             // Fallback (jika role ada tapi tidak punya kedua hak akses tersebut)
-            header("Location: " . $base_url . "modules/dashboard/index.php"); 
+            header("Location: " . $base_url . "modules/dashboard/index.php");
         }
         exit;
     }
@@ -134,7 +162,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <?php if ($error): ?>
         <div class="alert alert-danger py-2"><?php echo $error; ?></div>
-    <?php endif; ?>
+    <?php
+endif; ?>
 
     <form method="POST">
         <div class="mb-3">
