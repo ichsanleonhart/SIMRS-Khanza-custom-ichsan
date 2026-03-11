@@ -1758,4 +1758,164 @@ public class koneksiDB {
         }
         return var;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//TAMBAHAN DARI ICHSAN
+    public static String AKTIFKANWARNARANAP(){
+        try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
+            prop.loadFromXML(fis);
+            var=prop.getProperty("AKTIFKANWARNARANAP");
+        }catch(Exception e){
+            var=""; 
+        }
+        return var;
+    }
+		
+    //TAMBAHAN DARI ICHSAN
+    public static String WANOTIFPASIEN(){
+        try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
+            prop.loadFromXML(fis);
+            var=prop.getProperty("WANOTIFPASIEN");
+        }catch(Exception e){
+            var=""; 
+        }
+        return var;
+    }		   
+		
+////////////////////////////////////////////// setting whatsapp		
+    public static String HOSTWA() {  //akan diarahkan menjadi IPFOLDERFILEWA karena terlalu rancu dengan settingan database whatsapp terpisah
+        try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
+            prop.loadFromXML(fis);
+            var=EnkripsiAES.decrypt(prop.getProperty("HOSTWA"));
+        }catch(Exception e){
+            var=""; 
+        }
+        return var;
+    }
+    
+    public static String IPFOLDERFILEWA() {
+        try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
+            prop.loadFromXML(fis);
+            var=EnkripsiAES.decrypt(prop.getProperty("IPFOLDERFILEWA"));
+        }catch(Exception e){
+            var=""; 
+        }
+        return var;
+    }
+   
+   public static String PORTWEBWA() {
+        try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
+            prop.loadFromXML(fis);
+            var=EnkripsiAES.decrypt(prop.getProperty("PORTWEBWA"));
+        }catch(Exception e){
+            var=""; 
+        }
+        return var;
+    }
+    
+    public static String    FOLDERFILEWA() {
+        try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
+            prop.loadFromXML(fis);
+            var=prop.getProperty("FOLDERFILEWA");
+        }catch(Exception e){
+            var=""; 
+        }
+        return var;
+    }
+    ///////////////////////////////////////////////////////  
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+     public static String HOSTWAWEB() {
+        try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
+            prop.loadFromXML(fis);
+            var=EnkripsiAES.decrypt(prop.getProperty("HOSTWAWEB"));
+        }catch(Exception e){
+            var=""; 
+        }
+        return var;
+    }
+    
+    public static String PORTWA() {
+        try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
+            prop.loadFromXML(fis);
+            var=EnkripsiAES.decrypt(prop.getProperty("PORTWA"));
+        }catch(Exception e){
+            var=""; 
+        }
+        return var;
+    }
+    
+    public static String DATABASEWA() {
+        try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
+            prop.loadFromXML(fis);
+            var=EnkripsiAES.decrypt(prop.getProperty("DATABASEWA"));
+        }catch(Exception e){
+            var=""; 
+        }
+        return var;
+    }
+
+    
+    
+    public static String USERWA() {
+    try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
+            prop.loadFromXML(fis);
+            var=EnkripsiAES.decrypt(prop.getProperty("USERWA"));
+        }catch(Exception e){
+            var=""; 
+        }
+        return var;
+    }
+    
+    public static String PASWA() {
+        try (FileInputStream fis = new FileInputStream("setting/database.xml")) {
+            prop.loadFromXML(fis);
+            var=EnkripsiAES.decrypt(prop.getProperty("PASWA"));
+        }catch(Exception e){
+            var=""; 
+        }
+        return var;
+    }
 }
