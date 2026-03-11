@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-{"akunpiutang":[{"NamaAkun":"1. Piutang Umum","KodeRek":"117008","KdPJ":"A09"},{"NamaAkun":"2. Piutang BPJS","KodeRek":"117003","KdPJ":"BPJ"},{"NamaAkun":"3. Piutang Inhealth","KodeRek":"117005","KdPJ":"INH"},{"NamaAkun":"4. Piutang Asuransi Umum","KodeRek":"117007","KdPJ":"A06"},{"NamaAkun":"5. Piutang Jaminan Pemerintah","KodeRek":"117030","KdPJ":"A65"},{"NamaAkun":"6. Piutang Perusahaan","KodeRek":"117006","KdPJ":"A09"}]}
-=======
-{"akunpiutang":[{"NamaAkun":"PIUTANG AXA","KodeRek":"117015","KdPJ":"A04"},{"NamaAkun":"PIUTANG BPJS","KodeRek":"117003","KdPJ":"BPJ"},{"NamaAkun":"PIUTANG GARDA MEDIKA","KodeRek":"117001","KdPJ":"A06"}]}
->>>>>>> upstream/master
+{"akunpiutang":[{"NamaAkun":"PIUTANG ASURANSI PLN","KodeRek":"117016","KdPJ":"A30"},{"NamaAkun":"PIUTANG AXA","KodeRek":"117015","KdPJ":"A04"},{"NamaAkun":"PIUTANG BPJS","KodeRek":"117003","KdPJ":"BPJ"},{"NamaAkun":"PIUTANG GARDA MEDIKA","KodeRek":"117001","KdPJ":"A06"},{"NamaAkun":"PIUTANG PASIEN UMUM","KodeRek":"117001","KdPJ":"A09"}]}

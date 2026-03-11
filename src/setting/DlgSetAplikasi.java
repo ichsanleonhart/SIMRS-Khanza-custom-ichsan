@@ -17,6 +17,7 @@ import fungsi.validasi;
 import fungsi.sekuel;
 import fungsi.koneksiDB;
 import java.awt.Canvas;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -27,12 +28,17 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Blob;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
@@ -47,6 +53,10 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
     private Connection koneksi=koneksiDB.condb();
     private sekuel Sequel=new sekuel();
     private validasi Valid=new validasi();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private volatile boolean ceksukses = false;
+    private PreparedStatement ps;
+    private ResultSet rs;
 
     /** Creates new form DlgAdmin
      * @param parent
@@ -57,18 +67,18 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
         this.setLocation(10,10);
         setSize(457,249);
 
-        Object[] row={"Nama Toko","Alamat Toko","Kota","Propinsi","Aktifkan?","Wallpaper","KontaK","Email","Logo","Kode PPK BPJS","Kode PPK Inhealth","Kode PPK Kemenkes","Kode Apotek BPJS"};
+        Object[] row={"Faskes","Alamat","Kota","Propinsi","Aktifkan?","Wallpaper","KontaK","Email","Logo","Kode PPK BPJS","Kode PPK Inhealth","Kode PPK Kemenkes"};
         tabMode=new DefaultTableModel(null,row){
               @Override public boolean isCellEditable(int rowIndex, int colIndex){return false;}
         };
 
         tbAdmin.setModel(tabMode);
-        //tampil();
+        //runBackground(() ->tampil());
         //tbJabatan.setDefaultRenderer(Object.class, new WarnaTable(Scroll.getBackground(),Color.GREEN));
         tbAdmin.setPreferredScrollableViewportSize(new Dimension(500,500));
         tbAdmin.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-        for (int i = 0; i < 13; i++) {
+        for (int i = 0; i < 12; i++) {
             TableColumn column = tbAdmin.getColumnModel().getColumn(i);
             if(i==0){
                 column.setPreferredWidth(150);
@@ -88,7 +98,6 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
         kdPPK.setDocument(new batasInput((byte)15).getKata(kdPPK));
         kdPPK1.setDocument(new batasInput((byte)15).getKata(kdPPK1));
         kdPPK2.setDocument(new batasInput((byte)15).getKata(kdPPK2));
-        kdPPK3.setDocument(new batasInput((byte)15).getKata(kdPPK3));
     }
     Dimension screen=Toolkit.getDefaultToolkit().getScreenSize();
     private javax.swing.JFileChooser jfc = new JFileChooser();    
@@ -147,8 +156,6 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
         kdPPK1 = new widget.TextBox();
         label44 = new widget.Label();
         kdPPK2 = new widget.TextBox();
-        label45 = new widget.Label();
-        kdPPK3 = new widget.TextBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setUndecorated(true);
@@ -283,7 +290,7 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
         panelGlass1.setPreferredSize(new java.awt.Dimension(200, 282));
         panelGlass1.setLayout(null);
 
-        label35.setText("Nama RS :");
+        label35.setText("Faskes :");
         label35.setName("label35"); // NOI18N
         label35.setPreferredSize(new java.awt.Dimension(35, 23));
         panelGlass1.add(label35);
@@ -299,7 +306,7 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
         panelGlass1.add(Nm);
         Nm.setBounds(75, 10, 220, 23);
 
-        label34.setText("Alamat RS :");
+        label34.setText("Alamat :");
         label34.setName("label34"); // NOI18N
         label34.setPreferredSize(new java.awt.Dimension(35, 23));
         panelGlass1.add(label34);
@@ -509,11 +516,11 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
         panelGlass1.add(kdPPK1);
         kdPPK1.setBounds(350, 250, 110, 23);
 
-        label44.setText("Kode Apotek BPJS :");
+        label44.setText("Kode PPK Kemenkes :");
         label44.setName("label44"); // NOI18N
         label44.setPreferredSize(new java.awt.Dimension(35, 23));
         panelGlass1.add(label44);
-        label44.setBounds(720, 250, 120, 23);
+        label44.setBounds(486, 250, 120, 23);
 
         kdPPK2.setName("kdPPK2"); // NOI18N
         kdPPK2.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -523,21 +530,6 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
         });
         panelGlass1.add(kdPPK2);
         kdPPK2.setBounds(610, 250, 110, 23);
-
-        label45.setText("Kode PPK Kemenkes :");
-        label45.setName("label45"); // NOI18N
-        label45.setPreferredSize(new java.awt.Dimension(35, 23));
-        panelGlass1.add(label45);
-        label45.setBounds(486, 250, 120, 23);
-
-        kdPPK3.setName("kdPPK3"); // NOI18N
-        kdPPK3.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                kdPPK3KeyPressed(evt);
-            }
-        });
-        panelGlass1.add(kdPPK3);
-        kdPPK3.setBounds(845, 250, 110, 23);
 
         internalFrame1.add(panelGlass1, java.awt.BorderLayout.PAGE_START);
 
@@ -613,8 +605,8 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
         }else if(tabMode.getRowCount()==0){
             Sequel.menyimpan("setting","'"+Nm.getText()+"','"+Almt.getText()+"','"+Kota.getText()+
                              "','"+Propinsi.getText()+"','"+Kontak.getText()+"','"+Email.getText()+
-                             "','"+YesNo.getSelectedItem()+"','"+kdPPK.getText()+"','"+kdPPK1.getText()+"','"+kdPPK2.getText()+"','"+kdPPK3.getText()+"'","Setting",EGb,ELogo);
-            tampil();
+                             "','"+YesNo.getSelectedItem()+"','"+kdPPK.getText()+"','"+kdPPK1.getText()+"','"+kdPPK2.getText()+"'","Setting",EGb,ELogo);
+            runBackground(() ->tampil());
         }else if(tabMode.getRowCount()>0){
             JOptionPane.showMessageDialog(null,"Maaf, Hanya diijinkan satu Set Aplikasi...!!!!");
             Nm.requestFocus();
@@ -647,7 +639,7 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(null,"Maaf, Gagal menghapus. Pilih dulu data yang mau dihapus.\nKlik data pada table untuk memilih...!!!!");
         }else if(! Nm.getText().trim().equals("")){
             Sequel.queryu("delete from setting ");
-            tampil();
+            runBackground(() ->tampil());
             emptTeks();
         }
     }//GEN-LAST:event_BtnHapusActionPerformed
@@ -675,7 +667,7 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
     }//GEN-LAST:event_YesNoKeyPressed
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-        tampil();
+        runBackground(() ->tampil());
     }//GEN-LAST:event_formWindowOpened
 
     private void KontakKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_KontakKeyPressed
@@ -722,8 +714,8 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
             Sequel.queryu("delete from setting ");
             Sequel.menyimpan("setting","'"+Nm.getText()+"','"+Almt.getText()+"','"+Kota.getText()+
                              "','"+Propinsi.getText()+"','"+Kontak.getText()+"','"+Email.getText()+
-                             "','"+YesNo.getSelectedItem()+"','"+kdPPK.getText()+"','"+kdPPK1.getText()+"','"+kdPPK2.getText()+"','"+kdPPK3.getText()+"'","Setting",EGb,ELogo);
-            tampil();
+                             "','"+YesNo.getSelectedItem()+"','"+kdPPK.getText()+"','"+kdPPK1.getText()+"','"+kdPPK2.getText()+"'","Setting",EGb,ELogo);
+            runBackground(() ->tampil());
         }
     }//GEN-LAST:event_BtnEditActionPerformed
 
@@ -746,10 +738,6 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
     private void kdPPK2KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_kdPPK2KeyPressed
         Valid.pindah(evt,kdPPK1,BtnCariLogo);
     }//GEN-LAST:event_kdPPK2KeyPressed
-
-    private void kdPPK3KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_kdPPK3KeyPressed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_kdPPK3KeyPressed
 
     /**
     * @param args the command line arguments
@@ -791,7 +779,6 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
     private widget.TextBox kdPPK;
     private widget.TextBox kdPPK1;
     private widget.TextBox kdPPK2;
-    private widget.TextBox kdPPK3;
     private widget.Label label12;
     private widget.Label label34;
     private widget.Label label35;
@@ -804,7 +791,6 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
     private widget.Label label42;
     private widget.Label label43;
     private widget.Label label44;
-    private widget.Label label45;
     private widget.panelGlass panelGlass1;
     private widget.panelisi panelisi1;
     private widget.ScrollPane scrollPane2;
@@ -813,23 +799,30 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
     // End of variables declaration//GEN-END:variables
 
     private void tampil() {
-        String sql="select nama_instansi, alamat_instansi, kabupaten, propinsi, aktifkan, wallpaper,kontak,email,logo,kode_ppk,kode_ppkinhealth,kode_ppkkemenkes,kode_apotek from setting";
-        prosesCari(sql);
-    }
-
-    private void prosesCari(String sql) {
         Valid.tabelKosong(tabMode);
         try{
-            ResultSet rs=koneksi.prepareStatement(sql).executeQuery();
-            while(rs.next()){
-                Object[] data={rs.getString(1),rs.getString(2),rs.getString(3),
-                               rs.getString(4),rs.getString(5),rs.getBlob(6),
-                               rs.getString(7),rs.getString(8),rs.getBlob(9),
-                               rs.getString(10),rs.getString(11),rs.getString(12),rs.getString(13)
-                };
-                tabMode.addRow(data);
-            }
-        }catch(SQLException e){
+            ps=koneksi.prepareStatement("select nama_instansi, alamat_instansi, kabupaten, propinsi, aktifkan, wallpaper,kontak,email,logo,kode_ppk,kode_ppkinhealth,kode_ppkkemenkes from setting");
+            try {
+                rs=ps.executeQuery();
+                while(rs.next()){
+                    Object[] data={rs.getString(1),rs.getString(2),rs.getString(3),
+                                   rs.getString(4),rs.getString(5),rs.getBlob(6),
+                                   rs.getString(7),rs.getString(8),rs.getBlob(9),
+                                   rs.getString(10),rs.getString(11),rs.getString(12)
+                    };
+                    tabMode.addRow(data);
+                }
+            } catch (Exception e) {
+                System.out.println("Notif Map : "+e);
+            } finally{
+                if(rs!=null){
+                    rs.close();
+                }
+                if(ps!=null){
+                    ps.close();
+                }
+            } 
+        }catch(Exception e){
             System.out.println("Notifikasi : "+e);
         }
     }
@@ -846,9 +839,7 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
             Email.setText(tabMode.getValueAt(row,7).toString());
             kdPPK.setText(tabMode.getValueAt(row,9).toString());
             kdPPK1.setText(tabMode.getValueAt(row,10).toString());
-            kdPPK2.setText(tabMode.getValueAt(row,11).toString());            
-            kdPPK3.setText(tabMode.getValueAt(row,12).toString());
-
+            kdPPK2.setText(tabMode.getValueAt(row,11).toString());
             try {
                 ResultSet hasil = koneksi.prepareStatement("select wallpaper,logo from setting").executeQuery();
                 for (int I = 0; hasil.next(); I++) {
@@ -878,8 +869,7 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
         Propinsi.setText("");
         kdPPK.setText("");        
         kdPPK1.setText("");       
-        kdPPK2.setText("");       
-        kdPPK3.setText("");
+        kdPPK2.setText("");
         ((Painter) PhotoGambar).setImage("");
         EGb.setText("");
         ((Painter) PhotoLogo).setImage("");
@@ -930,4 +920,35 @@ public class DlgSetAplikasi extends javax.swing.JDialog {
         System.out.println(str);
     }
     
+    private void runBackground(Runnable task) {
+        if (ceksukses) return;
+        if (executor.isShutdown() || executor.isTerminated()) return;
+        if (!isDisplayable()) return;
+
+        ceksukses = true;
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+        try {
+            executor.submit(() -> {
+                try {
+                    task.run();
+                } finally {
+                    ceksukses = false;
+                    SwingUtilities.invokeLater(() -> {
+                        if (isDisplayable()) {
+                            setCursor(Cursor.getDefaultCursor());
+                        }
+                    });
+                }
+            });
+        } catch (RejectedExecutionException ex) {
+            ceksukses = false;
+        }
+    }
+    
+    @Override
+    public void dispose() {
+        executor.shutdownNow();
+        super.dispose();
+    }
 }

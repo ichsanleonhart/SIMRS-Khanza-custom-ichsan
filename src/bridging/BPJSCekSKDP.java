@@ -3108,6 +3108,8 @@ public final class BPJSCekSKDP extends javax.swing.JDialog {
                     kel=null;
                 }
             });
+            kel.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            kel.setLocationRelativeTo(internalFrame1);
         }
         
         if (kel == null) return;
@@ -3136,6 +3138,8 @@ public final class BPJSCekSKDP extends javax.swing.JDialog {
                     kec=null;
                 }
             });
+            kec.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            kec.setLocationRelativeTo(internalFrame1);
         }
         
         if (kec == null) return;
@@ -3164,6 +3168,8 @@ public final class BPJSCekSKDP extends javax.swing.JDialog {
                     kab=null;
                 }
             });
+            kab.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            kab.setLocationRelativeTo(internalFrame1);
         }
         if (kab == null) return;
         if (!kab.isVisible()) {
@@ -3257,6 +3263,8 @@ public final class BPJSCekSKDP extends javax.swing.JDialog {
                     kec=null;
                 }
             });
+            kec.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            kec.setLocationRelativeTo(internalFrame1);
         }
         
         if (kec == null) return;
@@ -3318,6 +3326,8 @@ public final class BPJSCekSKDP extends javax.swing.JDialog {
                     kab=null;
                 }
             });
+            kab.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            kab.setLocationRelativeTo(internalFrame1);
         }
         
         if (kab == null) return;
@@ -3345,6 +3355,8 @@ public final class BPJSCekSKDP extends javax.swing.JDialog {
                     kel=null;
                 }
             });
+            kel.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            kel.setLocationRelativeTo(internalFrame1);
         }
         
         if (kel == null) return;
@@ -3807,8 +3819,7 @@ public final class BPJSCekSKDP extends javax.swing.JDialog {
     private void BtnCari1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCari1ActionPerformed
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         BPJSDataSEP form=new BPJSDataSEP(null,false);
-        form.isCek();
-        form.tampil();   
+        form.isCek();  
         form.tutupInput();
         form.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         form.setLocationRelativeTo(internalFrame1);
@@ -4112,6 +4123,8 @@ public final class BPJSCekSKDP extends javax.swing.JDialog {
                     prop=null;
                 }
             });
+            prop.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            prop.setLocationRelativeTo(internalFrame1);
         }
         
         if (prop == null) return;
@@ -4170,6 +4183,8 @@ public final class BPJSCekSKDP extends javax.swing.JDialog {
                     prop=null;
                 }
             });
+            prop.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            prop.setLocationRelativeTo(internalFrame1);
         }
         
         if (prop == null) return;
