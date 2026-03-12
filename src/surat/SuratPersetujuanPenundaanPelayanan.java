@@ -612,7 +612,7 @@ public final class SuratPersetujuanPenundaanPelayanan extends javax.swing.JDialo
         FormInput.add(jLabel11);
         jLabel11.setBounds(364, 150, 55, 23);
 
-        Hubungan.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Suami", "Istri", "Anak", "Ayah", "Ibu", "Saudara", "Keponakan", "Diri Sendiri" }));
+        Hubungan.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Suami", "Istri", "Anak", "Ayah", "Ibu", "Saudara", "Keponakan", "Adik", "Kakak", "Diri Sendiri", "-", "Kerabat", "Orang Tua", "Saudara Kandung", "Teman", "Lain-lain" }));
         Hubungan.setName("Hubungan"); // NOI18N
         Hubungan.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
