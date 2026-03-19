@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package khanzahmsservicemobilejkn;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -754,6 +749,35 @@ public class frmUtama extends javax.swing.JFrame {
                             }
                         }
 
+                        // [SYNC/HEAL JKN] Sinkronisasi data lokal vs BPJS server sebelum rekonstruksi
+                        TeksArea.append("  [Sync/Heal] Memeriksa sinkronisasi task JKN: " + rs.getString("no_rawat") + "\n");
+                        for (String tIdSync : new String[]{"3", "4", "5"}) {
+                            String waktuNyataBPJS = getWaktuTaskDariBPJS(rs.getString("nobooking"), tIdSync);
+                            if (waktuNyataBPJS != null && !waktuNyataBPJS.isEmpty()) {
+                                // BPJS punya data task ini
+                                String waktuLokal = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where taskid='" + tIdSync + "' and no_rawat='" + rs.getString("no_rawat") + "'");
+                                if (waktuLokal.equals("")) {
+                                    // Lokal kosong, tambal dengan data dari BPJS
+                                    Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid", "?,?,?", "Patch Task " + tIdSync, 3, new String[]{rs.getString("no_rawat"), tIdSync, waktuNyataBPJS});
+                                    TeksArea.append("  [Sync/Heal] HEALING Task " + tIdSync + " ditambal dari BPJS: " + waktuNyataBPJS + "\n");
+                                    if (tIdSync.equals("3")) task3 = "Sudah";
+                                    if (tIdSync.equals("4")) task4 = "Sudah";
+                                    if (tIdSync.equals("5")) task5 = "Sudah";
+                                }
+                            } else {
+                                // BPJS tidak punya data, hapus data zombie lokal jika ada
+                                String waktuLokal = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where taskid='" + tIdSync + "' and no_rawat='" + rs.getString("no_rawat") + "'");
+                                if (!waktuLokal.equals("")) {
+                                    Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='" + tIdSync + "' and no_rawat='" + rs.getString("no_rawat") + "'");
+                                    TeksArea.append("  [Sync/Heal] Task " + tIdSync + " zombie dihapus dari lokal (BPJS tidak punya).\n");
+                                    if (tIdSync.equals("3")) task3 = "";
+                                    if (tIdSync.equals("4")) task4 = "";
+                                    if (tIdSync.equals("5")) task5 = "";
+                                }
+                            }
+                        }
+                        TeksArea.append("  [Sync/Heal] Selesai.\n");
+
                         if (task3.equals("")) {
                             // 1. Prioritaskan mencari waktu check-in (validasi) yang riil
                             datajam = Sequel.cariIsi("select validasi from referensi_mobilejkn_bpjs where no_rawat=?", rs.getString("no_rawat"));
@@ -860,23 +884,16 @@ public class frmUtama extends javax.swing.JFrame {
                                 datajam=Sequel.cariIsi("select if(diterima='0000-00-00 00:00:00','',diterima) from mutasi_berkas where mutasi_berkas.no_rawat=?",rs.getString("no_rawat"));  //kalau CPPT gak ditemukan, ambil dari jam ketika petugas melakukan klik kanan -> berkas diterima
                             }
                             
-                            // 3. FALLBACK FINAL: Gunakan metode Modulus jika data riil tidak ada.
+                            // 3. FALLBACK FINAL: Gunakan metode Waktu Acak jika data riil tidak ada.
                                 if (datajam.equals("")) {
                                     // [LOGGING] Menunjukkan fallback sedang digunakan
-                                    TeksArea.append("    -> Data riil Task 4 tidak ditemukan, menjalankan fallback Modulus...\n");                                            
-                                    int modulus = 0;
-                                    try {
-                                        // Ambil digit ke-14 dari no_rawat sebagai angka dasar.
-                                        modulus = Integer.parseInt(rs.getString("no_rawat").substring(13, 14));
-                                    } catch (Exception x) {
-                                        modulus = 0; // Default jika gagal
-                                    }
-                                    modulus = modulus % 3; // Hasilnya akan 0, 1, atau 2
-
-                                    // Ambil waktu Task 3 sebagai dasar, lalu tambahkan 11-13 menit.
+                                    TeksArea.append("    -> Data riil Task 4 tidak ditemukan, menjalankan fallback Waktu Acak...\n");                                            
+                                    // Ambil waktu Task 3 sebagai dasar, lalu tambahkan 5-20 menit.
                                     String waktuTask3 = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where no_rawat=? and taskid='3'", rs.getString("no_rawat"));
-                                    datajam = Sequel.cariIsi("select DATE_ADD('" + waktuTask3 + "', INTERVAL " + (11 + modulus) + " MINUTE)");
-                                }    
+                                    if (!waktuTask3.equals("")) {
+                                        datajam = Sequel.cariIsi("select DATE_ADD('" + waktuTask3 + "', INTERVAL (5 + FLOOR(RAND()*15)) MINUTE)");
+                                    }
+                                }
 
                             if(!datajam.equals("")){
                                 // [LOGGING] Menunjukkan Task ID yang akan dikirim
@@ -933,21 +950,14 @@ public class frmUtama extends javax.swing.JFrame {
                         
                         if(task4.equals("Sudah")&&task5.equals("")){
                             datajam=Sequel.cariIsi("select if(kembali='0000-00-00 00:00:00','',kembali) from mutasi_berkas where mutasi_berkas.no_rawat=?",rs.getString("no_rawat"));   //ini adalah waktu ketika dokter klik YES ketika keluar dari menu CPPT
-                            // 2. FALLBACK FINAL: Gunakan metode Modulus.
+                            // 2. FALLBACK FINAL: Gunakan metode Waktu Acak.
                                 if (datajam.equals("")) {
-                                    TeksArea.append("Data riil Task 5 tidak ditemukan, menjalankan fallback Modulus...\n");
-                                    int modulus = 0;
-                                    try {
-                                        // Ambil digit ke-14 dari no_rawat sebagai angka dasar.
-                                        modulus = Integer.parseInt(rs.getString("no_rawat").substring(13, 14));
-                                    } catch (Exception x) {
-                                        modulus = 0;
-                                    }
-                                    modulus = modulus % 4; // Hasilnya akan 0, 1, 2, atau 3
-
-                                    // Ambil waktu Task 4 sebagai dasar, lalu tambahkan 20-23 menit untuk simulasi durasi konsultasi.
+                                    TeksArea.append("Data riil Task 5 tidak ditemukan, menjalankan fallback Waktu Acak...\n");
+                                    // Ambil waktu Task 4 sebagai dasar, lalu tambahkan 5-20 menit.
                                     String waktuTask4 = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where no_rawat=? and taskid='4'", rs.getString("no_rawat"));
-                                    datajam = Sequel.cariIsi("select DATE_ADD('" + waktuTask4 + "', INTERVAL " + (20 + modulus) + " MINUTE)");
+                                    if (!waktuTask4.equals("")) {
+                                        datajam = Sequel.cariIsi("select DATE_ADD('" + waktuTask4 + "', INTERVAL (5 + FLOOR(RAND()*15)) MINUTE)");
+                                    }
                                 }
                             // 2. FALLBACK FINAL: Gunakan metode Modulus.
                             
@@ -1214,7 +1224,7 @@ public class frmUtama extends javax.swing.JFrame {
                             }
                         } */
                         
-                        if(task6.equals("Sudah")&&task7.equals("")){
+                        if(task7.equals("") && task6.equals("Sudah") && Sequel.cariInteger("select count(no_rawat) from referensi_mobilejkn_bpjs_taskid where no_rawat=? and taskid='6'", rs.getString("no_rawat")) > 0){
                             datajam=Sequel.cariIsi("select concat(resep_obat.tgl_penyerahan,' ',resep_obat.jam_penyerahan) from resep_obat where resep_obat.status='ralan' and resep_obat.no_rawat=? and concat(resep_obat.tgl_penyerahan,' ',resep_obat.jam_penyerahan)<>'0000-00-00 00:00:00'",rs.getString("no_rawat"));
                             // 2. FALLBACK FINAL: Gunakan metode Waktu Acak (seperti di kode teman Anda).
                                 if (datajam.equals("")) {
@@ -1420,6 +1430,35 @@ public class frmUtama extends javax.swing.JFrame {
                                         }
                                     }
                                     
+                                    // [SYNC/HEAL NON-JKN] Sinkronisasi data lokal vs BPJS server sebelum rekonstruksi
+                                    TeksArea.append("  [Sync/Heal] Memeriksa sinkronisasi task Non-JKN: " + rs.getString("no_rawat") + "\n");
+                                    for (String tIdSync : new String[]{"3", "4", "5"}) {
+                                        String waktuNyataBPJS = getWaktuTaskDariBPJS(rs.getString("no_rawat"), tIdSync);
+                                        if (waktuNyataBPJS != null && !waktuNyataBPJS.isEmpty()) {
+                                            // BPJS punya data task ini
+                                            String waktuLokal = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where taskid='" + tIdSync + "' and no_rawat='" + rs.getString("no_rawat") + "'");
+                                            if (waktuLokal.equals("")) {
+                                                // Lokal kosong, tambal dengan data dari BPJS
+                                                Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid", "?,?,?", "Patch Task " + tIdSync, 3, new String[]{rs.getString("no_rawat"), tIdSync, waktuNyataBPJS});
+                                                TeksArea.append("  [Sync/Heal] HEALING Task " + tIdSync + " ditambal dari BPJS: " + waktuNyataBPJS + "\n");
+                                                if (tIdSync.equals("3")) task3 = "Sudah";
+                                                if (tIdSync.equals("4")) task4 = "Sudah";
+                                                if (tIdSync.equals("5")) task5 = "Sudah";
+                                            }
+                                        } else {
+                                            // BPJS tidak punya data, hapus data zombie lokal jika ada
+                                            String waktuLokal = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where taskid='" + tIdSync + "' and no_rawat='" + rs.getString("no_rawat") + "'");
+                                            if (!waktuLokal.equals("")) {
+                                                Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='" + tIdSync + "' and no_rawat='" + rs.getString("no_rawat") + "'");
+                                                TeksArea.append("  [Sync/Heal] Task " + tIdSync + " zombie dihapus dari lokal (BPJS tidak punya).\n");
+                                                if (tIdSync.equals("3")) task3 = "";
+                                                if (tIdSync.equals("4")) task4 = "";
+                                                if (tIdSync.equals("5")) task5 = "";
+                                            }
+                                        }
+                                    }
+                                    TeksArea.append("  [Sync/Heal] Selesai.\n");
+                                    
                                     if(task3.equals("")){
                                         try {     
                                             datajam=Sequel.cariIsi("select DATE_ADD(concat('"+rs.getString("tgl_registrasi")+"',' ','"+rs2.getString("jam_mulai")+"'),INTERVAL "+(Integer.parseInt(rs.getString("no_reg"))*5)+" MINUTE) ");
@@ -1482,7 +1521,41 @@ public class frmUtama extends javax.swing.JFrame {
                                         }
 
 
-                                        datajam=Sequel.cariIsi("select if(concat(reg_periksa.tgl_registrasi,' ',reg_periksa.jam_reg)>concat('"+rs.getString("tgl_registrasi")+"',' ','"+rs2.getString("jam_mulai")+"'),concat(reg_periksa.tgl_registrasi,' ',reg_periksa.jam_reg),concat('"+rs.getString("tgl_registrasi")+"',' ','"+rs2.getString("jam_mulai")+"')) as tanggal from reg_periksa where reg_periksa.no_rawat=?",rs.getString("no_rawat"));
+                                        // [SMART FALLBACK TASK 3] Prioritas: jam_mulai -> jam_reg -> CPPT-random(5-20min)
+                                        // Syarat data WAJIB terkirim: selalu ada datajam meskipun fallback terakhir.
+                                        String waktuCPPT3 = Sequel.cariIsi(
+                                            "select concat(pemeriksaan_ralan.tgl_perawatan,' ',pemeriksaan_ralan.jam_rawat) from pemeriksaan_ralan"
+                                            + " inner join dokter on pemeriksaan_ralan.nip = dokter.kd_dokter"
+                                            + " where pemeriksaan_ralan.no_rawat=? order by tgl_perawatan ASC, jam_rawat ASC LIMIT 1",
+                                            rs.getString("no_rawat")
+                                        );
+                                        String jamMulaiTask3 = rs.getString("tgl_registrasi") + " " + rs2.getString("jam_mulai");
+                                        String jamRegTask3 = Sequel.cariIsi("select concat(tgl_registrasi,' ',jam_reg) from reg_periksa where no_rawat=?", rs.getString("no_rawat"));
+                                        
+                                        if (waktuCPPT3 != null && !waktuCPPT3.isEmpty()) {
+                                            // CPPT ada: cari waktu yang lebih AWAL dari CPPT
+                                            if (!jamMulaiTask3.isEmpty() && jamMulaiTask3.compareTo(waktuCPPT3) < 0) {
+                                                // Prioritas 1: jam_mulai (sebelum CPPT)
+                                                datajam = jamMulaiTask3;
+                                                TeksArea.append("    -> Task 3: menggunakan jam_mulai (" + datajam + ") [sebelum CPPT " + waktuCPPT3 + "].\n");
+                                            } else if (!jamRegTask3.isEmpty() && jamRegTask3.compareTo(waktuCPPT3) < 0) {
+                                                // Prioritas 2: jam_reg (jam_mulai >= CPPT, coba jam_reg)
+                                                datajam = jamRegTask3;
+                                                TeksArea.append("    -> Task 3: jam_mulai >= CPPT, menggunakan jam_reg (" + datajam + ").\n");
+                                            } else {
+                                                // Prioritas 3 (final): CPPT minus random 5-20 menit
+                                                datajam = Sequel.cariIsi("select DATE_SUB('" + waktuCPPT3 + "', INTERVAL (5 + FLOOR(RAND()*15)) MINUTE)");
+                                                TeksArea.append("    -> Task 3: fallback akhir: CPPT (" + waktuCPPT3 + ") minus random 5-20 menit = " + datajam + ".\n");
+                                            }
+                                        } else {
+                                            // Tidak ada CPPT: pakai jam_reg vs jam_mulai (logika lama)
+                                            if (!jamRegTask3.isEmpty() && jamRegTask3.compareTo(jamMulaiTask3) > 0) {
+                                                datajam = jamRegTask3;
+                                            } else {
+                                                datajam = jamMulaiTask3;
+                                            }
+                                            TeksArea.append("    -> Task 3: tidak ada CPPT, menggunakan waktu registrasi/jadwal (" + datajam + ").\n");
+                                        }
                                         if(!datajam.equals("")){
                                             if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"3",datajam})==true){
                                                 parsedDate = dateFormat.parse(datajam);
@@ -1541,6 +1614,25 @@ public class frmUtama extends javax.swing.JFrame {
                                         if(datajam.equals("")){
                                             datajam=Sequel.cariIsi("select if(mutasi_berkas.diterima='0000-00-00 00:00:00','',mutasi_berkas.diterima) from mutasi_berkas where mutasi_berkas.no_rawat=?",rs.getString("no_rawat"));
                                         }
+                                        // [VALIDASI URUTAN] Pastikan datajam riil lebih besar dari waktu Task 3.
+                                        if (!datajam.equals("")) {
+                                            String waktuTask3Cek = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where no_rawat='" + rs.getString("no_rawat") + "' and taskid='3'");
+                                            if (!waktuTask3Cek.equals("") && datajam.compareTo(waktuTask3Cek) <= 0) {
+                                                TeksArea.append("    -> Waktu riil Task 4 (" + datajam + ") <= Task 3 (" + waktuTask3Cek + "), invalid! Reset ke fallback.\n");
+                                                datajam = "";
+                                            }
+                                        }
+                                        
+                                        
+                                        // 3. FALLBACK FINAL: Jika data riil tidak ada, ambil dari waktu Task 3 + 5 s.d 20 menit
+                                        if (datajam.equals("")) {
+                                            TeksArea.append("    -> Data riil Task 4 tidak ditemukan, menjalankan fallback...\n");
+                                            String waktuTask3 = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where no_rawat=? and taskid='3'", rs.getString("no_rawat"));
+                                            if (!waktuTask3.equals("")) {
+                                                datajam = Sequel.cariIsi("select DATE_ADD('" + waktuTask3 + "', INTERVAL (5 + FLOOR(RAND()*15)) MINUTE)");
+                                            }
+                                        }
+                                        
                                         if(!datajam.equals("")){
                                             if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"4",datajam})==true){
                                                 parsedDate = dateFormat.parse(datajam);
@@ -1593,35 +1685,21 @@ public class frmUtama extends javax.swing.JFrame {
 
                                     if(task4.equals("Sudah")&&task5.equals("")){  //memulai kirim task 5
                                         datajam=Sequel.cariIsi("select if(mutasi_berkas.kembali='0000-00-00 00:00:00','',mutasi_berkas.kembali) from mutasi_berkas where mutasi_berkas.no_rawat=?",rs.getString("no_rawat"));
+                                        // [VALIDASI URUTAN] Pastikan datajam riil lebih besar dari waktu Task 4.
+                                        if (!datajam.equals("")) {
+                                            String waktuTask4Cek = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where no_rawat='" + rs.getString("no_rawat") + "' and taskid='4'");
+                                            if (!waktuTask4Cek.equals("") && datajam.compareTo(waktuTask4Cek) <= 0) {
+                                                TeksArea.append("    -> Waktu riil Task 5 (" + datajam + ") <= Task 4 (" + waktuTask4Cek + "), reset ke fallback.\n");
+                                                datajam = "";
+                                            }
+                                        }
+                                        
                                         if(datajam.equals("")){
-                                            //datajam=Sequel.cariIsi("select now() from reg_periksa where reg_periksa.stts='Sudah' and reg_periksa.no_rawat=?",rs.getString("no_rawat"));                                                    
-                                            // Mengambil waktu Task ID 4 sebagai dasar.
+                                            TeksArea.append("    -> Data riil Task 5 tidak ditemukan, menjalankan fallback...\n");
                                             String waktuTask4 = Sequel.cariIsi("select waktu from referensi_mobilejkn_bpjs_taskid where no_rawat=? and taskid='4'", rs.getString("no_rawat"));
-
-                                            // Hanya jika waktu Task ID 4 ditemukan.
                                             if (!waktuTask4.equals("")) {
-                                                try {
-                                                    // Konversi waktu Task 4 ke dalam format Date.
-                                                    Date tanggalTask4 = dateFormat.parse(waktuTask4);
-        
-                                                    // Siapkan Calendar untuk manipulasi waktu.
-                                                    Calendar kalender = Calendar.getInstance();
-                                                    kalender.setTime(tanggalTask4);
-        
-                                                    // Hasilkan angka acak antara 2 sampai 5.
-                                                    // new Random().nextInt(4) menghasilkan 0, 1, 2, atau 3. Ditambah 2 menjadi 2, 3, 4, atau 5.
-                                                    int menitAcak = new java.util.Random().nextInt(4) + 2;
-        
-                                                    // Tambahkan menit acak ke waktu Task 4.
-                                                    kalender.add(Calendar.MINUTE, menitAcak);
-        
-                                                    // Format kembali menjadi string dan jadikan sebagai datajam untuk Task 5.
-                                                    datajam = dateFormat.format(kalender.getTime());
-                                                } catch (Exception ed) {
-                                                    System.out.println("Gagal mem-parsing atau memodifikasi waktu Task 4 untuk fallback Task 5: " + ed);                                                    
-                                                }
-                                            }                                       
-                                
+                                                datajam = Sequel.cariIsi("select DATE_ADD('" + waktuTask4 + "', INTERVAL (5 + FLOOR(RAND()*15)) MINUTE)");
+                                            }
                                         }
                                         if(!datajam.equals("")){
                                             if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"5",datajam})==true){
@@ -1674,7 +1752,7 @@ public class frmUtama extends javax.swing.JFrame {
                                         }
                                     }
 
-                                    if(task5.equals("Sudah")&&task6.equals("")){
+                                    if(task6.equals("") && task5.equals("Sudah") && Sequel.cariInteger("select count(no_rawat) from referensi_mobilejkn_bpjs_taskid where no_rawat=? and taskid='5'", rs.getString("no_rawat")) > 0){
                                         noresep=Sequel.cariIsi("select resep_obat.no_resep from resep_obat where resep_obat.no_rawat=?",rs.getString("no_rawat"));
                                         if(!noresep.equals("")){
                                             try {     
@@ -1765,7 +1843,7 @@ public class frmUtama extends javax.swing.JFrame {
                                         }
                                     }
 
-                                    if(task6.equals("Sudah")&&task7.equals("")){
+                                    if(task7.equals("") && task6.equals("Sudah") && Sequel.cariInteger("select count(no_rawat) from referensi_mobilejkn_bpjs_taskid where no_rawat=? and taskid='6'", rs.getString("no_rawat")) > 0){
                                         datajam=Sequel.cariIsi("select concat(resep_obat.tgl_penyerahan,' ',resep_obat.jam_penyerahan) from resep_obat where resep_obat.status='ralan' and resep_obat.no_rawat=? and concat(resep_obat.tgl_penyerahan,' ',resep_obat.jam_penyerahan)<>'0000-00-00 00:00:00'",rs.getString("no_rawat"));
                                         if(!datajam.equals("")){
                                             if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{rs.getString("no_rawat"),"7",datajam})==true){
@@ -1915,11 +1993,8 @@ public class frmUtama extends javax.swing.JFrame {
              BufferedWriter bw = new BufferedWriter(fw)) {
             
             bw.write(data);
-            // bw.newLine(); // TeksArea.append sudah menyertakan \n, jadi ini mungkin tidak perlu
             
         } catch (IOException e) {
-            // Jika gagal nulis file log, tampilkan di System.out
-            // Kita tidak menggunakan TeksArea.append di sini untuk menghindari loop tak terbatas
             System.out.println("Gagal menulis ke file log: " + e.getMessage());
         }
     }

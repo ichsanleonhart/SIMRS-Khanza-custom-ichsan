@@ -623,8 +623,14 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
     // 4. Proses Rekonstruksi TASK ID 4 (Mulai Pelayanan)
     datataskid = Sequel.cariIsi("select * from referensi_mobilejkn_bpjs_taskid where taskid='4' and no_rawat=?", kodebooking);
     if (datataskid.equals("")) { // Hanya jika Task ID 4 bolong (Setelah di-heal)
-        // Waktu Task 4 = Base Time + (300 s.d. 900 detik) -> (5-15 menit)
-        datajam = Sequel.cariIsi("SELECT DATE_ADD('"+baseTime+"', INTERVAL (300 + (RAND() * 600)) SECOND)");
+        String waktuTask3 = getWaktuTaskDariBPJS(data, "3");
+        if (waktuTask3 != null && !waktuTask3.isEmpty()) {
+            // Waktu Task 4 = Waktu Task 3 + (5 s.d 20 menit)
+            datajam = Sequel.cariIsi("SELECT DATE_ADD('"+waktuTask3+"', INTERVAL (5 + FLOOR(RAND() * 15)) MINUTE)");
+        } else {
+            // Fallback lama jika Task 3 juga tidak ditemukan
+            datajam = Sequel.cariIsi("SELECT DATE_ADD('"+baseTime+"', INTERVAL (300 + (RAND() * 600)) SECOND)");
+        }
         
         if(!datajam.equals("")){
             if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{kodebooking,"4",datajam}) == true){ 
@@ -666,8 +672,14 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
     // 5. Proses Rekonstruksi TASK ID 5 (Selesai Pelayanan)
     datataskid = Sequel.cariIsi("select * from referensi_mobilejkn_bpjs_taskid where taskid='5' and no_rawat=?", kodebooking);
     if (datataskid.equals("")) { // Hanya jika Task ID 5 bolong (Setelah di-heal)
-        // Waktu Task 5 = Base Time + (900 s.d. 1800 detik) -> (15-30 menit)
-        datajam = Sequel.cariIsi("SELECT DATE_ADD('"+baseTime+"', INTERVAL (900 + (RAND() * 900)) SECOND)");
+        String waktuTask4 = getWaktuTaskDariBPJS(data, "4");
+        if (waktuTask4 != null && !waktuTask4.isEmpty()) {
+            // Waktu Task 5 = Waktu Task 4 + (5 s.d 20 menit)
+            datajam = Sequel.cariIsi("SELECT DATE_ADD('"+waktuTask4+"', INTERVAL (5 + FLOOR(RAND() * 15)) MINUTE)");
+        } else {
+            // Fallback lama jika Task 4 juga tidak ditemukan
+            datajam = Sequel.cariIsi("SELECT DATE_ADD('"+baseTime+"', INTERVAL (900 + (RAND() * 900)) SECOND)");
+        }
         
         if(!datajam.equals("")){
              if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{kodebooking,"5",datajam}) == true){ 
@@ -825,8 +837,14 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
     // 4. Proses Rekonstruksi TASK ID 4 (Mulai Pelayanan)
     datataskid = Sequel.cariIsi("select * from referensi_mobilejkn_bpjs_taskid where taskid='4' and no_rawat=?", kodebooking);
     if (datataskid.equals("")) { // Hanya jika Task ID 4 bolong (Setelah di-heal)
-        // Waktu Task 4 = Base Time + (300 s.d. 900 detik) -> (5-15 menit)
-        datajam = Sequel.cariIsi("SELECT DATE_ADD('"+baseTime+"', INTERVAL (300 + (RAND() * 600)) SECOND)");
+        String waktuTask3 = getWaktuTaskDariBPJS(kodebooking, "3");
+        if (waktuTask3 != null && !waktuTask3.isEmpty()) {
+            // Waktu Task 4 = Waktu Task 3 + (5 s.d 20 menit)
+            datajam = Sequel.cariIsi("SELECT DATE_ADD('"+waktuTask3+"', INTERVAL (5 + FLOOR(RAND() * 15)) MINUTE)");
+        } else {
+            // Fallback lama jika Task 3 juga tidak ditemukan
+            datajam = Sequel.cariIsi("SELECT DATE_ADD('"+baseTime+"', INTERVAL (300 + (RAND() * 600)) SECOND)");
+        }
         
         if(!datajam.equals("")){
             if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{kodebooking,"4",datajam}) == true){ 
@@ -868,8 +886,14 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
     // 5. Proses Rekonstruksi TASK ID 5 (Selesai Pelayanan)
     datataskid = Sequel.cariIsi("select * from referensi_mobilejkn_bpjs_taskid where taskid='5' and no_rawat=?", kodebooking);
     if (datataskid.equals("")) { // Hanya jika Task ID 5 bolong (Setelah di-heal)
-        // Waktu Task 5 = Base Time + (900 s.d. 1800 detik) -> (15-30 menit)
-        datajam = Sequel.cariIsi("SELECT DATE_ADD('"+baseTime+"', INTERVAL (900 + (RAND() * 900)) SECOND)");
+        String waktuTask4 = getWaktuTaskDariBPJS(kodebooking, "4");
+        if (waktuTask4 != null && !waktuTask4.isEmpty()) {
+            // Waktu Task 5 = Waktu Task 4 + (5 s.d 20 menit)
+            datajam = Sequel.cariIsi("SELECT DATE_ADD('"+waktuTask4+"', INTERVAL (5 + FLOOR(RAND() * 15)) MINUTE)");
+        } else {
+            // Fallback lama jika Task 4 juga tidak ditemukan
+            datajam = Sequel.cariIsi("SELECT DATE_ADD('"+baseTime+"', INTERVAL (900 + (RAND() * 900)) SECOND)");
+        }
         
         if(!datajam.equals("")){
              if(Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid","?,?,?","task id",3,new String[]{kodebooking,"5",datajam}) == true){ 
