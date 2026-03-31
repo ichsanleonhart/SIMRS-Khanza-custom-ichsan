@@ -1,4 +1,0 @@
-DirectoryIndex login.php
-
-# Matikan listing file jika tidak ada index
-Options -Indexes
