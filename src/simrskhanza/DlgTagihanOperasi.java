@@ -41,9 +41,6 @@ import org.apache.http.entity.mime.content.ByteArrayBody; // tambahan by ichsan
 import org.apache.http.impl.client.DefaultHttpClient; // tambahan by ichsan
 import java.util.HashMap;        // tambahan by ichsan
 import java.util.Map;            // tambahan by ichsan
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import javax.swing.SwingUtilities;
 
 public class DlgTagihanOperasi extends javax.swing.JDialog {
     private final DefaultTableModel tabMode,tabMode2;
@@ -52,14 +49,14 @@ public class DlgTagihanOperasi extends javax.swing.JDialog {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private volatile boolean ceksukses = false;
     private Jurnal jur=new Jurnal();
-    private Connection koneksi=koneksiDB.condb();
-	private string FileName ="", kodeberkas=""; //tambahan FileName ="", kodeberkas=""; oleh ichsan
+    private Connection koneksi=koneksiDB.condb();    
     private PreparedStatement pstindakan,psobat,psset_tarif, ps; // TAMBAHAN ps by ichsan
-    private ResultSet rsobat,rstindakan,rsset_tarif;
+    private ResultSet rsobat,rstindakan,rsset_tarif, rs; // TAMBAHAN rs by ichsan
     private DlgCariPetugas petugas;
     private DlgCariDokter dokter;    
     private double ttljmdokter=0,ttljmpetugas=0,ttlpendapatan=0,ttlbhp=0;
-    private String norawatibu="";
+    private String kelas_operasi="Yes",kelas="",cara_bayar_operasi="Yes",kd_pj="",status=""; // tambahan from upstream
+    private String norawatibu="", FileName ="", kodeberkas=""; //tambahan FileName ="", kodeberkas=""; oleh ichsan
     private double y=0,biayatindakan=0,biayaobat=0;
     private int jml=0,pilihan=0,i=0,index=0, reply=0;  //tambahan [reply=0] by ichsan untuk layar tampilan yes / no;
     private boolean[] pilih; 

@@ -549,7 +549,7 @@ public final class DlgIGD extends javax.swing.JDialog {
         
         if(catatanpasien.getTampilkanCatatan().equals("")){
             catatanpasien.SetCatatanPasien();
-        }        }
+        }
     }
 
     /**
@@ -8142,7 +8142,7 @@ public final class DlgIGD extends javax.swing.JDialog {
                     return;
                 }
                 resepobat.setVisible(true);
-            }            }
+            }
         }
     }// GEN-LAST:event_MnResepDOkterActionPerformed
 

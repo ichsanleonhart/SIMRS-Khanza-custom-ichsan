@@ -235,6 +235,7 @@ public final class DlgRawatJalan extends javax.swing.JDialog {
     private ResultSet rs,rstindakan;
     private int i=0,jmlparsial=0,jml=0,index=0,tinggi=0;
     private String aktifkanparsial="no",kode_poli="",kd_pj="",TANGGALMUNDUR="yes",pilihiterasi="";
+    private String variabel=""; // tambahan by ichsan untuk ICare BPJS
 	private RMCari5SOAPTerakhir soapterakhir=new RMCari5SOAPTerakhir(null,false);       //tambahan ichsan, tombol untuk mencari 5 soap terakhir
     private boolean[] pilih; 
     private String[] kode,nama,kategori;
