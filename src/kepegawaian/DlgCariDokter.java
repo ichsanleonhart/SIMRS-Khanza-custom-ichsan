@@ -452,6 +452,8 @@ public final class DlgCariDokter extends javax.swing.JDialog {
             iyembuilder=null;
         } catch (Exception e) {
             System.out.println("Notifikasi : "+e);
+        } finally {
+            if (fileWriter != null) try { fileWriter.close(); } catch (Exception e) {}
         }
         LCount.setText(""+tabMode.getRowCount());
     }
@@ -498,6 +500,10 @@ public final class DlgCariDokter extends javax.swing.JDialog {
             }else{
                 System.out.println("Notifikasi : "+ex);
             }
+        } finally {
+            if (myObj != null) try { myObj.close(); } catch (Exception e) {}
+            response = null;
+            root = null;
         }
     } 
     
@@ -521,12 +527,17 @@ public final class DlgCariDokter extends javax.swing.JDialog {
                 for(JsonNode list:response){
                     if(list.path("KodeDokter").asText().equalsIgnoreCase(kode)){
                         iyem=list.path("NamaDokter").asText();
+                        break;
                     }
                 }
             }
             myObj.close();
         } catch (Exception ex) {
             System.out.println("Notifikasi : "+ex);
+        } finally {
+            if (myObj != null) try { myObj.close(); } catch (Exception e) {}
+            response = null;
+            root = null;
         }
         if(iyem.equals("")){
             iyem=Sequel.cariIsi("select dokter.nm_dokter from dokter where dokter.kd_dokter=?",kode);

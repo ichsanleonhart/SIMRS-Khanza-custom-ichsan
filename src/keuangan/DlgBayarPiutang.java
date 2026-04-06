@@ -839,6 +839,10 @@ public final class DlgBayarPiutang extends javax.swing.JDialog {
                 myObj.close();
             } catch (Exception e) {
                 sukses=false;
+            }finally {
+                if (myObj != null) try { myObj.close(); } catch (Exception e) {}
+                response = null;
+                root = null;
             }
             Sequel.AutoComitFalse();
             sukses=true;
@@ -1295,14 +1299,6 @@ private void BtnSeekActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         try {
-            if(Valid.daysOld("./cache/akunbayar.iyem")<8){
-                runBackground(() ->tampilAkunBayar2());
-            }else{
-                runBackground(() ->tampilAkunBayar());
-            }
-        } catch (Exception e) {
-        }
-        try {
             ps=koneksi.prepareStatement(
                     "select set_akun.Diskon_Piutang,set_akun.Piutang_Tidak_Terbayar from set_akun");
             try {
@@ -1323,6 +1319,14 @@ private void BtnSeekActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
             }
         } catch (Exception e) {
             System.out.println("Notif : "+e);
+        }
+        try {
+            if(Valid.daysOld("./cache/akunbayar.iyem")<8){
+                runBackground(() ->tampilAkunBayar2());
+            }else{
+                runBackground(() ->tampilAkunBayar());
+            }
+        } catch (Exception e) {
         }
         if(koneksiDB.CARICEPAT().equals("aktif")){
             TCari.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
@@ -1646,6 +1650,8 @@ private void BtnSeekActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
              iyembuilder=null;
         } catch (Exception e) {
             System.out.println("Notifikasi : "+e);
+        } finally {
+            if (fileWriter != null) try { fileWriter.close(); } catch (Exception e) {}
         }
     }
     
@@ -1666,6 +1672,10 @@ private void BtnSeekActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
             }else{
                 System.out.println("Notifikasi : "+ex);
             }
+        }finally {
+            if (myObj != null) try { myObj.close(); } catch (Exception e) {}
+            response = null;
+            root = null;
         }
     } 
     

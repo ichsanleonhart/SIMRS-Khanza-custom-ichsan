@@ -433,6 +433,8 @@ public final class DlgCariPegawai extends javax.swing.JDialog {
             iyembuilder=null;
         }catch(Exception e){
             System.out.println("Notifikasi : "+e);
+        }finally {
+            if (fileWriter != null) try { fileWriter.close(); } catch (Exception e) {}
         }
         LCount.setText(""+tabMode.getRowCount());
     }
@@ -476,6 +478,10 @@ public final class DlgCariPegawai extends javax.swing.JDialog {
             }else{
                 System.out.println("Notifikasi : "+ex);
             }
+        } finally {
+            if (myObj != null) try { myObj.close(); } catch (Exception e) {}
+            response = null;
+            root = null;
         }
     } 
     
@@ -499,12 +505,17 @@ public final class DlgCariPegawai extends javax.swing.JDialog {
                 for(JsonNode list:response){
                     if(list.path("NIP").asText().equalsIgnoreCase(kode)){
                         iyem=list.path("Nama").asText();
+                        break;
                     }
                 }
             }
             myObj.close();
         } catch (Exception ex) {
             System.out.println("Notifikasi : "+ex);
+        } finally {
+            if (myObj != null) try { myObj.close(); } catch (Exception e) {}
+            response = null;
+            root = null;
         }
         if(iyem.equals("")){
             iyem=Sequel.cariIsi("select pegawai.nama from pegawai where pegawai.nik=?",kode);
@@ -538,6 +549,10 @@ public final class DlgCariPegawai extends javax.swing.JDialog {
             myObj.close();
         } catch (Exception ex) {
             System.out.println("Notifikasi : "+ex);
+        } finally {
+            if (myObj != null) try { myObj.close(); } catch (Exception e) {}
+            response = null;
+            root = null;
         }
         if(iyem.equals("")){
             iyem=Sequel.cariIsi("select pegawai.jbtn from pegawai where pegawai.nik=?",kode);
@@ -571,6 +586,10 @@ public final class DlgCariPegawai extends javax.swing.JDialog {
             myObj.close();
         } catch (Exception ex) {
             System.out.println("Notifikasi : "+ex);
+        } finally {
+            if (myObj != null) try { myObj.close(); } catch (Exception e) {}
+            response = null;
+            root = null;
         }
         if(iyem.equals("")){
             iyem=Sequel.cariIsi("select pegawai.departemen from pegawai where pegawai.nik=?",kode);

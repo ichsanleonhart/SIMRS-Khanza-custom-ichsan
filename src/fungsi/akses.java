@@ -18,7 +18,6 @@ public final class akses {
     private static final Connection koneksi=koneksiDB.condb();
     private static PreparedStatement ps,ps2;
     private static ResultSet rs,rs2;
-    
     private static String kode="",kdbangsal="",alamatip="",namars="",alamatrs="",kabupatenrs="",propinsirs="",kontakrs="",emailrs="",form="",namauser="",kode_ppk=""; 
     private static int jml1=0,jml2=0,lebar=0,tinggi=0;
     private static boolean aktif=false,admin=false,user=false,vakum=false,aplikasi=false,penyakit=false,obat_penyakit=false,dokter=false,jadwal_praktek=false,petugas=false,pasien=false,registrasi=false,
@@ -259,7 +258,8 @@ public final class akses {
             bpjs_riwayat_pelayanan_obat=false,skrining_gizi_kehamilan=false,bpjs_rekap_peserta_prb_apotek=false,serah_terima_anggota_tubuh_barang=false,pcra_icra_jenis_aktivitas_proyek=false,
             pcra_icra_lokasi_kelompok_risiko_area=false,pcra_icra_kelas_risiko_pencegahan=false,pcra_icra_tindakan_pengendalian=false,pcra_icra_identifkasi_risiko_infeksi=false,
             pcra_icra_identifkasi_risiko_keselamatan=false,pcra_icra_identifkasi_risiko_kebakaran=false,pcra_icra_identifkasi_risiko_utilitas=false,bpjs_daftar_resep_apotek=false,
-            daftar_permintaan_resep_iterasi_bpjs=false,pcra_icra_pengkajian_risiko_prakonstruksi=false;
+            daftar_permintaan_resep_iterasi_bpjs=false,pcra_icra_pengkajian_risiko_prakonstruksi=false,pcra_icra_persyaratan_harus_dipenuhi=false,satu_sehat_kirim_questionresponse_telaah_farmasi=false,
+            satu_sehat_kirim_allergy_intolerance=false;
     
     public static void setData(String user, String pass) {
         try {        
@@ -1468,6 +1468,9 @@ public final class akses {
                         akses.bpjs_daftar_resep_apotek=true;
                         akses.daftar_permintaan_resep_iterasi_bpjs=true;
                         akses.pcra_icra_pengkajian_risiko_prakonstruksi=true;
+                        akses.pcra_icra_persyaratan_harus_dipenuhi=true;
+                        akses.satu_sehat_kirim_questionresponse_telaah_farmasi=true;
+                        akses.satu_sehat_kirim_allergy_intolerance=true;
                     }else if(rs2.getRow()>=1){   
                         rs2.beforeFirst();
                         rs2.next();
@@ -2660,6 +2663,9 @@ public final class akses {
                         akses.bpjs_daftar_resep_apotek=rs2.getBoolean("bpjs_daftar_resep_apotek");
                         akses.daftar_permintaan_resep_iterasi_bpjs=rs2.getBoolean("daftar_permintaan_resep_iterasi_bpjs");
                         akses.pcra_icra_pengkajian_risiko_prakonstruksi=rs2.getBoolean("pcra_icra_pengkajian_risiko_prakonstruksi");
+                        akses.pcra_icra_persyaratan_harus_dipenuhi=rs2.getBoolean("pcra_icra_persyaratan_harus_dipenuhi");
+                        akses.satu_sehat_kirim_questionresponse_telaah_farmasi=rs2.getBoolean("satu_sehat_kirim_questionresponse_telaah_farmasi");
+                        akses.satu_sehat_kirim_allergy_intolerance=rs2.getBoolean("satu_sehat_kirim_allergy_intolerance");
                     }else if((rs.getRow()==0)&&(rs2.getRow()==0)){
                         setLogOut();
                     }
@@ -3875,6 +3881,9 @@ public final class akses {
         akses.bpjs_daftar_resep_apotek=false;
         akses.daftar_permintaan_resep_iterasi_bpjs=false;
         akses.pcra_icra_pengkajian_risiko_prakonstruksi=false;
+        akses.pcra_icra_persyaratan_harus_dipenuhi=false;
+        akses.satu_sehat_kirim_questionresponse_telaah_farmasi=false;
+        akses.satu_sehat_kirim_allergy_intolerance=false;
     }
     
     public static int getjml1() {return akses.jml1;}    
@@ -5104,4 +5113,7 @@ public final class akses {
     public static boolean getbpjs_daftar_resep_apotek(){return akses.bpjs_daftar_resep_apotek;}
     public static boolean getdaftar_permintaan_resep_iterasi_bpjs(){return akses.daftar_permintaan_resep_iterasi_bpjs;}
     public static boolean getpcra_icra_pengkajian_risiko_prakonstruksi(){return akses.pcra_icra_pengkajian_risiko_prakonstruksi;}
+    public static boolean getpcra_icra_persyaratan_harus_dipenuhi(){return akses.pcra_icra_persyaratan_harus_dipenuhi;}
+    public static boolean getsatu_sehat_kirim_questionresponse_telaah_farmasi(){return akses.satu_sehat_kirim_questionresponse_telaah_farmasi;}
+    public static boolean getsatu_sehat_kirim_allergy_intolerance(){return akses.satu_sehat_kirim_allergy_intolerance;}
 }   

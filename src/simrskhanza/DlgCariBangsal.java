@@ -414,6 +414,8 @@ public final class DlgCariBangsal extends javax.swing.JDialog {
             iyembuilder.setLength(0);
         }catch(Exception e){
             System.out.println("Notifikasi : "+e);
+        } finally {
+            if (fileWriter != null) try { fileWriter.close(); } catch (Exception e) {}
         }
         LCount.setText(""+tabMode.getRowCount());
     }
@@ -460,6 +462,10 @@ public final class DlgCariBangsal extends javax.swing.JDialog {
             }else{
                 System.out.println("Notifikasi : "+ex);
             }
+        } finally {
+            if (myObj != null) try { myObj.close(); } catch (Exception e) {}
+            response = null;
+            root = null;
         }
         LCount.setText(""+tabMode.getRowCount());
     }
@@ -484,12 +490,17 @@ public final class DlgCariBangsal extends javax.swing.JDialog {
                 for(JsonNode list:response){
                     if(list.path("KodeKamar").asText().equalsIgnoreCase(kode)){
                         iyem=list.path("NamaKamar").asText();
+                        break;
                     }
                 }
             }
             myObj.close();
         } catch (Exception ex) {
             System.out.println("Notifikasi : "+ex);
+        } finally {
+            if (myObj != null) try { myObj.close(); } catch (Exception e) {}
+            response = null;
+            root = null;
         }
         if(iyem.equals("")){
             iyem=Sequel.cariIsi("select bangsal.nm_bangsal from bangsal where bangsal.kd_bangsal=?",kode);

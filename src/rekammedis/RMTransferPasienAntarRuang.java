@@ -60,11 +60,18 @@ public final class RMTransferPasienAntarRuang extends javax.swing.JDialog {
     private String finger="", FileName ="",kodeberkas=""; //tambahan ichsan 
     private PreparedStatement ps;
     private ResultSet rs;
+<<<<<<< HEAD
     private int i=0,pilihan=0;
     private DlgCariPetugas petugas=new DlgCariPetugas(null,false);
 //    TAMBAHAN
     private DlgCariBangsal bangsal=new DlgCariBangsal(null,false);
     private DlgCariPoli poli=new DlgCariPoli(null,false);
+=======
+    private int i=0;
+    private DlgCariPetugas petugas;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private volatile boolean ceksukses = false;
+>>>>>>> upstream/master
     private StringBuilder htmlContent;
     
     /** Creates new form DlgRujuk
@@ -2307,11 +2314,42 @@ public final class RMTransferPasienAntarRuang extends javax.swing.JDialog {
     }//GEN-LAST:event_BtnDokterKeyPressed
 
     private void BtnMenerimaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnMenerimaActionPerformed
+<<<<<<< HEAD
         pilihan=2;
         petugas.isCek();
         petugas.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         petugas.setLocationRelativeTo(internalFrame1);
         petugas.setAlwaysOnTop(false);
+=======
+        if (petugas == null || !petugas.isDisplayable()) {
+            petugas=new DlgCariPetugas(null,false);
+            petugas.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            petugas.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    if(petugas.getTable().getSelectedRow()!= -1){
+                        KdPetugasMenerima.setText(petugas.getTable().getValueAt(petugas.getTable().getSelectedRow(),0).toString());
+                        NmPetugasMenerima.setText(petugas.getTable().getValueAt(petugas.getTable().getSelectedRow(),1).toString());
+                        KdPetugasMenerima.requestFocus();
+                    }   
+                    petugas=null;
+                }
+            });
+
+            petugas.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+            petugas.setLocationRelativeTo(internalFrame1);
+        }
+            
+        if (petugas == null) return;
+        if (!petugas.isVisible()) {
+            petugas.isCek();    
+            petugas.emptTeks();
+        }  
+        if (petugas.isVisible()) {
+            petugas.toFront();
+            return;
+        }    
+>>>>>>> upstream/master
         petugas.setVisible(true);
     }//GEN-LAST:event_BtnMenerimaActionPerformed
 

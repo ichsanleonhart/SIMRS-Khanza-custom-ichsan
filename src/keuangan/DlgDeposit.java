@@ -805,6 +805,10 @@ public class DlgDeposit extends javax.swing.JDialog {
                         myObj.close();
                     } catch (Exception e) {
                         sukses=false;
+                    } finally {
+                        if (myObj != null) try { myObj.close(); } catch (Exception e) {}
+                        response = null;
+                        root = null;
                     }
                 }else{
                     sukses=false;
@@ -1088,9 +1092,9 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         try {
             if(Valid.daysOld("./cache/akunbayar.iyem")<8){
-                runBackground(() ->tampilAkunBayar2());
+                tampilAkunBayar2();
             }else{
-                runBackground(() ->tampilAkunBayar());
+                tampilAkunBayar();
             }
         } catch (Exception e) {
         }
@@ -1461,6 +1465,8 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
              iyembuilder=null;
         } catch (Exception e) {
             System.out.println("Notifikasi : "+e);
+        } finally {
+            if (fileWriter != null) try { fileWriter.close(); } catch (Exception e) {}
         }
     }
     
@@ -1481,6 +1487,10 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
             }else{
                 System.out.println("Notifikasi : "+ex);
             }
+        } finally {
+            if (myObj != null) try { myObj.close(); } catch (Exception e) {}
+            response = null;
+            root = null;
         }
     } 
 
@@ -1493,12 +1503,17 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                for(JsonNode list:response){
                    if(list.path("NamaAkun").asText().equals(AkunBayar.getSelectedItem().toString())){
                         Persenppn.setText(list.path("PPN").asText());
+                        break;
                    }
                }
             }
             myObj.close();
         } catch (Exception e) {
             Persenppn.setText("0");
+        } finally {
+            if (myObj != null) try { myObj.close(); } catch (Exception e) {}
+            response = null;
+            root = null;
         }
     }
     
