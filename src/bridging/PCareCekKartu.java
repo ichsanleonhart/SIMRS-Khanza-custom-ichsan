@@ -5901,17 +5901,14 @@ public final class PCareCekKartu extends javax.swing.JDialog {
                     "No.Rawat: " + TNoRw.getText() +
                     " | No.RM: " + TNo.getText() +
                     " | Pasien: " + TNm.getText().replaceAll("[^\\x20-\\x7E]","");
+
                 try {
-                    Connection koneksiLog = koneksiDB.condb();
-                    PreparedStatement psForcelog = koneksiLog.prepareStatement(
-                        "INSERT INTO trackersql(tanggal, sqle, usere) VALUES (NOW(), ?, ?)"
-                    );
-                    psForcelog.setString(1, pesanPaksaLanjut);
-                    psForcelog.setString(2, akses.getkode());
-                    psForcelog.executeUpdate();
-                    psForcelog.close();
+                    String pesanSafe = pesanPaksaLanjut.replaceAll("['\\\\\\\\]", "`");
+                    String userSafe  = (akses.getkode() != null) ? akses.getkode().replaceAll("['\\\\\\\\]", "`") : "admin_ai";
+                    if(userSafe.length() > 20) { userSafe = userSafe.substring(0, 20); }
+                    
+                    Sequel.menyimpan("trackersql", "NOW(), '" + pesanSafe + "', '" + userSafe + "'", "Audit Trail Pelanggaran BPJS");
                     System.out.println("[!!!] " + pesanPaksaLanjut);
-                    catatLog("[!!!] " + pesanPaksaLanjut);
                 } catch (Exception eLog) {
                     System.out.println("Gagal log paksa lanjut: " + eLog);
                 }
@@ -6406,18 +6403,16 @@ public final class PCareCekKartu extends javax.swing.JDialog {
     // ========================================================================
     private void catatTrackerBPJS(String noRawat, String noRM, String namaPasien,
                                    String taskDesc, String payload, String responseBPJS) {
-        Connection koneksiLog = null;
-        PreparedStatement psLog = null;
         try {
-            // Gunakan koneksi independen agar tidak collision dengan ResultSet aktif
-            koneksiLog = koneksiDB.condb();
-            if(koneksiLog == null) return;
-
-            // Sanitasi karakter non-printable (buang emoji dan special char)
-            String safeNama     = (namaPasien   != null) ? namaPasien.replaceAll("[^\\x20-\\x7E]", "")   : "";
-            String safePayload  = (payload      != null) ? payload.replaceAll("[^\\x20-\\x7E]", "")      : "";
-            String safeResponse = (responseBPJS != null) ? responseBPJS.replaceAll("[^\\x20-\\x7E]", "") : "";
-            String safeNoRM     = (noRM         != null) ? noRM.trim()                                    : "";
+            // Sanitasi Ekstrim: Buang emoji, petik tunggal, dan backslash agar aman untuk String Concat (Sequel)
+            String safeNama     = (namaPasien   != null) ? namaPasien.replaceAll("[^\\x20-\\x7E]", "").replaceAll("['\\\\\\\\]", "`") : "";
+            String safePayload  = (payload      != null) ? payload.replaceAll("[^\\x20-\\x7E]", "").replaceAll("['\\\\\\\\]", "`")   : "";
+            String safeResponse = (responseBPJS != null) ? responseBPJS.replaceAll("[^\\x20-\\x7E]", "").replaceAll("['\\\\\\\\]", "`") : "";
+            String safeNoRM     = (noRM         != null) ? noRM.trim().replaceAll("['\\\\\\\\]", "`")                             : "";
+            
+            // Pengamanan panjang usere (max 20 di trackersql)
+            String tokenUser    = (akses.getkode() != null) ? akses.getkode().replaceAll("['\\\\\\\\]", "`") : "admin_ai";
+            if(tokenUser.length() > 20) { tokenUser = tokenUser.substring(0, 20); }
 
             String pesanLog =
                 "[LOG BRIDGING BPJS]" +
@@ -6428,20 +6423,14 @@ public final class PCareCekKartu extends javax.swing.JDialog {
                 " | PAYLOAD: "       + safePayload +
                 " | RESPONSE BPJS: " + safeResponse;
 
-            psLog = koneksiLog.prepareStatement(
-                "INSERT INTO trackersql(tanggal, sqle, usere) VALUES (NOW(), ?, ?)"
-            );
-            psLog.setString(1, pesanLog);
-            psLog.setString(2, akses.getkode());
-            psLog.executeUpdate();
+            // Gunakan core fungsi Khanza (Sequel) yang terjamin dan otomatis memunculkan JOptionPane jika gagal
+            Sequel.menyimpan("trackersql", "NOW(), '" + pesanLog + "', '" + tokenUser + "'", "Audit Trail BPJS");
+            
             System.out.println("[TRACKER OK] " + taskDesc);
-            catatLog("[TRACKER] " + pesanLog);
 
         } catch (Exception e) {
-            System.out.println("[TRACKER] Gagal simpan log: " + e);
-            catatLog("[TRACKER] Gagal simpan log: " + e);
-        } finally {
-            try { if(psLog != null) psLog.close(); } catch(Exception ignore) {}
+            System.out.println("[TRACKER] Gagal simpan log (FATAL): " + e);
+            JOptionPane.showMessageDialog(null, "SYSTEM ERROR: Log BPJS Gagal Tersimpan!\nKirim Screenshot ini ke Tim IT:\n" + e.getMessage());
         }
     }
 
