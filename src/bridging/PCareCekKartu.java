@@ -5868,7 +5868,7 @@ public final class PCareCekKartu extends javax.swing.JDialog {
         tampil(NoPeserta);
         empt=true;
     }
-
+/*
     private void SimpanPendaftaranPCare() {
 		
 		if(ADDANTRIANAPIMOBILEJKNFKTP.equals("yes")){
@@ -6447,7 +6447,512 @@ public final class PCareCekKartu extends javax.swing.JDialog {
             pw.close();
         } catch (Exception e) { }
     }    
+*/
+    
+    // ========================================================================
+    // ALUR UTAMA: 1. Add Antrean (Task 0) -> 2. Update Hadir (Task 1) -> 3. Pendaftaran PCare
+    // Dibungkus dalam Background Thread agar UI tidak FREEZE/HANG saat throttle.
+    // ========================================================================
+    private void SimpanPendaftaranPCare() {
+        // Kunci tombol simpan dan ubah kursor jadi loading agar user tidak klik 2x
+        BtnSimpan.setEnabled(false);
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
+        // Jalankan proses bridging di Background Thread
+        new Thread(() -> {
+            try {
+                // [1 & 2] PROSES ANTREAN MOBILE JKN (TASK 0 & TASK 1)
+                if(ADDANTRIANAPIMOBILEJKNFKTP.equals("yes")){
+                    boolean antreanOk = SimpanAntrianOnSite();
+
+                    if(antreanOk){
+                        // TASK 1: Update Hadir — Jeda 2 detik (throttle) aman karena di background thread
+                        UpdateHadirOnSite();
+                    } else {
+                        // Task 0 GAGAL — Konfirmasi ke user melalui UI Thread (EDT)
+                        final int[] pilihUser = new int[1];
+                        try {
+                            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                                pilihUser[0] = JOptionPane.showConfirmDialog(null,
+                                    "Add Antrean ke BPJS GAGAL!\n" +
+                                    "Apakah Anda tetap ingin melanjutkan pendaftaran PCare?\n\n" +
+                                    "(Pilih YES = registrasi PCare disimpan TANPA antrean BPJS.\n" +
+                                    " Kondisi ini dicatat sebagai pelanggaran alur di sistem.)",
+                                    "PERINGATAN - Add Antrean Gagal",
+                                    JOptionPane.YES_NO_OPTION,
+                                    JOptionPane.WARNING_MESSAGE);
+                            });
+                        } catch (Exception e) {}
+
+                        if(pilihUser[0] != JOptionPane.YES_OPTION){
+                            // Batal, kembalikan UI ke normal dan hentikan proses
+                            javax.swing.SwingUtilities.invokeLater(() -> {
+                                BtnSimpan.setEnabled(true);
+                                setCursor(Cursor.getDefaultCursor());
+                            });
+                            return; 
+                        }
+
+                        // User bersikeras lanjut — Catat BUKTI PELANGGARAN
+                        catatTrackerBPJS(TNoRw.getText(), TNo.getText(), TNm.getText(), 
+                            "PELANGGARAN ALUR BPJS - USER MELANJUTKAN SIMPAN PCARE MESKI ADD ANTREAN (TASK 0) GAGAL", 
+                            "-", "-");
+                    }
+                }
+
+                // [3] PROSES ADD PENDAFTARAN PCARE
+                headers = new HttpHeaders();
+                headers.setContentType(MediaType.TEXT_PLAIN);
+                headers.add("X-cons-id",koneksiDB.CONSIDAPIPCARE());
+                utc=String.valueOf(api.GetUTCdatetimeAsString());
+                headers.add("X-timestamp",utc);            
+                headers.add("X-signature",api.getHmac());
+                headers.add("X-authorization","Basic "+Base64.encodeBase64String(otorisasi.getBytes()));
+                headers.add("user_key",koneksiDB.USERKEYAPIPCARE());
+                
+                kunjungansakit="true";
+                if(JenisKunjungan.getSelectedItem().toString().equals("Kunjungan Sehat")){
+                    kunjungansakit="false";
+                }
+                
+                requestJson ="{" +
+                                "\"kdProviderPeserta\": \""+ProviderPeserta.getText()+"\"," +
+                                "\"tglDaftar\": \""+TanggalDaftar.getSelectedItem().toString().substring(0,10)+"\"," +
+                                "\"noKartu\": \""+NoKartu.getText()+"\"," +
+                                "\"kdPoli\": \""+KdPoliTujuan.getText()+"\"," +
+                                "\"keluhan\": \""+Keluhan.getText()+"\"," +
+                                "\"kunjSakit\": "+kunjungansakit+"," +
+                                "\"sistole\": "+getSafeNumericValue(Sistole.getText())+"," +
+                                "\"diastole\": "+getSafeNumericValue(Diastole.getText())+"," +
+                                "\"beratBadan\": "+getSafeNumericValue(BeratBadan.getText())+"," +
+                                "\"tinggiBadan\": "+getSafeNumericValue(TinggiBadan.getText())+"," +
+                                "\"respRate\": "+getSafeNumericValue(Respiratory.getText())+"," +
+                                "\"lingkarPerut\": "+getSafeLingkarPerut(LingkarPerut.getText())+"," +
+                                "\"heartRate\": "+getSafeNumericValue(Heartrate.getText())+"," +
+                                "\"rujukBalik\": 0," +
+                                "\"kdTkp\": \""+Perawatan.getSelectedItem().toString().substring(0,2)+"\"" +
+                             "}";
+                             
+                catatLog(">> JSON PCARE: " + requestJson);
+                requestEntity = new HttpEntity(requestJson,headers);
+                String rawPcareResponse = api.getRest().exchange(link+"/pendaftaran", HttpMethod.POST, requestEntity, String.class).getBody();
+                root = mapper.readTree(rawPcareResponse);
+                nameNode = root.path("metaData");
+                
+                if(nameNode.path("code").asText().equals("201")){
+                    response = mapper.readTree(api.Decrypt(root.path("response").asText(),utc)).path("message");
+                    
+                    if(Sequel.menyimpantf("pcare_pendaftaran","?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'Terkirim'","No.Urut",20,new String[]{
+                        TNoRw.getText(),Valid.SetTgl(TanggalDaftar.getSelectedItem()+""),TNo.getText(),TNm.getText(),ProviderPeserta.getText(),
+                        NoKartu.getText(),KdPoliTujuan.getText(),NmPoliTujuan.getText(),Keluhan.getText(),JenisKunjungan.getSelectedItem().toString(),
+                        Sistole.getText(),Diastole.getText(),BeratBadan.getText(),TinggiBadan.getText(),Respiratory.getText(),LingkarPerut.getText(),
+                        Heartrate.getText(),"0",Perawatan.getSelectedItem().toString(),response.asText()
+                    })==true){  
+                        if((!Keluhan.getText().trim().equals(""))||(!Respiratory.getText().trim().equals(""))||
+                                (!Heartrate.getText().trim().equals(""))||(!TinggiBadan.getText().trim().equals(""))||
+                                (!BeratBadan.getText().trim().equals(""))||(!Sistole.getText().trim().equals(""))||
+                                (!Diastole.getText().trim().equals(""))){
+                            if(Perawatan.getSelectedIndex()==0){
+                                Sequel.menyimpan2("pemeriksaan_ralan","?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?",21,new String[]{
+                                    TNoRw.getText(),Valid.SetTgl(TanggalDaftar.getSelectedItem()+""),Sequel.cariIsi("select current_time()"),
+                                    TSuhu.getText(),Sistole.getText()+"/"+Diastole.getText(),Heartrate.getText(),Respiratory.getText(),TinggiBadan.getText(), 
+                                    BeratBadan.getText(),"","","Compos Mentis", Keluhan.getText(),"","",LingkarPerut.getText(),"","","","",KdTenagaMedis.getText()
+                                });    
+                            }else{
+                                Sequel.menyimpan2("pemeriksaan_ranap","?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?",20,new String[]{
+                                    TNoRw.getText(),Valid.SetTgl(TanggalDaftar.getSelectedItem()+""),Sequel.cariIsi("select current_time()"),
+                                    TSuhu.getText(),Sistole.getText()+"/"+Diastole.getText(),Heartrate.getText(),Respiratory.getText(),TinggiBadan.getText(), 
+                                    BeratBadan.getText(),"","","Compos Mentis", Keluhan.getText(),"","","","","","",KdTenagaMedis.getText()
+                                });    
+                            }     
+                        }
+                        
+                        // Sukses PCare, kembalikan UI
+                        javax.swing.SwingUtilities.invokeLater(() -> {
+                            emptTeks();
+                        });
+                    }                     
+                } else {
+                    javax.swing.SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(null,"Gagal Pendaftaran PCare: " + nameNode.path("message").asText());
+                    });
+                }
+
+            } catch (Exception ex) {
+                catatLog("Notifikasi Bridging PCare Exception: " + ex);
+                // --- [1] ERROR KONEKSI/TIMEOUT (SIMPAN LOKAL DULU) ---
+                if (ex.toString().contains("UnknownHostException") || ex.toString().contains("unreachable") || ex.toString().contains("500") || ex.toString().contains("408")) {
+                    if (Sequel.menyimpantf("pcare_pendaftaran", "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'Gagal'", "No.Urut", 20, new String[]{
+                        TNoRw.getText(), Valid.SetTgl(TanggalDaftar.getSelectedItem() + ""), TNo.getText(), TNm.getText(), ProviderPeserta.getText(),
+                        NoKartu.getText(), KdPoliTujuan.getText(), NmPoliTujuan.getText(), Keluhan.getText(), JenisKunjungan.getSelectedItem().toString(),
+                        Sistole.getText(), Diastole.getText(), BeratBadan.getText(), TinggiBadan.getText(), Respiratory.getText(), LingkarPerut.getText(),
+                        Heartrate.getText(), "0", Perawatan.getSelectedItem().toString(), ""
+                    }) == true) {
+                        if ((!Keluhan.getText().trim().equals("")) || (!Respiratory.getText().trim().equals("")) || (!Heartrate.getText().trim().equals("")) || (!TinggiBadan.getText().trim().equals("")) || (!BeratBadan.getText().trim().equals("")) || (!Sistole.getText().trim().equals("")) || (!Diastole.getText().trim().equals(""))) {
+                            if (Perawatan.getSelectedIndex() == 0) {
+                                Sequel.menyimpan2("pemeriksaan_ralan", "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?", 21, new String[]{
+                                    TNoRw.getText(), Valid.SetTgl(TanggalDaftar.getSelectedItem() + ""), Sequel.cariIsi("select current_time()"),
+                                    TSuhu.getText(), Sistole.getText() + "/" + Diastole.getText(), Heartrate.getText(), Respiratory.getText(), TinggiBadan.getText(),
+                                    BeratBadan.getText(), "", "", "Compos Mentis", Keluhan.getText(), "", "", LingkarPerut.getText(), "", "", "", "", KdTenagaMedis.getText()
+                                });
+                            } else {
+                                Sequel.menyimpan2("pemeriksaan_ranap", "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?", 20, new String[]{
+                                    TNoRw.getText(), Valid.SetTgl(TanggalDaftar.getSelectedItem() + ""), Sequel.cariIsi("select current_time()"),
+                                    TSuhu.getText(), Sistole.getText() + "/" + Diastole.getText(), Heartrate.getText(), Respiratory.getText(), TinggiBadan.getText(),
+                                    BeratBadan.getText(), "", "", "Compos Mentis", Keluhan.getText(), "", "", "", "", "", "", KdTenagaMedis.getText()
+                                });
+                            }
+                        }
+                        javax.swing.SwingUtilities.invokeLater(() -> emptTeks());
+                    }
+                    
+                    javax.swing.SwingUtilities.invokeLater(() -> {
+                        if (ex.toString().contains("500")) {
+                            JOptionPane.showMessageDialog(null, "Server PCare sedang gangguan (Error 500). Data disimpan secara lokal.");
+                        } else if (ex.toString().contains("408")) {
+                            JOptionPane.showMessageDialog(null, "Koneksi Timeout. Data disimpan secara lokal.");
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Koneksi ke server PCare terputus. Data disimpan secara lokal.");
+                        }
+                    });
+                } else if (ex.toString().contains("412") || ex.toString().contains("400") || ex.toString().contains("422")) {
+                    javax.swing.SwingUtilities.invokeLater(() -> {
+                        showDetailedErrorDialog("Respon Error BPJS PCare", "Data ditolak oleh server BPJS:", ex);
+                    });
+                } else {
+                    javax.swing.SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(null, "Terjadi kesalahan: " + ex);
+                    });
+                }
+            } finally {
+                // Selalu pastikan kursor kembali normal dan tombol aktif lagi
+                javax.swing.SwingUtilities.invokeLater(() -> {
+                    BtnSimpan.setEnabled(true);
+                    this.setCursor(Cursor.getDefaultCursor());
+                });
+            }
+        }).start();
+    }
+        
+    public boolean SimpanAntrianOnSite(){
+        boolean statusantrean = false; 
+        catatLog("\n========== [DEBUG] MULAI BRIDGING ANTREAN (PCareDataPendaftaran) ==========");
+
+        String nomorRawat = "";
+        try { nomorRawat = TNoRw.getText(); } catch(Exception e){}
+        
+        if(nomorRawat.equals("")){
+            return false;
+        }
+
+        PreparedStatement psReg = null;
+        ResultSet rsReg = null;
+
+        try {
+            psReg = koneksi.prepareStatement(
+                "select reg_periksa.no_reg,reg_periksa.tgl_registrasi,reg_periksa.kd_dokter,reg_periksa.kd_poli,reg_periksa.stts_daftar,reg_periksa.no_rkm_medis,reg_periksa.kd_pj, "+
+                "pasien.no_ktp,pasien.no_tlp,pasien.no_peserta, pasien.nm_pasien from reg_periksa inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis where reg_periksa.no_rawat=?");
+            
+            psReg.setString(1, nomorRawat);
+            rsReg = psReg.executeQuery();
+                
+            if(rsReg.next()){
+                String namaPasien = rsReg.getString("nm_pasien");
+                String noRMLocal = rsReg.getString("no_rkm_medis").trim();
+
+                try {
+                    String tglSaja = TanggalDaftar.getSelectedItem().toString().substring(0,10);
+                    date = LocalDate.parse(tglSaja, formatter);
+                    dow = date.getDayOfWeek();
+                    day = dow.getValue(); 
+                } catch (Exception e) {
+                    day = 1; 
+                }
+                
+                switch (day) {
+                    case 1: hari="SENIN"; break;
+                    case 2: hari="SELASA"; break;
+                    case 3: hari="RABU"; break;
+                    case 4: hari="KAMIS"; break;
+                    case 5: hari="JUMAT"; break;
+                    case 6: hari="SABTU"; break;
+                    default: hari="AKHAD"; break;
+                }
+                
+                PreparedStatement psJadwal = koneksi.prepareStatement(
+                    "select jadwal.jam_mulai,jadwal.jam_selesai from jadwal where jadwal.hari_kerja=? and jadwal.kd_dokter=? and jadwal.kd_poli=?"
+                );
+                
+                try {
+                    psJadwal.setString(1, hari);
+                    psJadwal.setString(2, rsReg.getString("kd_dokter"));
+                    psJadwal.setString(3, rsReg.getString("kd_poli"));
+                    ResultSet rsJadwal = psJadwal.executeQuery();
+                    
+                    if(rsJadwal.next()){
+                        String jamPraktek = rsJadwal.getString("jam_mulai").substring(0,5)+"-"+rsJadwal.getString("jam_selesai").substring(0,5);
+                        
+                        String kodeDokterBPJS = "";
+                        PreparedStatement psDok = koneksi.prepareStatement("SELECT kd_dokter_pcare FROM maping_dokter_pcare WHERE kd_dokter=?");
+                        psDok.setString(1, rsReg.getString("kd_dokter"));
+                        ResultSet rsDok = psDok.executeQuery();
+                        if(rsDok.next()){ kodeDokterBPJS = rsDok.getString("kd_dokter_pcare"); } 
+                        else {
+                            javax.swing.SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Mapping Dokter PCare Kosong! Silahkan mapping dulu."));
+                            catatTrackerBPJS(nomorRawat, noRMLocal, namaPasien, "Task 0 - Add Antrean GAGAL: Mapping Dokter Kosong", "", "");
+                            return false; 
+                        }
+                        rsDok.close(); psDok.close();
+
+                        String kodePoliBPJS = "";
+                        PreparedStatement psPoli = koneksi.prepareStatement("SELECT kd_poli_pcare FROM maping_poliklinik_pcare WHERE kd_poli_rs=?");
+                        psPoli.setString(1, rsReg.getString("kd_poli"));
+                        ResultSet rsPoli = psPoli.executeQuery();
+                        if(rsPoli.next()){ kodePoliBPJS = rsPoli.getString("kd_poli_pcare"); } 
+                        else {
+                            javax.swing.SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Mapping Poli PCare Kosong! Silahkan mapping dulu."));
+                            catatTrackerBPJS(nomorRawat, noRMLocal, namaPasien, "Task 0 - Add Antrean GAGAL: Mapping Poli Kosong", "", "");
+                            return false;
+                        }
+                        rsPoli.close(); psPoli.close();
+
+                        String noKartuKirim = rsReg.getString("no_peserta").trim();
+                        String nikKirim = rsReg.getString("no_ktp").trim();
+                        
+                        if(noKartuKirim.length() < 5){
+                             javax.swing.SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Nomor Kartu Pasien Kosong/Tidak Valid!"));
+                             catatTrackerBPJS(nomorRawat, noRMLocal, namaPasien, "Task 0 - Add Antrean GAGAL: No Kartu Invalid", "", "");
+                             return false;
+                        }
+
+                        headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_JSON);
+                        headers.add("X-cons-id",koneksiDB.CONSIDMOBILEJKNFKTP());
+                        utc=String.valueOf(apimobilejkn.GetUTCdatetimeAsString());
+                        headers.add("X-timestamp",utc);            
+                        headers.add("X-signature",apimobilejkn.getHmac());
+                        headers.add("X-authorization","Basic "+Base64.encodeBase64String(otorisasi.getBytes()));
+                        headers.add("user_key",koneksiDB.USERKEYMOBILEJKNFKTP());
+
+                        int angkaAntreanInt = 0;
+                        try { angkaAntreanInt = Integer.parseInt(getSafeNumericValue(rsReg.getString("no_reg"))); } catch (Exception e){}
+
+                        requestJson ="{" +
+                                        "\"nomorkartu\": \""+noKartuKirim+"\"," +
+                                        "\"nik\": \""+nikKirim+"\"," +
+                                        "\"nohp\": \""+rsReg.getString("no_tlp").trim()+"\"," +
+                                        "\"kodepoli\": \""+kodePoliBPJS.trim()+"\"," +
+                                        "\"namapoli\": \""+NmPoliTujuan.getText().trim()+"\"," +
+                                        "\"norm\": \""+noRMLocal+"\"," +
+                                        "\"tanggalperiksa\": \""+rsReg.getString("tgl_registrasi").trim()+"\"," +
+                                        "\"kodedokter\": "+getSafeNumericValue(kodeDokterBPJS)+"," +
+                                        "\"namadokter\": \""+NmTenagaMedis.getText().trim()+"\"," +
+                                        "\"jampraktek\": \""+jamPraktek+"\"," +
+                                        "\"nomorantrean\": \""+rsReg.getString("no_reg").trim()+"\"," +
+                                        "\"angkaantrean\": "+angkaAntreanInt+"," +
+                                        "\"keterangan\": \"Peserta harap 30 menit lebih awal guna pencatatan administrasi.\"" +
+                                    "}";
+                        
+                        requestEntity = new HttpEntity(requestJson,headers);
+                        String rawResponse = apimobilejkn.getRest().exchange(koneksiDB.URLMOBILEJKNFKTP()+"/antrean/add", HttpMethod.POST, requestEntity, String.class).getBody();
+
+                        root = mapper.readTree(rawResponse);
+                        nameNode = root.path("metadata"); 
+                        String code = nameNode.path("code").asText();
+                        String message = nameNode.path("message").asText();
+
+                        if(code.equals("200")){
+                            statusantrean = true;
+                            kodePoliBPJSCache  = kodePoliBPJS;
+                            tglRegistrasiCache = rsReg.getString("tgl_registrasi").trim();
+                            noKartuKirimCache  = noKartuKirim;
+                            noRMCache          = noRMLocal;
+                            namaPasienCache    = namaPasien;
+
+                            catatTrackerBPJS(nomorRawat, noRMLocal, namaPasien, "Task 0 - Add Antrean Sukses (200)", requestJson, rawResponse);
+                            simpanTaskId(nomorRawat, "0");
+
+                        } else if(code.equals("201")){
+                            if(message.toLowerCase().contains("sudah terdaftar")){
+                                statusantrean = true;
+                                kodePoliBPJSCache  = kodePoliBPJS;
+                                tglRegistrasiCache = rsReg.getString("tgl_registrasi").trim();
+                                noKartuKirimCache  = noKartuKirim;
+                                noRMCache          = noRMLocal;
+                                namaPasienCache    = namaPasien;
+
+                                catatTrackerBPJS(nomorRawat, noRMLocal, namaPasien, "Task 0 - Add Antrean Sudah Terdaftar (201-Bypass)", requestJson, rawResponse);
+                                simpanTaskId(nomorRawat, "0");
+                            } else {
+                                statusantrean = false;
+                                javax.swing.SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Gagal add antrean (201): " + message));
+                                catatTrackerBPJS(nomorRawat, noRMLocal, namaPasien, "Task 0 - Add Antrean GAGAL (201): " + message, requestJson, rawResponse);
+                            }
+                        } else {
+                            statusantrean = false;
+                            javax.swing.SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Gagal add antrean ("+code+"): " + message));
+                            catatTrackerBPJS(nomorRawat, noRMLocal, namaPasien, "Task 0 - Add Antrean GAGAL ("+code+"): " + message, requestJson, rawResponse);
+                        }
+                    } else {
+                        statusantrean=false;
+                        javax.swing.SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Jadwal Dokter di Khanza Kosong/Tutup!"));
+                        catatTrackerBPJS(nomorRawat, rsReg.getString("no_rkm_medis").trim(), namaPasien, "Task 0 - Add Antrean GAGAL: Jadwal Dokter Lokal Kosong/Tutup", "", "");
+                    } 
+                    psJadwal.close();
+                    
+                } catch (Exception ex) {
+                    statusantrean=false;
+                    catatTrackerBPJS(nomorRawat, rsReg.getString("no_rkm_medis").trim(), namaPasien, "Task 0 - Add Antrean EXCEPTION: " + ex.getMessage(), "", "");
+                }
+            }
+        } catch (Exception ex) {
+            statusantrean=false;
+        } finally{
+            try { if(rsReg!=null) rsReg.close(); } catch(Exception e){}
+            try { if(psReg!=null) psReg.close(); } catch(Exception e){}
+        }
+        return statusantrean;
+    }
+    
+    // ========================================================================
+    // HELPER: Simpan Task ID ke referensi_mobilejkn_bpjs_taskid
+    // ========================================================================
+    private void simpanTaskId(String noRawat, String taskId) {
+        PreparedStatement ps = null;
+        try {
+            ps = koneksi.prepareStatement(
+                "INSERT IGNORE INTO referensi_mobilejkn_bpjs_taskid (no_rawat, taskid, waktu) VALUES (?, ?, NOW())"
+            );
+            ps.setString(1, noRawat);
+            ps.setString(2, taskId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            catatLog("[TASK ID] Gagal simpan taskid=" + taskId + ": " + e.getMessage());
+        } finally {
+            if (ps != null) {
+                try { ps.close(); } catch (Exception e) {}
+            }
+        }
+    }
+
+    // ========================================================================
+    // HELPER: Update Hadir / Panggil Antrean (Task 1)
+    // ========================================================================
+    private boolean UpdateHadirOnSite() {
+        boolean result = false;
+        String payloadPanggil = "";
+        String rawResp = "";
+        
+        // --- THROTTLE ANTI SPAM BPJS (Aman karena berjalan di Background Thread) ---
+        try {
+            catatLog("[THROTTLE] Menunggu 2 Detik sebelum hit Task 1...");
+            Thread.sleep(2000); 
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
+
+        try {
+            headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("X-cons-id",       koneksiDB.CONSIDMOBILEJKNFKTP());
+            utc = String.valueOf(apimobilejkn.GetUTCdatetimeAsString());
+            headers.add("X-timestamp",     utc);
+            headers.add("X-signature",     apimobilejkn.getHmac());
+            headers.add("X-authorization", "Basic " + Base64.encodeBase64String(otorisasi.getBytes()));
+            headers.add("user_key",        koneksiDB.USERKEYMOBILEJKNFKTP());
+
+            long waktuMillis = System.currentTimeMillis();
+
+            payloadPanggil =
+                "{" +
+                "\"tanggalperiksa\": \"" + tglRegistrasiCache  + "\"," +
+                "\"kodepoli\": \""        + kodePoliBPJSCache   + "\"," +
+                "\"nomorkartu\": \""      + noKartuKirimCache   + "\"," +
+                "\"status\": 1," +
+                "\"waktu\": "             + waktuMillis          +
+                "}";
+
+            requestEntity = new HttpEntity(payloadPanggil, headers);
+            rawResp = apimobilejkn.getRest()
+                .exchange(koneksiDB.URLMOBILEJKNFKTP() + "/antrean/panggil",
+                          HttpMethod.POST, requestEntity, String.class)
+                .getBody();
+
+            JsonNode rootPanggil = mapper.readTree(rawResp);
+            String codePanggil   = rootPanggil.path("metadata").path("code").asText();
+            String msgPanggil    = rootPanggil.path("metadata").path("message").asText();
+
+            if(codePanggil.equals("200")){
+                result = true;
+                catatTrackerBPJS(TNoRw.getText(), noRMCache, namaPasienCache, "Task 1 - Update Hadir Sukses (200) [SOAP]", payloadPanggil, rawResp);
+                simpanTaskId(TNoRw.getText(), "1");
+            } else {
+                catatTrackerBPJS(TNoRw.getText(), noRMCache, namaPasienCache, "Task 1 - Update Hadir GAGAL (" + codePanggil + "): " + msgPanggil, payloadPanggil, rawResp);
+            }
+
+        } catch (Exception ex) {
+            catatTrackerBPJS(TNoRw.getText(), noRMCache, namaPasienCache, "Task 1 - Update Hadir EXCEPTION: " + ex.getMessage(), payloadPanggil, rawResp);
+        }
+        return result;
+    }
+
+    // ========================================================================
+    // HELPER: Audit Trail BPJS ke trackersql dan Text Log
+    // ========================================================================
+    private void catatTrackerBPJS(String noRawat, String noRM, String namaPasien, String taskDesc, String payload, String responseBPJS) {
+        PreparedStatement ps = null;
+        try {
+            String safeNama     = (namaPasien != null) ? namaPasien : "";
+            String safeNoRM     = (noRM != null) ? noRM.trim() : "";
+            String tokenUser    = (akses.getkode() != null) ? akses.getkode() : "admin_ai";
+            
+            if(tokenUser.length() > 20) { tokenUser = tokenUser.substring(0, 20); }
+
+            String pesanLog =
+                "[BUKTI BPJS] No.Rawat: " + noRawat +
+                " | No.RM: "  + safeNoRM +
+                " | Pasien: " + safeNama +
+                " | Task: "   + taskDesc +
+                " | PAYLOAD: "       + payload +
+                " | RESPONSE BPJS: " + responseBPJS;
+
+            // 1. Catat ke Text File (Otomatis)
+            catatLog(pesanLog);
+
+            // 2. Catat ke Database (Menggunakan PreparedStatement yang aman)
+            ps = koneksi.prepareStatement("INSERT INTO trackersql (tanggal, sqle, usere) VALUES (NOW(), ?, ?)");
+            ps.setString(1, pesanLog);
+            ps.setString(2, tokenUser);
+            ps.executeUpdate();
+            
+        } catch (Exception e) {
+            catatLog("[FATAL] Gagal simpan log ke database trackersql: " + e.getMessage());
+        } finally {
+            if (ps != null) {
+                try { ps.close(); } catch (Exception e) {}
+            }
+        }
+    }
+
+    // ========================================================================
+    // HELPER: Pencatatan Log ke File Teks
+    // ========================================================================
+    private void catatLog(String pesan) {
+        try {
+            // Log akan tersimpan di folder project utama dengan nama log_antrean_bpjs.txt
+            java.io.FileWriter fw = new java.io.FileWriter("log_antrean_bpjs.txt", true);
+            java.io.PrintWriter pw = new java.io.PrintWriter(fw);
+            pw.println(java.time.LocalDateTime.now() + " : " + pesan);
+            pw.close();
+            
+            // Tampilkan juga di console/terminal (opsional)
+            System.out.println(pesan);
+        } catch (Exception e) { 
+            System.out.println("Gagal menulis log ke file teks: " + e.getMessage());
+        }
+    }
+    
+    
     // 1. Pengaman Angka (Mencegah Error jika field kosong)
     private String getSafeNumericValue(String value) {
         if (value == null || value.trim().isEmpty()) { return "0"; }
