@@ -6462,6 +6462,7 @@ public final class PCareCekKartu extends javax.swing.JDialog {
         new Thread(() -> {
             try {
                 // [1 & 2] PROSES ANTREAN MOBILE JKN (TASK 0 & TASK 1)
+                ADDANTRIANAPIMOBILEJKNFKTP = koneksiDB.ADDANTRIANAPIMOBILEJKNFKTP();
                 if(ADDANTRIANAPIMOBILEJKNFKTP.equals("yes")){
                     boolean antreanOk = SimpanAntrianOnSite();
 
@@ -6571,8 +6572,18 @@ public final class PCareCekKartu extends javax.swing.JDialog {
                         javax.swing.SwingUtilities.invokeLater(() -> {
                             emptTeks();
                         });
+                        // AUDIT TRAIL: Task 2 Add PCare Sukses → log ke trackersql + txt
+                        catatTrackerBPJS(TNoRw.getText(), TNo.getText(), TNm.getText(),
+                            "Task 2 - Add PCare Sukses (201) | noSEP: " + response.asText(),
+                            requestJson, rawPcareResponse);
+                        // LOG TERSIER: Simpan Task 2 (Selesai Pendaftaran/Mulai Pelayanan)
+                        simpanTaskId(TNoRw.getText(), "2");
                     }                     
                 } else {
+                    // AUDIT TRAIL: Task 2 Add PCare Gagal (HTTP OK tapi metadata bukan 201)
+                    catatTrackerBPJS(TNoRw.getText(), TNo.getText(), TNm.getText(),
+                        "Task 2 - Add PCare GAGAL (" + nameNode.path("code").asText() + "): " + nameNode.path("message").asText(),
+                        requestJson, rawPcareResponse);
                     javax.swing.SwingUtilities.invokeLater(() -> {
                         JOptionPane.showMessageDialog(null,"Gagal Pendaftaran PCare: " + nameNode.path("message").asText());
                     });
@@ -6580,6 +6591,10 @@ public final class PCareCekKartu extends javax.swing.JDialog {
 
             } catch (Exception ex) {
                 catatLog("Notifikasi Bridging PCare Exception: " + ex);
+                // AUDIT TRAIL: Task 2 Add PCare Exception → log ke trackersql + txt (sebelum fallback simpan lokal)
+                catatTrackerBPJS(TNoRw.getText(), TNo.getText(), TNm.getText(),
+                    "Task 2 - Add PCare EXCEPTION: " + (ex.getMessage() != null ? ex.getMessage() : ex.toString()),
+                    requestJson, "");
                 // --- [1] ERROR KONEKSI/TIMEOUT (SIMPAN LOKAL DULU) ---
                 if (ex.toString().contains("UnknownHostException") || ex.toString().contains("unreachable") || ex.toString().contains("500") || ex.toString().contains("408")) {
                     if (Sequel.menyimpantf("pcare_pendaftaran", "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'Gagal'", "No.Urut", 20, new String[]{
@@ -6728,9 +6743,14 @@ public final class PCareCekKartu extends javax.swing.JDialog {
                         headers = new HttpHeaders();
                         headers.setContentType(MediaType.APPLICATION_JSON);
                         headers.add("X-cons-id",koneksiDB.CONSIDMOBILEJKNFKTP());
-                        utc=String.valueOf(apimobilejkn.GetUTCdatetimeAsString());
-                        headers.add("X-timestamp",utc);            
-                        headers.add("X-signature",apimobilejkn.getHmac());
+                        // [FIX KRITIS] Panggil getHmac() DULU (ini menyimpan timestamp ke lastUsedTimestamp),
+                        // baru ambil timestampnya. Inilah cara PHP: $tStamp dibuat SEKALI untuk
+                        // X-timestamp DAN X-signature. Kalau dua kali panggil GetUTCdatetimeAsString()
+                        // timestamp bisa beda 1 detik → signature tidak match → BPJS balas 201 WS Bridging.
+                        String hmacTask0 = apimobilejkn.getHmac();
+                        utc = apimobilejkn.getLastUsedTimestamp();
+                        headers.add("X-timestamp", utc);            
+                        headers.add("X-signature",  hmacTask0);
                         headers.add("X-authorization","Basic "+Base64.encodeBase64String(otorisasi.getBytes()));
                         headers.add("user_key",koneksiDB.USERKEYMOBILEJKNFKTP());
 
@@ -6773,21 +6793,23 @@ public final class PCareCekKartu extends javax.swing.JDialog {
                             simpanTaskId(nomorRawat, "0");
 
                         } else if(code.equals("201")){
-                            if(message.toLowerCase().contains("sudah terdaftar")){
-                                statusantrean = true;
-                                kodePoliBPJSCache  = kodePoliBPJS;
-                                tglRegistrasiCache = rsReg.getString("tgl_registrasi").trim();
-                                noKartuKirimCache  = noKartuKirim;
-                                noRMCache          = noRMLocal;
-                                namaPasienCache    = namaPasien;
-
-                                catatTrackerBPJS(nomorRawat, noRMLocal, namaPasien, "Task 0 - Add Antrean Sudah Terdaftar (201-Bypass)", requestJson, rawResponse);
-                                simpanTaskId(nomorRawat, "0");
-                            } else {
-                                statusantrean = false;
-                                javax.swing.SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Gagal add antrean (201): " + message));
-                                catatTrackerBPJS(nomorRawat, noRMLocal, namaPasien, "Task 0 - Add Antrean GAGAL (201): " + message, requestJson, rawResponse);
-                            }
+                            // -----------------------------------------------------------------------
+                            // Per dokumentasi BPJS Antrean FKTP:
+                            // Code 201 = antrean DITERIMA / peserta sudah tercatat di sistem BPJS.
+                            // Pesan bisa berupa: "WS Bridging", "sudah terdaftar", dll.
+                            // SEMUA code 201 diperlakukan sebagai BYPASS-OK.
+                            // Lanjut ke Task 1 (Update/Panggil Hadir) → Task 2 (Add PCare).
+                            // -----------------------------------------------------------------------
+                            statusantrean = true;
+                            kodePoliBPJSCache  = kodePoliBPJS;
+                            tglRegistrasiCache = rsReg.getString("tgl_registrasi").trim();
+                            noKartuKirimCache  = noKartuKirim;
+                            noRMCache          = noRMLocal;
+                            namaPasienCache    = namaPasien;
+                            catatLog(">> [Task 0] BYPASS-OK (201: " + message + ") - Lanjut Task 1 & Task 2");
+                            catatTrackerBPJS(nomorRawat, noRMLocal, namaPasien,
+                                "Task 0 - Add Antrean Bypass-OK (201: " + message + ")", requestJson, rawResponse);
+                            simpanTaskId(nomorRawat, "0");
                         } else {
                             statusantrean = false;
                             javax.swing.SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Gagal add antrean ("+code+"): " + message));
@@ -6802,7 +6824,10 @@ public final class PCareCekKartu extends javax.swing.JDialog {
                     
                 } catch (Exception ex) {
                     statusantrean=false;
-                    catatTrackerBPJS(nomorRawat, rsReg.getString("no_rkm_medis").trim(), namaPasien, "Task 0 - Add Antrean EXCEPTION: " + ex.getMessage(), "", "");
+                    // Gunakan noRMLocal (sudah di-capture) karena rsReg mungkin sudah tertutup
+                    catatLog("[Task 0] EXCEPTION di SimpanAntrianOnSite: " + ex);
+                    catatTrackerBPJS(nomorRawat, noRMLocal, namaPasien,
+                        "Task 0 - Add Antrean EXCEPTION: " + (ex.getMessage() != null ? ex.getMessage() : ex.toString()), "", "");
                 }
             }
         } catch (Exception ex) {
@@ -6855,9 +6880,11 @@ public final class PCareCekKartu extends javax.swing.JDialog {
             headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.add("X-cons-id",       koneksiDB.CONSIDMOBILEJKNFKTP());
-            utc = String.valueOf(apimobilejkn.GetUTCdatetimeAsString());
+            // [FIX KRITIS] Sama seperti Task 0: getHmac() dulu → ambil lastUsedTimestamp
+            String hmacTask1 = apimobilejkn.getHmac();
+            utc = apimobilejkn.getLastUsedTimestamp();
             headers.add("X-timestamp",     utc);
-            headers.add("X-signature",     apimobilejkn.getHmac());
+            headers.add("X-signature",     hmacTask1);
             headers.add("X-authorization", "Basic " + Base64.encodeBase64String(otorisasi.getBytes()));
             headers.add("user_key",        koneksiDB.USERKEYMOBILEJKNFKTP());
 

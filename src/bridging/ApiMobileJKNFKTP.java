@@ -37,6 +37,14 @@ public class ApiMobileJKNFKTP {
     private Scheme scheme;
     private HttpComponentsClientHttpRequestFactory factory;
     
+    // [FIX] Simpan timestamp terakhir yang digunakan getHmac(),
+    // agar X-timestamp di header SELALU sinkron dengan X-signature.
+    private String lastUsedTimestamp = "";
+    
+    public String getLastUsedTimestamp() {
+        return lastUsedTimestamp;
+    }
+    
     public ApiMobileJKNFKTP(){
         try {
             Key = koneksiDB.SECRETKEYMOBILEJKNFKTP();
@@ -48,7 +56,11 @@ public class ApiMobileJKNFKTP {
     
     public String getHmac() {        
         long GetUTCdatetimeAsString = GetUTCdatetimeAsString();
-        salt = Consid +"&"+String.valueOf(GetUTCdatetimeAsString);
+        // [FIX] Simpan timestamp ini agar PCareCekKartu dapat menggunakan
+        // timestamp yang PERSIS SAMA untuk header X-timestamp.
+        // (PHP: $tStamp dibuat sekali, dipakai untuk signature DAN header)
+        lastUsedTimestamp = String.valueOf(GetUTCdatetimeAsString);
+        salt = Consid +"&"+ lastUsedTimestamp;
         generateHmacSHA256Signature = null;
 	try {
 	    generateHmacSHA256Signature = generateHmacSHA256Signature(salt,Key);
@@ -89,7 +101,10 @@ public class ApiMobileJKNFKTP {
     }
     
     public RestTemplate getRest() throws NoSuchAlgorithmException, KeyManagementException {
-        sslContext = SSLContext.getInstance("SSL");
+        // [FIX] Ganti "SSL" → "TLS". Protocol "SSL" (SSLv3) sudah deprecated
+        // dan diblokir oleh server BPJS serta JVM modern.
+        // PHP: CURLOPT_SSL_VERIFYPEER=false → bypass semua, Java harus pakai TLS.
+        sslContext = SSLContext.getInstance("TLS");
         javax.net.ssl.TrustManager[] trustManagers= {
             new X509TrustManager() {
                 public X509Certificate[] getAcceptedIssuers() {return null;}
