@@ -13,6 +13,9 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.http.ResponseEntity;
 
 /**
  *
@@ -31,6 +34,76 @@ public class SatuSehatCekNIK {
     private JsonNode response;
     private FileReader dataPropinsi,dataKabupaten,dataKecamatan,dataKelurahan;
         
+
+    private String konekSatuSehatCek(String url) throws Exception {
+        int maxRetries = 5;
+        int attempt = 0;
+        Exception lastException = null;
+
+        while (attempt < maxRetries) {
+            try {
+                attempt++;
+                headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.add("Authorization", "Bearer " + api.TokenSatuSehat());
+                requestEntity = new HttpEntity(headers);
+                
+                System.out.println("URL : " + url);
+                ResponseEntity<String> response = api.getRest().exchange(url, HttpMethod.GET, requestEntity, String.class);
+                return response.getBody();
+            } catch (HttpClientErrorException e) {
+                int statusCode = 0;
+                try {
+                    statusCode = e.getStatusCode().value();
+                } catch (IllegalArgumentException ex) {
+                    if (e.getMessage() != null && e.getMessage().contains("429")) {
+                        statusCode = 429;
+                    } else {
+                        throw e;
+                    }
+                }
+
+                if (statusCode == 401) {
+                    System.out.println("Token Expired, refreshing... (Attempt " + attempt + ")");
+                    api.TokenSatuSehat(); // Segarkan token
+                    attempt--; // Coba ulangi tanpa hitung limit
+                    continue;
+                } else if (statusCode == 404) {
+                    // Kalau 404 (Not Found), berarti memang pasien/dokter tidak ada di Satu Sehat. Jangan retry.
+                    throw e;
+                } else if (statusCode == 429) {
+                    lastException = e;
+                    System.out.println("Terlalu banyak request (429). Menunggu 15 detik... (Attempt " + attempt + ")");
+                    try {
+                        Thread.sleep(15000);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                } else {
+                    System.out.println("   !! [SERVER ERROR CHECK] " + statusCode + ": " + e.getResponseBodyAsString());
+                    throw e; 
+                }
+            } catch (ResourceAccessException e) {
+                lastException = e;
+                System.out.println("Koneksi gagal (ResourceAccessException). Menunggu 5 detik... (Attempt " + attempt + ")");
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+            } catch (Exception e) {
+                lastException = e;
+                System.out.println("Gagal terhubung: " + e.getMessage() + ". Menunggu 5 detik... (Attempt " + attempt + ")");
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+        throw new Exception("Gagal terhubung ke Satu Sehat (Cek NIK) setelah " + maxRetries + " percobaan. " + (lastException != null ? lastException.getMessage() : ""));
+    }
+
     public SatuSehatCekNIK(){
         super();
         try {
@@ -68,24 +141,22 @@ public class SatuSehatCekNIK {
         try{
             birthDate="";province="";provincename="";city="";cityname="";district="";districtname="";village="";villagename="";
             rt="";rw="";line="";postalCode="";gender="";noktp="";idpasien="";maritalStatus="";name="";phone="";email="";
-            headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.add("Authorization", "Bearer "+api.TokenSatuSehat());
-            requestEntity = new HttpEntity(headers);
+//             headers.setContentType(MediaType.APPLICATION_JSON);
+//             headers.add("Authorization", "Bearer "+api.TokenSatuSehat());
+//             requestEntity = new HttpEntity(headers);
             System.out.println("URL : "+link+"/Patient?identifier=https://fhir.kemkes.go.id/id/nik|"+cari);
-            json=api.getRest().exchange(link+"/Patient?identifier=https://fhir.kemkes.go.id/id/nik|"+cari, HttpMethod.GET, requestEntity, String.class).getBody();
+            json=konekSatuSehatCek(link+"/Patient?identifier=https://fhir.kemkes.go.id/id/nik|"+cari);
             System.out.println("JSON : "+json);
             root = mapper.readTree(json);
             for(JsonNode list:root.path("entry")){
                 idpasien=list.path("resource").path("id").asText();
                 noktp=cari;
                 try{
-                    headers = new HttpHeaders();
-                    headers.setContentType(MediaType.APPLICATION_JSON);
-                    headers.add("Authorization", "Bearer "+api.TokenSatuSehat());
-                    requestEntity = new HttpEntity(headers);
+//                     headers.setContentType(MediaType.APPLICATION_JSON);
+//                     headers.add("Authorization", "Bearer "+api.TokenSatuSehat());
+//                     requestEntity = new HttpEntity(headers);
                     System.out.println("URL : "+link+"/Patient/"+idpasien);
-                    json=api.getRest().exchange(link+"/Patient/"+idpasien, HttpMethod.GET, requestEntity, String.class).getBody();
+                    json=konekSatuSehatCek(link+"/Patient/"+idpasien);
                     System.out.println("JSON : "+json);
                     root = mapper.readTree(json);
                     gender = root.path("gender").asText().toLowerCase().equals("male")?"Laki-laki":"Perempuan";
@@ -153,12 +224,11 @@ public class SatuSehatCekNIK {
             
             if(name.equals("")){
                 try{
-                    headers = new HttpHeaders();
-                    headers.setContentType(MediaType.APPLICATION_JSON);
-                    headers.add("Authorization", "Bearer "+api.TokenSatuSehat());
-                    requestEntity = new HttpEntity(headers);
+//                     headers.setContentType(MediaType.APPLICATION_JSON);
+//                     headers.add("Authorization", "Bearer "+api.TokenSatuSehat());
+//                     requestEntity = new HttpEntity(headers);
                     System.out.println("URL : "+link+"/Patient/"+cari);
-                    json=api.getRest().exchange(link+"/Patient/"+cari, HttpMethod.GET, requestEntity, String.class).getBody();
+                    json=konekSatuSehatCek(link+"/Patient/"+cari);
                     System.out.println("JSON : "+json);
                     root = mapper.readTree(json);
                     idpasien=cari;
@@ -247,12 +317,11 @@ public class SatuSehatCekNIK {
     public String tampilIDPasien(String cari) {
         idpasien="";
         try{
-            headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.add("Authorization", "Bearer "+api.TokenSatuSehat());
-            requestEntity = new HttpEntity(headers);
+//             headers.setContentType(MediaType.APPLICATION_JSON);
+//             headers.add("Authorization", "Bearer "+api.TokenSatuSehat());
+//             requestEntity = new HttpEntity(headers);
             System.out.println("URL : "+link+"/Patient?identifier=https://fhir.kemkes.go.id/id/nik|"+cari);
-            json=api.getRest().exchange(link+"/Patient?identifier=https://fhir.kemkes.go.id/id/nik|"+cari, HttpMethod.GET, requestEntity, String.class).getBody();
+            json=konekSatuSehatCek(link+"/Patient?identifier=https://fhir.kemkes.go.id/id/nik|"+cari);
             System.out.println("JSON : "+json);
             root = mapper.readTree(json);
             for(JsonNode list:root.path("entry")){
@@ -268,12 +337,11 @@ public class SatuSehatCekNIK {
     public String tampilIDParktisi(String cari) {
         idpasien="";
         try{
-            headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.add("Authorization", "Bearer "+api.TokenSatuSehat());
-            requestEntity = new HttpEntity(headers);
+//             headers.setContentType(MediaType.APPLICATION_JSON);
+//             headers.add("Authorization", "Bearer "+api.TokenSatuSehat());
+//             requestEntity = new HttpEntity(headers);
             System.out.println("URL : "+link+"/Practitioner?identifier=https://fhir.kemkes.go.id/id/nik|"+cari);
-            json=api.getRest().exchange(link+"/Practitioner?identifier=https://fhir.kemkes.go.id/id/nik|"+cari, HttpMethod.GET, requestEntity, String.class).getBody();
+            json=konekSatuSehatCek(link+"/Practitioner?identifier=https://fhir.kemkes.go.id/id/nik|"+cari);
             System.out.println("JSON : "+json);
             root = mapper.readTree(json);
             response = root.path("entry");

@@ -12,20 +12,48 @@ import fungsi.ApiSatuSehat;
 import fungsi.SatuSehatCekNIK;
 import fungsi.koneksiDB;
 import fungsi.sekuel;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 
 /**
  *
@@ -48,24 +76,59 @@ public class frmUtama extends javax.swing.JFrame {
     private Date date = new Date();  
     private SatuSehatCekNIK cekViaSatuSehat=new SatuSehatCekNIK();  
 
+    // === AUTOPILOT VARIABLES ===
+    private volatile boolean isAutopilot = false;
+    private volatile boolean isEmergencyStop = false;
+    private long lastRunTimeMs = System.currentTimeMillis();
+    private int intervalMenit = 240; // Default 4 Jam (240 Menit)
+
     /**
      * Creates new form frmUtama
      */
+    // === KONSTANTA WARNA & FONT TEMA DARK MATRIX ===
+    private static final Color BG_DEEP     = new Color(0x0A0F0A);
+    private static final Color BG_PANEL    = new Color(0x111811);
+    private static final Color BG_CARD     = new Color(0x162016);
+    private static final Color ACCENT_GREEN= new Color(0x00FF41);
+    private static final Color ACCENT_DIM  = new Color(0x00A827);
+    private static final Color TEXT_WHITE  = new Color(0xE8FFE8);
+    private static final Color TEXT_MUTED  = new Color(0x5A8A5A);
+    private static final Color BTN_NORMAL  = new Color(0x0D2B0D);
+    private static final Color BTN_HOVER   = new Color(0x1A4A1A);
+    private static final Color BORDER_CLR  = new Color(0x00A827);
+    private static final Font  FONT_MONO   = new Font("Courier New", Font.PLAIN, 12);
+    private static final Font  FONT_MONO_B = new Font("Courier New", Font.BOLD, 13);
+    private static final Font  FONT_SANS   = new Font("Segoe UI", Font.PLAIN, 12);
+    private static final Font  FONT_SANS_B = new Font("Segoe UI", Font.BOLD, 13);
+    private static final Font  FONT_TITLE  = new Font("Segoe UI", Font.BOLD, 18);
+
     public frmUtama() {
         initComponents();
-        TeksArea.setComponentPopupMenu(jPopupMenu1);
         try {
-            link=koneksiDB.URLFHIRSATUSEHAT();
+            link = koneksiDB.URLFHIRSATUSEHAT();
         } catch (Exception e) {
-            System.out.println("Notif : "+e);
+            System.out.println("Notif : " + e);
         }
-        
-        this.setSize(490,340);
-        
-        date = new Date();  
-        Tanggal1.setText(tanggalFormat.format(date)); 
-        Tanggal2.setText(tanggalFormat.format(date)); 
-        
+
+        date = new Date();
+        Tanggal1.setText(tanggalFormat.format(date));
+        Tanggal2.setText(tanggalFormat.format(date));
+
+        setupModernUI();
+        TeksArea.setComponentPopupMenu(jPopupMenu1);
+        // Auto-scroll TeksArea setiap kali ada teks baru
+        TeksArea.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e)  { scrollToBottom(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e)  { scrollToBottom(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { scrollToBottom(); }
+            private void scrollToBottom() {
+                SwingUtilities.invokeLater(() -> TeksArea.setCaretPosition(TeksArea.getDocument().getLength()));
+            }
+        });
+
+        this.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
+        this.setMinimumSize(new Dimension(1024, 600));
+
         jam();
     }
 
@@ -369,64 +432,606 @@ public class frmUtama extends javax.swing.JFrame {
 
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Service Satu Sehat (Ichsan)");
+        setTitle("⬛ SATU SEHAT BRIDGING SERVICE — KhanzaHMS by Ichsan");
 
-        jScrollPane1.setMaximumSize(new java.awt.Dimension(1000, 1000));
-
+        // Hanya init komponen non-visual; layout sebenarnya dibangun di setupModernUI()
         TeksArea.setColumns(20);
         TeksArea.setRows(5);
         jScrollPane1.setViewportView(TeksArea);
 
-        getContentPane().add(jScrollPane1, java.awt.BorderLayout.CENTER);
-
-        jPanel1.setMinimumSize(new java.awt.Dimension(500, 200));
-        jPanel1.setName(""); // NOI18N
-
-        jButtonStartKirim.setText("Start Kirim Manual!");
-        jButtonStartKirim.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonStartKirimActionPerformed(evt);
-            }
-        });
-        jPanel1.add(jButtonStartKirim);
-
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel1.setText("Tanggal :");
-        jLabel1.setPreferredSize(new java.awt.Dimension(70, 23));
-        jPanel1.add(jLabel1);
-
-        Tanggal1.setPreferredSize(new java.awt.Dimension(100, 23));
-        jPanel1.add(Tanggal1);
-
-        jLabel3.setText("s.d.");
-        jLabel3.setPreferredSize(new java.awt.Dimension(28, 23));
-        jPanel1.add(jLabel3);
-
-        Tanggal2.setPreferredSize(new java.awt.Dimension(100, 23));
-        jPanel1.add(Tanggal2);
-
-        jLabel2.setPreferredSize(new java.awt.Dimension(30, 23));
-        jPanel1.add(jLabel2);
-
-        jButton1.setText("Keluar");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-        jPanel1.add(jButton1);
-
-        getContentPane().add(jPanel1, java.awt.BorderLayout.PAGE_END);
-
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
-        jTextArea1.setText("1. encounter(): Mengambil data Kunjungan Pasien dari tabel reg_periksa.\n2. observationTTV(): Mengambil data Pemeriksaan Tanda-Tanda Vital (suhu, tensi, nadi, respirasi, tinggi, berat, SpO2, GCS, kesadaran, lingkar perut) dari tabel pemeriksaan_ralan dan pemeriksaan_ranap.\n3. vaksin(): Mengambil data Pemberian Vaksin dari detail_pemberian_obat yang sudah dipetakan.\n4. prosedur(): Mengambil data Tindakan/Prosedur yang dicatat untuk pasien berdasarkan kode ICD-9 dari prosedur_pasien.\n5. condition(): Mengambil data Diagnosa berdasarkan kode ICD-10 dari diagnosa_pasien.\n6. clinicalimpression(): Mengambil data Asesmen/Penilaian Dokter (termasuk keluhan dan pemeriksaan fisik) dari pemeriksaan_ralan dan pemeriksaan_ranap.\n7. dietgizi(): Mengambil data Asuhan Gizi (ADIME), khususnya bagian instruksi, dari catatan_adime_gizi.\n8. medicationrequest(): Mengambil data Resep Obat (baik resep tunggal maupun racikan) dari resep_obat, resep_dokter, dan resep_dokter_racikan.\n9. medicationdispense(): Mengambil data Penyerahan Obat kepada pasien dari detail_pemberian_obat.\n10. medicationstatement(): Mengambil data Aturan Pakai Obat yang diterima pasien dari resep_dokter dan aturan_pakai.\n11. servicerequestradiologi(): Mengambil data Permintaan Pemeriksaan Radiologi dari permintaan_radiologi.\n12. specimenradiologi(): Mengambil data Spesimen (informasi pengambilan sampel/gambar) untuk pemeriksaan radiologi dari permintaan_radiologi.\n13. observationradiologi(): Mengambil data Hasil Bacaan/Observasi dari pemeriksaan radiologi dari tabel hasil_radiologi.\n14. diagnosticreportradiologi(): Mengambil data Laporan/Kesan Akhir dari pemeriksaan radiologi dari hasil_radiologi.\n15. servicerequestlabpk() & servicerequestlabmb(): Mengambil data Permintaan Pemeriksaan Laboratorium (Patologi Klinik & Mikrobiologi) dari permintaan_lab dan permintaan_labmb.\n16. specimenlabpk() & specimenlabmb(): Mengambil data Spesimen (informasi pengambilan sampel) untuk pemeriksaan lab dari permintaan_lab dan permintaan_labmb.\n17. observationlabpk() & observationlabmb(): Mengambil data Hasil per Item Pemeriksaan Lab dari detail_periksa_lab.\n18. diagnosticreportlabpk() & diagnosticreportlabmb(): Mengambil data Laporan/Kesan Akhir dari pemeriksaan lab dari saran_kesan_lab.\n19. careplan(): Mengambil data Rencana Tindak Lanjut (RTL) dari pemeriksaan_ralan dan pemeriksaan_ranap.");
         jScrollPane2.setViewportView(jTextArea1);
-
-        getContentPane().add(jScrollPane2, java.awt.BorderLayout.PAGE_START);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    /**
+     * Membangun seluruh tampilan modern secara programatik.
+     * Dipanggil di constructor SETELAH initComponents() selesai.
+     */
+    private void setupModernUI() {
+        // ---------------------------------------------------------------
+        // ROOT FRAME
+        // ---------------------------------------------------------------
+        getContentPane().removeAll();
+        getContentPane().setBackground(BG_DEEP);
+        getContentPane().setLayout(new BorderLayout(0, 0));
+
+        // ---------------------------------------------------------------
+        // HEADER BAR (TOP)
+        // ---------------------------------------------------------------
+        JPanel headerPanel = new JPanel(new BorderLayout()) {
+            @Override protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setPaint(new GradientPaint(0,0,new Color(0x041504),getWidth(),0,new Color(0x0A200A)));
+                g2.fillRect(0,0,getWidth(),getHeight());
+            }
+        };
+        headerPanel.setBorder(BorderFactory.createMatteBorder(0,0,2,0,ACCENT_GREEN));
+        headerPanel.setPreferredSize(new Dimension(0, 60));
+        headerPanel.setOpaque(false);
+
+        JLabel lblTitle = new JLabel("  ⬡ SATU SEHAT BRIDGING SERVICE");
+        lblTitle.setFont(FONT_TITLE);
+        lblTitle.setForeground(ACCENT_GREEN);
+        headerPanel.add(lblTitle, BorderLayout.WEST);
+
+        JLabel lblSubtitle = new JLabel("KhanzaHMS Custom · Ichsan Edition · Auto-Reconnect ON  ");
+        lblSubtitle.setFont(new Font("Courier New", Font.PLAIN, 11));
+        lblSubtitle.setForeground(TEXT_MUTED);
+        lblSubtitle.setHorizontalAlignment(SwingConstants.RIGHT);
+        headerPanel.add(lblSubtitle, BorderLayout.EAST);
+
+        getContentPane().add(headerPanel, BorderLayout.NORTH);
+
+        // ---------------------------------------------------------------
+        // LEFT — LOG CONSOLE (Matrix style)
+        // ---------------------------------------------------------------
+        TeksArea.setBackground(BG_DEEP);
+        TeksArea.setForeground(ACCENT_GREEN);
+        TeksArea.setCaretColor(ACCENT_GREEN);
+        TeksArea.setFont(FONT_MONO);
+        TeksArea.setEditable(false);
+        TeksArea.setLineWrap(true);
+        TeksArea.setWrapStyleWord(false);
+        TeksArea.setMargin(new Insets(8, 8, 8, 8));
+        TeksArea.setText("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] SISTEM DIMULAI.\n" +
+            "[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] KhanzaHMS Satu Sehat Bridging Service AKTIF.\n" +
+            "[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] Auto-Reconnect engine: STANDBY.\n" +
+            "[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] Token refresh engine: STANDBY.\n" +
+            "[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] Batch scheduler: berjalan setiap 4 jam.\n" +
+            "[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] Gunakan panel kanan untuk trigger manual.\n" +
+            "[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] Hover tombol ⓘ untuk melihat detail resource.\n" +
+            "=".repeat(64) + "\n");
+
+        jScrollPane1.setBackground(BG_DEEP);
+        jScrollPane1.setBorder(BorderFactory.createEmptyBorder());
+        jScrollPane1.getViewport().setBackground(BG_DEEP);
+        jScrollPane1.setViewportView(TeksArea);
+        jScrollPane1.getVerticalScrollBar().setBackground(BG_PANEL);
+
+        getContentPane().add(jScrollPane1, BorderLayout.CENTER);
+
+        // ---------------------------------------------------------------
+        // RIGHT — CONTROL PANEL
+        // ---------------------------------------------------------------
+        JPanel rightPanel = new JPanel();
+        rightPanel.setBackground(BG_PANEL);
+        rightPanel.setBorder(BorderFactory.createMatteBorder(0,2,0,0,BORDER_CLR));
+        rightPanel.setLayout(new BorderLayout(0,0));
+        rightPanel.setPreferredSize(new Dimension(310, 0));
+
+        // === DATE RANGE SECTION ===
+        JPanel datePanel = new JPanel(new GridBagLayout());
+        datePanel.setBackground(BG_CARD);
+        datePanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0,0,2,0,BORDER_CLR),
+            BorderFactory.createEmptyBorder(10,10,10,10)
+        ));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL; gbc.insets = new Insets(3,4,3,4);
+
+        JLabel lblDate = new JLabel("◈ RENTANG TANGGAL");
+        lblDate.setFont(FONT_MONO_B); lblDate.setForeground(ACCENT_GREEN);
+        gbc.gridx=0; gbc.gridy=0; gbc.gridwidth=3; datePanel.add(lblDate, gbc);
+
+        JLabel lblFrom = new JLabel("Dari:"); lblFrom.setFont(FONT_SANS); lblFrom.setForeground(TEXT_WHITE);
+        gbc.gridx=0; gbc.gridy=1; gbc.gridwidth=1; gbc.weightx=0; datePanel.add(lblFrom, gbc);
+
+        Tanggal1.setBackground(new Color(0x0A1A0A)); Tanggal1.setForeground(ACCENT_GREEN);
+        Tanggal1.setFont(FONT_MONO_B); Tanggal1.setCaretColor(ACCENT_GREEN);
+        Tanggal1.setBorder(BorderFactory.createLineBorder(ACCENT_DIM));
+        gbc.gridx=1; gbc.gridy=1; gbc.gridwidth=2; gbc.weightx=1; datePanel.add(Tanggal1, gbc);
+
+        JLabel lblTo = new JLabel("S/D:"); lblTo.setFont(FONT_SANS); lblTo.setForeground(TEXT_WHITE);
+        gbc.gridx=0; gbc.gridy=2; gbc.gridwidth=1; gbc.weightx=0; datePanel.add(lblTo, gbc);
+
+        Tanggal2.setBackground(new Color(0x0A1A0A)); Tanggal2.setForeground(ACCENT_GREEN);
+        Tanggal2.setFont(FONT_MONO_B); Tanggal2.setCaretColor(ACCENT_GREEN);
+        Tanggal2.setBorder(BorderFactory.createLineBorder(ACCENT_DIM));
+        gbc.gridx=1; gbc.gridy=2; gbc.gridwidth=2; gbc.weightx=1; datePanel.add(Tanggal2, gbc);
+
+        // === AUTOPILOT CONTROL PANEL SECTION ===
+        JPanel controlPanel = new JPanel(new GridBagLayout());
+        controlPanel.setBackground(BG_CARD);
+        controlPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0,0,2,0,BORDER_CLR),
+            BorderFactory.createEmptyBorder(10,10,10,10)
+        ));
+
+        GridBagConstraints gbcCtrl = new GridBagConstraints();
+        gbcCtrl.fill = GridBagConstraints.HORIZONTAL; gbcCtrl.insets = new Insets(3,4,3,4);
+
+        JLabel lblCtrl = new JLabel("◈ KONTROL AUTOPILOT");
+        lblCtrl.setFont(FONT_MONO_B); lblCtrl.setForeground(ACCENT_GREEN);
+        gbcCtrl.gridx=0; gbcCtrl.gridy=0; gbcCtrl.gridwidth=2; controlPanel.add(lblCtrl, gbcCtrl);
+
+        JLabel lblInt = new JLabel("Interval Auto-Scan:"); lblInt.setFont(FONT_SANS); lblInt.setForeground(TEXT_WHITE);
+        gbcCtrl.gridx=0; gbcCtrl.gridy=1; gbcCtrl.gridwidth=2; controlPanel.add(lblInt, gbcCtrl);
+
+        javax.swing.JComboBox<String> cmbInterval = new javax.swing.JComboBox<>(new String[]{"Setiap 5 Menit", "Setiap 15 Menit", "Setiap 1 Jam", "Setiap 4 Jam", "Setiap 12 Jam"});
+        cmbInterval.setBackground(new Color(0x0A1A0A)); cmbInterval.setForeground(ACCENT_GREEN); cmbInterval.setFont(FONT_MONO);
+        cmbInterval.setSelectedIndex(3); // Default 4 Jam
+        cmbInterval.addActionListener(e -> {
+            int idx = cmbInterval.getSelectedIndex();
+            switch(idx) {
+                case 0: intervalMenit = 5; break;
+                case 1: intervalMenit = 15; break;
+                case 2: intervalMenit = 60; break;
+                case 3: intervalMenit = 240; break;
+                case 4: intervalMenit = 720; break;
+            }
+            TeksArea.append("[SISTEM] Interval Auto-Scan diubah menjadi " + intervalMenit + " menit.\n");
+        });
+        gbcCtrl.gridx=0; gbcCtrl.gridy=2; gbcCtrl.gridwidth=2; controlPanel.add(cmbInterval, gbcCtrl);
+
+        JButton btnPlayPause = new JButton("▶ PLAY AUTOPILOT");
+        btnPlayPause.setBackground(BTN_NORMAL); btnPlayPause.setForeground(TEXT_WHITE);
+        btnPlayPause.setFont(FONT_SANS_B); btnPlayPause.setFocusPainted(false);
+        btnPlayPause.addActionListener(e -> {
+            isAutopilot = !isAutopilot;
+            if(isAutopilot) {
+                btnPlayPause.setText("⏸ PAUSE AUTOPILOT");
+                btnPlayPause.setBackground(new Color(0x735c00)); // Dark yellow
+                TeksArea.append("[SISTEM] Mode AUTOPILOT AKTIF. Akan melakukan scan masif setiap " + intervalMenit + " menit.\n");
+                lastRunTimeMs = System.currentTimeMillis(); // Reset timer saat play
+            } else {
+                btnPlayPause.setText("▶ PLAY AUTOPILOT");
+                btnPlayPause.setBackground(BTN_NORMAL);
+                TeksArea.append("[SISTEM] Mode AUTOPILOT DIHENTIKAN SEMENTARA.\n");
+            }
+        });
+        gbcCtrl.gridx=0; gbcCtrl.gridy=3; gbcCtrl.gridwidth=1; gbcCtrl.weightx=0.5; controlPanel.add(btnPlayPause, gbcCtrl);
+
+        JButton btnPanic = new JButton("🛑 PANIC STOP");
+        btnPanic.setBackground(new Color(0x4a0a0a)); btnPanic.setForeground(Color.WHITE);
+        btnPanic.setFont(FONT_SANS_B); btnPanic.setFocusPainted(false);
+        btnPanic.addActionListener(e -> {
+            isEmergencyStop = true;
+            TeksArea.append("\n!!! [EMERGENCY BRAKE DITARIK] !!!\nSistem akan menghentikan seluruh putaran loop pada database dalam 5 detik mendatang!\n");
+            // Set kembali ke idle setelah 5 detik agar bisa bekerja normal lagi nanti
+            new Thread(() -> {
+                try { Thread.sleep(5000); } catch(Exception ex) {}
+                isEmergencyStop = false;
+                TeksArea.append("[SISTEM] Emergency brake direlease. Sistem kembali ke mode aman.\n");
+            }).start();
+            
+            if(isAutopilot) { // Otomatis matikan autopilot jika sedang jalan
+                btnPlayPause.doClick();
+            }
+        });
+        gbcCtrl.gridx=1; gbcCtrl.gridy=3; gbcCtrl.gridwidth=1; gbcCtrl.weightx=0.5; controlPanel.add(btnPanic, gbcCtrl);
+
+        JPanel topContainer = new JPanel();
+        topContainer.setLayout(new BoxLayout(topContainer, BoxLayout.Y_AXIS));
+        topContainer.add(datePanel);
+        topContainer.add(controlPanel);
+
+        rightPanel.add(topContainer, BorderLayout.NORTH);
+
+        // === SCROLLABLE BUTTON PANEL ===
+        JPanel btnContainer = new JPanel();
+        btnContainer.setBackground(BG_PANEL);
+        btnContainer.setLayout(new BoxLayout(btnContainer, BoxLayout.Y_AXIS));
+        btnContainer.setBorder(BorderFactory.createEmptyBorder(6,8,6,8));
+
+        // --- Helper lambda untuk membuat tombol resource ---
+        // (Definisi langsung sebagai inner class karena Java 8+)
+        ActionListener[] actionHolder = new ActionListener[1]; // workaround for lambda
+
+        // Section: BATCH UTAMA
+        btnContainer.add(makeSectionLabel("▸ BATCH & CONTROL"));
+
+        JButton btnBatch = makeActionButton("🚀  KIRIM SEMUA (BATCH FULL)", "↻ AIO");
+        btnBatch.setBackground(new Color(0x003300));
+        btnBatch.addActionListener(evt -> jButtonStartKirimActionPerformed(evt));
+        btnContainer.add(btnBatch);
+        btnContainer.add(Box.createVerticalStrut(3));
+
+        // Section: KUNJUNGAN
+        btnContainer.add(makeSectionLabel("▸ KUNJUNGAN & TANDA VITAL"));
+        addResourceRow(btnContainer, "Encounter (Kunjungan)", "Encounter",
+            "TABEL SUMBER:\n" +
+            "  • reg_periksa (Master kunjungan)\n" +
+            "  • pasien (Data demografi & NIK)\n" +
+            "  • pegawai (NIK DPJP)\n" +
+            "  • poliklinik (Mapping lokasi)\n\n" +
+            "PRASYARAT (MANDATORY):\n" +
+            "  1. NIK Pasien & Dokter sudah valid (16 digit).\n" +
+            "  2. Poliklinik sudah dipetakan ke ID Lokasi Satu Sehat.\n" +
+            "  3. Status kunjungan bukan 'Batal'.\n\n" +
+            "LOGIKA SKIP:\n" +
+            "  Akan melewati data yang sudah memiliki ID di tabel `satu_sehat_encounter`.",
+            evt -> kirim_encounterActionPerformed(evt));
+        addResourceRow(btnContainer, "Observation TTV", "Vital Signs + SpO2, GCS",
+            "TABEL SUMBER:\n" +
+            "  • pemeriksaan_ralan (TTV Jalan)\n" +
+            "  • pemeriksaan_ranap (TTV Inap)\n" +
+            "  • satu_sehat_encounter (Join utama)\n\n" +
+            "PRASYARAT (MANDATORY):\n" +
+            "  1. Wajib sudah sukses kirim Encounter (id_encounter harus ada).\n" +
+            "  2. Data parameter suhu/tensi tidak boleh kosong atau '-'.\n\n" +
+            "DATA KRITIKAL:\n" +
+            "  Suhu, Sistole, Diastole, Nadi, Respirasi, BB, TB, SpO2, GCS.\n\n" +
+            "LOGIKA SKIP:\n" +
+            "  Melewati data yang sudah ada di tabel `satu_sehat_observationttv...`.",
+            evt -> kirim_observationTTVActionPerformed(evt));
+        addResourceRow(btnContainer, "Immunization (Vaksin)", "Riwayat Imunisasi",
+            "TABEL SUMBER:\n" +
+            "  • detail_pemberian_obat (Filter barang vaksin)\n" +
+            "  • satu_sehat_mapping_vaksin (Kamus SNOMED)\n" +
+            "  • nota_jalan / nota_inap (Validasi kasir)\n\n" +
+            "PRASYARAT (MANDATORY):\n" +
+            "  1. Barang obat harus dipetakan sebagai 'Vaksin' di master.\n" +
+            "  2. No. Batch & No. Faktur wajib terisi.\n\n" +
+            "LOGIKA SKIP:\n" +
+            "  Melewati data yang sudah ada di tabel `satu_sehat_immunization`.",
+            evt -> kirim_vaksinActionPerformed(evt));
+
+        // Section: KLINIS
+        btnContainer.add(makeSectionLabel("▸ DATA KLINIS"));
+        addResourceRow(btnContainer, "Condition (Diagnosa)", "ICD-10 Diagnosa Utama",
+            "TABEL SUMBER:\n" +
+            "  • diagnosa_pasien (Kode ICD-10)\n" +
+            "  • satu_sehat_encounter (Join utama)\n" +
+            "  • penyakit (Nama penyakit)\n\n" +
+            "PRASYARAT (MANDATORY):\n" +
+            "  1. Harus ada Encounter ID yang sukses.\n" +
+            "  2. Nota jalan/inap harus sudah ada (Kasir).\n\n" +
+            "LOGIKA SKIP:\n" +
+            "  Melewati data yang sudah ada di tabel `satu_sehat_condition` per kode penyakit.",
+            evt -> kirim_conditionActionPerformed(evt));
+        addResourceRow(btnContainer, "Procedure (Tindakan)", "ICD-9 Tindakan Medis",
+            "TABEL SUMBER:\n" +
+            "  • prosedur_pasien (Kode ICD-9)\n" +
+            "  • satu_sehat_encounter (Join utama)\n" +
+            "  • icd9 (Deskripsi tindakan)\n\n" +
+            "PRASYARAT (MANDATORY):\n" +
+            "  1. Harus ada Encounter ID yang sukses.\n\n" +
+            "LOGIKA SKIP:\n" +
+            "  Melewati data yang sudah ada di tabel `satu_sehat_procedure` per kode ICD-9.",
+            evt -> kirim_prosedurActionPerformed(evt));
+        addResourceRow(btnContainer, "Clinical Impression (Asesmen)", "Asesmen & Keluhan",
+            "TABEL SUMBER:\n" +
+            "  • pemeriksaan_ralan / pemeriksaan_ranap\n" +
+            "  • Kolom: keluhan, pemeriksaan, anamnesa, asesmen\n\n" +
+            "PRASYARAT (MANDATORY):\n" +
+            "  1. Harus ada Encounter ID yang sukses.\n\n" +
+            "LOGIKA SKIP:\n" +
+            "  Melewati data yang sudah ada di tabel `satu_sehat_clinical_impression`.",
+            evt -> kirim_clinicalimpressionActionPerformed(evt));
+        addResourceRow(btnContainer, "CarePlan (Rencana Rawat)", "RTL & Rencana Tindak Lanjut",
+            "TABEL SUMBER:\n" +
+            "  • pemeriksaan_ralan / pemeriksaan_ranap (Kolom rtl/saran)\n" +
+            "  • satu_sehat_condition (Prerequisite HL7)\n\n" +
+            "PRASYARAT (MANDATORY):\n" +
+            "  1. Harus ada Condition ID (Diagnosa) untuk dikaitkan.\n\n" +
+            "LOGIKA SKIP:\n" +
+            "  Melewati data yang sudah ada di tabel `satu_sehat_careplan`.",
+            evt -> kirim_careplanActionPerformed(evt));
+        addResourceRow(btnContainer, "Diet Gizi (ADIME)", "Asuhan Gizi Instruksi",
+            "TABEL SUMBER:\n" +
+            "  • catatan_adime_gizi (Assessment s/d Evaluasi)\n" +
+            "  • satu_sehat_encounter (Join utama)\n\n" +
+            "PRASYARAT (MANDATORY):\n" +
+            "  1. Harus ada Encounter ID.\n\n" +
+            "LOGIKA SKIP:\n" +
+            "  Melewati data yang sudah ada di tabel `satu_sehat_diet`.",
+            evt -> kirim_dietgiziActionPerformed(evt));
+
+        // Section: FARMASI
+        btnContainer.add(makeSectionLabel("▸ FARMASI & OBAT"));
+        addResourceRow(btnContainer, "Medication Request (Resep)", "Resep Obat Dokter",
+            "Sumber tabel:\n  • resep_obat (header resep)\n  • resep_dokter (detail tunggal)\n  • resep_dokter_racikan (detail racikan)\n  • satu_sehat_encounter (prerequisite)\n\nLogika:\nMengambil semua item resep (tunggal &\nracikan) yang belum terkirim ke Satu Sehat.",
+            evt -> kirim_medicationrequestActionPerformed(evt));
+        // Section: FARMASI
+        btnContainer.add(makeSectionLabel("▸ FARMASI & OBAT"));
+        addResourceRow(btnContainer, "Medication Master", "Induk Kamus Obat",
+            "TABEL SUMBER: satu_sehat_mapping_obat + databarang.\n" +
+            "PRASYARAT: Mapping KFA harus lengkap.\n" +
+            "INFO: Resource INDUK. Jalankan ini sebelum kirim Resep/Pemberian.",
+            evt -> kirim_medicationActionPerformed(evt));
+        addResourceRow(btnContainer, "MedicationRequest (Resep)", "Order Obat Dokter",
+            "TABEL SUMBER: resep_obat, resep_dokter, resep_dokter_racikan.\n" +
+            "PRASYARAT (MANDATORY):\n" +
+            "  1. Harus ada Encounter ID.\n" +
+            "  2. Harus sudah kirim Medication Master (Medication ID).\n" +
+            "LOGIKA SKIP: Melewati resep yang sudah ada di tabel `satu_sehat_medicationrequest`.",
+            evt -> kirim_medicationrequestActionPerformed(evt));
+        addResourceRow(btnContainer, "MedicationDispense (Pemberian)", "Penyerahan Obat Apotek",
+            "TABEL SUMBER: detail_pemberian_obat & depo farmasi.\n" +
+            "PRASYARAT (MANDATORY):\n" +
+            "  1. MedicationRequest ID (Resep harus sukses).\n" +
+            "  2. Wajib ada No. Batch, No. Faktur & Lokasi Depo Terpetakan.\n" +
+            "LOGIKA SKIP: Melewati data di tabel `satu_sehat_medicationdispense`.",
+            evt -> kirim_medicationdispenseActionPerformed(evt));
+        addResourceRow(btnContainer, "MedicationStatement", "Penggunaan Mandiri",
+            "TABEL SUMBER: pemberitahuan_obat_pasien.\n" +
+            "PRASYARAT: Encounter ID.\n" +
+            "LOGIKA SKIP: Melewati data di `satu_sehat_medicationstatement`.",
+            evt -> kirim_medicationstatementActionPerformed(evt));
+        addResourceRow(btnContainer, "Questionnaire (Telaah)", "Telaah Resep Klinis",
+            "TABEL SUMBER: resep_obat & penyerahan_obat.\n" +
+            "PRASYARAT: Encounter ID & Nota Bayar.\n" +
+            "LOGIKA: Skrining 3 aspek (Administrasi, Farmasetik, Klinis).\n" +
+            "SKIP: Jika ID sudah ada di tabel `satu_sehat_questionnairereq_...`.",
+            evt -> kirim_questionnaireActionPerformed(evt));
+
+        // Section: RADIOLOGI
+        btnContainer.add(makeSectionLabel("▸ RADIOLOGI"));
+        addResourceRow(btnContainer, "ServiceRequest Radiologi", "Permintaan Foto",
+            "TABEL SUMBER: permintaan_radiologi.\n" +
+            "PRASYARAT: Encounter ID.\n" +
+            "LOGIKA SKIP: Melewati data di `satu_sehat_servicerequest_radiologi`.",
+            evt -> kirim_servicerequestradiologiActionPerformed(evt));
+        addResourceRow(btnContainer, "Specimen Radiologi", "Imaging Session",
+            "TABEL SUMBER: permintaan_radiologi.\n" +
+            "PRASYARAT: ServiceRequest ID (Permintaan harus sukses).\n" +
+            "LOGIKA SKIP: Melewati data di `satu_sehat_specimen_radiologi`.",
+            evt -> kirim_specimenradiologiActionPerformed(evt));
+        addResourceRow(btnContainer, "Observation Radiologi", "Hasil Bacaan Foto",
+            "TABEL SUMBER: hasil_radiologi.\n" +
+            "PRASYARAT: ServiceRequest ID.\n" +
+            "LOGIKA SKIP: Melewati data di `satu_sehat_observation_radiologi`.",
+            evt -> kirim_observationradiologiActionPerformed(evt));
+        addResourceRow(btnContainer, "DiagnosticReport Rad", "Kesan Akhir",
+            "TABEL SUMBER: hasil_radiologi (Kesimpulan/Kesan).\n" +
+            "PRASYARAT: Observation ID (Hasil bacaan harus sukses).\n" +
+            "LOGIKA SKIP: Melewati data di `satu_sehat_diagnostic_report_radiologi`.",
+            evt -> kirim_diagnosticreportradiologiActionPerformed(evt));
+        addResourceRow(btnContainer, "Encounter v2 (Rad/Lab)", "Encounter Susulan",
+            "TABEL: reg_periksa & periksa_radiologi / lab.\n" +
+            "PRASYARAT: Mapping Lokasi Ralan.\n" +
+            "LOGIKA: Membuat encounter pendukung untuk data penunjang 'yatim' (tanpa periksa ralan).",
+            evt -> kirim_encounter2ActionPerformed(evt));
+
+        // Section: LAB PK
+        btnContainer.add(makeSectionLabel("▸ LABORATORIUM PK"));
+        addResourceRow(btnContainer, "ServiceRequest Lab PK", "Order Laborat PK",
+            "TABEL: permintaan_lab.\n" +
+            "PRASYARAT: Encounter ID.\n" +
+            "LOGIKA SKIP: Melewati data di `satu_sehat_servicerequest_lab`.",
+            evt -> kirim_servicerequestlabpkActionPerformed(evt));
+        addResourceRow(btnContainer, "Specimen Lab PK", "Sampel Darah/Urin",
+            "TABEL: permintaan_lab.\n" +
+            "PRASYARAT: ServiceRequest ID Lab PK.\n" +
+            "LOGIKA SKIP: Melewati data di `satu_sehat_specimen_lab`.",
+            evt -> kirim_specimenlabpkActionPerformed(evt));
+        addResourceRow(btnContainer, "Observation Lab PK", "Hasil Per-Parameter",
+            "TABEL: detail_periksa_lab.\n" +
+            "PRASYARAT: Specimen ID Lab PK.\n" +
+            "LOGIKA SKIP: Melewati data di `satu_sehat_observation_lab`.",
+            evt -> kirim_observationlabpkActionPerformed(evt));
+        addResourceRow(btnContainer, "DiagnosticReport Lab PK", "Saran Kesan Akhir",
+            "TABEL: saran_kesan_lab.\n" +
+            "PRASYARAT: Observation ID Lab PK.\n" +
+            "LOGIKA SKIP: Melewati data di `satu_sehat_diagnostic_report_lab`.",
+            evt -> kirim_diagnosticreportlabpkActionPerformed(evt));
+
+        // Section: LAB MB
+        btnContainer.add(makeSectionLabel("▸ LABORATORIUM MB"));
+        addResourceRow(btnContainer, "ServiceRequest Lab MB", "Order Laborat MB",
+            "TABEL: permintaan_labmb.\n" +
+            "PRASYARAT: Encounter ID.\n" +
+            "LOGIKA SKIP: Melewati data di `satu_sehat_servicerequest_labmb`.",
+            evt -> kirim_servicerequestlabmbActionPerformed(evt));
+        addResourceRow(btnContainer, "Specimen Lab MB", "Sampel Mikrobiologi",
+            "TABEL: permintaan_labmb.\n" +
+            "PRASYARAT: ServiceRequest ID Lab MB.\n" +
+            "LOGIKA SKIP: Melewati data di `satu_sehat_specimen_labmb`.",
+            evt -> kirim_specimenlabmbActionPerformed(evt));
+        addResourceRow(btnContainer, "Observation Lab MB", "Hasil Pertumbuhan",
+            "TABEL: detail_periksa_labmb.\n" +
+            "PRASYARAT: Specimen ID Lab MB.\n" +
+            "LOGIKA SKIP: Melewati data di `satu_sehat_observation_labmb`.",
+            evt -> kirim_observationlabmbActionPerformed(evt));
+        addResourceRow(btnContainer, "DiagnosticReport Lab MB", "Interpretasi MB",
+            "TABEL: saran_kesan_labmb.\n" +
+            "PRASYARAT: Observation ID Lab MB.\n" +
+            "LOGIKA SKIP: Melewati data di `satu_sehat_diagnostic_report_labmb`.",
+            evt -> kirim_diagnosticreportlabmbActionPerformed(evt));
+
+        // Section: FINAL & SPECIAL
+        btnContainer.add(makeSectionLabel("▸ FINAL & SPECIAL"));
+        addResourceRow(btnContainer, "EpisodeOfCare", "ANC / Kehamilan",
+            "TABEL: reg_periksa + diagnosa ICD-10 kelompok O.\n" +
+            "PRASYARAT: NIK Pasien & Target Encounter ID.\n" +
+            "LOGIKA: Pengelompokan asuhan kebidanan/kehamilan.",
+            evt -> kirim_episodeofcareActionPerformed(evt));
+        addResourceRow(btnContainer, "Composition (Resume)", "Bundel Resume Medis",
+            "TABEL: Ringkasan dari seluruh resource klinis.\n" +
+            "PRASYARAT (SANGAT KETAT):\n" +
+            "  1. Harus sudah pulang (Nota Bayar Ada).\n" +
+            "  2. Harus ada Resume Medis Khanza.\n" +
+            "  3. Harus sudah punya Encounter ID.\n" +
+            "LOGIKA: Gerbang Terakhir. Mengikat Diagnosa, Obat, Lab, dan Rad ke dalam satu Resume FHIR.",
+            evt -> kirim_compositionActionPerformed(evt));
+        addResourceRow(btnContainer, "DICOM Orthanc", "Routing Gambar Radiologi",
+            "SUMBER: Server Orthanc DICOM.\n" +
+            "PRASYARAT: No. Order Radiologi Khanza.\n" +
+            "LOGIKA: Mengambil file DICOM dari Orthanc untuk dikirim ke Satu Sehat (ImagingStudy).",
+            evt -> kirim_dicomrouterActionPerformed(evt));
+
+        JScrollPane scrollRight = new JScrollPane(btnContainer);
+        scrollRight.setBackground(BG_PANEL);
+        scrollRight.setBorder(BorderFactory.createEmptyBorder());
+        scrollRight.getViewport().setBackground(BG_PANEL);
+        scrollRight.getVerticalScrollBar().setBackground(BG_PANEL);
+        scrollRight.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        rightPanel.add(scrollRight, BorderLayout.CENTER);
+
+        // === BOTTOM BAR PANEL KANAN (Keluar) ===
+        JPanel bottomCtrl = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 8));
+        bottomCtrl.setBackground(BG_CARD);
+        bottomCtrl.setBorder(BorderFactory.createMatteBorder(2,0,0,0,BORDER_CLR));
+
+        JButton btnKeluar = makeActionButton("✕  KELUAR", "Exit");
+        btnKeluar.setBackground(new Color(0x3B0000));
+        btnKeluar.setForeground(new Color(0xFF6666));
+        btnKeluar.addActionListener(evt -> jButton1ActionPerformed(evt));
+        bottomCtrl.add(btnKeluar);
+
+        rightPanel.add(bottomCtrl, BorderLayout.SOUTH);
+
+        getContentPane().add(rightPanel, BorderLayout.EAST);
+
+        revalidate();
+        repaint();
+    }
+
+    /** Membuat label separator antar seksi di panel kanan */
+    private JLabel makeSectionLabel(String text) {
+        JLabel lbl = new JLabel(text);
+        lbl.setFont(new Font("Courier New", Font.BOLD, 10));
+        lbl.setForeground(ACCENT_DIM);
+        lbl.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
+        lbl.setBorder(BorderFactory.createEmptyBorder(10, 2, 2, 2));
+        return lbl;
+    }
+
+    /**
+     * Membuat baris tombol resource: [Tombol Aksi Kirim] [ⓘ]
+     * Tombol ⓘ membuka modal dialog yang menjelaskan resource tersebut.
+     */
+    private void addResourceRow(JPanel container, String label, String subtitle, String helpText, ActionListener kirimAction) {
+        JPanel row = new JPanel(new BorderLayout(4, 0));
+        row.setBackground(BG_PANEL);
+        row.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
+        row.setMaximumSize(new Dimension(Short.MAX_VALUE, 38));
+        row.setBorder(BorderFactory.createEmptyBorder(2, 0, 2, 0));
+
+        // Tombol KIRIM
+        JButton btnKirim = new JButton("⬆ " + label);
+        btnKirim.setFont(FONT_SANS);
+        btnKirim.setForeground(TEXT_WHITE);
+        btnKirim.setBackground(BTN_NORMAL);
+        btnKirim.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER_CLR, 1),
+            BorderFactory.createEmptyBorder(4, 8, 4, 8)
+        ));
+        btnKirim.setFocusPainted(false);
+        btnKirim.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnKirim.setHorizontalAlignment(SwingConstants.LEFT);
+        btnKirim.addActionListener(kirimAction);
+        btnKirim.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) { btnKirim.setBackground(BTN_HOVER); }
+            public void mouseExited(MouseEvent e)  { btnKirim.setBackground(BTN_NORMAL); }
+        });
+
+        // Tombol INFO ⓘ
+        JButton btnInfo = new JButton("ⓘ");
+        btnInfo.setFont(new Font("Segoe UI Symbol", Font.BOLD, 14));
+        btnInfo.setForeground(ACCENT_DIM);
+        btnInfo.setBackground(BG_CARD);
+        btnInfo.setBorder(BorderFactory.createLineBorder(BORDER_CLR, 1));
+        btnInfo.setFocusPainted(false);
+        btnInfo.setPreferredSize(new Dimension(32, 32));
+        btnInfo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnInfo.setToolTipText(subtitle);
+        btnInfo.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) { btnInfo.setForeground(ACCENT_GREEN); }
+            public void mouseExited(MouseEvent e)  { btnInfo.setForeground(ACCENT_DIM); }
+        });
+        btnInfo.addActionListener(evt -> showResourceModal(label, subtitle, helpText));
+
+        row.add(btnKirim, BorderLayout.CENTER);
+        row.add(btnInfo, BorderLayout.EAST);
+        container.add(row);
+    }
+
+    /** Menampilkan dialog modal yang berisi penjelasan lengkap sebuah resource FHIR */
+    private void showResourceModal(String title, String subtitle, String description) {
+        JDialog dialog = new JDialog(this, "ⓘ  Info Resource: " + title, true);
+        dialog.setSize(480, 380);
+        dialog.setLocationRelativeTo(this);
+        dialog.getContentPane().setBackground(BG_DEEP);
+        dialog.getContentPane().setLayout(new BorderLayout(0, 0));
+
+        // Header Modal
+        JPanel mHeader = new JPanel(new BorderLayout());
+        mHeader.setBackground(BG_CARD);
+        mHeader.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0,0,2,0,ACCENT_GREEN),
+            BorderFactory.createEmptyBorder(12,16,12,16)
+        ));
+        JLabel mTitle = new JLabel(title);
+        mTitle.setFont(FONT_SANS_B);
+        mTitle.setForeground(ACCENT_GREEN);
+        JLabel mSub = new JLabel(subtitle);
+        mSub.setFont(new Font("Segoe UI", Font.ITALIC, 11));
+        mSub.setForeground(TEXT_MUTED);
+        mHeader.add(mTitle, BorderLayout.NORTH);
+        mHeader.add(mSub, BorderLayout.CENTER);
+        dialog.getContentPane().add(mHeader, BorderLayout.NORTH);
+
+        // Body Modal
+        JTextArea mBody = new JTextArea(description);
+        mBody.setEditable(false);
+        mBody.setFont(FONT_MONO);
+        mBody.setForeground(ACCENT_GREEN);
+        mBody.setBackground(BG_DEEP);
+        mBody.setMargin(new Insets(14,16,14,16));
+        mBody.setLineWrap(true);
+        mBody.setWrapStyleWord(true);
+        JScrollPane mScroll = new JScrollPane(mBody);
+        mScroll.setBorder(BorderFactory.createEmptyBorder());
+        mScroll.getViewport().setBackground(BG_DEEP);
+        dialog.getContentPane().add(mScroll, BorderLayout.CENTER);
+
+        // Footer Modal
+        JPanel mFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        mFooter.setBackground(BG_CARD);
+        mFooter.setBorder(BorderFactory.createMatteBorder(2,0,0,0,BORDER_CLR));
+        JButton mClose = makeActionButton("Tutup", "Close");
+        mClose.addActionListener(e -> dialog.dispose());
+        mFooter.add(mClose);
+        dialog.getContentPane().add(mFooter, BorderLayout.SOUTH);
+
+        dialog.setVisible(true);
+    }
+
+    /** Membuat tombol bergaya dark dengan hover effect */
+    private JButton makeActionButton(String text, String tooltip) {
+        JButton btn = new JButton(text);
+        btn.setFont(FONT_SANS_B);
+        btn.setForeground(ACCENT_GREEN);
+        btn.setBackground(BTN_NORMAL);
+        btn.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER_CLR, 1),
+            BorderFactory.createEmptyBorder(5, 12, 5, 12)
+        ));
+        btn.setFocusPainted(false);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setToolTipText(tooltip);
+        btn.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) { btn.setBackground(BTN_HOVER); }
+            public void mouseExited(MouseEvent e)  { btn.setBackground(BTN_NORMAL); }
+        });
+        return btn;
+    }
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         System.exit(0);
@@ -575,6 +1180,23 @@ public class frmUtama extends javax.swing.JFrame {
             }
         }.execute();
     }//GEN-LAST:event_kirim_dietgiziActionPerformed
+
+    private void kirim_medicationActionPerformed(java.awt.event.ActionEvent evt) {
+        TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Medication Master...\n");
+        jPopupMenu1.setEnabled(false);
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                medication();
+                return null;
+            }
+            @Override
+            protected void done() {
+                jPopupMenu1.setEnabled(true);
+                TeksArea.append("\nPENGIRIMAN MANUAL: Medication Master SELESAI.\n");
+            }
+        }.execute();
+    }
 
     private void kirim_medicationrequestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirim_medicationrequestActionPerformed
         TeksArea.setText("MEMULAI PENGIRIMAN MANUAL: Medication Request...\n");
@@ -1065,16 +1687,23 @@ public class frmUtama extends javax.swing.JFrame {
                 jam = nol_jam + Integer.toString(nilai_jam);
                 menit = nol_menit + Integer.toString(nilai_menit);
                 detik = nol_detik + Integer.toString(nilai_detik);
-                if(jam.equals("01")&&menit.equals("01")&&detik.equals("01")){
-                    TeksArea.setText("");
+                // [LOGIKA 1]: Pergantian Hari / Tanggal (Persis Jam 00:00:00)
+                if(jam.equals("00")&&menit.equals("00")&&detik.equals("00")){
+                    TeksArea.append("[SISTEM] Pergantian Hari Terdeteksi. Menyesuaikan Tanggal...\n");
                     date = new Date();  
                     Tanggal1.setText(tanggalFormat.format(date)); 
                     Tanggal2.setText(tanggalFormat.format(date)); 
-                    medication();
                 }
                 
-                if((nilai_jam%4==0)&&(detik.equals("01")&&menit.equals("01"))){
-                    new Thread(() -> jalankanSemuaQueryBridging()).start(); //tambahan ichsan
+                // [LOGIKA 2]: Autopilot Engine membaca Interval
+                if (isAutopilot) {
+                    long currentMs = System.currentTimeMillis();
+                    long targetMs = intervalMenit * 60 * 1000L;
+                    if ((currentMs - lastRunTimeMs) >= targetMs) {
+                        lastRunTimeMs = currentMs;
+                        TeksArea.append("\n[AUTOPILOT] Memulai Scan Rutin Setiap " + intervalMenit + " Menit...\n");
+                        new Thread(() -> jalankanSemuaQueryBridging()).start();
+                    }
                 }
             }
         };
@@ -1113,6 +1742,10 @@ public class frmUtama extends javax.swing.JFrame {
                 
                 int i = 0;
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     i++;
                     kirimEncounterHelper(rs); 
                     jeda();
@@ -1233,7 +1866,7 @@ public class frmUtama extends javax.swing.JFrame {
             requestEntity = new HttpEntity(json, headers);
             try {
                 // Percobaan Kirim Pertama
-                String responseJson = api.getRest().exchange(link + "/Encounter", HttpMethod.POST, requestEntity, String.class).getBody();
+                String responseJson = konekSatuSehat(link + "/Encounter", HttpMethod.POST, requestEntity);
                 handleEncounterSuccess(responseJson, noRawat);
                 
             } catch (HttpClientErrorException e) {
@@ -1251,7 +1884,7 @@ public class frmUtama extends javax.swing.JFrame {
                     
                     try {
                         // Percobaan Kirim Kedua (Retry)
-                        String responseJsonRetry = api.getRest().exchange(link + "/Encounter", HttpMethod.POST, requestEntity, String.class).getBody();
+                        String responseJsonRetry = konekSatuSehat(link + "/Encounter", HttpMethod.POST, requestEntity);
                         TeksArea.append("   [RETRY SUKSES] Berhasil dikirim setelah refresh token.\n");
                         handleEncounterSuccess(responseJsonRetry, noRawat);
                         
@@ -1325,6 +1958,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(3, Tanggal1.getText()); ps.setString(4, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     try {
                         idpasien = cekViaSatuSehat.tampilIDPasien(rs.getString("no_ktp"));
                         iddokter = cekViaSatuSehat.tampilIDParktisi(rs.getString("ktppraktisi"));
@@ -1381,6 +2018,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(3, Tanggal1.getText()); ps.setString(4, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     try {
                         idpasien = cekViaSatuSehat.tampilIDPasien(rs.getString("no_ktp"));
                         iddokter = cekViaSatuSehat.tampilIDParktisi(rs.getString("ktppraktisi"));
@@ -1432,6 +2073,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(3, Tanggal1.getText()); ps.setString(4, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     try {
                         idpasien = cekViaSatuSehat.tampilIDPasien(rs.getString("no_ktp"));
                         iddokter = cekViaSatuSehat.tampilIDParktisi(rs.getString("ktppraktisi"));
@@ -1482,6 +2127,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(3, Tanggal1.getText()); ps.setString(4, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     try {
                         idpasien = cekViaSatuSehat.tampilIDPasien(rs.getString("no_ktp"));
                         iddokter = cekViaSatuSehat.tampilIDParktisi(rs.getString("ktppraktisi"));
@@ -1537,6 +2186,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(3, Tanggal1.getText()); ps.setString(4, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     try {
                         idpasien = cekViaSatuSehat.tampilIDPasien(rs.getString("no_ktp"));
                         iddokter = cekViaSatuSehat.tampilIDParktisi(rs.getString("ktppraktisi"));
@@ -1590,6 +2243,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(3, Tanggal1.getText()); ps.setString(4, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     try {
                         idpasien = cekViaSatuSehat.tampilIDPasien(rs.getString("no_ktp"));
                         iddokter = cekViaSatuSehat.tampilIDParktisi(rs.getString("ktppraktisi"));
@@ -1635,7 +2292,7 @@ public class frmUtama extends javax.swing.JFrame {
 
         try {
             // --- PERCOBAAN KIRIM PERTAMA ---
-            json = api.getRest().exchange(link + "/Observation", HttpMethod.POST, requestEntity, String.class).getBody();
+            json = konekSatuSehat(link + "/Observation", HttpMethod.POST, requestEntity);
             // Jika sukses, simpan log
             simpanLogTTV(json, tableName, rs);
             
@@ -1655,7 +2312,7 @@ public class frmUtama extends javax.swing.JFrame {
                 
                 try {
                     // 3. Kirim Ulang (Retry)
-                    json = api.getRest().exchange(link + "/Observation", HttpMethod.POST, requestEntity, String.class).getBody();
+                    json = konekSatuSehat(link + "/Observation", HttpMethod.POST, requestEntity);
                     simpanLogTTV(json, tableName, rs);
                     TeksArea.append("   [RETRY SUKSES] Data berhasil dikirim dengan token baru.\n");
                 } catch (Exception ex) {
@@ -1669,7 +2326,7 @@ public class frmUtama extends javax.swing.JFrame {
                 try {
                     // Cari ID data yang sudah ada tersebut (Self-Healing)
                     String searchUrl = link + "/Observation?subject=" + idpasien + "&code=" + loincCode + "&date=" + rs.getString("tgl_perawatan") + "T" + rs.getString("jam_rawat") + "+07:00";
-                    String searchJson = api.getRest().exchange(searchUrl, HttpMethod.GET, new HttpEntity(headers), String.class).getBody();
+                    String searchJson = konekSatuSehat(searchUrl, HttpMethod.GET, new HttpEntity(headers));
                     
                     JsonNode searchRoot = mapper.readTree(searchJson);
                     if (searchRoot.path("total").asInt() > 0) {
@@ -1747,6 +2404,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // LOGGING DETEKTIF
                     TeksArea.append("\n[PROSES RALAN] No.Rawat: " + rs.getString("no_rawat") + " | Pasien: " + rs.getString("nm_pasien") + "\n");
 
@@ -1846,6 +2507,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     TeksArea.append("\n[PROSES RANAP] No.Rawat: " + rs.getString("no_rawat") + " | Pasien: " + rs.getString("nm_pasien") + "\n");
 
                     if ((!rs.getString("no_ktp").equals("")) && (!rs.getString("ktppraktisi").equals("")) && rs.getString("id_clinicalimpression").equals("")) {
@@ -1931,7 +2596,7 @@ public class frmUtama extends javax.swing.JFrame {
             // TeksArea.append("   URL : " + link + "/ClinicalImpression\n");
             
             // KIRIM DATA
-            String responseJson = api.getRest().exchange(link + "/ClinicalImpression", HttpMethod.POST, requestEntity, String.class).getBody();
+            String responseJson = konekSatuSehat(link + "/ClinicalImpression", HttpMethod.POST, requestEntity);
             
             // SUKSES
             simpanLogCI(responseJson, rs, statusRawat);
@@ -1948,7 +2613,7 @@ public class frmUtama extends javax.swing.JFrame {
                 
                 try {
                     // RETRY KIRIM
-                    String responseJsonRetry = api.getRest().exchange(link + "/ClinicalImpression", HttpMethod.POST, requestEntity, String.class).getBody();
+                    String responseJsonRetry = konekSatuSehat(link + "/ClinicalImpression", HttpMethod.POST, requestEntity);
                     TeksArea.append("   [RETRY SUKSES] Data terkirim setelah refresh token.\n");
                     simpanLogCI(responseJsonRetry, rs, statusRawat);
                 } catch (Exception ex) {
@@ -2005,6 +2670,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     TeksArea.append("\n[PROSES VAKSIN] No.Rawat: " + rs.getString("no_rawat") + " | Vaksin: " + rs.getString("vaksin_display") + "\n");
 
                     if ((!rs.getString("no_ktp").equals("")) && (!rs.getString("ktppraktisi").equals("")) && rs.getString("id_immunization").equals("")) {
@@ -2111,7 +2780,7 @@ public class frmUtama extends javax.swing.JFrame {
                                 TeksArea.append("   URL : " + link + "/Immunization\n");
                                 TeksArea.append("   Request JSON : " + json + "\n");
                                 requestEntity = new HttpEntity(json, headers);
-                                json = api.getRest().exchange(link + "/Immunization", HttpMethod.POST, requestEntity, String.class).getBody();
+                                json = konekSatuSehat(link + "/Immunization", HttpMethod.POST, requestEntity);
                                 TeksArea.append("   Result JSON : " + json + "\n");
                                 root = mapper.readTree(json);
                                 response = root.path("id");
@@ -2177,6 +2846,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Detektif Log
                     TeksArea.append("\n[DETEKTIF RALAN] Rawat: " + rs.getString("no_rawat") + " | ICD-9: " + rs.getString("kode") + " | Pasien: " + rs.getString("nm_pasien") + "\n");
 
@@ -2272,6 +2945,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Detektif Log
                     TeksArea.append("\n[DETEKTIF RANAP] Rawat: " + rs.getString("no_rawat") + " | ICD-9: " + rs.getString("kode") + " | Pasien: " + rs.getString("nm_pasien") + "\n");
 
@@ -2360,7 +3037,7 @@ public class frmUtama extends javax.swing.JFrame {
             //TeksArea.append("   [DEBUG JSON] " + jsonPayload + "\n");
             
             // KIRIM PERTAMA
-            json = api.getRest().exchange(link + "/Procedure", HttpMethod.POST, requestEntity, String.class).getBody();
+            json = konekSatuSehat(link + "/Procedure", HttpMethod.POST, requestEntity);
             simpanLogProsedur(json, rs);
             
         } catch (HttpClientErrorException e) {
@@ -2372,7 +3049,7 @@ public class frmUtama extends javax.swing.JFrame {
                 requestEntity = new HttpEntity(jsonPayload, headers);
                 
                 try {
-                    json = api.getRest().exchange(link + "/Procedure", HttpMethod.POST, requestEntity, String.class).getBody();
+                    json = konekSatuSehat(link + "/Procedure", HttpMethod.POST, requestEntity);
                     simpanLogProsedur(json, rs);
                     TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                 } catch (Exception ex) {
@@ -2421,6 +3098,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Detektif Log
                     TeksArea.append("\n[DETEKTIF RALAN] Rawat: " + rs.getString("no_rawat") + " | ICD-10: " + rs.getString("kd_penyakit") + " | Pasien: " + rs.getString("nm_pasien") + "\n");
 
@@ -2517,6 +3198,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Detektif Log
                     TeksArea.append("\n[DETEKTIF RANAP] Rawat: " + rs.getString("no_rawat") + " | ICD-10: " + rs.getString("kd_penyakit") + " | Pasien: " + rs.getString("nm_pasien") + "\n");
 
@@ -2606,7 +3291,7 @@ public class frmUtama extends javax.swing.JFrame {
             // TeksArea.append("   [DEBUG JSON] " + jsonPayload + "\n");
             
             // KIRIM PERTAMA
-            json = api.getRest().exchange(link + "/Condition", HttpMethod.POST, requestEntity, String.class).getBody();
+            json = konekSatuSehat(link + "/Condition", HttpMethod.POST, requestEntity);
             simpanLogCondition(json, rs);
             
         } catch (HttpClientErrorException e) {
@@ -2618,7 +3303,7 @@ public class frmUtama extends javax.swing.JFrame {
                 requestEntity = new HttpEntity(jsonPayload, headers);
                 
                 try {
-                    json = api.getRest().exchange(link + "/Condition", HttpMethod.POST, requestEntity, String.class).getBody();
+                    json = konekSatuSehat(link + "/Condition", HttpMethod.POST, requestEntity);
                     simpanLogCondition(json, rs);
                     TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                 } catch (Exception ex) {
@@ -2677,6 +3362,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Log Detektif
                     TeksArea.append("\n[DETEKTIF DIET RALAN] Rawat: " + rs.getString("no_rawat") + " | Pasien: " + rs.getString("nm_pasien") + "\n");
 
@@ -2815,6 +3504,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText() + " ");
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Log Detektif
                     TeksArea.append("\n[DETEKTIF DIET RANAP] Rawat: " + rs.getString("no_rawat") + "\n");
 
@@ -2942,7 +3635,7 @@ public class frmUtama extends javax.swing.JFrame {
             // TeksArea.append("   [DEBUG JSON] " + jsonPayload + "\n");
             
             // KIRIM PERTAMA
-            json = api.getRest().exchange(link + "/Composition", HttpMethod.POST, requestEntity, String.class).getBody();
+            json = konekSatuSehat(link + "/Composition", HttpMethod.POST, requestEntity);
             simpanLogDiet(json, rs);
             
         } catch (HttpClientErrorException e) {
@@ -2954,7 +3647,7 @@ public class frmUtama extends javax.swing.JFrame {
                 requestEntity = new HttpEntity(jsonPayload, headers);
                 
                 try {
-                    json = api.getRest().exchange(link + "/Composition", HttpMethod.POST, requestEntity, String.class).getBody();
+                    json = konekSatuSehat(link + "/Composition", HttpMethod.POST, requestEntity);
                     simpanLogDiet(json, rs);
                     TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                 } catch (Exception ex) {
@@ -2995,6 +3688,10 @@ public class frmUtama extends javax.swing.JFrame {
             try {
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Sanitasi string agar tidak merusak JSON
                     String namaObat = rs.getString("obat_display").replaceAll("(\r\n|\r|\n|\n\r)", " ").replaceAll("\"", "'").replaceAll("\\\\", "/");
                     String bentukObat = rs.getString("form_display").replaceAll("(\r\n|\r|\n|\n\r)", " ").replaceAll("\"", "'");
@@ -3085,9 +3782,9 @@ public class frmUtama extends javax.swing.JFrame {
 
                         // Eksekusi Request sesuai Method
                         if (method.equals("POST")) {
-                            json = api.getRest().exchange(url, HttpMethod.POST, requestEntity, String.class).getBody();
+                            json = konekSatuSehat(url, HttpMethod.POST, requestEntity);
                         } else {
-                            json = api.getRest().exchange(url, HttpMethod.PUT, requestEntity, String.class).getBody();
+                            json = konekSatuSehat(url, HttpMethod.PUT, requestEntity);
                         }
 
                         TeksArea.append("   Result JSON : " + json + "\n");
@@ -3164,6 +3861,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     if ((!rs.getString("no_ktp").equals("")) && rs.getString("id_medicationrequest").equals("")) {
                         kirimMedicationRequest(rs, "outpatient", "satu_sehat_medicationrequest", false);
                     }
@@ -3205,6 +3906,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     if ((!rs.getString("no_ktp").equals("")) && rs.getString("id_medicationrequest").equals("")) {
                         kirimMedicationRequest(rs, "inpatient", "satu_sehat_medicationrequest", false);
                     }
@@ -3247,6 +3952,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     if ((!rs.getString("no_ktp").equals("")) && rs.getString("id_medicationrequest").equals("")) {
                         kirimMedicationRequest(rs, "outpatient", "satu_sehat_medicationrequest_racikan", true);
                     }
@@ -3289,6 +3998,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     if ((!rs.getString("no_ktp").equals("")) && rs.getString("id_medicationrequest").equals("")) {
                         kirimMedicationRequest(rs, "inpatient", "satu_sehat_medicationrequest_racikan", true);
                     }
@@ -3463,7 +4176,7 @@ public class frmUtama extends javax.swing.JFrame {
             requestEntity = new HttpEntity(json, headers);
             try {
                 // KIRIM PERTAMA
-                String responseJson = api.getRest().exchange(link + "/MedicationRequest", HttpMethod.POST, requestEntity, String.class).getBody();
+                String responseJson = konekSatuSehat(link + "/MedicationRequest", HttpMethod.POST, requestEntity);
                 simpanLogMedication(responseJson, tableName, rs, isRacikan);
                 
             } catch (HttpClientErrorException e) {
@@ -3476,7 +4189,7 @@ public class frmUtama extends javax.swing.JFrame {
                     
                     try {
                         // RETRY KIRIM
-                        String responseJson = api.getRest().exchange(link + "/MedicationRequest", HttpMethod.POST, requestEntity, String.class).getBody();
+                        String responseJson = konekSatuSehat(link + "/MedicationRequest", HttpMethod.POST, requestEntity);
                         simpanLogMedication(responseJson, tableName, rs, isRacikan);
                         TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                     } catch (Exception ex) {
@@ -3574,6 +4287,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     kirimMedicationDispense(rs, "outpatient");
                     jeda();
                 }
@@ -3637,6 +4354,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     kirimMedicationDispense(rs, "inpatient");
                     jeda();
                 }
@@ -3756,7 +4477,7 @@ public class frmUtama extends javax.swing.JFrame {
             requestEntity = new HttpEntity(json, headers);
             try {
                 // KIRIM PERTAMA
-                String responseJson = api.getRest().exchange(link + "/MedicationDispense", HttpMethod.POST, requestEntity, String.class).getBody();
+                String responseJson = konekSatuSehat(link + "/MedicationDispense", HttpMethod.POST, requestEntity);
                 simpanLogDispense(responseJson, rs);
                 
             } catch (HttpClientErrorException e) {
@@ -3767,7 +4488,7 @@ public class frmUtama extends javax.swing.JFrame {
                     headers.set("Authorization", "Bearer " + newToken);
                     requestEntity = new HttpEntity(json, headers);
                     try {
-                        String responseJson = api.getRest().exchange(link + "/MedicationDispense", HttpMethod.POST, requestEntity, String.class).getBody();
+                        String responseJson = konekSatuSehat(link + "/MedicationDispense", HttpMethod.POST, requestEntity);
                         simpanLogDispense(responseJson, rs);
                         TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                     } catch (Exception ex) {
@@ -3806,7 +4527,7 @@ public class frmUtama extends javax.swing.JFrame {
             // Identifier Value disini harus sama persis dengan yang dikirim di JSON (no_resep + "-" + kode_brng)
             String searchUrl = link + "/MedicationDispense?identifier=http://sys-ids.kemkes.go.id/prescription-item/" + koneksiDB.IDSATUSEHAT() + "|" + identifierValue;
             
-            String searchJson = api.getRest().exchange(searchUrl, HttpMethod.GET, new HttpEntity(headers), String.class).getBody();
+            String searchJson = konekSatuSehat(searchUrl, HttpMethod.GET, new HttpEntity(headers));
             JsonNode searchRoot = mapper.readTree(searchJson);
             
             if (searchRoot.path("total").asInt() > 0) {
@@ -3911,6 +4632,10 @@ public class frmUtama extends javax.swing.JFrame {
             ps.setString(2, Tanggal2.getText());
             rs = ps.executeQuery();
             while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                 String statusLanjut = rs.getString("status_lanjut");
                 String catCode = statusLanjut.equalsIgnoreCase("Ralan") ? "outpatient" : "inpatient";
                 processMedicationStatement(rs, catCode, tableName, isRacikan);
@@ -4075,7 +4800,7 @@ public class frmUtama extends javax.swing.JFrame {
             // Kirim Request
             requestEntity = new HttpEntity(json, headers);
             try {
-                String responseJson = api.getRest().exchange(link + "/MedicationStatement", HttpMethod.POST, requestEntity, String.class).getBody();
+                String responseJson = konekSatuSehat(link + "/MedicationStatement", HttpMethod.POST, requestEntity);
                 simpanLogStatement(responseJson, rs, tableName, isRacikan);
                 
             } catch (HttpClientErrorException e) {
@@ -4085,7 +4810,7 @@ public class frmUtama extends javax.swing.JFrame {
                     headers.set("Authorization", "Bearer " + newToken);
                     requestEntity = new HttpEntity(json, headers);
                     try {
-                        String responseJson = api.getRest().exchange(link + "/MedicationStatement", HttpMethod.POST, requestEntity, String.class).getBody();
+                        String responseJson = konekSatuSehat(link + "/MedicationStatement", HttpMethod.POST, requestEntity);
                         simpanLogStatement(responseJson, rs, tableName, isRacikan);
                         TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                     } catch (Exception ex) {
@@ -4124,7 +4849,7 @@ public class frmUtama extends javax.swing.JFrame {
     private void recoverDuplicateStatement(String identifierValue, ResultSet rs, String tableName, boolean isRacikan) {
         try {
             String searchUrl = link + "/MedicationStatement?identifier=http://sys-ids.kemkes.go.id/medicationstatement/" + koneksiDB.IDSATUSEHAT() + "|" + identifierValue;
-            String searchJson = api.getRest().exchange(searchUrl, HttpMethod.GET, new HttpEntity(headers), String.class).getBody();
+            String searchJson = konekSatuSehat(searchUrl, HttpMethod.GET, new HttpEntity(headers));
             
             JsonNode searchRoot = mapper.readTree(searchJson);
             if (searchRoot.path("total").asInt() > 0) {
@@ -4185,6 +4910,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     kirimMedicationStatement(rs, "outpatient", "satu_sehat_medicationstatement", false);
                     jeda();
                 }
@@ -4226,6 +4955,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     kirimMedicationStatement(rs, "inpatient", "satu_sehat_medicationstatement", false);
                     jeda();
                 }
@@ -4269,6 +5002,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     kirimMedicationStatement(rs, "outpatient", "satu_sehat_medicationstatement_racikan", true);
                     jeda();
                 }
@@ -4312,6 +5049,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     kirimMedicationStatement(rs, "inpatient", "satu_sehat_medicationstatement_racikan", true);
                     jeda();
                 }
@@ -4475,7 +5216,7 @@ public class frmUtama extends javax.swing.JFrame {
             
             // 5. KIRIM REQUEST & HANDLE ERROR
             requestEntity = new HttpEntity(json, headers);
-            String responseJson = api.getRest().exchange(link + "/MedicationStatement", HttpMethod.POST, requestEntity, String.class).getBody();
+            String responseJson = konekSatuSehat(link + "/MedicationStatement", HttpMethod.POST, requestEntity);
             
             TeksArea.append("   Result : " + responseJson + "\n"); // Uncomment jika ingin lihat full response
 
@@ -4537,6 +5278,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     TeksArea.append("\n[DETEKTIF RALAN] Rawat: " + rs.getString("no_rawat") + " | Order: " + rs.getString("noorder") + " | Tindakan: " + rs.getString("nm_perawatan") + "\n");
                     
                     if ((!rs.getString("no_ktp").equals("")) && (!rs.getString("ktpdokter").equals("")) && rs.getString("id_servicerequest").equals("")) {
@@ -4675,6 +5420,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     TeksArea.append("\n[DETEKTIF RANAP] Rawat: " + rs.getString("no_rawat") + " | Order: " + rs.getString("noorder") + " | Tindakan: " + rs.getString("nm_perawatan") + "\n");
                     
                     if ((!rs.getString("no_ktp").equals("")) && (!rs.getString("ktpdokter").equals("")) && rs.getString("id_servicerequest").equals("")) {
@@ -4807,7 +5556,7 @@ public class frmUtama extends javax.swing.JFrame {
             // TeksArea.append("   [DEBUG JSON] " + jsonPayload + "\n");
             
             // KIRIM PERTAMA
-            json = api.getRest().exchange(link + "/ServiceRequest", HttpMethod.POST, requestEntity, String.class).getBody();
+            json = konekSatuSehat(link + "/ServiceRequest", HttpMethod.POST, requestEntity);
             simpanLogServiceRequest(json, rs);
             
         } catch (HttpClientErrorException e) {
@@ -4819,7 +5568,7 @@ public class frmUtama extends javax.swing.JFrame {
                 requestEntity = new HttpEntity(jsonPayload, headers);
                 
                 try {
-                    json = api.getRest().exchange(link + "/ServiceRequest", HttpMethod.POST, requestEntity, String.class).getBody();
+                    json = konekSatuSehat(link + "/ServiceRequest", HttpMethod.POST, requestEntity);
                     simpanLogServiceRequest(json, rs);
                     TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                 } catch (Exception ex) {
@@ -4877,6 +5626,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Log Detektif
                     TeksArea.append("\n[DETEKTIF SPECIMEN] Order: " + rs.getString("noorder") + " | Rawat: " + rs.getString("no_rawat") + "\n");
 
@@ -4967,7 +5720,7 @@ public class frmUtama extends javax.swing.JFrame {
             // TeksArea.append("   [DEBUG JSON] " + jsonPayload + "\n");
             
             // KIRIM PERTAMA
-            json = api.getRest().exchange(link + "/Specimen", HttpMethod.POST, requestEntity, String.class).getBody();
+            json = konekSatuSehat(link + "/Specimen", HttpMethod.POST, requestEntity);
             simpanLogSpecimen(json, rs);
             
         } catch (HttpClientErrorException e) {
@@ -4979,7 +5732,7 @@ public class frmUtama extends javax.swing.JFrame {
                 requestEntity = new HttpEntity(jsonPayload, headers);
                 
                 try {
-                    json = api.getRest().exchange(link + "/Specimen", HttpMethod.POST, requestEntity, String.class).getBody();
+                    json = konekSatuSehat(link + "/Specimen", HttpMethod.POST, requestEntity);
                     simpanLogSpecimen(json, rs);
                     TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                 } catch (Exception ex) {
@@ -5049,6 +5802,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Log Detektif
                     TeksArea.append("\n[DETEKTIF OBS RAD] Order: " + rs.getString("noorder") + " | Hasil: " + rs.getString("nm_perawatan") + "\n");
 
@@ -5180,7 +5937,7 @@ public class frmUtama extends javax.swing.JFrame {
             // TeksArea.append("   [DEBUG JSON] " + jsonPayload + "\n");
             
             // KIRIM PERTAMA
-            json = api.getRest().exchange(link + "/Observation", HttpMethod.POST, requestEntity, String.class).getBody();
+            json = konekSatuSehat(link + "/Observation", HttpMethod.POST, requestEntity);
             simpanLogObsRad(json, rs);
             
         } catch (HttpClientErrorException e) {
@@ -5192,7 +5949,7 @@ public class frmUtama extends javax.swing.JFrame {
                 requestEntity = new HttpEntity(jsonPayload, headers);
                 
                 try {
-                    json = api.getRest().exchange(link + "/Observation", HttpMethod.POST, requestEntity, String.class).getBody();
+                    json = konekSatuSehat(link + "/Observation", HttpMethod.POST, requestEntity);
                     simpanLogObsRad(json, rs);
                     TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                 } catch (Exception ex) {
@@ -5266,6 +6023,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Log Detektif
                     TeksArea.append("\n[DETEKTIF DIAG REPORT] Order: " + rs.getString("noorder") + " | Rawat: " + rs.getString("no_rawat") + "\n");
 
@@ -5409,7 +6170,7 @@ public class frmUtama extends javax.swing.JFrame {
             // TeksArea.append("   [DEBUG JSON] " + jsonPayload + "\n");
             
             // KIRIM PERTAMA
-            json = api.getRest().exchange(link + "/DiagnosticReport", HttpMethod.POST, requestEntity, String.class).getBody();
+            json = konekSatuSehat(link + "/DiagnosticReport", HttpMethod.POST, requestEntity);
             simpanLogDiagnosticReport(json, rs);
             
         } catch (HttpClientErrorException e) {
@@ -5421,7 +6182,7 @@ public class frmUtama extends javax.swing.JFrame {
                 requestEntity = new HttpEntity(jsonPayload, headers);
                 
                 try {
-                    json = api.getRest().exchange(link + "/DiagnosticReport", HttpMethod.POST, requestEntity, String.class).getBody();
+                    json = konekSatuSehat(link + "/DiagnosticReport", HttpMethod.POST, requestEntity);
                     simpanLogDiagnosticReport(json, rs);
                     TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                 } catch (Exception ex) {
@@ -5479,6 +6240,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Log Detektif
                     TeksArea.append("\n[DETEKTIF LAB PK] Order: " + rs.getString("noorder") + " | Item: " + rs.getString("Pemeriksaan") + "\n");
                     TeksArea.append("   [INFO MAPPING] Code: " + rs.getString("code") + " | System: " + rs.getString("system") + "\n");
@@ -5604,7 +6369,7 @@ public class frmUtama extends javax.swing.JFrame {
             requestEntity = new HttpEntity(json, headers);
             try {
                 // KIRIM PERTAMA
-                String responseJson = api.getRest().exchange(link + "/ServiceRequest", HttpMethod.POST, requestEntity, String.class).getBody();
+                String responseJson = konekSatuSehat(link + "/ServiceRequest", HttpMethod.POST, requestEntity);
                 simpanLogLabPK(responseJson, rs);
                 
             } catch (HttpClientErrorException e) {
@@ -5617,7 +6382,7 @@ public class frmUtama extends javax.swing.JFrame {
                     
                     try {
                         // RETRY KIRIM
-                        String responseJson = api.getRest().exchange(link + "/ServiceRequest", HttpMethod.POST, requestEntity, String.class).getBody();
+                        String responseJson = konekSatuSehat(link + "/ServiceRequest", HttpMethod.POST, requestEntity);
                         simpanLogLabPK(responseJson, rs);
                         TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                     } catch (Exception ex) {
@@ -5733,7 +6498,7 @@ public class frmUtama extends javax.swing.JFrame {
                                 TeksArea.append("URL : "+link+"/ServiceRequest");
                                 TeksArea.append("Request JSON : "+json);
                                 requestEntity = new HttpEntity(json,headers);
-                                json=api.getRest().exchange(link+"/ServiceRequest", HttpMethod.POST, requestEntity, String.class).getBody();
+                                json=konekSatuSehat(link+"/ServiceRequest", HttpMethod.POST, requestEntity);
                                 TeksArea.append("Result JSON : "+json);
                                 root = mapper.readTree(json);
                                 response = root.path("id");
@@ -5854,7 +6619,7 @@ public class frmUtama extends javax.swing.JFrame {
                                 TeksArea.append("URL : "+link+"/ServiceRequest");
                                 TeksArea.append("Request JSON : "+json);
                                 requestEntity = new HttpEntity(json,headers);
-                                json=api.getRest().exchange(link+"/ServiceRequest", HttpMethod.POST, requestEntity, String.class).getBody();
+                                json=konekSatuSehat(link+"/ServiceRequest", HttpMethod.POST, requestEntity);
                                 TeksArea.append("Result JSON : "+json);
                                 root = mapper.readTree(json);
                                 response = root.path("id");
@@ -5925,6 +6690,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Log Detektif
                     TeksArea.append("\n[DETEKTIF SPECIMEN PK] Order: " + rs.getString("noorder") + " | Item: " + rs.getString("Pemeriksaan") + "\n");
 
@@ -6011,7 +6780,7 @@ public class frmUtama extends javax.swing.JFrame {
             requestEntity = new HttpEntity(json, headers);
             try {
                 // KIRIM PERTAMA
-                String responseJson = api.getRest().exchange(link + "/Specimen", HttpMethod.POST, requestEntity, String.class).getBody();
+                String responseJson = konekSatuSehat(link + "/Specimen", HttpMethod.POST, requestEntity);
                 simpanLogSpecimenLabPK(responseJson, rs);
                 
             } catch (HttpClientErrorException e) {
@@ -6024,7 +6793,7 @@ public class frmUtama extends javax.swing.JFrame {
                     
                     try {
                         // RETRY KIRIM
-                        String responseJson = api.getRest().exchange(link + "/Specimen", HttpMethod.POST, requestEntity, String.class).getBody();
+                        String responseJson = konekSatuSehat(link + "/Specimen", HttpMethod.POST, requestEntity);
                         simpanLogSpecimenLabPK(responseJson, rs);
                         TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                     } catch (Exception ex) {
@@ -6117,7 +6886,7 @@ public class frmUtama extends javax.swing.JFrame {
                                 TeksArea.append("URL : "+link+"/Specimen");
                                 TeksArea.append("Request JSON : "+json);
                                 requestEntity = new HttpEntity(json,headers);
-                                json=api.getRest().exchange(link+"/Specimen", HttpMethod.POST, requestEntity, String.class).getBody();
+                                json=konekSatuSehat(link+"/Specimen", HttpMethod.POST, requestEntity);
                                 TeksArea.append("Result JSON : "+json);
                                 root = mapper.readTree(json);
                                 response = root.path("id");
@@ -6215,7 +6984,7 @@ public class frmUtama extends javax.swing.JFrame {
                                 TeksArea.append("URL : "+link+"/Specimen");
                                 TeksArea.append("Request JSON : "+json);
                                 requestEntity = new HttpEntity(json,headers);
-                                json=api.getRest().exchange(link+"/Specimen", HttpMethod.POST, requestEntity, String.class).getBody();
+                                json=konekSatuSehat(link+"/Specimen", HttpMethod.POST, requestEntity);
                                 TeksArea.append("Result JSON : "+json);
                                 root = mapper.readTree(json);
                                 response = root.path("id");
@@ -6299,6 +7068,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Log Detektif
                     TeksArea.append("\n[DETEKTIF OBS LAB] No.Order: " + rs.getString("noorder") + " | Item: " + rs.getString("Pemeriksaan") + "\n");
 
@@ -6412,7 +7185,7 @@ public class frmUtama extends javax.swing.JFrame {
             requestEntity = new HttpEntity(json, headers);
             try {
                 // KIRIM PERTAMA
-                String responseJson = api.getRest().exchange(link + "/Observation", HttpMethod.POST, requestEntity, String.class).getBody();
+                String responseJson = konekSatuSehat(link + "/Observation", HttpMethod.POST, requestEntity);
                 simpanLogObsLab(responseJson, rs);
                 
             } catch (HttpClientErrorException e) {
@@ -6423,7 +7196,7 @@ public class frmUtama extends javax.swing.JFrame {
                     headers.set("Authorization", "Bearer " + newToken);
                     requestEntity = new HttpEntity(json, headers);
                     try {
-                        String responseJson = api.getRest().exchange(link + "/Observation", HttpMethod.POST, requestEntity, String.class).getBody();
+                        String responseJson = konekSatuSehat(link + "/Observation", HttpMethod.POST, requestEntity);
                         simpanLogObsLab(responseJson, rs);
                         TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                     } catch (Exception ex) {
@@ -6464,7 +7237,7 @@ public class frmUtama extends javax.swing.JFrame {
         try {
             // Cari ID berdasarkan Identifier unik kita
             String searchUrl = link + "/Observation?identifier=http://sys-ids.kemkes.go.id/observation/" + koneksiDB.IDSATUSEHAT() + "|" + identifierValue;
-            String searchJson = api.getRest().exchange(searchUrl, HttpMethod.GET, new HttpEntity(headers), String.class).getBody();
+            String searchJson = konekSatuSehat(searchUrl, HttpMethod.GET, new HttpEntity(headers));
             
             JsonNode searchRoot = mapper.readTree(searchJson);
             if (searchRoot.path("total").asInt() > 0) {
@@ -6572,7 +7345,7 @@ public class frmUtama extends javax.swing.JFrame {
                                 TeksArea.append("URL : "+link+"/Observation");
                                 TeksArea.append("Request JSON : "+json);
                                 requestEntity = new HttpEntity(json,headers);
-                                json=api.getRest().exchange(link+"/Observation", HttpMethod.POST, requestEntity, String.class).getBody();
+                                json=konekSatuSehat(link+"/Observation", HttpMethod.POST, requestEntity);
                                 TeksArea.append("Result JSON : "+json);
                                 root = mapper.readTree(json);
                                 response = root.path("id");
@@ -6696,7 +7469,7 @@ public class frmUtama extends javax.swing.JFrame {
                                 TeksArea.append("URL : "+link+"/Observation");
                                 TeksArea.append("Request JSON : "+json);
                                 requestEntity = new HttpEntity(json,headers);
-                                json=api.getRest().exchange(link+"/Observation", HttpMethod.POST, requestEntity, String.class).getBody();
+                                json=konekSatuSehat(link+"/Observation", HttpMethod.POST, requestEntity);
                                 TeksArea.append("Result JSON : "+json);
                                 root = mapper.readTree(json);
                                 response = root.path("id");
@@ -6787,6 +7560,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Log Detektif
                     TeksArea.append("\n[DETEKTIF DIAG LAB] Order: " + rs.getString("noorder") + " | Item: " + rs.getString("Pemeriksaan") + "\n");
 
@@ -6898,7 +7675,7 @@ public class frmUtama extends javax.swing.JFrame {
             requestEntity = new HttpEntity(json, headers);
             try {
                 // KIRIM PERTAMA
-                String responseJson = api.getRest().exchange(link + "/DiagnosticReport", HttpMethod.POST, requestEntity, String.class).getBody();
+                String responseJson = konekSatuSehat(link + "/DiagnosticReport", HttpMethod.POST, requestEntity);
                 simpanLogDiagLab(responseJson, rs);
                 
             } catch (HttpClientErrorException e) {
@@ -6909,7 +7686,7 @@ public class frmUtama extends javax.swing.JFrame {
                     headers.set("Authorization", "Bearer " + newToken);
                     requestEntity = new HttpEntity(json, headers);
                     try {
-                        String responseJson = api.getRest().exchange(link + "/DiagnosticReport", HttpMethod.POST, requestEntity, String.class).getBody();
+                        String responseJson = konekSatuSehat(link + "/DiagnosticReport", HttpMethod.POST, requestEntity);
                         simpanLogDiagLab(responseJson, rs);
                         TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                     } catch (Exception ex) {
@@ -6950,7 +7727,7 @@ public class frmUtama extends javax.swing.JFrame {
         try {
             // Mencari ID DiagnosticReport berdasarkan Identifier Unik (noorder.id_template)
             String searchUrl = link + "/DiagnosticReport?identifier=http://sys-ids.kemkes.go.id/diagnostic/" + koneksiDB.IDSATUSEHAT() + "/lab|" + identifierValue;
-            String searchJson = api.getRest().exchange(searchUrl, HttpMethod.GET, new HttpEntity(headers), String.class).getBody();
+            String searchJson = konekSatuSehat(searchUrl, HttpMethod.GET, new HttpEntity(headers));
             
             JsonNode searchRoot = mapper.readTree(searchJson);
             if (searchRoot.path("total").asInt() > 0) {
@@ -7075,7 +7852,7 @@ public class frmUtama extends javax.swing.JFrame {
                                 TeksArea.append("URL : "+link+"/DiagnosticReport");
                                 TeksArea.append("Request JSON : "+json);
                                 requestEntity = new HttpEntity(json,headers);
-                                json=api.getRest().exchange(link+"/DiagnosticReport", HttpMethod.POST, requestEntity, String.class).getBody();
+                                json=konekSatuSehat(link+"/DiagnosticReport", HttpMethod.POST, requestEntity);
                                 TeksArea.append("Result JSON : "+json);
                                 root = mapper.readTree(json);
                                 response = root.path("id");
@@ -7216,7 +7993,7 @@ public class frmUtama extends javax.swing.JFrame {
                                 TeksArea.append("URL : "+link+"/DiagnosticReport");
                                 TeksArea.append("Request JSON : "+json);
                                 requestEntity = new HttpEntity(json,headers);
-                                json=api.getRest().exchange(link+"/DiagnosticReport", HttpMethod.POST, requestEntity, String.class).getBody();
+                                json=konekSatuSehat(link+"/DiagnosticReport", HttpMethod.POST, requestEntity);
                                 TeksArea.append("Result JSON : "+json);
                                 root = mapper.readTree(json);
                                 response = root.path("id");
@@ -7288,6 +8065,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Log Detektif
                     TeksArea.append("\n[DETEKTIF CAREPLAN RALAN] Rawat: " + rs.getString("no_rawat") + "\n");
                     
@@ -7332,6 +8113,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Log Detektif
                     TeksArea.append("\n[DETEKTIF CAREPLAN RANAP] Rawat: " + rs.getString("no_rawat") + "\n");
 
@@ -7426,7 +8211,7 @@ public class frmUtama extends javax.swing.JFrame {
             requestEntity = new HttpEntity(json, headers);
             try {
                 // KIRIM PERTAMA
-                String responseJson = api.getRest().exchange(link + "/CarePlan", HttpMethod.POST, requestEntity, String.class).getBody();
+                String responseJson = konekSatuSehat(link + "/CarePlan", HttpMethod.POST, requestEntity);
                 simpanLogCarePlan(responseJson, rs, statusRawat);
                 
             } catch (HttpClientErrorException e) {
@@ -7439,7 +8224,7 @@ public class frmUtama extends javax.swing.JFrame {
                     
                     try {
                         // RETRY KIRIM
-                        String responseJson = api.getRest().exchange(link + "/CarePlan", HttpMethod.POST, requestEntity, String.class).getBody();
+                        String responseJson = konekSatuSehat(link + "/CarePlan", HttpMethod.POST, requestEntity);
                         simpanLogCarePlan(responseJson, rs, statusRawat);
                         TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                     } catch (Exception ex) {
@@ -7512,6 +8297,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     processQuestionnaireResponse(rs, "Ralan");
                     jeda();
                 }
@@ -7556,6 +8345,10 @@ public class frmUtama extends javax.swing.JFrame {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     processQuestionnaireResponse(rs, "Ranap");
                     jeda();
                 }
@@ -7682,7 +8475,7 @@ public class frmUtama extends javax.swing.JFrame {
             requestEntity = new HttpEntity(json, headers);
             try {
                 // KIRIM PERTAMA
-                String responseJson = api.getRest().exchange(link + "/QuestionnaireResponse", HttpMethod.POST, requestEntity, String.class).getBody();
+                String responseJson = konekSatuSehat(link + "/QuestionnaireResponse", HttpMethod.POST, requestEntity);
                 simpanLogQuestionnaire(responseJson, rs);
                 
             } catch (HttpClientErrorException e) {
@@ -7693,7 +8486,7 @@ public class frmUtama extends javax.swing.JFrame {
                     headers.set("Authorization", "Bearer " + newToken);
                     requestEntity = new HttpEntity(json, headers);
                     try {
-                        String responseJson = api.getRest().exchange(link + "/QuestionnaireResponse", HttpMethod.POST, requestEntity, String.class).getBody();
+                        String responseJson = konekSatuSehat(link + "/QuestionnaireResponse", HttpMethod.POST, requestEntity);
                         simpanLogQuestionnaire(responseJson, rs);
                         TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                     } catch (Exception ex) {
@@ -7734,7 +8527,7 @@ public class frmUtama extends javax.swing.JFrame {
         try {
             // Mencari ID berdasarkan Identifier (no_resep)
             String searchUrl = link + "/QuestionnaireResponse?identifier=http://sys-ids.kemkes.go.id/questionnaireresponse/" + koneksiDB.IDSATUSEHAT() + "|" + identifierValue;
-            String searchJson = api.getRest().exchange(searchUrl, HttpMethod.GET, new HttpEntity(headers), String.class).getBody();
+            String searchJson = konekSatuSehat(searchUrl, HttpMethod.GET, new HttpEntity(headers));
             
             JsonNode searchRoot = mapper.readTree(searchJson);
             if (searchRoot.path("total").asInt() > 0) {
@@ -7803,6 +8596,10 @@ public class frmUtama extends javax.swing.JFrame {
             ps.setString(2, Tanggal2.getText());
             rs = ps.executeQuery();
             while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                 kirimQuestionnaire(rs);
             }
         } catch (Exception e) {
@@ -7841,6 +8638,10 @@ public class frmUtama extends javax.swing.JFrame {
             ps.setString(2, Tanggal2.getText());
             rs = ps.executeQuery();
             while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                 kirimQuestionnaire(rs);
             }
         } catch (Exception e) {
@@ -7997,7 +8798,7 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
             TeksArea.append("   Request JSON : " + json + "\n");
 
             requestEntity = new HttpEntity(json, headers);
-            json = api.getRest().exchange(link + "/QuestionnaireResponse", HttpMethod.POST, requestEntity, String.class).getBody();
+            json = konekSatuSehat(link + "/QuestionnaireResponse", HttpMethod.POST, requestEntity);
             
             TeksArea.append("   Result JSON : " + json + "\n");
             
@@ -8108,6 +8909,10 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
             rs = ps.executeQuery();
 
             while(rs.next()) {
+                if (isEmergencyStop) {
+                    TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                    break;
+                }
                 // Helper Kirim
                 processComposition(rs);
                 jeda();
@@ -8225,7 +9030,7 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
             requestEntity = new HttpEntity(json, headers);
             try {
                 // KIRIM PERTAMA
-                String responseJson = api.getRest().exchange(link + "/Composition", HttpMethod.POST, requestEntity, String.class).getBody();
+                String responseJson = konekSatuSehat(link + "/Composition", HttpMethod.POST, requestEntity);
                 simpanLogComposition(responseJson, rs);
                 
             } catch (HttpClientErrorException e) {
@@ -8236,7 +9041,7 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
                     headers.set("Authorization", "Bearer " + newToken);
                     requestEntity = new HttpEntity(json, headers);
                     try {
-                        String responseJson = api.getRest().exchange(link + "/Composition", HttpMethod.POST, requestEntity, String.class).getBody();
+                        String responseJson = konekSatuSehat(link + "/Composition", HttpMethod.POST, requestEntity);
                         simpanLogComposition(responseJson, rs);
                         TeksArea.append("   [RETRY SUKSES] Data terkirim.\n");
                     } catch (Exception ex) {
@@ -8278,7 +9083,7 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
         try {
             // Mencari ID berdasarkan Identifier (no_rawat)
             String searchUrl = link + "/Composition?identifier=http://sys-ids.kemkes.go.id/composition/" + koneksiDB.IDSATUSEHAT() + "|" + noRawat;
-            String searchJson = api.getRest().exchange(searchUrl, HttpMethod.GET, new HttpEntity(headers), String.class).getBody();
+            String searchJson = konekSatuSehat(searchUrl, HttpMethod.GET, new HttpEntity(headers));
             
             JsonNode searchRoot = mapper.readTree(searchJson);
             if (searchRoot.path("total").asInt() > 0) {
@@ -8356,6 +9161,10 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
             rs = ps.executeQuery();
 
             while(rs.next()) {
+                if (isEmergencyStop) {
+                    TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                    break;
+                }
                 TeksArea.append("\n[PROSES COMPOSITION] No.Rawat: " + rs.getString("no_rawat") + " | Pasien: " + rs.getString("nm_pasien") + "\n");
 
                 idpasien = cekViaSatuSehat.tampilIDPasien(rs.getString("no_ktp"));
@@ -8465,7 +9274,7 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
                 
                 try {
                     // PERCOBAAN PERTAMA
-                    String responseJson = api.getRest().exchange(link + "/Composition", HttpMethod.POST, requestEntity, String.class).getBody();
+                    String responseJson = konekSatuSehat(link + "/Composition", HttpMethod.POST, requestEntity);
                     simpanLogComposition(responseJson, rs);
                     
                 } catch (HttpClientErrorException e) {
@@ -8484,7 +9293,7 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
                         
                         // 3. Coba Kirim Ulang (Retry)
                         try {
-                            String responseJsonRetry = api.getRest().exchange(link + "/Composition", HttpMethod.POST, requestEntity, String.class).getBody();
+                            String responseJsonRetry = konekSatuSehat(link + "/Composition", HttpMethod.POST, requestEntity);
                             TeksArea.append("   [RETRY SUKSES] Berhasil dikirim setelah refresh token.\n");
                             simpanLogComposition(responseJsonRetry, rs);
                         } catch (Exception ex) {
@@ -8529,6 +9338,86 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
     }
 
     // ============================================================
+    // FITUR BARU: UNIFIED REQUEST HANDLER (AUTO-RECONNECT)
+    // Menangani semua HTTP Request ke Satu Sehat dengan fitur:
+    // 1. Auto-Refresh Token jika 401 Unauthorized
+    // 2. Auto-Reconnect jika koneksi terputus/Timeout (maksimal 5x)
+    // ============================================================
+    private String konekSatuSehat(String url, HttpMethod method, HttpEntity requestEntity) throws Exception {
+        int maxRetries = 5;
+        int attempt = 0;
+        Exception lastException = null;
+
+        while (attempt < maxRetries) {
+            try {
+                attempt++;
+                ResponseEntity<String> response = api.getRest().exchange(url, method, requestEntity, String.class);
+                return response.getBody();
+            } catch (HttpClientErrorException e) {
+                int statusCode = 0;
+                try {
+                    statusCode = e.getStatusCode().value();
+                } catch (IllegalArgumentException ex) {
+                    if (e.getMessage() != null && e.getMessage().contains("429")) {
+                        statusCode = 429;
+                    } else {
+                        throw e;
+                    }
+                }
+
+                if (statusCode == 401) {
+                    TeksArea.append("   !! [TOKEN EXPIRED] Memperbarui Token... (Percobaan " + attempt + "/" + maxRetries + ")\n");
+                    api.TokenSatuSehat(); // Segarkan token
+                    
+                    // Update header dengan token baru
+                    HttpHeaders headersBaru = new HttpHeaders();
+                    headersBaru.setContentType(MediaType.APPLICATION_JSON);
+                    headersBaru.add("Authorization", "Bearer " + api.TokenSatuSehat());
+                    
+                    // Buat request entity baru dengan body lama (jika ada) dan header baru
+                    Object body = requestEntity.getBody();
+                    requestEntity = new HttpEntity<>(body, headersBaru);
+                    
+                    // Jangan tambah attempt jika hanya token expired, langsung coba lagi di putaran berikutnya
+                    attempt--; 
+                    continue;
+                } else if (statusCode == 429) {
+                    lastException = e;
+                    TeksArea.append("   !! [TOO MANY REQUESTS] Server Penuh (429). Menunggu 15 detik... (Percobaan " + attempt + "/" + maxRetries + ")\n");
+                    try {
+                        Thread.sleep(15000); // Tunggu lebih lama (15 detik) untuk rate limiting
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                } else {
+                    // Error HttpClientErrorException lainnya (400, 404, 500)
+                    TeksArea.append("   !! [SERVER ERROR] " + statusCode + ": " + e.getResponseBodyAsString() + "\n");
+                    throw e; 
+                }
+            } catch (ResourceAccessException e) {
+                lastException = e;
+                TeksArea.append("   !! [GANGGUAN KONEKSI] Menunggu 5 detik sebelum coba lagi... (Percobaan " + attempt + "/" + maxRetries + ")\n");
+                try {
+                    Thread.sleep(5000); // Tunggu 5 detik sebelum retry
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+            } catch (Exception e) {
+                lastException = e;
+                TeksArea.append("   !! [ERROR TIDAK TERDUGA] " + e.getMessage() + " (Percobaan " + attempt + "/" + maxRetries + ")\n");
+                try {
+                    Thread.sleep(5000); // Tunggu 5 detik sebelum retry
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+        
+        throw new Exception("Gagal terhubung ke Satu Sehat setelah " + maxRetries + " percobaan. Pesan Terakhir: " + lastException.getMessage());
+    }
+
+
+    // ============================================================
     // FITUR BARU: ALLERGY INTOLERANCE
     // Mengambil data alergi dari pemeriksaan_ralan dan mapping
     // ke kode FHIR via file cache ./cache/alergisatusehat.iyem
@@ -8566,6 +9455,10 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     processAlergi(rs);
                     jeda();
                 }
@@ -8681,7 +9574,7 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
 
             TeksArea.append("   URL : " + link + "/AllergyIntolerance\n");
             requestEntity = new HttpEntity(json, headers);
-            String responseJson = api.getRest().exchange(link + "/AllergyIntolerance", HttpMethod.POST, requestEntity, String.class).getBody();
+            String responseJson = konekSatuSehat(link + "/AllergyIntolerance", HttpMethod.POST, requestEntity);
             TeksArea.append("   Result JSON : " + responseJson + "\n");
 
             simpanLogAlergi(responseJson, rs);
@@ -8748,6 +9641,10 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     processEpisodeOfCare(rs);
                     jeda();
                 }
@@ -8786,6 +9683,10 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     processEpisodeOfCare(rs);
                     jeda();
                 }
@@ -8855,7 +9756,7 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
 
             TeksArea.append("   URL : " + link + "/EpisodeOfCare\n");
             requestEntity = new HttpEntity(json, headers);
-            String responseJson = api.getRest().exchange(link + "/EpisodeOfCare", HttpMethod.POST, requestEntity, String.class).getBody();
+            String responseJson = konekSatuSehat(link + "/EpisodeOfCare", HttpMethod.POST, requestEntity);
             TeksArea.append("   Result JSON : " + responseJson + "\n");
 
             simpanLogEpisodeOfCare(responseJson, noRawat);
@@ -8917,6 +9818,10 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     // Hanya proses yang BELUM punya id_encounter
                     if (!rs.getString("no_ktp").isEmpty() &&
                         !rs.getString("ktpdokter").isEmpty() &&
@@ -8983,7 +9888,7 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
 
                             TeksArea.append("   URL : " + link + "/Encounter\n");
                             requestEntity = new HttpEntity(json, headers);
-                            String responseJson = api.getRest().exchange(link + "/Encounter", HttpMethod.POST, requestEntity, String.class).getBody();
+                            String responseJson = konekSatuSehat(link + "/Encounter", HttpMethod.POST, requestEntity);
                             TeksArea.append("   Result JSON : " + responseJson + "\n");
 
                             root = mapper.readTree(responseJson);
@@ -9039,6 +9944,10 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
                 ps.setString(2, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
+                    if (isEmergencyStop) {
+                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
+                        break;
+                    }
                     String noOrder = rs.getString("noorder");
                     TeksArea.append("   [DICOM] Memproses noorder: " + noOrder + "\n");
                     try {
