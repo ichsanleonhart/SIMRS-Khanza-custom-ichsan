@@ -1,0 +1,1636 @@
+{
+  "alergi": [
+    {
+      "keyword": "amoxicillin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372687004",
+      "coding_display": "Amoxicillin",
+      "text": "Alergi antibiotik golongan Penisilin (Amoksisilin)"
+    },
+    {
+      "keyword": "amoxilin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372687004",
+      "coding_display": "Amoxicillin",
+      "text": "Alergi antibiotik golongan Penisilin (Amoksisilin)"
+    },
+    {
+      "keyword": "amoxil",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372687004",
+      "coding_display": "Amoxicillin",
+      "text": "Alergi antibiotik golongan Penisilin (Amoksisilin)"
+    },
+    {
+      "keyword": "amoxisilin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372687004",
+      "coding_display": "Amoxicillin",
+      "text": "Alergi antibiotik golongan Penisilin (Amoksisilin)"
+    },
+    {
+      "keyword": "kalmoxil",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372687004",
+      "coding_display": "Amoxicillin",
+      "text": "Alergi antibiotik golongan Penisilin (Amoksisilin)"
+    },
+    {
+      "keyword": "amoxan",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372687004",
+      "coding_display": "Amoxicillin",
+      "text": "Alergi antibiotik golongan Penisilin (Amoksisilin)"
+    },
+    {
+      "keyword": "ampicillin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372687004",
+      "coding_display": "Ampicillin",
+      "text": "Alergi antibiotik golongan Penisilin (Ampisilin)"
+    },
+    {
+      "keyword": "ampisilin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372687004",
+      "coding_display": "Ampicillin",
+      "text": "Alergi antibiotik golongan Penisilin (Ampisilin)"
+    },
+    {
+      "keyword": "vicin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372687004",
+      "coding_display": "Ampicillin",
+      "text": "Alergi antibiotik golongan Penisilin (Ampisilin)"
+    },
+    {
+      "keyword": "penbritin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372687004",
+      "coding_display": "Ampicillin",
+      "text": "Alergi antibiotik golongan Penisilin (Ampisilin)"
+    },
+    {
+      "keyword": "penicillin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "764146007",
+      "coding_display": "Penicillin",
+      "text": "Alergi kelompok antibiotik Penisilin"
+    },
+    {
+      "keyword": "penisilin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "764146007",
+      "coding_display": "Penicillin",
+      "text": "Alergi kelompok antibiotik Penisilin"
+    },
+    {
+      "keyword": "phenoxymethylpenicillin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "764146007",
+      "coding_display": "Penicillin",
+      "text": "Alergi kelompok antibiotik Penisilin"
+    },
+    {
+      "keyword": "procaine penicillin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "764146007",
+      "coding_display": "Penicillin",
+      "text": "Alergi kelompok antibiotik Penisilin"
+    },
+    {
+      "keyword": "cefixime",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372836005",
+      "coding_display": "Cephalosporin",
+      "text": "Alergi Sefalosporin Generasi 3 (Cefixime)"
+    },
+    {
+      "keyword": "sefiksim",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372836005",
+      "coding_display": "Cephalosporin",
+      "text": "Alergi Sefalosporin Generasi 3 (Cefixime)"
+    },
+    {
+      "keyword": "cefspan",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372836005",
+      "coding_display": "Cephalosporin",
+      "text": "Alergi Sefalosporin Generasi 3 (Cefixime)"
+    },
+    {
+      "keyword": "fixacep",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372836005",
+      "coding_display": "Cephalosporin",
+      "text": "Alergi Sefalosporin Generasi 3 (Cefixime)"
+    },
+    {
+      "keyword": "cefadroxil",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372836005",
+      "coding_display": "Cephalosporin",
+      "text": "Alergi Sefalosporin Generasi 1 (Cefadroxil)"
+    },
+    {
+      "keyword": "sefadroksil",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372836005",
+      "coding_display": "Cephalosporin",
+      "text": "Alergi Sefalosporin Generasi 1 (Cefadroxil)"
+    },
+    {
+      "keyword": "ancefa",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372836005",
+      "coding_display": "Cephalosporin",
+      "text": "Alergi Sefalosporin Generasi 1 (Cefadroxil)"
+    },
+    {
+      "keyword": "duricef",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372836005",
+      "coding_display": "Cephalosporin",
+      "text": "Alergi Sefalosporin Generasi 1 (Cefadroxil)"
+    },
+    {
+      "keyword": "ceftriaxone",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372836005",
+      "coding_display": "Cephalosporin",
+      "text": "Alergi Sefalosporin Injeksi (Ceftriaxone)"
+    },
+    {
+      "keyword": "seftriakson",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372836005",
+      "coding_display": "Cephalosporin",
+      "text": "Alergi Sefalosporin Injeksi (Ceftriaxone)"
+    },
+    {
+      "keyword": "broadced",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372836005",
+      "coding_display": "Cephalosporin",
+      "text": "Alergi Sefalosporin Injeksi (Ceftriaxone)"
+    },
+    {
+      "keyword": "rocephin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372836005",
+      "coding_display": "Cephalosporin",
+      "text": "Alergi Sefalosporin Injeksi (Ceftriaxone)"
+    },
+    {
+      "keyword": "cephalosporin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372836005",
+      "coding_display": "Cephalosporin",
+      "text": "Alergi kelompok antibiotik Sefalosporin"
+    },
+    {
+      "keyword": "sefalosporin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372836005",
+      "coding_display": "Cephalosporin",
+      "text": "Alergi kelompok antibiotik Sefalosporin"
+    },
+    {
+      "keyword": "golongan cef",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372836005",
+      "coding_display": "Cephalosporin",
+      "text": "Alergi kelompok antibiotik Sefalosporin"
+    },
+    {
+      "keyword": "ciprofloxacin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372868007",
+      "coding_display": "Quinolone",
+      "text": "Alergi golongan Quinolone (Ciprofloxacin)"
+    },
+    {
+      "keyword": "siprofloksasin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372868007",
+      "coding_display": "Quinolone",
+      "text": "Alergi golongan Quinolone (Ciprofloxacin)"
+    },
+    {
+      "keyword": "baquinor",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372868007",
+      "coding_display": "Quinolone",
+      "text": "Alergi golongan Quinolone (Ciprofloxacin)"
+    },
+    {
+      "keyword": "ciproxi",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372868007",
+      "coding_display": "Quinolone",
+      "text": "Alergi golongan Quinolone (Ciprofloxacin)"
+    },
+    {
+      "keyword": "erythromycin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372733003",
+      "coding_display": "Macrolide",
+      "text": "Alergi golongan Macrolide (Erythromycin)"
+    },
+    {
+      "keyword": "eritromisin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372733003",
+      "coding_display": "Macrolide",
+      "text": "Alergi golongan Macrolide (Erythromycin)"
+    },
+    {
+      "keyword": "erythrocin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372733003",
+      "coding_display": "Macrolide",
+      "text": "Alergi golongan Macrolide (Erythromycin)"
+    },
+    {
+      "keyword": "aspirin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "387458008",
+      "coding_display": "Aspirin",
+      "text": "Alergi senyawa salisilat (Aspirin)"
+    },
+    {
+      "keyword": "asetosal",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "387458008",
+      "coding_display": "Aspirin",
+      "text": "Alergi senyawa salisilat (Aspirin)"
+    },
+    {
+      "keyword": "aspilet",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "387458008",
+      "coding_display": "Aspirin",
+      "text": "Alergi senyawa salisilat (Aspirin)"
+    },
+    {
+      "keyword": "naspro",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "387458008",
+      "coding_display": "Aspirin",
+      "text": "Alergi senyawa salisilat (Aspirin)"
+    },
+    {
+      "keyword": "ibuprofen",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "387207008",
+      "coding_display": "Ibuprofen",
+      "text": "Alergi derivat asam propionat (Ibuprofen)"
+    },
+    {
+      "keyword": "proris",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "387207008",
+      "coding_display": "Ibuprofen",
+      "text": "Alergi derivat asam propionat (Ibuprofen)"
+    },
+    {
+      "keyword": "farsifen",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "387207008",
+      "coding_display": "Ibuprofen",
+      "text": "Alergi derivat asam propionat (Ibuprofen)"
+    },
+    {
+      "keyword": "ibufenz",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "387207008",
+      "coding_display": "Ibuprofen",
+      "text": "Alergi derivat asam propionat (Ibuprofen)"
+    },
+    {
+      "keyword": "asam mefenamat",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi NSAID (Asam Mefenamat)"
+    },
+    {
+      "keyword": "mefenamic acid",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi NSAID (Asam Mefenamat)"
+    },
+    {
+      "keyword": "ponstan",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi NSAID (Asam Mefenamat)"
+    },
+    {
+      "keyword": "mefinal",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi NSAID (Asam Mefenamat)"
+    },
+    {
+      "keyword": "opistan",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi NSAID (Asam Mefenamat)"
+    },
+    {
+      "keyword": "diclofenac",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi NSAID (Diklofenak)"
+    },
+    {
+      "keyword": "diklofenak",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi NSAID (Diklofenak)"
+    },
+    {
+      "keyword": "voltaren",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi NSAID (Diklofenak)"
+    },
+    {
+      "keyword": "cataflam",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi NSAID (Diklofenak)"
+    },
+    {
+      "keyword": "eflagen",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi NSAID (Diklofenak)"
+    },
+    {
+      "keyword": "piroxicam",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi golongan Oxicam (NSAID)"
+    },
+    {
+      "keyword": "meloxicam",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi golongan Oxicam (NSAID)"
+    },
+    {
+      "keyword": "mobic",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi golongan Oxicam (NSAID)"
+    },
+    {
+      "keyword": "feldene",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi golongan Oxicam (NSAID)"
+    },
+    {
+      "keyword": "ketorolac",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi NSAID Injeksi (Ketorolac)"
+    },
+    {
+      "keyword": "toradol",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi NSAID Injeksi (Ketorolac)"
+    },
+    {
+      "keyword": "remopain",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi NSAID Injeksi (Ketorolac)"
+    },
+    {
+      "keyword": "metampiron",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi Metampiron/Antalgin"
+    },
+    {
+      "keyword": "antalgin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi Metampiron/Antalgin"
+    },
+    {
+      "keyword": "metamizole",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi Metampiron/Antalgin"
+    },
+    {
+      "keyword": "novalgin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "293586001",
+      "coding_display": "NSAID",
+      "text": "Alergi Metampiron/Antalgin"
+    },
+    {
+      "keyword": "paracetamol",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "387517004",
+      "coding_display": "Acetaminophen",
+      "text": "Alergi Parasetamol/Acetaminophen"
+    },
+    {
+      "keyword": "pct",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "387517004",
+      "coding_display": "Acetaminophen",
+      "text": "Alergi Parasetamol/Acetaminophen"
+    },
+    {
+      "keyword": "panadol",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "387517004",
+      "coding_display": "Acetaminophen",
+      "text": "Alergi Parasetamol/Acetaminophen"
+    },
+    {
+      "keyword": "sanmol",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "387517004",
+      "coding_display": "Acetaminophen",
+      "text": "Alergi Parasetamol/Acetaminophen"
+    },
+    {
+      "keyword": "tempra",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "387517004",
+      "coding_display": "Acetaminophen",
+      "text": "Alergi Parasetamol/Acetaminophen"
+    },
+    {
+      "keyword": "lidocaine",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372810005",
+      "coding_display": "Lidocaine",
+      "text": "Alergi Anestesi Lokal (Lidokain)"
+    },
+    {
+      "keyword": "lidokain",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372810005",
+      "coding_display": "Lidocaine",
+      "text": "Alergi Anestesi Lokal (Lidokain)"
+    },
+    {
+      "keyword": "pehacain",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372810005",
+      "coding_display": "Lidocaine",
+      "text": "Alergi Anestesi Lokal (Lidokain)"
+    },
+    {
+      "keyword": "insulin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "373254001",
+      "coding_display": "Insulin",
+      "text": "Alergi produk Insulin"
+    },
+    {
+      "keyword": "humulin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "373254001",
+      "coding_display": "Insulin",
+      "text": "Alergi produk Insulin"
+    },
+    {
+      "keyword": "novorapid",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "373254001",
+      "coding_display": "Insulin",
+      "text": "Alergi produk Insulin"
+    },
+    {
+      "keyword": "lantus",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "373254001",
+      "coding_display": "Insulin",
+      "text": "Alergi produk Insulin"
+    },
+    {
+      "keyword": "metformin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "387467008",
+      "coding_display": "Metformin",
+      "text": "Intoleransi/Alergi Metformin"
+    },
+    {
+      "keyword": "glucophage",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "387467008",
+      "coding_display": "Metformin",
+      "text": "Intoleransi/Alergi Metformin"
+    },
+    {
+      "keyword": "karbamazepin",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372894003",
+      "coding_display": "Carbamazepine",
+      "text": "Alergi Antikonvulsan (Karbamazepin)"
+    },
+    {
+      "keyword": "carbamazepine",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372894003",
+      "coding_display": "Carbamazepine",
+      "text": "Alergi Antikonvulsan (Karbamazepin)"
+    },
+    {
+      "keyword": "tegretol",
+      "category": "medication",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "372894003",
+      "coding_display": "Carbamazepine",
+      "text": "Alergi Antikonvulsan (Karbamazepin)"
+    },
+    {
+      "keyword": "udang",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi Crustacea (Udang)"
+    },
+    {
+      "keyword": "shrimp",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi Crustacea (Udang)"
+    },
+    {
+      "keyword": "prawn",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi Crustacea (Udang)"
+    },
+    {
+      "keyword": "kepiting",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi Crustacea (Kepiting)"
+    },
+    {
+      "keyword": "crab",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi Crustacea (Kepiting)"
+    },
+    {
+      "keyword": "rajungan",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi Crustacea (Kepiting)"
+    },
+    {
+      "keyword": "cumi",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi Moluska (Cumi/Gurita)"
+    },
+    {
+      "keyword": "squid",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi Moluska (Cumi/Gurita)"
+    },
+    {
+      "keyword": "sotong",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi Moluska (Cumi/Gurita)"
+    },
+    {
+      "keyword": "gurita",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi Moluska (Cumi/Gurita)"
+    },
+    {
+      "keyword": "octopus",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi Moluska (Cumi/Gurita)"
+    },
+    {
+      "keyword": "kerang",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi Moluska (Kerang)"
+    },
+    {
+      "keyword": "shellfish",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi Moluska (Kerang)"
+    },
+    {
+      "keyword": "clam",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi Moluska (Kerang)"
+    },
+    {
+      "keyword": "mussel",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi Moluska (Kerang)"
+    },
+    {
+      "keyword": "seafood",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi berbagai jenis makanan laut"
+    },
+    {
+      "keyword": "makanan laut",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi berbagai jenis makanan laut"
+    },
+    {
+      "keyword": "hasil laut",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "44027008",
+      "coding_display": "Seafood",
+      "text": "Alergi berbagai jenis makanan laut"
+    },
+    {
+      "keyword": "ikan",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227037002",
+      "coding_display": "Fish",
+      "text": "Alergi protein ikan laut/tawar"
+    },
+    {
+      "keyword": "fish",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227037002",
+      "coding_display": "Fish",
+      "text": "Alergi protein ikan laut/tawar"
+    },
+    {
+      "keyword": "salmon",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227037002",
+      "coding_display": "Fish",
+      "text": "Alergi protein ikan laut/tawar"
+    },
+    {
+      "keyword": "tuna",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227037002",
+      "coding_display": "Fish",
+      "text": "Alergi protein ikan laut/tawar"
+    },
+    {
+      "keyword": "tongkol",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227037002",
+      "coding_display": "Fish",
+      "text": "Alergi protein ikan laut/tawar"
+    },
+    {
+      "keyword": "lele",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227037002",
+      "coding_display": "Fish",
+      "text": "Alergi protein ikan laut/tawar"
+    },
+    {
+      "keyword": "bandeng",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227037002",
+      "coding_display": "Fish",
+      "text": "Alergi protein ikan laut/tawar"
+    },
+    {
+      "keyword": "mujair",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227037002",
+      "coding_display": "Fish",
+      "text": "Alergi protein ikan laut/tawar"
+    },
+    {
+      "keyword": "cakalang",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227037002",
+      "coding_display": "Fish",
+      "text": "Alergi protein ikan laut/tawar"
+    },
+    {
+      "keyword": "telur",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "102263004",
+      "coding_display": "Egg",
+      "text": "Alergi protein telur ayam"
+    },
+    {
+      "keyword": "egg",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "102263004",
+      "coding_display": "Egg",
+      "text": "Alergi protein telur ayam"
+    },
+    {
+      "keyword": "putih telur",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "102263004",
+      "coding_display": "Egg",
+      "text": "Alergi protein telur ayam"
+    },
+    {
+      "keyword": "kuning telur",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "102263004",
+      "coding_display": "Egg",
+      "text": "Alergi protein telur ayam"
+    },
+    {
+      "keyword": "susu",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227183005",
+      "coding_display": "Milk protein",
+      "text": "Alergi protein susu sapi (Kasein/Whey)"
+    },
+    {
+      "keyword": "milk",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227183005",
+      "coding_display": "Milk protein",
+      "text": "Alergi protein susu sapi (Kasein/Whey)"
+    },
+    {
+      "keyword": "dairy",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227183005",
+      "coding_display": "Milk protein",
+      "text": "Alergi protein susu sapi (Kasein/Whey)"
+    },
+    {
+      "keyword": "susu sapi",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227183005",
+      "coding_display": "Milk protein",
+      "text": "Alergi protein susu sapi (Kasein/Whey)"
+    },
+    {
+      "keyword": "keju",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227183005",
+      "coding_display": "Milk protein",
+      "text": "Alergi turunan produk susu"
+    },
+    {
+      "keyword": "cheese",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227183005",
+      "coding_display": "Milk protein",
+      "text": "Alergi turunan produk susu"
+    },
+    {
+      "keyword": "yogurt",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227183005",
+      "coding_display": "Milk protein",
+      "text": "Alergi turunan produk susu"
+    },
+    {
+      "keyword": "mentega",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227183005",
+      "coding_display": "Milk protein",
+      "text": "Alergi turunan produk susu"
+    },
+    {
+      "keyword": "butter",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "227183005",
+      "coding_display": "Milk protein",
+      "text": "Alergi turunan produk susu"
+    },
+    {
+      "keyword": "kacang tanah",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "406455002",
+      "coding_display": "Peanut",
+      "text": "Alergi kacang tanah"
+    },
+    {
+      "keyword": "peanut",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "406455002",
+      "coding_display": "Peanut",
+      "text": "Alergi kacang tanah"
+    },
+    {
+      "keyword": "kacang garing",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "406455002",
+      "coding_display": "Peanut",
+      "text": "Alergi kacang tanah"
+    },
+    {
+      "keyword": "selai kacang",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "406455002",
+      "coding_display": "Peanut",
+      "text": "Alergi kacang tanah"
+    },
+    {
+      "keyword": "kacang kedelai",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256349002",
+      "coding_display": "Soy bean",
+      "text": "Alergi protein kedelai"
+    },
+    {
+      "keyword": "soybean",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256349002",
+      "coding_display": "Soy bean",
+      "text": "Alergi protein kedelai"
+    },
+    {
+      "keyword": "kedelai",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256349002",
+      "coding_display": "Soy bean",
+      "text": "Alergi protein kedelai"
+    },
+    {
+      "keyword": "tahu",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256349002",
+      "coding_display": "Soy bean",
+      "text": "Alergi protein kedelai"
+    },
+    {
+      "keyword": "tempe",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256349002",
+      "coding_display": "Soy bean",
+      "text": "Alergi protein kedelai"
+    },
+    {
+      "keyword": "susu kedelai",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256349002",
+      "coding_display": "Soy bean",
+      "text": "Alergi protein kedelai"
+    },
+    {
+      "keyword": "mede",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "735029006",
+      "coding_display": "Tree nut",
+      "text": "Alergi kacang pohon (Tree nuts)"
+    },
+    {
+      "keyword": "cashew",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "735029006",
+      "coding_display": "Tree nut",
+      "text": "Alergi kacang pohon (Tree nuts)"
+    },
+    {
+      "keyword": "almond",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "735029006",
+      "coding_display": "Tree nut",
+      "text": "Alergi kacang pohon (Tree nuts)"
+    },
+    {
+      "keyword": "walnut",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "735029006",
+      "coding_display": "Tree nut",
+      "text": "Alergi kacang pohon (Tree nuts)"
+    },
+    {
+      "keyword": "kenari",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "735029006",
+      "coding_display": "Tree nut",
+      "text": "Alergi kacang pohon (Tree nuts)"
+    },
+    {
+      "keyword": "pistachio",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "735029006",
+      "coding_display": "Tree nut",
+      "text": "Alergi kacang pohon (Tree nuts)"
+    },
+    {
+      "keyword": "wijen",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "57126000",
+      "coding_display": "Sesame seed",
+      "text": "Alergi biji wijen"
+    },
+    {
+      "keyword": "sesame",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "57126000",
+      "coding_display": "Sesame seed",
+      "text": "Alergi biji wijen"
+    },
+    {
+      "keyword": "minyak wijen",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "57126000",
+      "coding_display": "Sesame seed",
+      "text": "Alergi biji wijen"
+    },
+    {
+      "keyword": "gandum",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "412071004",
+      "coding_display": "Wheat",
+      "text": "Alergi gandum / gluten"
+    },
+    {
+      "keyword": "wheat",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "412071004",
+      "coding_display": "Wheat",
+      "text": "Alergi gandum / gluten"
+    },
+    {
+      "keyword": "tepung",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "412071004",
+      "coding_display": "Wheat",
+      "text": "Alergi gandum / gluten"
+    },
+    {
+      "keyword": "terigu",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "412071004",
+      "coding_display": "Wheat",
+      "text": "Alergi gandum / gluten"
+    },
+    {
+      "keyword": "gluten",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "412071004",
+      "coding_display": "Wheat",
+      "text": "Alergi gandum / gluten"
+    },
+    {
+      "keyword": "roti",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "412071004",
+      "coding_display": "Wheat",
+      "text": "Alergi gandum / gluten"
+    },
+    {
+      "keyword": "mie",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "412071004",
+      "coding_display": "Wheat",
+      "text": "Alergi gandum / gluten"
+    },
+    {
+      "keyword": "pasta",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "412071004",
+      "coding_display": "Wheat",
+      "text": "Alergi gandum / gluten"
+    },
+    {
+      "keyword": "cokelat",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "226952003",
+      "coding_display": "Chocolate",
+      "text": "Alergi/Intoleransi Cokelat"
+    },
+    {
+      "keyword": "chocolate",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "226952003",
+      "coding_display": "Chocolate",
+      "text": "Alergi/Intoleransi Cokelat"
+    },
+    {
+      "keyword": "coklat",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "226952003",
+      "coding_display": "Chocolate",
+      "text": "Alergi/Intoleransi Cokelat"
+    },
+    {
+      "keyword": "vetsin",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256440009",
+      "coding_display": "Food additive",
+      "text": "Intoleransi terhadap MSG/Penyedap"
+    },
+    {
+      "keyword": "msg",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256440009",
+      "coding_display": "Food additive",
+      "text": "Intoleransi terhadap MSG/Penyedap"
+    },
+    {
+      "keyword": "micin",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256440009",
+      "coding_display": "Food additive",
+      "text": "Intoleransi terhadap MSG/Penyedap"
+    },
+    {
+      "keyword": "penyedap",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256440009",
+      "coding_display": "Food additive",
+      "text": "Intoleransi terhadap MSG/Penyedap"
+    },
+    {
+      "keyword": "pengawet",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256440009",
+      "coding_display": "Food additive",
+      "text": "Intoleransi terhadap bahan pengawet"
+    },
+    {
+      "keyword": "preservative",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256440009",
+      "coding_display": "Food additive",
+      "text": "Intoleransi terhadap bahan pengawet"
+    },
+    {
+      "keyword": "benzoat",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256440009",
+      "coding_display": "Food additive",
+      "text": "Intoleransi terhadap bahan pengawet"
+    },
+    {
+      "keyword": "sulfit",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256440009",
+      "coding_display": "Food additive",
+      "text": "Intoleransi terhadap bahan pengawet"
+    },
+    {
+      "keyword": "nitrat",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256440009",
+      "coding_display": "Food additive",
+      "text": "Intoleransi terhadap bahan pengawet"
+    },
+    {
+      "keyword": "nanas",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256259004",
+      "coding_display": "Fruit",
+      "text": "Alergi spesifik pada buah-buahan tertentu"
+    },
+    {
+      "keyword": "pineapple",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256259004",
+      "coding_display": "Fruit",
+      "text": "Alergi spesifik pada buah-buahan tertentu"
+    },
+    {
+      "keyword": "strawberry",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256259004",
+      "coding_display": "Fruit",
+      "text": "Alergi spesifik pada buah-buahan tertentu"
+    },
+    {
+      "keyword": "stroberi",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256259004",
+      "coding_display": "Fruit",
+      "text": "Alergi spesifik pada buah-buahan tertentu"
+    },
+    {
+      "keyword": "kiwi",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256259004",
+      "coding_display": "Fruit",
+      "text": "Alergi spesifik pada buah-buahan tertentu"
+    },
+    {
+      "keyword": "tomat",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256259004",
+      "coding_display": "Fruit",
+      "text": "Alergi spesifik pada buah-buahan tertentu"
+    },
+    {
+      "keyword": "pisang",
+      "category": "food",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256259004",
+      "coding_display": "Fruit",
+      "text": "Alergi spesifik pada buah-buahan tertentu"
+    },
+    {
+      "keyword": "debu",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "84163006",
+      "coding_display": "House dust mite",
+      "text": "Alergi tungau debu rumah"
+    },
+    {
+      "keyword": "tungau",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "84163006",
+      "coding_display": "House dust mite",
+      "text": "Alergi tungau debu rumah"
+    },
+    {
+      "keyword": "dust",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "84163006",
+      "coding_display": "House dust mite",
+      "text": "Alergi tungau debu rumah"
+    },
+    {
+      "keyword": "mite",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "84163006",
+      "coding_display": "House dust mite",
+      "text": "Alergi tungau debu rumah"
+    },
+    {
+      "keyword": "kucing",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "260152009",
+      "coding_display": "Animal dander",
+      "text": "Alergi epitel/bulu hewan peliharaan"
+    },
+    {
+      "keyword": "cat",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "260152009",
+      "coding_display": "Animal dander",
+      "text": "Alergi epitel/bulu hewan peliharaan"
+    },
+    {
+      "keyword": "bulu kucing",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "260152009",
+      "coding_display": "Animal dander",
+      "text": "Alergi epitel/bulu hewan peliharaan"
+    },
+    {
+      "keyword": "anjing",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "260152009",
+      "coding_display": "Animal dander",
+      "text": "Alergi epitel/bulu hewan peliharaan"
+    },
+    {
+      "keyword": "dog",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "260152009",
+      "coding_display": "Animal dander",
+      "text": "Alergi epitel/bulu hewan peliharaan"
+    },
+    {
+      "keyword": "bulu anjing",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "260152009",
+      "coding_display": "Animal dander",
+      "text": "Alergi epitel/bulu hewan peliharaan"
+    },
+    {
+      "keyword": "kecoak",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "84333007",
+      "coding_display": "Cockroach",
+      "text": "Alergi protein kecoa"
+    },
+    {
+      "keyword": "lipas",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "84333007",
+      "coding_display": "Cockroach",
+      "text": "Alergi protein kecoa"
+    },
+    {
+      "keyword": "cockroach",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "84333007",
+      "coding_display": "Cockroach",
+      "text": "Alergi protein kecoa"
+    },
+    {
+      "keyword": "serbuk sari",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256259004",
+      "coding_display": "Pollen",
+      "text": "Alergi serbuk sari bunga"
+    },
+    {
+      "keyword": "pollen",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256259004",
+      "coding_display": "Pollen",
+      "text": "Alergi serbuk sari bunga"
+    },
+    {
+      "keyword": "bunga",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256259004",
+      "coding_display": "Pollen",
+      "text": "Alergi serbuk sari bunga"
+    },
+    {
+      "keyword": "lateks",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256245006",
+      "coding_display": "Latex",
+      "text": "Alergi bahan lateks/karet alami"
+    },
+    {
+      "keyword": "latex",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256245006",
+      "coding_display": "Latex",
+      "text": "Alergi bahan lateks/karet alami"
+    },
+    {
+      "keyword": "karet",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256245006",
+      "coding_display": "Latex",
+      "text": "Alergi bahan lateks/karet alami"
+    },
+    {
+      "keyword": "sarung tangan karet",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "256245006",
+      "coding_display": "Latex",
+      "text": "Alergi bahan lateks/karet alami"
+    },
+    {
+      "keyword": "dingin",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "235719002",
+      "coding_display": "Physical intolerance",
+      "text": "Intoleransi fisik terhadap suhu dingin (Urtikaria Dingin)"
+    },
+    {
+      "keyword": "cuaca dingin",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "235719002",
+      "coding_display": "Physical intolerance",
+      "text": "Intoleransi fisik terhadap suhu dingin (Urtikaria Dingin)"
+    },
+    {
+      "keyword": "udara dingin",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "235719002",
+      "coding_display": "Physical intolerance",
+      "text": "Intoleransi fisik terhadap suhu dingin (Urtikaria Dingin)"
+    },
+    {
+      "keyword": "panas",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "235719002",
+      "coding_display": "Physical intolerance",
+      "text": "Intoleransi fisik terhadap panas/sinar matahari"
+    },
+    {
+      "keyword": "matahari",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "235719002",
+      "coding_display": "Physical intolerance",
+      "text": "Intoleransi fisik terhadap panas/sinar matahari"
+    },
+    {
+      "keyword": "lebah",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "9104001",
+      "coding_display": "Bee venom protein",
+      "text": "Alergi bisa lebah/tawon"
+    },
+    {
+      "keyword": "tawon",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "9104001",
+      "coding_display": "Bee venom protein",
+      "text": "Alergi bisa lebah/tawon"
+    },
+    {
+      "keyword": "bee",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "9104001",
+      "coding_display": "Bee venom protein",
+      "text": "Alergi bisa lebah/tawon"
+    },
+    {
+      "keyword": "wasp",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "9104001",
+      "coding_display": "Bee venom protein",
+      "text": "Alergi bisa lebah/tawon"
+    },
+    {
+      "keyword": "sengatan",
+      "category": "environment",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "9104001",
+      "coding_display": "Bee venom protein",
+      "text": "Alergi bisa lebah/tawon"
+    },
+    {
+      "keyword": "tidak ada",
+      "category": "other",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "716186003",
+      "coding_display": "No known allergy",
+      "text": "Pasien menyatakan tidak memiliki riwayat alergi"
+    },
+    {
+      "keyword": "nka",
+      "category": "other",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "716186003",
+      "coding_display": "No known allergy",
+      "text": "Pasien menyatakan tidak memiliki riwayat alergi"
+    },
+    {
+      "keyword": "negatif",
+      "category": "other",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "716186003",
+      "coding_display": "No known allergy",
+      "text": "Pasien menyatakan tidak memiliki riwayat alergi"
+    },
+    {
+      "keyword": "tidak ditemukan",
+      "category": "other",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "716186003",
+      "coding_display": "No known allergy",
+      "text": "Pasien menyatakan tidak memiliki riwayat alergi"
+    },
+    {
+      "keyword": "tidak ada alergi",
+      "category": "other",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "716186003",
+      "coding_display": "No known allergy",
+      "text": "Pasien menyatakan tidak memiliki riwayat alergi"
+    },
+    {
+      "keyword": "nihil",
+      "category": "other",
+      "coding_system": "http://snomed.info/sct",
+      "coding_code": "716186003",
+      "coding_display": "No known allergy",
+      "text": "Pasien menyatakan tidak memiliki riwayat alergi"
+    }
+  ]
+}
