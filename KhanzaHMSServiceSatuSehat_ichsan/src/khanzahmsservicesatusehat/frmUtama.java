@@ -741,12 +741,18 @@ public class frmUtama extends javax.swing.JFrame {
             "LOGIKA SKIP:\n" +
             "  Melewati data yang sudah ada di tabel `satu_sehat_diet`.",
             evt -> kirim_dietgiziActionPerformed(evt));
+        addResourceRow(btnContainer, "AllergyIntolerance (Alergi)", "Riwayat Alergi Pasien",
+            "TABEL SUMBER:\n" +
+            "  • pemeriksaan_ralan (Kolom `alergi`)\n" +
+            "  • satu_sehat_encounter (Join utama)\n" +
+            "  • ./cache/alergisatusehat.iyem (Kamus SNOMED)\n\n" +
+            "PRASYARAT (MANDATORY):\n" +
+            "  1. Harus ada Encounter ID.\n" +
+            "  2. Teks di kolom alergi harus cocok dengan kamus .iyem (240+ variasi).\n\n" +
+            "LOGIKA SKIP:\n" +
+            "  Melewati data yang sudah ada di log `satu_sehat_allergy_intolerance`.",
+            evt -> kirim_alergiActionPerformed(evt));
 
-        // Section: FARMASI
-        btnContainer.add(makeSectionLabel("▸ FARMASI & OBAT"));
-        addResourceRow(btnContainer, "Medication Request (Resep)", "Resep Obat Dokter",
-            "Sumber tabel:\n  • resep_obat (header resep)\n  • resep_dokter (detail tunggal)\n  • resep_dokter_racikan (detail racikan)\n  • satu_sehat_encounter (prerequisite)\n\nLogika:\nMengambil semua item resep (tunggal &\nracikan) yang belum terkirim ke Satu Sehat.",
-            evt -> kirim_medicationrequestActionPerformed(evt));
         // Section: FARMASI
         btnContainer.add(makeSectionLabel("▸ FARMASI & OBAT"));
         addResourceRow(btnContainer, "Medication Master", "Induk Kamus Obat",

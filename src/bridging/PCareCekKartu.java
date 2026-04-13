@@ -6568,21 +6568,23 @@ public final class PCareCekKartu extends javax.swing.JDialog {
                             }     
                         }
                         
-                        // Sukses PCare, kembalikan UI
+                        // AUDIT TRAIL: Task 3 Add PCare Sukses → log ke trackersql + txt
+                        catatTrackerBPJS(TNoRw.getText(), TNo.getText(), TNm.getText(),
+                            "Task 3 - Add PCare Sukses (201) | noSEP: " + response.asText(),
+                            requestJson, rawPcareResponse);
+                        // LOG TERSIER: Simpan Task 3 (Selesai Pendaftaran/Mulai Pelayanan)
+                        simpanTaskId(TNoRw.getText(), "3");
+
+                        // Sukses PCare, kembalikan UI (DIPINDAH KE PALING AKHIR AGAR TIDAK RACE CONDITION)
+                        // Karena emptTeks() akan menghapus TNoRw.getText() menjadi kosong yang menggagalkan INSERT constraint.
                         javax.swing.SwingUtilities.invokeLater(() -> {
                             emptTeks();
                         });
-                        // AUDIT TRAIL: Task 2 Add PCare Sukses → log ke trackersql + txt
-                        catatTrackerBPJS(TNoRw.getText(), TNo.getText(), TNm.getText(),
-                            "Task 2 - Add PCare Sukses (201) | noSEP: " + response.asText(),
-                            requestJson, rawPcareResponse);
-                        // LOG TERSIER: Simpan Task 2 (Selesai Pendaftaran/Mulai Pelayanan)
-                        simpanTaskId(TNoRw.getText(), "2");
                     }                     
                 } else {
-                    // AUDIT TRAIL: Task 2 Add PCare Gagal (HTTP OK tapi metadata bukan 201)
+                    // AUDIT TRAIL: Task 3 Add PCare Gagal (HTTP OK tapi metadata bukan 201)
                     catatTrackerBPJS(TNoRw.getText(), TNo.getText(), TNm.getText(),
-                        "Task 2 - Add PCare GAGAL (" + nameNode.path("code").asText() + "): " + nameNode.path("message").asText(),
+                        "Task 3 - Add PCare GAGAL (" + nameNode.path("code").asText() + "): " + nameNode.path("message").asText(),
                         requestJson, rawPcareResponse);
                     javax.swing.SwingUtilities.invokeLater(() -> {
                         JOptionPane.showMessageDialog(null,"Gagal Pendaftaran PCare: " + nameNode.path("message").asText());
@@ -6591,9 +6593,9 @@ public final class PCareCekKartu extends javax.swing.JDialog {
 
             } catch (Exception ex) {
                 catatLog("Notifikasi Bridging PCare Exception: " + ex);
-                // AUDIT TRAIL: Task 2 Add PCare Exception → log ke trackersql + txt (sebelum fallback simpan lokal)
+                // AUDIT TRAIL: Task 3 Add PCare Exception → log ke trackersql + txt (sebelum fallback simpan lokal)
                 catatTrackerBPJS(TNoRw.getText(), TNo.getText(), TNm.getText(),
-                    "Task 2 - Add PCare EXCEPTION: " + (ex.getMessage() != null ? ex.getMessage() : ex.toString()),
+                    "Task 3 - Add PCare EXCEPTION: " + (ex.getMessage() != null ? ex.getMessage() : ex.toString()),
                     requestJson, "");
                 // --- [1] ERROR KONEKSI/TIMEOUT (SIMPAN LOKAL DULU) ---
                 if (ex.toString().contains("UnknownHostException") || ex.toString().contains("unreachable") || ex.toString().contains("500") || ex.toString().contains("408")) {
@@ -6798,7 +6800,7 @@ public final class PCareCekKartu extends javax.swing.JDialog {
                             // Code 201 = antrean DITERIMA / peserta sudah tercatat di sistem BPJS.
                             // Pesan bisa berupa: "WS Bridging", "sudah terdaftar", dll.
                             // SEMUA code 201 diperlakukan sebagai BYPASS-OK.
-                            // Lanjut ke Task 1 (Update/Panggil Hadir) → Task 2 (Add PCare).
+                            // Lanjut ke Task 1 (Update/Panggil Hadir) → Task 3 (Add PCare).
                             // -----------------------------------------------------------------------
                             statusantrean = true;
                             kodePoliBPJSCache  = kodePoliBPJS;
@@ -6806,7 +6808,7 @@ public final class PCareCekKartu extends javax.swing.JDialog {
                             noKartuKirimCache  = noKartuKirim;
                             noRMCache          = noRMLocal;
                             namaPasienCache    = namaPasien;
-                            catatLog(">> [Task 0] BYPASS-OK (201: " + message + ") - Lanjut Task 1 & Task 2");
+                            catatLog(">> [Task 0] BYPASS-OK (201: " + message + ") - Lanjut Task 1 & Task 3");
                             catatTrackerBPJS(nomorRawat, noRMLocal, namaPasien,
                                 "Task 0 - Add Antrean Bypass-OK (201: " + message + ")", requestJson, rawResponse);
                             simpanTaskId(nomorRawat, "0");
@@ -6927,11 +6929,12 @@ public final class PCareCekKartu extends javax.swing.JDialog {
     // HELPER: Audit Trail BPJS ke trackersql dan Text Log
     // ========================================================================
     private void catatTrackerBPJS(String noRawat, String noRM, String namaPasien, String taskDesc, String payload, String responseBPJS) {
-        PreparedStatement ps = null;
         try {
-            String safeNama     = (namaPasien != null) ? namaPasien : "";
-            String safeNoRM     = (noRM != null) ? noRM.trim() : "";
-            String tokenUser    = (akses.getkode() != null) ? akses.getkode() : "admin_ai";
+            String safeNama     = (namaPasien != null) ? namaPasien.replaceAll("['\\\\\\\\]", "`") : "";
+            String safeNoRM     = (noRM != null) ? noRM.trim().replaceAll("['\\\\\\\\]", "`") : "";
+            String safePayload  = (payload != null) ? payload.replaceAll("['\\\\\\\\]", "`") : "";
+            String safeResp     = (responseBPJS != null) ? responseBPJS.replaceAll("['\\\\\\\\]", "`") : "";
+            String tokenUser    = (akses.getkode() != null) ? akses.getkode().replaceAll("['\\\\\\\\]", "`") : "admin_ai";
             
             if(tokenUser.length() > 20) { tokenUser = tokenUser.substring(0, 20); }
 
@@ -6940,24 +6943,18 @@ public final class PCareCekKartu extends javax.swing.JDialog {
                 " | No.RM: "  + safeNoRM +
                 " | Pasien: " + safeNama +
                 " | Task: "   + taskDesc +
-                " | PAYLOAD: "       + payload +
-                " | RESPONSE BPJS: " + responseBPJS;
+                " | PAYLOAD: "       + safePayload +
+                " | RESPONSE BPJS: " + safeResp;
 
             // 1. Catat ke Text File (Otomatis)
             catatLog(pesanLog);
 
-            // 2. Catat ke Database (Menggunakan PreparedStatement yang aman)
-            ps = koneksi.prepareStatement("INSERT INTO trackersql (tanggal, sqle, usere) VALUES (NOW(), ?, ?)");
-            ps.setString(1, pesanLog);
-            ps.setString(2, tokenUser);
-            ps.executeUpdate();
+            // 2. Catat ke Database (Menggunakan fungsi core Khanza yang dijamin stabil, anti-lock statement)
+            Sequel.menyimpan("trackersql", "NOW(), '" + pesanLog + "', '" + tokenUser + "'", "Audit Trail BPJS");
             
         } catch (Exception e) {
-            catatLog("[FATAL] Gagal simpan log ke database trackersql: " + e.getMessage());
-        } finally {
-            if (ps != null) {
-                try { ps.close(); } catch (Exception e) {}
-            }
+            catatLog("[FATAL] Gagal simpan log ke database trackersql via Sequel: " + e.getMessage());
+            System.out.println("[FATAL] Gagal simpan log ke database trackersql via Sequel: " + e.getMessage());
         }
     }
 
