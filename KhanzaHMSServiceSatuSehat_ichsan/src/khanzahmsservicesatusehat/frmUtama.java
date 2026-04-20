@@ -104,6 +104,7 @@ public class frmUtama extends javax.swing.JFrame {
 
     public frmUtama() {
         initComponents();
+        createTableStatus(); // Buat tabel status jika belum ada
         try {
             link = koneksiDB.URLFHIRSATUSEHAT();
         } catch (Exception e) {
@@ -130,6 +131,81 @@ public class frmUtama extends javax.swing.JFrame {
         this.setMinimumSize(new Dimension(1024, 600));
 
         jam();
+    }
+
+    private void createTableStatus() {
+        try {
+            Sequel.queryu("create table if not exists satu_sehat_encounter_status (no_rawat varchar(17) not null, id_encounter varchar(100) not null, status enum('arrived','in-progress','finished') not null, primary key(no_rawat))");
+        } catch (Exception e) {
+            System.out.println("Notifikasi Gagal Membuat Tabel Status : " + e);
+        }
+    }
+
+    private void updateEncounterStatus(String noRawat, String idEncounter, String statusBaru) {
+        try {
+            TeksArea.append("   [STATUS] Mengupdate Encounter " + noRawat + " menjadi " + statusBaru + "...\n");
+            
+            // 1. Persiapan Header & URL
+            String url = link + "/Encounter/" + idEncounter;
+            headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("Authorization", "Bearer " + api.TokenSatuSehat());
+            
+            // 2. Ambil data asli Encounter dari Satu Sehat
+            String currentJson = konekSatuSehat(url, HttpMethod.GET, new HttpEntity(headers));
+            com.fasterxml.jackson.databind.node.ObjectNode encounterNode = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(currentJson);
+            
+            // 3. Update Status
+            encounterNode.put("status", statusBaru);
+            
+            // 4. KHUSUS FINISHED: Wajib menyisipkan elemen diagnosis
+            if (statusBaru.equals("finished")) {
+                // Cari ID Condition (Diagnosa) dari database lokal
+                String idCondition = Sequel.cariIsi("select id_condition from satu_sehat_condition where no_rawat=? limit 1", noRawat).trim();
+                
+                if (!idCondition.isEmpty()) {
+                    TeksArea.append("   [DEBUG] Mengaitkan ID Condition: " + idCondition + "\n");
+                    
+                    // Pastikan elemen diagnosis bersih sebelum diisi
+                    encounterNode.remove("diagnosis");
+                    
+                    com.fasterxml.jackson.databind.node.ArrayNode diagnosisArray = encounterNode.putArray("diagnosis");
+                    com.fasterxml.jackson.databind.node.ObjectNode diagnosisObj = diagnosisArray.addObject();
+                    
+                    // Referensi ke Condition ID
+                    com.fasterxml.jackson.databind.node.ObjectNode conditionRef = diagnosisObj.putObject("condition");
+                    conditionRef.put("reference", "Condition/" + idCondition);
+                    
+                    // Gunakan code 'DD' (Discharge Diagnosis) untuk status Finished
+                    com.fasterxml.jackson.databind.node.ObjectNode useNode = diagnosisObj.putObject("use");
+                    com.fasterxml.jackson.databind.node.ArrayNode codingUse = useNode.putArray("coding");
+                    com.fasterxml.jackson.databind.node.ObjectNode codingItem = codingUse.addObject();
+                    codingItem.put("system", "http://terminology.hl7.org/CodeSystem/diagnosis-role");
+                    codingItem.put("code", "DD"); 
+                    codingItem.put("display", "Discharge diagnosis");
+                    
+                    diagnosisObj.put("rank", 1);
+                } else {
+                    TeksArea.append("   !! [CRITICAL] Diagnosa (Condition) tidak ditemukan di DB Lokal untuk No.Rawat ini.\n");
+                    TeksArea.append("      Satu Sehat mewajibkan Diagnosa ada sebelum status diubah ke Finished.\n");
+                    return; // Batalkan PUT jika diagnosa tidak ada agar tidak 400
+                }
+            }
+            
+            // 5. Kirim Perubahan dengan PUT
+            String updateJson = mapper.writeValueAsString(encounterNode);
+            requestEntity = new HttpEntity(updateJson, headers);
+            String responseJson = konekSatuSehat(url, HttpMethod.PUT, requestEntity);
+            
+            if (responseJson.contains(idEncounter)) {
+                Sequel.queryu2("update satu_sehat_encounter_status set status=? where no_rawat=?", 2, new String[]{
+                    statusBaru, noRawat
+                });
+                TeksArea.append("   [SUKSES] Status Encounter Terkini: " + statusBaru + "\n");
+            }
+        } catch (Exception e) {
+            TeksArea.append("   !! [GAGAL UPDATE STATUS] " + e.getMessage() + "\n");
+        }
     }
 
     /**
@@ -450,6 +526,48 @@ public class frmUtama extends javax.swing.JFrame {
      * Membangun seluruh tampilan modern secara programatik.
      * Dipanggil di constructor SETELAH initComponents() selesai.
      */
+    private void syncFinishedBatch() {
+        try {
+            TeksArea.append("\n[MAINTENANCE] MEMULAI BATCH 'FINISHED' MASAL (HISTORY REPAIR)...\n");
+            TeksArea.append("[MAINTENANCE] Mengsinkronisasi data lama dari tabel encounter...\n");
+            
+            // Migrasi data dari tabel encounter lama ke tabel status baru (jika belum ada)
+            Sequel.queryu("INSERT IGNORE INTO satu_sehat_encounter_status (no_rawat, id_encounter, status) " +
+                         "SELECT no_rawat, id_encounter, 'arrived' FROM satu_sehat_encounter");
+
+            // Scan masif untuk 'finished' berdasarkan tanggal di form
+            // Syarat: Ada ID Encounter, Belum Finished, dan SUDAH punya Composition (Resume Medis)
+            ps = koneksi.prepareStatement(
+                "SELECT stat.no_rawat, stat.id_encounter " +
+                "FROM satu_sehat_encounter_status stat " +
+                "INNER JOIN reg_periksa rp ON stat.no_rawat = rp.no_rawat " +
+                "WHERE stat.status <> 'finished' " +
+                "AND rp.tgl_registrasi BETWEEN ? AND ? " +
+                "AND EXISTS (SELECT no_rawat FROM satu_sehat_composition WHERE no_rawat = stat.no_rawat) " +
+                "LIMIT 500" // Batasi 500 per klik agar tidak overload
+            );
+            
+            ps.setString(1, Tanggal1.getText());
+            ps.setString(2, Tanggal2.getText());
+            rs = ps.executeQuery();
+            
+            int count = 0;
+            while (rs.next()) {
+                if (isEmergencyStop) break;
+                updateEncounterStatus(rs.getString("no_rawat"), rs.getString("id_encounter"), "finished");
+                count++;
+                
+                // Jeda dinamis: Setiap 10 data, beri jeda 1 detik agar tidak terkena Rate Limit 429 Satu Sehat
+                if (count % 10 == 0) {
+                    try { Thread.sleep(1000); } catch (Exception e) {}
+                }
+            }
+            TeksArea.append("\n[MAINTENANCE] BATCH SELESAI. Total data diupdate ke Finished: " + count + "\n");
+        } catch (Exception e) {
+            TeksArea.append("   !! [ERR MAINTENANCE] " + e.getMessage() + "\n");
+        }
+    }
+
     private void setupModernUI() {
         // ---------------------------------------------------------------
         // ROOT FRAME
@@ -880,6 +998,19 @@ public class frmUtama extends javax.swing.JFrame {
             "PRASYARAT: No. Order Radiologi Khanza.\n" +
             "LOGIKA: Mengambil file DICOM dari Orthanc untuk dikirim ke Satu Sehat (ImagingStudy).",
             evt -> kirim_dicomrouterActionPerformed(evt));
+
+        // Section: MAINTENANCE & REPAIR
+        btnContainer.add(makeSectionLabel("▸ MAINTENANCE & REPAIR"));
+        addResourceRow(btnContainer, "Sync Lifecycle (Finished)", "History Repair 5 Tahun",
+            "FUNGSI KHUSUS:\n" +
+            "1. Migrasi data lama ke tabel status.\n" +
+            "2. Mencari data yang sudah punya Resume & Nota.\n" +
+            "3. Mengirim status 'finished' secara masif.\n" +
+            "Gunakan rentang tanggal di atas untuk membatasi scan.",
+            evt -> {
+                TeksArea.setText("MEMULAI MAINTENANCE: Sync Lifecycle Finished...\n");
+                new Thread(() -> syncFinishedBatch()).start();
+            });
 
         JScrollPane scrollRight = new JScrollPane(btnContainer);
         scrollRight.setBackground(BG_PANEL);
@@ -1918,7 +2049,11 @@ public class frmUtama extends javax.swing.JFrame {
             Sequel.menyimpan2("satu_sehat_encounter", "?,?", "No.Rawat", 2, new String[]{
                 noRawat, responseId.asText()
             });
-            TeksArea.append("   [SUKSES] ID Encounter: " + responseId.asText() + "\n");
+            // CATAT STATUS AWAL: arrived
+            Sequel.menyimpan2("satu_sehat_encounter_status", "?,?,?", "Status Encounter arrived", 3, new String[]{
+                noRawat, responseId.asText(), "arrived"
+            });
+            TeksArea.append("   [SUKSES] ID Encounter: " + responseId.asText() + " (Status: arrived)\n");
         }
     }
     
@@ -2651,183 +2786,156 @@ public class frmUtama extends javax.swing.JFrame {
             TeksArea.append("------------------------------------------------------\n");
 
             ps = koneksi.prepareStatement(
-                    "select reg_periksa.no_rawat,pasien.nm_pasien,pasien.no_ktp,satu_sehat_encounter.id_encounter,satu_sehat_mapping_vaksin.vaksin_code,satu_sehat_mapping_vaksin.vaksin_system,"
+                    "select detail_pemberian_obat.no_rawat,pasien.nm_pasien,pasien.no_ktp,satu_sehat_encounter.id_encounter,satu_sehat_mapping_vaksin.vaksin_code,satu_sehat_mapping_vaksin.vaksin_system,"
                     + "satu_sehat_mapping_vaksin.kode_brng,satu_sehat_mapping_vaksin.vaksin_display,satu_sehat_mapping_vaksin.route_code,satu_sehat_mapping_vaksin.route_system,"
                     + "satu_sehat_mapping_vaksin.route_display,satu_sehat_mapping_vaksin.dose_quantity_code,satu_sehat_mapping_vaksin.dose_quantity_system,"
-                    + "satu_sehat_mapping_vaksin.dose_quantity_unit,detail_pemberian_obat.no_batch,detail_pemberian_obat.tgl_perawatan,detail_pemberian_obat.jam,"
-                    + "detail_pemberian_obat.jml,aturan_pakai.aturan,satu_sehat_mapping_lokasi_ralan.id_lokasi_satusehat,poliklinik.nm_poli,pegawai.no_ktp as ktppraktisi,"
-                    + "ifnull(satu_sehat_immunization.id_immunization,'') as id_immunization,detail_pemberian_obat.no_faktur "
-                    + "from reg_periksa inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis "
+                    + "satu_sehat_mapping_vaksin.dose_quantity_unit,"
+                    + "if(detail_pemberian_obat.no_batch='' or detail_pemberian_obat.no_batch is null, if(detail_pemberian_obat.no_faktur='' or detail_pemberian_obat.no_faktur is null, '000000', SUBSTRING(detail_pemberian_obat.no_faktur, 1, 6)), detail_pemberian_obat.no_batch) as no_batch,"
+                    + "detail_pemberian_obat.tgl_perawatan,detail_pemberian_obat.jam,"
+                    + "detail_pemberian_obat.jml,ifnull(aturan_pakai.aturan,'') as aturan,satu_sehat_mapping_lokasi_ralan.id_lokasi_satusehat,poliklinik.nm_poli,pegawai.no_ktp as ktppraktisi,"
+                    + "ifnull(satu_sehat_immunization.id_immunization,'') as id_immunization,"
+                    + "if(detail_pemberian_obat.no_faktur='' or detail_pemberian_obat.no_faktur is null,'000000',detail_pemberian_obat.no_faktur) as no_faktur, "
+                    + "ifnull(data_batch.tgl_kadaluarsa, databarang.expire) as tgl_kadaluarsa "
+                    + "from detail_pemberian_obat "
+                    + "inner join reg_periksa on detail_pemberian_obat.no_rawat=reg_periksa.no_rawat "
+                    + "inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis "
                     + "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat "
-                    + "inner join detail_pemberian_obat on detail_pemberian_obat.no_rawat=reg_periksa.no_rawat "
                     + "inner join satu_sehat_mapping_vaksin on satu_sehat_mapping_vaksin.kode_brng=detail_pemberian_obat.kode_brng "
-                    + "inner join aturan_pakai on aturan_pakai.tgl_perawatan=detail_pemberian_obat.tgl_perawatan and aturan_pakai.jam=detail_pemberian_obat.jam and "
-                    + "aturan_pakai.no_rawat=detail_pemberian_obat.no_rawat and aturan_pakai.kode_brng=detail_pemberian_obat.kode_brng "
+                    + "inner join databarang on databarang.kode_brng=detail_pemberian_obat.kode_brng "
+                    + "left join aturan_pakai on aturan_pakai.tgl_perawatan=detail_pemberian_obat.tgl_perawatan and aturan_pakai.jam=detail_pemberian_obat.jam and aturan_pakai.no_rawat=detail_pemberian_obat.no_rawat and aturan_pakai.kode_brng=detail_pemberian_obat.kode_brng "
                     + "inner join satu_sehat_mapping_lokasi_ralan on satu_sehat_mapping_lokasi_ralan.kd_poli=reg_periksa.kd_poli "
                     + "inner join poliklinik on poliklinik.kd_poli=satu_sehat_mapping_lokasi_ralan.kd_poli "
                     + "inner join pegawai on reg_periksa.kd_dokter=pegawai.nik "
-                    + "inner join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "
-                    + "left join satu_sehat_immunization on satu_sehat_immunization.no_rawat=detail_pemberian_obat.no_rawat and satu_sehat_immunization.tgl_perawatan=detail_pemberian_obat.tgl_perawatan and "
-                    + "satu_sehat_immunization.jam=detail_pemberian_obat.jam and satu_sehat_immunization.kode_brng=detail_pemberian_obat.kode_brng and "
-                    + "satu_sehat_immunization.no_batch=detail_pemberian_obat.no_batch and satu_sehat_immunization.no_faktur=detail_pemberian_obat.no_faktur "
-                    + "where detail_pemberian_obat.no_batch<>'' and nota_jalan.tanggal between ? and ? and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' and pasien.no_ktp <> '0000000000000000' and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' and pegawai.no_ktp <> '0000000000000000' and ifnull(satu_sehat_immunization.id_immunization,'')=''");
+                    + "left join nota_jalan on nota_jalan.no_rawat=reg_periksa.no_rawat "
+                    + "left join nota_inap on nota_inap.no_rawat=reg_periksa.no_rawat "
+                    + "left join data_batch on data_batch.no_batch=detail_pemberian_obat.no_batch and data_batch.kode_brng=detail_pemberian_obat.kode_brng and data_batch.no_faktur=detail_pemberian_obat.no_faktur "
+                    + "left join satu_sehat_immunization on satu_sehat_immunization.no_rawat=detail_pemberian_obat.no_rawat and satu_sehat_immunization.tgl_perawatan=detail_pemberian_obat.tgl_perawatan and satu_sehat_immunization.jam=detail_pemberian_obat.jam and satu_sehat_immunization.kode_brng=detail_pemberian_obat.kode_brng "
+                    + "where (nota_jalan.tanggal between ? and ? OR nota_inap.tanggal between ? and ?) "
+                    + "and LENGTH(pasien.no_ktp) = 16 and pasien.no_ktp REGEXP '^[0-9]+$' "
+                    + "and LENGTH(pegawai.no_ktp) = 16 and pegawai.no_ktp REGEXP '^[0-9]+$' "
+                    + "and ifnull(satu_sehat_immunization.id_immunization,'')=''");
             try {
                 ps.setString(1, Tanggal1.getText());
                 ps.setString(2, Tanggal2.getText());
+                ps.setString(3, Tanggal1.getText());
+                ps.setString(4, Tanggal2.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
-                    if (isEmergencyStop) {
-                        TeksArea.append("\n[EMERGENCY STOP] Memutus loop eksekusi query secara aman!\n");
-                        break;
-                    }
-                    TeksArea.append("\n[PROSES VAKSIN] No.Rawat: " + rs.getString("no_rawat") + " | Vaksin: " + rs.getString("vaksin_display") + "\n");
+                    if (isEmergencyStop) break;
+                    
+                    TeksArea.append("\n[PROSES VAKSIN] No.Rawat: " + rs.getString("no_rawat") + " | " + rs.getString("vaksin_display") + "\n");
 
-                    if ((!rs.getString("no_ktp").equals("")) && (!rs.getString("ktppraktisi").equals("")) && rs.getString("id_immunization").equals("")) {
-                        try {
-                            // 1. Cek ID Satu Sehat
-                            idpasien = cekViaSatuSehat.tampilIDPasien(rs.getString("no_ktp"));
-                            iddokter = cekViaSatuSehat.tampilIDParktisi(rs.getString("ktppraktisi"));
+                    try {
+                        idpasien = cekViaSatuSehat.tampilIDPasien(rs.getString("no_ktp"));
+                        iddokter = cekViaSatuSehat.tampilIDParktisi(rs.getString("ktppraktisi"));
 
-                            if (idpasien.equals("") || iddokter.equals("")) {
-                                TeksArea.append("!! SKIP: ID Pasien/Dokter tidak ditemukan di Satu Sehat.\n");
-                                continue;
-                            }
+                        if (idpasien.isEmpty() || iddokter.isEmpty()) {
+                            TeksArea.append("   !! [SKIP] ID Pasien/Dokter tidak ditemukan di Satu Sehat.\n");
+                            continue;
+                        }
 
-                            // 2. Sanitasi & Persiapan Data
-                            String namaVaksin = rs.getString("vaksin_display").replaceAll("(\r\n|\r|\n|\n\r)", " ").replaceAll("\"", "'");
-                            String namaPoli = rs.getString("nm_poli").replaceAll("\"", "'");
-                            String tglKadaluarsa = Sequel.cariIsi("SELECT data_batch.tgl_kadaluarsa FROM data_batch WHERE data_batch.no_batch='" + rs.getString("no_batch") + "' and data_batch.kode_brng='" + rs.getString("kode_brng") + "' and data_batch.no_faktur='" + rs.getString("no_faktur") + "'");
-                            
-                            // Sanitasi Dosis (Hanya angka)
-                            String dosisKe = rs.getString("aturan").replaceAll("[^0-9]", "");
-                            if(dosisKe.equals("")){
-                                dosisKe = "1"; // Default jika tidak ada angka di aturan pakai
-                            }
+                        // Sanitasi Nama Vaksin
+                        String namaVaksin = rs.getString("vaksin_display").replaceAll("(\r\n|\r|\n|\n\r)", " ").replaceAll("\"", "'");
+                        
+                        // Logika Dosis (Ambil angka dari aturan pakai)
+                        String doseStr = rs.getString("aturan").replaceAll("[^0-9]", "");
+                        if(doseStr.isEmpty()) doseStr = "1";
+                        
+                        // Logika Fallback Tanggal Kadaluarsa
+                        String tglKadaluarsa = rs.getString("tgl_kadaluarsa");
+                        if (tglKadaluarsa == null || tglKadaluarsa.trim().isEmpty() || tglKadaluarsa.equals("0000-00-00")) {
+                            java.util.Calendar cal = java.util.Calendar.getInstance();
+                            cal.add(java.util.Calendar.YEAR, 5);
+                            tglKadaluarsa = tanggalFormat.format(cal.getTime());
+                            TeksArea.append("   !! [INFO] Tgl Kadaluarsa kosong. Menggunakan default bypass 5 tahun ke depan: " + tglKadaluarsa + "\n");
+                        }
 
-                            try {
-                                headers = new HttpHeaders();
-                                headers.setContentType(MediaType.APPLICATION_JSON);
-                                headers.add("Authorization", "Bearer " + api.TokenSatuSehat());
-                                json = "{"
-                                        + "\"resourceType\": \"Immunization\","
-                                        + "\"status\": \"completed\","
-                                        + "\"vaccineCode\": {"
-                                        + "\"coding\": ["
-                                        + "{"
+                        headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_JSON);
+                        headers.add("Authorization", "Bearer " + api.TokenSatuSehat());
+
+                        json = "{"
+                                + "\"resourceType\": \"Immunization\","
+                                + "\"status\": \"completed\","
+                                + "\"vaccineCode\": {"
+                                    + "\"coding\": [{"
                                         + "\"system\": \"" + rs.getString("vaksin_system") + "\","
                                         + "\"code\": \"" + rs.getString("vaksin_code") + "\","
                                         + "\"display\": \"" + namaVaksin + "\""
-                                        + "}"
-                                        + "]"
-                                        + "},"
-                                        + "\"patient\": {"
-                                        + "\"reference\": \"Patient/" + idpasien + "\""
-                                        + "},"
-                                        + "\"encounter\": {"
-                                        + "\"reference\": \"Encounter/" + rs.getString("id_encounter") + "\""
-                                        + "},"
-                                        + "\"occurrenceDateTime\": \"" + rs.getString("tgl_perawatan") + "T" + rs.getString("jam") + "+07:00\","
-                                        + "\"expirationDate\": \"" + tglKadaluarsa + "\","
-                                        + "\"recorded\": \"" + rs.getString("tgl_perawatan") + "T" + rs.getString("jam") + "+07:00\","
-                                        + "\"primarySource\": true,"
-                                        + "\"location\": {"
-                                        + "\"reference\": \"Location/" + rs.getString("id_lokasi_satusehat") + "\","
-                                        + "\"display\": \"" + namaPoli + "\""
-                                        + "},"
-                                        + "\"lotNumber\": \"" + rs.getString("no_batch") + "\","
-                                        + "\"route\": {"
-                                        + "\"coding\": ["
-                                        + "{"
+                                    + "}]"
+                                + "},"
+                                + "\"patient\": {\"reference\": \"Patient/" + idpasien + "\"},"
+                                + "\"encounter\": {\"reference\": \"Encounter/" + rs.getString("id_encounter") + "\"},"
+                                + "\"occurrenceDateTime\": \"" + rs.getString("tgl_perawatan") + "T" + rs.getString("jam") + "+07:00\","
+                                + "\"recorded\": \"" + rs.getString("tgl_perawatan") + "T" + rs.getString("jam") + "+07:00\","
+                                + "\"primarySource\": true,"
+                                + "\"reasonCode\": [{\"coding\": [{\"system\": \"http://snomed.info/sct\",\"code\": \"281657000\",\"display\": \"Vaccination needed\"}]}],"
+                                + "\"location\": {\"reference\": \"Location/" + rs.getString("id_lokasi_satusehat") + "\",\"display\": \"" + rs.getString("nm_poli") + "\"},"
+                                + "\"lotNumber\": \"" + rs.getString("no_batch") + "\","
+                                + "\"expirationDate\": \"" + tglKadaluarsa + "\","
+                                + "\"route\": {"
+                                    + "\"coding\": [{"
                                         + "\"system\": \"" + rs.getString("route_system") + "\","
                                         + "\"code\": \"" + rs.getString("route_code") + "\","
                                         + "\"display\": \"" + rs.getString("route_display") + "\""
-                                        + "}"
-                                        + "]"
-                                        + "},"
-                                        + "\"doseQuantity\": {"
-                                        + "\"value\": " + rs.getString("jml") + ","
-                                        + "\"unit\": \"" + rs.getString("dose_quantity_unit") + "\","
-                                        + "\"system\": \"" + rs.getString("dose_quantity_system") + "\","
-                                        + "\"code\": \"" + rs.getString("dose_quantity_code") + "\""
-                                        + "},"
-                                        + "\"performer\": ["
-                                        + "{"
-                                        + "\"function\": {"
-                                        + "\"coding\": ["
-                                        + "{"
-                                        + "\"system\": \"http://terminology.hl7.org/CodeSystem/v2-0443\","
-                                        + "\"code\": \"AP\","
-                                        + "\"display\": \"Administering Provider\""
-                                        + "}"
-                                        + "]"
-                                        + "},"
-                                        + "\"actor\": {"
-                                        + "\"reference\": \"Practitioner/" + iddokter + "\""
-                                        + "}"
-                                        + "}"
-                                        + "],"
-                                        + "\"reasonCode\": ["
-                                        + "{"
-                                        + "\"coding\": ["
-                                        + "{"
-                                        + "\"system\": \"https://terminology.kemkes.go.id/CodeSystem/immunization-reason\","
-                                        + "\"code\": \"IM-Program\","
-                                        + "\"display\" : \"Imunisasi Program\""
-                                        + "}"
-                                        + "]"
-                                        + "}"
-                                        + "],"
-                                        + "\"protocolApplied\" : ["
-                                        + "{"
-                                        + "\"doseNumberPositiveInt\" : " + dosisKe
-                                        + "}"
-                                        + "]"
-                                        + "}";
-                                TeksArea.append("   URL : " + link + "/Immunization\n");
-                                TeksArea.append("   Request JSON : " + json + "\n");
-                                requestEntity = new HttpEntity(json, headers);
-                                json = konekSatuSehat(link + "/Immunization", HttpMethod.POST, requestEntity);
-                                TeksArea.append("   Result JSON : " + json + "\n");
-                                root = mapper.readTree(json);
-                                response = root.path("id");
-                                if (!response.asText().equals("")) {
-                                    Sequel.menyimpan2("satu_sehat_immunization", "?,?,?,?,?,?,?,?", "Imunisasi/Vaksin", 7, new String[]{
-                                        rs.getString("no_rawat"), rs.getString("tgl_perawatan"), rs.getString("jam"), rs.getString("kode_brng"), rs.getString("no_batch"), rs.getString("no_faktur"), response.asText()
-                                    });
-                                    TeksArea.append("   [SUKSES] Disimpan ke database lokal.\n");
-                                }
-                            } catch (Exception e) {
-                                TeksArea.append("   [ERROR API] " + e + "\n");
-                                System.out.println("Notifikasi Bridging : " + e);
-                            }
-                        } catch (Exception e) {
-                            TeksArea.append("   [ERROR INTERN] " + e + "\n");
-                            System.out.println("Notifikasi : " + e);
-                        }
-                    } else {
-                        if (rs.getString("no_ktp").equals("")) TeksArea.append("!! SKIP: NIK Pasien Kosong\n");
-                        if (rs.getString("ktppraktisi").equals("")) TeksArea.append("!! SKIP: NIK Dokter Kosong\n");
-                        if (!rs.getString("id_immunization").equals("")) TeksArea.append("!! SKIP: Sudah Terkirim\n");
+                                    + "}]"
+                                + "},"
+                                + "\"doseQuantity\": {"
+                                    + "\"value\": " + rs.getString("jml") + ","
+                                    + "\"unit\": \"" + rs.getString("dose_quantity_unit") + "\","
+                                    + "\"system\": \"" + rs.getString("dose_quantity_system") + "\","
+                                    + "\"code\": \"" + rs.getString("dose_quantity_code") + "\""
+                                + "},"
+                                + "\"performer\": [{"
+                                    + "\"function\": {\"coding\": [{\"system\": \"http://terminology.hl7.org/CodeSystem/v2-0443\",\"code\": \"AP\",\"display\": \"Administering Provider\"}]},"
+                                    + "\"actor\": {\"reference\": \"Practitioner/" + iddokter + "\"}"
+                                + "}],"
+                                + "\"protocolApplied\": [{\"doseNumberPositiveInt\": " + doseStr + "}]"
+                                + "}";
+
+                        processSendVaksin(json, rs);
+
+                    } catch (Exception e) {
+                        TeksArea.append("   !! [ERROR SYSTEM] " + e.getMessage() + "\n");
                     }
                     jeda();
                 }
-            } catch (Exception e) {
-                System.out.println("Notif : " + e);
-                TeksArea.append("ERROR QUERY VAKSIN: " + e + "\n");
             } finally {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (ps != null) {
-                    ps.close();
-                }
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
             }
         } catch (Exception e) {
-            System.out.println("Notifikasi : " + e);
-            TeksArea.append("!! ERROR UTAMA VAKSIN: " + e + "\n");
+            TeksArea.append("!! ERROR UTAMA VAKSIN: " + e.getMessage() + "\n");
         }
     }
-    
+
+    private void processSendVaksin(String jsonPayload, ResultSet rs) throws Exception {
+        requestEntity = new HttpEntity(jsonPayload, headers);
+        try {
+            String responseJson = konekSatuSehat(link + "/Immunization", HttpMethod.POST, requestEntity);
+            root = mapper.readTree(responseJson);
+            JsonNode responseId = root.path("id");
+            if (!responseId.asText().equals("")) {
+                Sequel.menyimpantf2("satu_sehat_immunization", "?,?,?,?,?,?,?", "Imunisasi/Vaksin", 7, new String[]{
+                    rs.getString("no_rawat"), rs.getString("tgl_perawatan"), rs.getString("jam"),
+                    rs.getString("kode_brng"), rs.getString("no_batch"), rs.getString("no_faktur"), responseId.asText()
+                });
+                TeksArea.append("   [SUKSES] ID Satu Sehat: " + responseId.asText() + "\n");
+            }
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode().value() == 401) {
+                TeksArea.append("   !! [TOKEN EXPIRED] Retrying...\n");
+                headers.set("Authorization", "Bearer " + api.TokenSatuSehat());
+                requestEntity = new HttpEntity(jsonPayload, headers);
+                String responseJsonRetry = konekSatuSehat(link + "/Immunization", HttpMethod.POST, requestEntity);
+                root = mapper.readTree(responseJsonRetry);
+                if (!root.path("id").asText().isEmpty()) TeksArea.append("   [RETRY SUKSES]\n");
+            } else {
+                TeksArea.append("   !! [API ERROR] " + e.getResponseBodyAsString() + "\n");
+            }
+        }
+    }
+
     // MODUL PROSEDUR (ICD-9) - LEVEL DETEKTIF + AUTO RECONNECT
     private void prosedur() {
         try {
@@ -9985,6 +10093,51 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
         }
     }
 
+    private void checkStatusChanges() {
+        try {
+            TeksArea.append("\n[STATUS CHECK] Memulai Sinkronisasi Status Lifecycle Encounter...\n");
+
+            // 1. SCAN UNTUK IN-PROGRESS
+            // Mencari yang statusnya 'arrived' TAPI sudah ada Condition (Diagnosa) terkirim
+            ps = koneksi.prepareStatement(
+                "SELECT stat.no_rawat, stat.id_encounter " +
+                "FROM satu_sehat_encounter_status stat " +
+                "WHERE stat.status = 'arrived' " +
+                "AND EXISTS (SELECT no_rawat FROM satu_sehat_condition WHERE no_rawat = stat.no_rawat) " +
+                "LIMIT 20"
+            );
+            try {
+                rs = ps.executeQuery();
+                while (rs.next()) {
+                    if (isEmergencyStop) break;
+                    updateEncounterStatus(rs.getString("no_rawat"), rs.getString("id_encounter"), "in-progress");
+                    jeda();
+                }
+            } catch (Exception e) { System.out.println("Err In-Progress Scan: " + e); }
+
+            // 2. SCAN UNTUK FINISHED
+            // Mencari yang statusnya 'in-progress' TAPI sudah ada Composition (Resume) terkirim
+            ps = koneksi.prepareStatement(
+                "SELECT stat.no_rawat, stat.id_encounter " +
+                "FROM satu_sehat_encounter_status stat " +
+                "WHERE stat.status = 'in-progress' " +
+                "AND EXISTS (SELECT no_rawat FROM satu_sehat_composition WHERE no_rawat = stat.no_rawat) " +
+                "LIMIT 20"
+            );
+            try {
+                rs = ps.executeQuery();
+                while (rs.next()) {
+                    if (isEmergencyStop) break;
+                    updateEncounterStatus(rs.getString("no_rawat"), rs.getString("id_encounter"), "finished");
+                    jeda();
+                }
+            } catch (Exception e) { System.out.println("Err Finished Scan: " + e); }
+
+        } catch (Exception e) {
+            TeksArea.append("   !! [ERROR STATUS CHECK] " + e.getMessage() + "\n");
+        }
+    }
+
     private void jalankanSemuaQueryBridging() {
     // Menambahkan log ke TeksArea untuk memberikan feedback ke user
     TeksArea.append("\n======================================================\n");
@@ -10019,6 +10172,10 @@ private void kirimQuestionnaire(ResultSet rs) throws Exception {
     alergi();
     episodeofcare();
     encounter2();
+    
+    // Sinkronisasi Status Lifecycle (In-Progress & Finished)
+    checkStatusChanges();
+
     // Orthanc DICOM Router: hanya kirim jika mode otomatis diaktifkan via checkbox menu
     if (jCheckBoxMenuItemOrtancAuto.isSelected()) {
         kirimDicomRouter();
