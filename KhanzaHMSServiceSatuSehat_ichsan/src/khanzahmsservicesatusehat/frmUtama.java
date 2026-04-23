@@ -706,25 +706,25 @@ public class frmUtama extends javax.swing.JFrame {
         });
         gbcCtrl.gridx=0; gbcCtrl.gridy=2; gbcCtrl.gridwidth=2; controlPanel.add(cmbInterval, gbcCtrl);
 
-        JButton btnPlayPause = new JButton("▶ PLAY AUTOPILOT");
+        JButton btnPlayPause = new JButton("PLAY AUTOPILOT");
         btnPlayPause.setBackground(BTN_NORMAL); btnPlayPause.setForeground(TEXT_WHITE);
         btnPlayPause.setFont(FONT_SANS_B); btnPlayPause.setFocusPainted(false);
         btnPlayPause.addActionListener(e -> {
             isAutopilot = !isAutopilot;
             if(isAutopilot) {
-                btnPlayPause.setText("⏸ PAUSE AUTOPILOT");
+                btnPlayPause.setText("PAUSE AUTOPILOT");
                 btnPlayPause.setBackground(new Color(0x735c00)); // Dark yellow
                 TeksArea.append("[SISTEM] Mode AUTOPILOT AKTIF. Akan melakukan scan masif setiap " + intervalMenit + " menit.\n");
                 lastRunTimeMs = System.currentTimeMillis(); // Reset timer saat play
             } else {
-                btnPlayPause.setText("▶ PLAY AUTOPILOT");
+                btnPlayPause.setText("PLAY AUTOPILOT");
                 btnPlayPause.setBackground(BTN_NORMAL);
                 TeksArea.append("[SISTEM] Mode AUTOPILOT DIHENTIKAN SEMENTARA.\n");
             }
         });
         gbcCtrl.gridx=0; gbcCtrl.gridy=3; gbcCtrl.gridwidth=1; gbcCtrl.weightx=0.5; controlPanel.add(btnPlayPause, gbcCtrl);
 
-        JButton btnPanic = new JButton("🛑 PANIC STOP");
+        JButton btnPanic = new JButton("PANIC STOP");
         btnPanic.setBackground(new Color(0x4a0a0a)); btnPanic.setForeground(Color.WHITE);
         btnPanic.setFont(FONT_SANS_B); btnPanic.setFocusPainted(false);
         btnPanic.addActionListener(e -> {
@@ -1910,14 +1910,25 @@ public class frmUtama extends javax.swing.JFrame {
             TeksArea.append("\n[PROSES ENCOUNTER] No.Rawat: " + noRawat + " | Pasien: " + nmPasien + "\n");
             
             // 1. Validasi KyC
-            iddokter = cekViaSatuSehat.tampilIDParktisi(rs.getString("ktpdokter"));
-            idpasien = cekViaSatuSehat.tampilIDPasien(rs.getString("no_ktp"));
+            String nikDokter = rs.getString("ktpdokter");
+            String nikPasien = rs.getString("no_ktp");
 
+            iddokter = cekViaSatuSehat.tampilIDParktisi(nikDokter);
+            idpasien = cekViaSatuSehat.tampilIDPasien(nikPasien);
+
+            // [TAMBAHAN SISIPAN] Jika ID Pasien kosong, coba daftarkan pasien baru
+            if (idpasien.isEmpty()) {
+                TeksArea.append("   -> ID Pasien tidak ditemukan di Satu Sehat. Mencoba mendaftarkan...\n");
+                // Panggil method daftarPasienBaru dan simpan hasilnya ke idpasien
+                idpasien = daftarPasienBaru(nikPasien); 
+            }
+
+            // Evaluasi ulang: Jika iddokter kosong, ATAU idpasien TETAP kosong setelah dicoba daftar
             if (iddokter.isEmpty() || idpasien.isEmpty()) {
-                TeksArea.append("   !! [SKIP] ID Pasien/Dokter tidak ditemukan di Satu Sehat.\n");
-                TeksArea.append("      -> Cek NIK Pasien: " + rs.getString("no_ktp") + "\n");
-                TeksArea.append("      -> Cek NIK Dokter: " + rs.getString("ktpdokter") + "\n");
-                return;
+                TeksArea.append("   !! [SKIP] ID Pasien/Dokter tidak valid untuk dilanjutkan.\n");
+                TeksArea.append("      -> NIK Pasien: " + nikPasien + " (IHS: " + (idpasien.isEmpty() ? "Gagal Didapat" : idpasien) + ")\n");
+                TeksArea.append("      -> NIK Dokter: " + nikDokter + " (IHS: " + (iddokter.isEmpty() ? "Tidak Ditemukan" : iddokter) + ")\n");
+                return; // Hentikan proses encounter untuk pasien ini
             }
 
             // 2. Persiapan Data
@@ -2056,7 +2067,81 @@ public class frmUtama extends javax.swing.JFrame {
             TeksArea.append("   [SUKSES] ID Encounter: " + responseId.asText() + " (Status: arrived)\n");
         }
     }
-    
+
+    private String daftarPasienBaru(String nik) {
+        String newIHS = "";
+        try {
+            TeksArea.append("      -> [MPI] Mencoba pancingan IHS via Kemenkes...\n");
+
+            headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("Authorization", "Bearer " + api.TokenSatuSehat());
+            requestEntity = new HttpEntity(headers);
+
+            // STRATEGI 1: PANCINGAN GET
+            try {
+                String responseJson = konekSatuSehat(link + "/Patient?identifier=https://fhir.kemkes.go.id/id/nik|" + nik, HttpMethod.GET, requestEntity);
+                root = mapper.readTree(responseJson);
+                if (root.path("total").asInt() > 0) {
+                    newIHS = root.path("entry").get(0).path("resource").path("id").asText();
+                    TeksArea.append("      [MPI SUCCESS] IHS ditemukan: " + newIHS + "\n");
+                    return newIHS;
+                }
+            } catch (Exception e) {}
+
+            // STRATEGI 2: POST (Pendaftaran Baru)
+            TeksArea.append("      -> [MPI] Mencoba pendaftaran manual (POST)...\n");
+            ps = koneksi.prepareStatement(
+                "select pasien.nm_pasien, pasien.tgl_lahir, pasien.jk, pasien.no_ktp, pasien.alamat, " +
+                "kabupaten.nm_kab, kelurahan.nm_kel, pasien.no_tlp " +
+                "from pasien " +
+                "inner join kelurahan on pasien.kd_kel = kelurahan.kd_kel " +
+                "inner join kabupaten on pasien.kd_kab = kabupaten.kd_kab " +
+                "where pasien.no_ktp = ?"
+            );
+            ps.setString(1, nik);
+            ResultSet rsPasien = ps.executeQuery();
+            
+            if (rsPasien.next()) {
+                String namaBersih = rsPasien.getString("nm_pasien").replaceAll("(?i)(,\\s*NY|,\\s*TN|,\\s*NN|,\\s*AN|,\\s*BY|,\\s*SD|,\\s*SDR).*", "").replaceAll("\"", "'").trim();
+                String tglLahir = rsPasien.getString("tgl_lahir");
+                String gender = rsPasien.getString("jk").equals("L") ? "male" : "female";
+                String alamatPasien = rsPasien.getString("alamat").replaceAll("\"", "'").replaceAll("(\\r\\n|\\r|\\n|\\n\\r)", " ").trim();
+                if(alamatPasien.isEmpty()) alamatPasien = "Alamat Sesuai KTP";
+
+                json = "{" +
+                        "\"resourceType\": \"Patient\"," +
+                        "\"meta\": {\"profile\": [\"https://fhir.kemkes.go.id/r4/StructureDefinition/Patient\"]}," +
+                        "\"active\": true," +
+                        "\"identifier\": [{" +
+                            "\"use\": \"official\"," +
+                            "\"system\": \"https://fhir.kemkes.go.id/id/nik\"," +
+                            "\"value\": \"" + nik + "\"" +
+                        "}]," +
+                        "\"name\": [{\"use\": \"official\", \"text\": \"" + namaBersih + "\"}]," +
+                        "\"gender\": \"" + gender + "\"," +
+                        "\"birthDate\": \"" + tglLahir + "\"," +
+                        "\"address\": [{" +
+                            "\"use\": \"home\"," +
+                            "\"line\": [\"" + alamatPasien + "\"]," +
+                            "\"city\": \"" + rsPasien.getString("nm_kab").toUpperCase() + "\"" +
+                        "}]" +
+                    "}";
+                
+                requestEntity = new HttpEntity(json, headers);
+                String responseJson = konekSatuSehat(link + "/Patient", HttpMethod.POST, requestEntity);
+                root = mapper.readTree(responseJson);
+                newIHS = root.path("id").asText();
+                if (!newIHS.isEmpty()) TeksArea.append("      [MPI SUCCESS] Pasien terdaftar! IHS: " + newIHS + "\n");
+            }
+            rsPasien.close(); ps.close();
+        } catch (org.springframework.web.client.HttpStatusCodeException e) {
+            TeksArea.append("      !! [MPI FAIL] Data SIMRS tidak sesuai KTP/Dukcapil. Mohon update manual di pendaftaran.\n");
+        } catch (Exception e) {
+            TeksArea.append("      !! [MPI ERROR] " + e.getMessage() + "\n");
+        }
+        return newIHS;
+    }
     
     // MODUL UTAMA OBSERVATION TTV (LEVEL DETEKTIF CONAN)
     private void observationTTV() {
