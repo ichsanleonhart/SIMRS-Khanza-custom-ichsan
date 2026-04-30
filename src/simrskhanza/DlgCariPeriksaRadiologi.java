@@ -1,17 +1,6 @@
 package simrskhanza;
 
-import bridging.ApiOrthanc;
-import bridging.OrthancDICOM;
-import com.fasterxml.jackson.databind.JsonNode;
-import kepegawaian.DlgCariPetugas;
-import keuangan.Jurnal;
-import fungsi.WarnaTable;
-import fungsi.batasInput;
-import fungsi.koneksiDB;
-import fungsi.sekuel;
-import fungsi.validasi;
-import fungsi.akses;
-import fungsi.akuntindakanradiologi;
+// --- 1. Import Standard Java ---
 import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dimension;
@@ -45,7 +34,7 @@ import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
-// --- 2. Import Security & SSL (SOLUSI ERROR KAMU ADA DISINI) ---
+// --- 2. Import Security & SSL ---
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -65,6 +54,7 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.codec.binary.Base64;
@@ -83,19 +73,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 // --- 5. Import Internal SIMRS Khanza ---
 import bridging.ApiOrthanc;
 import bridging.OrthancDICOM;
-import kepegawaian.DlgCariPetugas;
-import kepegawaian.DlgCariDokter;
-import keuangan.Jurnal;
 import fungsi.WarnaTable;
+import fungsi.akses;
+import fungsi.akuntindakanradiologi;
 import fungsi.batasInput;
 import fungsi.koneksiDB;
 import fungsi.sekuel;
 import fungsi.validasi;
-import fungsi.akses;
+import kepegawaian.DlgCariDokter;
+import kepegawaian.DlgCariPetugas;
+import keuangan.Jurnal;
 import laporan.DlgBerkasRawat;
 import rekammedis.MasterCariTemplateHasilRadiologi;
 import rekammedis.RMRiwayatPerawatan;
-import org.apache.http.entity.mime.content.InputStreamBody;
 
 
 public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
@@ -403,7 +393,8 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
         tbListDicom = new widget.Table();
         panelGlass7 = new widget.panelisi();
         btnDicom = new widget.Button();
-        SimpanGambar = new widget.Button();
+        SimpanGambar = new widget.Button();       // [MASTER] Upload JPG ke Photo Radiologi
+        btnDicomRouter = new widget.Button();     // [UPSTREAM] Ke DICOMROUTER
         PanelDataDicari = new widget.panelisi();
         label17 = new widget.Label();
         NoRawatDicari = new widget.Label();
@@ -1237,15 +1228,16 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
         });
         panelGlass7.add(btnDicom);
 
+        // [MASTER] Tombol Upload JPG dari Orthanc ke Photo Radiologi
         SimpanGambar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/upload24.png"))); // NOI18N
         SimpanGambar.setMnemonic('T');
         SimpanGambar.setText("Upload JPG ke Photo Radiologi");
         SimpanGambar.setToolTipText("Alt+T");
         SimpanGambar.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        SimpanGambar.setMaximumSize(new java.awt.Dimension(240, 34));
-        SimpanGambar.setMinimumSize(new java.awt.Dimension(240, 34));
+        SimpanGambar.setMaximumSize(new java.awt.Dimension(200, 34));
+        SimpanGambar.setMinimumSize(new java.awt.Dimension(200, 34));
         SimpanGambar.setName("SimpanGambar"); // NOI18N
-        SimpanGambar.setPreferredSize(new java.awt.Dimension(190, 30));
+        SimpanGambar.setPreferredSize(new java.awt.Dimension(180, 30));
         SimpanGambar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 SimpanGambarActionPerformed(evt);
@@ -1257,6 +1249,20 @@ public class DlgCariPeriksaRadiologi extends javax.swing.JDialog {
             }
         });
         panelGlass7.add(SimpanGambar);
+
+        // [UPSTREAM] Tombol Ke DICOMROUTER
+        btnDicomRouter.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/save-16x16.png"))); // NOI18N
+        btnDicomRouter.setMnemonic('T');
+        btnDicomRouter.setText("Ke DICOMROUTER");
+        btnDicomRouter.setToolTipText("Alt+T");
+        btnDicomRouter.setName("btnDicomRouter"); // NOI18N
+        btnDicomRouter.setPreferredSize(new java.awt.Dimension(150, 30));
+        btnDicomRouter.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDicomRouterActionPerformed(evt);
+            }
+        });
+        panelGlass7.add(btnDicomRouter);
 
         FormOrthan.add(panelGlass7, java.awt.BorderLayout.PAGE_END);
 
@@ -2262,7 +2268,7 @@ if(Kd2.getText().equals("")){
             if(tbListDicom.getSelectedRow()!= -1){
                 this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 OrthancDICOM orthan=new OrthancDICOM(null,false);
-                orthan.setJudul("::[ DICOM Orthanc Pasien "+tbDokter.getValueAt(tbDokter.getSelectedRow(),1).toString()+", Series "+tbListDicom.getValueAt(tbListDicom.getSelectedRow(),2).toString()+" ]::",tbDokter.getValueAt(tbDokter.getSelectedRow(),0).toString().replaceAll("/","")+"_"+tbDokter.getValueAt(tbDokter.getSelectedRow(),1).toString().replaceAll(" ","_").replaceAll("/","").replaceAll(":","").replaceAll(",",""),tbListDicom.getValueAt(tbListDicom.getSelectedRow(),2).toString());
+                orthan.setJudul("::[ DICOM Orthanc Pasien "+tbDokter.getValueAt(tbDokter.getSelectedRow(),1).toString()+", Series "+tbListDicom.getValueAt(tbListDicom.getSelectedRow(),2).toString()+" ]::",tbDokter.getValueAt(tbDokter.getSelectedRow(),0).toString().replaceAll("/","")+"_"+tbDokter.getValueAt(tbDokter.getSelectedRow(),1).toString().replaceAll(" ","_").replaceAll("/","").replaceAll(":","").replaceAll(",",""),tbListDicom.getValueAt(tbListDicom.getSelectedRow(),2).toString(),tbListDicom.getValueAt(tbListDicom.getSelectedRow(),1).toString(),tbDokter.getValueAt(tbDokter.getSelectedRow(),0).toString());
                 try {
                     System.out.println("URL : "+koneksiDB.URLORTHANC()+":"+koneksiDB.PORTORTHANC()+"/web-viewer/app/viewer.html?series="+tbListDicom.getValueAt(tbListDicom.getSelectedRow(),2).toString());
                     orthan.loadURL(koneksiDB.URLORTHANC()+":"+koneksiDB.PORTORTHANC()+"/web-viewer/app/viewer.html?series="+tbListDicom.getValueAt(tbListDicom.getSelectedRow(),2).toString());
@@ -2749,6 +2755,24 @@ if(Kd2.getText().equals("")){
             this.setCursor(Cursor.getDefaultCursor());
         }
      }
+
+    // [UPSTREAM] Kirim series DICOM ke DICOMROUTER / modality lain via ApiOrthanc
+    private void btnDicomRouterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDicomRouterActionPerformed
+        if(tabModeDicom.getRowCount()==0){
+            JOptionPane.showMessageDialog(null,"Maaf, data sudah habis...!!!!");
+            TCari.requestFocus();
+        }else {
+            if(tbListDicom.getSelectedRow()!= -1){
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                ApiOrthanc orthanc=new ApiOrthanc();
+                orthanc.kirimKeModality(tbListDicom.getValueAt(tbListDicom.getSelectedRow(),2).toString());
+                this.setCursor(Cursor.getDefaultCursor());
+            }else{
+                JOptionPane.showMessageDialog(null,"Maaf, Silahkan pilih data..!!");
+            }
+        }
+    }//GEN-LAST:event_btnDicomRouterActionPerformed
+
     /**
     * @param args the command line arguments
     */
@@ -2823,6 +2847,7 @@ if(Kd2.getText().equals("")){
     private widget.Button btnAmbilPhoto;
     private widget.Button btnAmbilPhoto1;
     private widget.Button btnDicom;
+    private widget.Button btnDicomRouter;
     private widget.Button btnDokter;
     private widget.Button btnDokterPj;
     private widget.Button btnPasien;

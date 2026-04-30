@@ -50,8 +50,10 @@ import fungsi.sekuel;
 import fungsi.validasi;
 import fungsi.akses;
 import fungsi.WarnaTableRawatInap; //tambahan ichsan
+import fungsi.cacheigd;
 import fungsi.catatanpasien;
-import fungsi.closingkasir;import inventory.DlgCopyResep;
+import fungsi.closingkasir;
+import inventory.DlgCopyResep;
 import inventory.DlgPeresepanDokter;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -230,7 +232,10 @@ import surat.SuratSakitPihak2;
 import surat.SuratTidakHamil;
 import java.util.List;
 import javax.swing.WindowConstants;
+import permintaan.DlgPermintaanKonsultasiMedik;
+import permintaan.DlgPermintaanKonsultasiPerawat;
 import rekammedis.RMDataSkriningGiziKehamilan;
+import surat.SuratPermintaanBinrohtal;
 import surat.SuratSerahTerimaBarangAnggotaTubuh;
 
 /**
@@ -4453,6 +4458,9 @@ public final class DlgIGD extends javax.swing.JDialog {
         setUndecorated(true);
         setResizable(false);
         addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
             public void windowOpened(java.awt.event.WindowEvent evt) {
                 formWindowOpened(evt);
             }
@@ -7321,8 +7329,22 @@ public final class DlgIGD extends javax.swing.JDialog {
             Valid.pindah(evt, BtnPrint3, Kabupaten2);
         }
     }// GEN-LAST:event_BtnKeluar3KeyPressed
-
-    private void formWindowOpened(java.awt.event.WindowEvent evt) {// GEN-FIRST:event_formWindowOpened
+   private void formWindowClosed(java.awt.event.WindowEvent evt) { 
+        cacheigd.SetTanggalAwal(DTPCari1.getDate());
+        cacheigd.SetTanggalAkhir(DTPCari2.getDate());
+        cacheigd.SetKeyWord(TCari.getText());
+        cacheigd.clearDataPasien();
+        
+        for (int i = 0; i < tabMode.getRowCount(); i++) {
+            Object[] baris = new Object[tabMode.getColumnCount()];
+            for (int j = 0; j < tabMode.getColumnCount(); j++) {
+                baris[j] = tabMode.getValueAt(i, j);
+            }
+            cacheigd.setDataPasien(baris);
+        }
+    }
+    
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         try {
             ps3 = koneksi.prepareStatement(
                     "select poliklinik.registrasi,poliklinik.registrasilama,poliklinik.kd_poli from poliklinik where poliklinik.kd_poli='IGDK'");
@@ -7346,11 +7368,31 @@ public final class DlgIGD extends javax.swing.JDialog {
         } catch (Exception e) {
             System.out.println("Notif : " + e);
         }
-
-        tampil();
-
-        if (koneksiDB.CARICEPAT().equals("aktif")) {
-            TCari.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+        
+        if(cacheigd.getTanggalAwal()!=null){
+            DTPCari1.setDate(cacheigd.getTanggalAwal());
+        }
+        
+        if(cacheigd.getTanggalAkhir()!=null){
+            DTPCari2.setDate(cacheigd.getTanggalAkhir());
+        }
+        
+        if(cacheigd.getKeyWord()!=null){
+            TCari.setText(cacheigd.getKeyWord());
+        }
+        
+        if(!cacheigd.getDataPasien().isEmpty()){
+            for (Object[] baris : cacheigd.getDataPasien()) {
+                tabMode.addRow(baris);
+            }
+            LCount.setText("" + tabMode.getRowCount());
+            cacheigd.clearDataPasien();
+        }else{
+            tampil();
+        }
+        
+        if(koneksiDB.CARICEPAT().equals("aktif")){
+            TCari.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
                 @Override
                 public void insertUpdate(DocumentEvent e) {
                     if (TCari.getText().length() > 2) {
@@ -12898,7 +12940,73 @@ public final class DlgIGD extends javax.swing.JDialog {
             }
         }
     }
-
+    private void MnPermintaanKonsultasiMedikActionPerformed(java.awt.event.ActionEvent evt) {
+        if(tabMode.getRowCount()==0){
+            JOptionPane.showMessageDialog(null,"Maaf, table masih kosong...!!!!");
+            TNoReg.requestFocus();
+        }else if(TPasien.getText().trim().equals("")){
+            JOptionPane.showMessageDialog(null,"Maaf, Silahkan anda pilih dulu dengan menklik data pada table...!!!");
+            tbPetugas.requestFocus();
+        }else{
+            if(tbPetugas.getSelectedRow()!= -1){
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                DlgPermintaanKonsultasiMedik form=new DlgPermintaanKonsultasiMedik(null,false);
+                form.isCek();
+                form.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+                form.setLocationRelativeTo(internalFrame1);
+                form.setVisible(true);
+                form.emptTeks();
+                form.setNoRm(TNoRw.getText(),TNoRM.getText(),TPasien.getText());
+                form.tampil2();
+                this.setCursor(Cursor.getDefaultCursor());  
+            }                
+        }
+    }
+    
+    private void MnPermintaanKonsultasiPerawatActionPerformed(java.awt.event.ActionEvent evt) {
+        if(tabMode.getRowCount()==0){
+            JOptionPane.showMessageDialog(null,"Maaf, table masih kosong...!!!!");
+            TNoReg.requestFocus();
+        }else if(TPasien.getText().trim().equals("")){
+            JOptionPane.showMessageDialog(null,"Maaf, Silahkan anda pilih dulu dengan menklik data pada table...!!!");
+            tbPetugas.requestFocus();
+        }else{
+            if(tbPetugas.getSelectedRow()!= -1){
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                DlgPermintaanKonsultasiPerawat form=new DlgPermintaanKonsultasiPerawat(null,false);
+                form.isCek();
+                form.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+                form.setLocationRelativeTo(internalFrame1);
+                form.setVisible(true);
+                form.emptTeks();
+                form.setNoRm(TNoRw.getText(),TNoRM.getText(),TPasien.getText());
+                form.tampil2();
+                this.setCursor(Cursor.getDefaultCursor());  
+            }                
+        }
+    }
+    
+    private void MnPersetujuanBimbinganRohaniActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MnPersetujuanUmumActionPerformed
+        if(tabMode.getRowCount()==0){
+            JOptionPane.showMessageDialog(null,"Maaf, data registrasi sudah habis...!!!!");
+            TNoRM.requestFocus();
+        }else if(TPasien.getText().trim().equals("")){
+            JOptionPane.showMessageDialog(null,"Maaf, Silahkan anda pilih dulu data pasien dengan menklik data pada table...!!!");
+            tbPetugas.requestFocus();
+        }else{
+            if(tbPetugas.getSelectedRow()!= -1){
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                SuratPermintaanBinrohtal form=new SuratPermintaanBinrohtal(null,false);
+                form.isCek();
+                form.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+                form.setLocationRelativeTo(internalFrame1);
+                form.setVisible(true);
+                form.emptTeks();
+                form.setNoRm(TNoRw.getText(),DTPCari2.getDate());
+                this.setCursor(Cursor.getDefaultCursor());
+            }
+        }
+    }
     /**
      * @data args the command line arguments
      */
@@ -13225,29 +13333,18 @@ public final class DlgIGD extends javax.swing.JDialog {
     private javax.swing.JMenuItem ppSuratPRI;
     private widget.Table tbPetugas;
     // End of variables declaration//GEN-END:variables
-    private javax.swing.JMenuItem MnPenilaianPreInduksi, MnHasilPemeriksaanEKG, MnSudahTerbitSEP,
-            MnPenilaianPasienImunitasRendah, MnCatatanKeseimbanganCairan, MnCatatanObservasiCHBP,
-            MnCatatanObservasiInduksiPersalinan,
-            MnDataOperasi, MnSkriningMerokokUsiaSekolahRemaja, MnSkriningKekerasanPadaWanita, MnSkriningObesitas,
-            MnSkriningRisikoKankerPayudara, MnSkriningRisikoKankerParu, MnSkriningKesehatanGigiMulutRemaja,
-            MnSkriningTBC, MnCatatanAnastesiSedasi, MnSkriningPUMA, MnSkriningAdiksiNikotin, MnSkriningThalassemia,
-            MnSkriningInstrumenSDQ, MnSkriningInstrumenSRQ, MnChecklistPemberianFibrinolitik,
-            MnSkriningKankerKolorektal, MnPenilaianPsikologKlinis, MnPenilaianDerajatDehidrasi, MnHasilPemeriksaanECHO,
-            MnPenilaianBayiBaruLahir, MnSkriningDiabetesMelitus, MnLaporanTindakan,
-            MnPelaksanaanInformasiEdukasi, MnSkriningAnemia, MnSkriningHipertensi, MnSkriningKesehatanPenglihatan,
-            MnCatatanObservasiHemodialisa, MnSkriningKesehatanGigiMulutDewasa,
-            MnSkriningKesehatanGigiMulutBalita, MnSkriningRisikoKankerServiks, MnCatatanCairanHemodialisa,
-            MnSkriningKesehatanGigiMulutLansia, MnSkriningIndraPendengaran, MnCatatanPengkajianPaskaOperasi,
-            MnSkriningFrailtySyndrome, MnCatatanObservasiBayi, MnCheckListKesiapanAnestesi, MnHasilPemeriksaanSlitLamp,
-            MnHasilPemeriksaanOCT, MnCetakSuratKeteranganLayakTerbang, MnPersetujuanPemeriksaanHIV,
-            MnSkriningInstrumenACRS, MnPernyataanMemilihDPJP, MnSkriningInstrumenMentalEmosional,
-            MnCheckListKriteriaMasukNICU, MnCheckListKriteriaMasukPICU, MnSkriningInstrumenAMT,
-            MnSkriningPneumoniaSeverityIndex,
-            MnHasilPemeriksaanTreadmill, MnHasilPemeriksaanECHOPediatrik, MnSkriningInstrumenESAT, MnSkriningCURB65,
-            MnSkriningGiziKehamilan, MnSerahTerimaBarangAnggotaTubuh;
-    private javax.swing.JMenu MnRMSkrining, MnEdukasi, MnRMSkriningRisikoKanker, MnRMSkriningKesehatanGigiMulut,
-            MnSuratPersetujuan, MnSkriningInstrumen, MnSkriningParu;
-
+    private javax.swing.JMenuItem MnPenilaianPreInduksi,MnHasilPemeriksaanEKG,MnSudahTerbitSEP,MnPenilaianPasienImunitasRendah,MnCatatanKeseimbanganCairan,MnCatatanObservasiCHBP,MnCatatanObservasiInduksiPersalinan,
+                                  MnDataOperasi,MnSkriningMerokokUsiaSekolahRemaja,MnSkriningKekerasanPadaWanita,MnSkriningObesitas,MnSkriningRisikoKankerPayudara,MnSkriningRisikoKankerParu,MnSkriningKesehatanGigiMulutRemaja,
+                                  MnSkriningTBC,MnCatatanAnastesiSedasi,MnSkriningPUMA,MnSkriningAdiksiNikotin,MnSkriningThalassemia,MnSkriningInstrumenSDQ,MnSkriningInstrumenSRQ,MnChecklistPemberianFibrinolitik,
+                                  MnSkriningKankerKolorektal,MnPenilaianPsikologKlinis,MnPenilaianDerajatDehidrasi,MnHasilPemeriksaanECHO,MnPenilaianBayiBaruLahir,MnSkriningDiabetesMelitus,MnLaporanTindakan,
+                                  MnPelaksanaanInformasiEdukasi,MnSkriningAnemia,MnSkriningHipertensi,MnSkriningKesehatanPenglihatan,MnCatatanObservasiHemodialisa,MnSkriningKesehatanGigiMulutDewasa,
+                                  MnSkriningKesehatanGigiMulutBalita,MnSkriningRisikoKankerServiks,MnCatatanCairanHemodialisa,MnSkriningKesehatanGigiMulutLansia,MnSkriningIndraPendengaran,MnCatatanPengkajianPaskaOperasi,
+                                  MnSkriningFrailtySyndrome,MnCatatanObservasiBayi,MnCheckListKesiapanAnestesi,MnHasilPemeriksaanSlitLamp,MnHasilPemeriksaanOCT,MnCetakSuratKeteranganLayakTerbang,MnPersetujuanPemeriksaanHIV,
+                                  MnSkriningInstrumenACRS,MnPernyataanMemilihDPJP,MnSkriningInstrumenMentalEmosional,MnCheckListKriteriaMasukNICU,MnCheckListKriteriaMasukPICU,MnSkriningInstrumenAMT,MnSkriningPneumoniaSeverityIndex,
+                                  MnHasilPemeriksaanTreadmill,MnHasilPemeriksaanECHOPediatrik,MnSkriningInstrumenESAT,MnSkriningCURB65,MnSkriningGiziKehamilan,MnSerahTerimaBarangAnggotaTubuh,MnPermintaanKonsultasiMedik,
+                                  MnPermintaanKonsultasiPerawat,MnPersetujuanBimbinganRohani;
+    private javax.swing.JMenu MnRMSkrining,MnEdukasi,MnRMSkriningRisikoKanker,MnRMSkriningKesehatanGigiMulut,MnSuratPersetujuan,MnSkriningInstrumen,MnSkriningParu;
+    
     private void tampil() {
         if (ceksukses == false) {
             ceksukses = true;
@@ -13748,10 +13845,13 @@ public final class DlgIGD extends javax.swing.JDialog {
         MnPersetujuanPemeriksaanHIV.setEnabled(akses.getsurat_persetujuan_pemeriksaan_hiv());
         MnPernyataanMemilihDPJP.setEnabled(akses.getsurat_pernyataan_memilih_dpjp());
         MnSerahTerimaBarangAnggotaTubuh.setEnabled(akses.getserah_terima_anggota_tubuh_barang());
-        MnCheckListKriteriaMasukNICU.setEnabled(akses.getkriteria_masuk_nicu());
-        MnCheckListKriteriaMasukPICU.setEnabled(akses.getkriteria_masuk_picu());
+        MnPersetujuanBimbinganRohani.setEnabled(akses.getpermintaan_binrohtal());
+        MnCheckListKriteriaMasukNICU.setEnabled(akses.getkriteria_masuk_nicu());   
+        MnCheckListKriteriaMasukPICU.setEnabled(akses.getkriteria_masuk_picu());   
         MnSkriningCURB65.setEnabled(akses.getskrining_curb65());
         MnSkriningGiziKehamilan.setEnabled(akses.getskrining_gizi_kehamilan());
+        MnPermintaanKonsultasiMedik.setEnabled(akses.getkonsultasi_medik());
+        MnPermintaanKonsultasiPerawat.setEnabled(akses.getkonsultasi_perawat());
     }
 
     private void isNumber() {
@@ -14611,7 +14711,19 @@ public final class DlgIGD extends javax.swing.JDialog {
         MnSerahTerimaBarangAnggotaTubuh.setName("MnSerahTerimaBarangAnggotaTubuh");
         MnSerahTerimaBarangAnggotaTubuh.setPreferredSize(new java.awt.Dimension(260, 26));
         MnSerahTerimaBarangAnggotaTubuh.addActionListener(this::MnSerahTerimaBarangAnggotaTubuhActionPerformed);
-
+        
+        MnPersetujuanBimbinganRohani = new javax.swing.JMenuItem();
+        MnPersetujuanBimbinganRohani.setBackground(new java.awt.Color(255, 255, 254));
+        MnPersetujuanBimbinganRohani.setFont(new java.awt.Font("Tahoma", 0, 11));
+        MnPersetujuanBimbinganRohani.setForeground(new java.awt.Color(50, 50, 50));
+        MnPersetujuanBimbinganRohani.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); 
+        MnPersetujuanBimbinganRohani.setText("Persetujuan Bimbingan Rohani & Mental");
+        MnPersetujuanBimbinganRohani.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        MnPersetujuanBimbinganRohani.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        MnPersetujuanBimbinganRohani.setName("MnPersetujuanBimbinganRohani");
+        MnPersetujuanBimbinganRohani.setPreferredSize(new java.awt.Dimension(260, 26));
+        MnPersetujuanBimbinganRohani.addActionListener(this::MnPersetujuanBimbinganRohaniActionPerformed);
+        
         MnSkriningInstrumenACRS = new javax.swing.JMenuItem();
         MnSkriningInstrumenACRS.setBackground(new java.awt.Color(255, 255, 254));
         MnSkriningInstrumenACRS.setFont(new java.awt.Font("Tahoma", 0, 11));
@@ -14723,7 +14835,31 @@ public final class DlgIGD extends javax.swing.JDialog {
         MnSkriningGiziKehamilan.setName("MnSkriningGiziKehamilan");
         MnSkriningGiziKehamilan.setPreferredSize(new java.awt.Dimension(260, 26));
         MnSkriningGiziKehamilan.addActionListener(this::MnSkriningGiziKehamilanActionPerformed);
-
+        
+        MnPermintaanKonsultasiMedik = new javax.swing.JMenuItem();
+        MnPermintaanKonsultasiMedik.setBackground(new java.awt.Color(255, 255, 254));
+        MnPermintaanKonsultasiMedik.setFont(new java.awt.Font("Tahoma", 0, 11));
+        MnPermintaanKonsultasiMedik.setForeground(new java.awt.Color(50, 50, 50));
+        MnPermintaanKonsultasiMedik.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); 
+        MnPermintaanKonsultasiMedik.setText("Konsultasi Medik");
+        MnPermintaanKonsultasiMedik.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        MnPermintaanKonsultasiMedik.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        MnPermintaanKonsultasiMedik.setName("MnPermintaanKonsultasiMedik");
+        MnPermintaanKonsultasiMedik.setPreferredSize(new java.awt.Dimension(210, 26));
+        MnPermintaanKonsultasiMedik.addActionListener(this::MnPermintaanKonsultasiMedikActionPerformed);
+        
+        MnPermintaanKonsultasiPerawat = new javax.swing.JMenuItem();
+        MnPermintaanKonsultasiPerawat.setBackground(new java.awt.Color(255, 255, 254));
+        MnPermintaanKonsultasiPerawat.setFont(new java.awt.Font("Tahoma", 0, 11));
+        MnPermintaanKonsultasiPerawat.setForeground(new java.awt.Color(50, 50, 50));
+        MnPermintaanKonsultasiPerawat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); 
+        MnPermintaanKonsultasiPerawat.setText("Konsultasi Perawat");
+        MnPermintaanKonsultasiPerawat.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        MnPermintaanKonsultasiPerawat.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        MnPermintaanKonsultasiPerawat.setName("MnPermintaanKonsultasiPerawat");
+        MnPermintaanKonsultasiPerawat.setPreferredSize(new java.awt.Dimension(210, 26));
+        MnPermintaanKonsultasiPerawat.addActionListener(this::MnPermintaanKonsultasiPerawatActionPerformed);
+        
         MnRMSkriningRisikoKanker = new javax.swing.JMenu();
         MnRMSkriningRisikoKanker.setBackground(new java.awt.Color(255, 255, 254));
         MnRMSkriningRisikoKanker.setForeground(new java.awt.Color(50, 50, 50));
@@ -14915,7 +15051,10 @@ public final class DlgIGD extends javax.swing.JDialog {
         MnEdukasi.add(MnPelaksanaanInformasiEdukasi);
 
         MnTindakan.add(MnDataOperasi);
-
+        
+        MnPermintaan.add(MnPermintaanKonsultasiMedik);
+        MnPermintaan.add(MnPermintaanKonsultasiPerawat);
+        
         MnDataRM.add(MnRMSkrining);
         MnDataRM.add(MnRMIGD);
         MnDataRM.add(MnRMOperasi);
@@ -14953,6 +15092,8 @@ public final class DlgIGD extends javax.swing.JDialog {
         MnSuratPersetujuan.add(MnPersetujuanPemeriksaanHIV);
         MnSuratPersetujuan.add(MnPernyataanMemilihDPJP);
         MnSuratPersetujuan.add(MnSerahTerimaBarangAnggotaTubuh);
+        MnSuratPersetujuan.add(MnPersetujuanBimbinganRohani);
+        
         MnRMHCU.add(MnCheckListKriteriaMasukNICU);
         MnRMHCU.add(MnCheckListKriteriaMasukPICU);
     }

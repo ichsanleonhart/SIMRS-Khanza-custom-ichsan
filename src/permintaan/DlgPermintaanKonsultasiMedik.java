@@ -154,6 +154,10 @@ public class DlgPermintaanKonsultasiMedik extends javax.swing.JDialog {
                 }
             });
         } 
+        DiagnosaKerja.setDocument(new batasInput((int)200).getKata(DiagnosaKerja));
+        UraianKonsultasi.setDocument(new batasInput((int)800).getKata(UraianKonsultasi));
+        JawabanDiagnosaKerja.setDocument(new batasInput((int)200).getKata(JawabanDiagnosaKerja));
+        JawabanKonsultasi.setDocument(new batasInput((int)800).getKata(JawabanKonsultasi));
         
         WindowInput.setSize(735,245);
         WindowInput.setLocationRelativeTo(null);  
@@ -208,6 +212,8 @@ public class DlgPermintaanKonsultasiMedik extends javax.swing.JDialog {
         JawabanDiagnosaKerja = new widget.TextBox();
         label3 = new widget.Label();
         LoadHTML = new widget.editorpane();
+        jPopupMenu1 = new javax.swing.JPopupMenu();
+        MnGenerateSBAR = new javax.swing.JMenuItem();
         internalFrame1 = new widget.InternalFrame();
         Scroll = new widget.ScrollPane();
         tbObat = new widget.Table();
@@ -413,6 +419,22 @@ public class DlgPermintaanKonsultasiMedik extends javax.swing.JDialog {
 
         LoadHTML.setBorder(null);
         LoadHTML.setName("LoadHTML"); // NOI18N
+
+        jPopupMenu1.setName("jPopupMenu1"); // NOI18N
+
+        MnGenerateSBAR.setBackground(new java.awt.Color(255, 255, 254));
+        MnGenerateSBAR.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
+        MnGenerateSBAR.setForeground(new java.awt.Color(50, 50, 50));
+        MnGenerateSBAR.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
+        MnGenerateSBAR.setText("Gunakan Format SBAR");
+        MnGenerateSBAR.setName("MnGenerateSBAR"); // NOI18N
+        MnGenerateSBAR.setPreferredSize(new java.awt.Dimension(200, 26));
+        MnGenerateSBAR.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                MnGenerateSBARActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(MnGenerateSBAR);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setUndecorated(true);
@@ -824,11 +846,13 @@ public class DlgPermintaanKonsultasiMedik extends javax.swing.JDialog {
         jLabel30.setBounds(16, 150, 90, 23);
 
         scrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        scrollPane1.setComponentPopupMenu(jPopupMenu1);
         scrollPane1.setName("scrollPane1"); // NOI18N
 
         UraianKonsultasi.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         UraianKonsultasi.setColumns(20);
         UraianKonsultasi.setRows(5);
+        UraianKonsultasi.setComponentPopupMenu(jPopupMenu1);
         UraianKonsultasi.setName("UraianKonsultasi"); // NOI18N
         UraianKonsultasi.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
@@ -1736,6 +1760,9 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     }
     // tambahan ichsan - modul berkas digital perawatan
         
+    private void MnGenerateSBARActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MnGenerateSBARActionPerformed
+        UraianKonsultasi.setText("Situation :\n\n\nBackground :\n\n\nAssessment :\n\n\nRecommendation :\n");
+    }//GEN-LAST:event_MnGenerateSBARActionPerformed
     /**
     * @param args the command line arguments
     */
@@ -1783,6 +1810,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private widget.TextBox KdDokterDikonsuli;
     private widget.Label LCount;
     private widget.editorpane LoadHTML;
+    private javax.swing.JMenuItem MnGenerateSBAR;
     private widget.TextBox NmDokter;
     private widget.TextBox NmDokterDikonsuli;
     private widget.TextBox NmPasien;
@@ -1820,6 +1848,7 @@ private void ChkInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private widget.Label jLabel8;
     private widget.Label jLabel9;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
