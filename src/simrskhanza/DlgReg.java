@@ -6805,24 +6805,25 @@ public final class DlgReg extends javax.swing.JDialog {
 
     private void BtnCheckinKeyPressed(java.awt.event.KeyEvent evt) {          //ketika tombol checkin ditekan                             
         if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
-            BtnCheckinActionPerformed(null);            
-            ////////////////////Selesai tekan tombol checkin, dilanjutkan dengan script untuk mengirim pesan WA ke nomor hp pasien             
-        try { //////////////// start - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
-             if(koneksiDB.WANOTIFPASIEN().equals("yes")){
-                 //kirimWhatsAppMessageMJKN();  //kirim pesan WA by ichsan
-                 reply = JOptionPane.showConfirmDialog(rootPane,"Mau sekalian bikin SEP..?","Konfirmasi",JOptionPane.YES_NO_OPTION);
-                 if (reply == JOptionPane.YES_OPTION) {                                    
-                                //MnSEPActionPerformed(new java.awt.event.ActionEvent(this, ActionEvent.ACTION_PERFORMED, "MnSEP")); // Trigger SEP action
-                                MnSEP.doClick();  // Simulates user clicking the MnSEP menu item
-                                } 
-                             }else{
-                                 JOptionPane.showMessageDialog(null,"Maaf ada kesalahan, mungkin kunjungan ini bukan pasien BPJS");
-                             }            
-        } catch (Exception e) {
-            e.printStackTrace(); // Debugging: shows the actual error in the console
-            emptTeks();  //kosongkan isi form setelah tekan simpan
-        }  ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan     
-        
+            reply = JOptionPane.showConfirmDialog(rootPane,"Mau checkin-kan pasien ini?","Konfirmasi",JOptionPane.YES_NO_OPTION);
+            if (reply == JOptionPane.YES_OPTION) {
+                BtnCheckinActionPerformed(null);            
+                ////////////////////Selesai tekan tombol checkin, dilanjutkan dengan script untuk mengirim pesan WA ke nomor hp pasien             
+                try { //////////////// start - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan
+                     if(koneksiDB.WANOTIFPASIEN().equals("yes")){
+                         //kirimWhatsAppMessageMJKN();  //kirim pesan WA by ichsan
+                         reply = JOptionPane.showConfirmDialog(rootPane,"Mau sekalian bikin SEP..?","Konfirmasi",JOptionPane.YES_NO_OPTION);
+                         if (reply == JOptionPane.YES_OPTION) {                                    
+                             MnSEPActionPerformed(null);
+                         } 
+                            }else{
+                            JOptionPane.showMessageDialog(null,"Maaf ada kesalahan, mungkin kunjungan ini bukan pasien BPJS");
+                            }            
+                } catch (Exception e) {
+                    e.printStackTrace(); // Debugging: shows the actual error in the console
+                    emptTeks();  //kosongkan isi form setelah tekan simpan
+                }  ////////////////////// end - fungsi untuk cek ke database.xml, kalau disetting yes pada WA Notif Pasien,  maka jalankan script untuk kirim WA - ichsan     
+            }
         } else {
             Valid.pindah(evt, BtnCari, BtnBatal);
         }
