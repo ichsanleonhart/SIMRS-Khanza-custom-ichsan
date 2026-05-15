@@ -9156,6 +9156,8 @@ private void MnDataPemberianObatActionPerformed(java.awt.event.ActionEvent evt) 
             akuntindakanralan.SetAkunTindakanRalan();
         }
         
+        tampilkasir(); // TAMBAHAN ICHSAN
+        
         if(cacherawatjalan.getTanggalAwal()!=null){
             DTPCari1.setDate(cacherawatjalan.getTanggalAwal());
         }

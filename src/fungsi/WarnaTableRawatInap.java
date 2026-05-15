@@ -86,7 +86,7 @@ public class WarnaTableRawatInap extends DefaultTableCellRenderer {
         Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
         // Prioritize "Batal" condition di table IGD
-        if (table.getValueAt(row, 18).toString().contains("Batal")) {
+        if (table.getColumnCount() > 18 && table.getValueAt(row, 18) != null && table.getValueAt(row, 18).toString().contains("Batal")) {
             component.setBackground(new Color(255, 5, 5)); // Blazing red background
             component.setForeground(new Color(255, 255, 5)); // Yellow text
         } else {
@@ -101,13 +101,14 @@ public class WarnaTableRawatInap extends DefaultTableCellRenderer {
             }
             
             // bagian ini adalah render untuk table rawat inap
-            if (table.getValueAt(row, 6).toString().contains("BPJS")) {
-                component.setBackground(new Color(204, 255, 204));
-                component.setForeground(new Color(50, 40, 50));
-            } else if (table.getValueAt(row, 6).toString().contains("UMUM")) {
-                component.setBackground(new Color(102, 204, 255));
-                component.setForeground(new Color(0, 0, 102));
-            } else if (table.getValueAt(row, 6).toString().contains("Asuransi")) {
+            if (table.getColumnCount() > 6 && table.getValueAt(row, 6) != null) {
+                if (table.getValueAt(row, 6).toString().contains("BPJS")) {
+                    component.setBackground(new Color(204, 255, 204));
+                    component.setForeground(new Color(50, 40, 50));
+                } else if (table.getValueAt(row, 6).toString().contains("UMUM")) {
+                    component.setBackground(new Color(102, 204, 255));
+                    component.setForeground(new Color(0, 0, 102));
+                } else if (table.getValueAt(row, 6).toString().contains("Asuransi")) {
                 component.setBackground(new Color(255, 204, 255));
                 component.setForeground(new Color(42, 53, 42));
             } else if (table.getValueAt(row, 6).toString().contains("Perusahaan")) {
@@ -120,26 +121,29 @@ public class WarnaTableRawatInap extends DefaultTableCellRenderer {
                 component.setBackground(new Color(51, 204, 255));
                 component.setForeground(new Color(0, 0, 102));
             }
+            }
             
             // bagian ini adalah render untuk table IGD
-            if (table.getValueAt(row, 17).toString().contains("BPJS")) {
-                component.setBackground(new Color(204, 255, 204));
-                component.setForeground(new Color(50, 40, 50));
-            } else if (table.getValueAt(row, 17).toString().contains("UMUM")) {
-                component.setBackground(new Color(102, 204, 255));
-                component.setForeground(new Color(0, 0, 102));
-            } else if (table.getValueAt(row, 17).toString().contains("Asuransi")) {
-                component.setBackground(new Color(255, 204, 255));
-                component.setForeground(new Color(42, 53, 42));
-            } else if (table.getValueAt(row, 17).toString().contains("Perusahaan")) {
-                component.setBackground(new Color(255, 204, 204));
-                component.setForeground(new Color(31, 38, 38));
-            } else if (table.getValueAt(row, 17).toString().contains("Inhealth")) {
-                component.setBackground(new Color(255, 153, 204));
-                component.setForeground(new Color(55, 36, 36));
-            } else if (table.getValueAt(row, 17).toString().contains("PJPK")) {
-                component.setBackground(new Color(51, 204, 255));
-                component.setForeground(new Color(0, 0, 102));
+            if (table.getColumnCount() > 17 && table.getValueAt(row, 17) != null) {
+                if (table.getValueAt(row, 17).toString().contains("BPJS")) {
+                    component.setBackground(new Color(204, 255, 204));
+                    component.setForeground(new Color(50, 40, 50));
+                } else if (table.getValueAt(row, 17).toString().contains("UMUM")) {
+                    component.setBackground(new Color(102, 204, 255));
+                    component.setForeground(new Color(0, 0, 102));
+                } else if (table.getValueAt(row, 17).toString().contains("Asuransi")) {
+                    component.setBackground(new Color(255, 204, 255));
+                    component.setForeground(new Color(42, 53, 42));
+                } else if (table.getValueAt(row, 17).toString().contains("Perusahaan")) {
+                    component.setBackground(new Color(255, 204, 204));
+                    component.setForeground(new Color(31, 38, 38));
+                } else if (table.getValueAt(row, 17).toString().contains("Inhealth")) {
+                    component.setBackground(new Color(255, 153, 204));
+                    component.setForeground(new Color(55, 36, 36));
+                } else if (table.getValueAt(row, 17).toString().contains("PJPK")) {
+                    component.setBackground(new Color(51, 204, 255));
+                    component.setForeground(new Color(0, 0, 102));
+                }
             }
         }
 

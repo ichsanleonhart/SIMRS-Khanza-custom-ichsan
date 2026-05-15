@@ -8203,6 +8203,9 @@ public class DlgKamarInap extends javax.swing.JDialog {
     }
     
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        if(WindowInputKamar.isVisible()==false){
+            tampil(); 
+        } 
         try {
             if(pengaturankamarinap.getAktifkanDiagnosaAkhir().equals("Yes")){
                 diagnosaakhir.setEditable(true); 

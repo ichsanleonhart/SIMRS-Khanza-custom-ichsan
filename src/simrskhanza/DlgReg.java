@@ -8808,7 +8808,11 @@ private void MnRawatJalanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
                     if (!dlgrwjl.isVisible()) {
                         dlgrwjl.SetPoli(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),21).toString());
                         dlgrwjl.SetPj(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),22).toString());
-                        dlgrwjl.setNoRm(TNoRw.getText(),DTPCari1.getDate(),DTPCari2.getDate());   
+                        dlgrwjl.setNoRm(TNoRw.getText(),
+                            DTPCari1.getDate(),DTPCari2.getDate(),
+                            tbPetugas.getValueAt(tbPetugas.getSelectedRow(),5).toString(),
+                            tbPetugas.getValueAt(tbPetugas.getSelectedRow(),6).toString()
+                        );   
                         dlgrwjl.isCek();
                     }
 
@@ -9498,6 +9502,11 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
         
         if(cacheregistrasi.getDokter()!=null){
             CrDokter.setText(cacheregistrasi.getDokter());
+        } else {
+            String nm_dokter = Sequel.cariIsi("select nm_dokter from dokter where kd_dokter=?", akses.getkode());
+            if (!nm_dokter.equals("")) {
+                CrDokter.setText(nm_dokter);
+            }
         }
         
         if(cacheregistrasi.getPoli()!=null){
