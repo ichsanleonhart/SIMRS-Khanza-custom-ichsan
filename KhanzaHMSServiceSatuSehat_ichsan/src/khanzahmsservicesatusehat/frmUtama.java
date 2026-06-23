@@ -4879,15 +4879,15 @@ public class frmUtama extends javax.swing.JFrame {
             String dbUnitCode = rs.getString("denominator_code").trim();
             String finalUnitSystem = "";
             
-            // 1. CEK SPESIFIK UNTUK 'mL' (KASUS SIRUP)
-            // Kita paksa mL menggunakan DrugForm karena UCUM selalu ditolak untuk kasus ini
-            if (dbUnitCode.equalsIgnoreCase("mL") || dbUnitCode.equals("ml") || dbUnitCode.equals("ML")) {
-                dbUnitCode = "mL"; // Standarisasi penulisan
-                finalUnitSystem = "http://terminology.hl7.org/CodeSystem/v3-orderableDrugForm"; // PAKSA KE SINI
+            // 1. CEK SPESIFIK UNTUK 'mL' (KASUS SIRUP) - Konversi ke SOL (Solution) karena v3-orderableDrugForm wajib digunakan
+            if (dbUnitCode.equalsIgnoreCase("mL") || dbUnitCode.equalsIgnoreCase("ml") || dbUnitCode.equalsIgnoreCase("ML")) {
+                dbUnitCode = "SOL"; // Map mL ke SOL (Solution) di v3-orderableDrugForm
+                finalUnitSystem = "http://terminology.hl7.org/CodeSystem/v3-orderableDrugForm";
             }
-            // 2. CEK UNTUK SATUAN BERAT (mg, g) - Ini biasanya aman pakai UCUM
+            // 2. CEK UNTUK SATUAN BERAT (mg, g, IU) - Konversi ke POWD (Powder) karena v3-orderableDrugForm wajib digunakan
             else if (dbUnitCode.equalsIgnoreCase("mg") || dbUnitCode.equalsIgnoreCase("g") || dbUnitCode.equalsIgnoreCase("IU")) {
-                finalUnitSystem = "http://unitsofmeasure.org";
+                dbUnitCode = "POWD"; // Map mg/g/IU ke POWD (Powder) di v3-orderableDrugForm
+                finalUnitSystem = "http://terminology.hl7.org/CodeSystem/v3-orderableDrugForm";
             }
             // 3. SEMUA SISANYA (Tablet, Botol, Pcs, dll) -> DrugForm
             else {
