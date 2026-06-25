@@ -4879,15 +4879,15 @@ public class frmUtama extends javax.swing.JFrame {
             String dbUnitCode = rs.getString("denominator_code").trim();
             String finalUnitSystem = "";
             
-            // 1. CEK SPESIFIK UNTUK 'mL' (KASUS SIRUP)
-            // Kita paksa mL menggunakan DrugForm karena UCUM selalu ditolak untuk kasus ini
-            if (dbUnitCode.equalsIgnoreCase("mL") || dbUnitCode.equals("ml") || dbUnitCode.equals("ML")) {
-                dbUnitCode = "mL"; // Standarisasi penulisan
-                finalUnitSystem = "http://terminology.hl7.org/CodeSystem/v3-orderableDrugForm"; // PAKSA KE SINI
+            // 1. CEK SPESIFIK UNTUK 'mL' (KASUS SIRUP) - Konversi ke SOL (Solution) karena v3-orderableDrugForm wajib digunakan
+            if (dbUnitCode.equalsIgnoreCase("mL") || dbUnitCode.equalsIgnoreCase("ml") || dbUnitCode.equalsIgnoreCase("ML")) {
+                dbUnitCode = "SOL"; // Map mL ke SOL (Solution) di v3-orderableDrugForm
+                finalUnitSystem = "http://terminology.hl7.org/CodeSystem/v3-orderableDrugForm";
             }
-            // 2. CEK UNTUK SATUAN BERAT (mg, g) - Ini biasanya aman pakai UCUM
+            // 2. CEK UNTUK SATUAN BERAT (mg, g, IU) - Konversi ke POWD (Powder) karena v3-orderableDrugForm wajib digunakan
             else if (dbUnitCode.equalsIgnoreCase("mg") || dbUnitCode.equalsIgnoreCase("g") || dbUnitCode.equalsIgnoreCase("IU")) {
-                finalUnitSystem = "http://unitsofmeasure.org";
+                dbUnitCode = "POWD"; // Map mg/g/IU ke POWD (Powder) di v3-orderableDrugForm
+                finalUnitSystem = "http://terminology.hl7.org/CodeSystem/v3-orderableDrugForm";
             }
             // 3. SEMUA SISANYA (Tablet, Botol, Pcs, dll) -> DrugForm
             else {
@@ -8567,7 +8567,6 @@ public class frmUtama extends javax.swing.JFrame {
 
     // HELPER SAKTI KHUSUS QUESTIONNAIRE (Auto Reconnect + Duplicate Recovery)
     private void processQuestionnaireResponse(ResultSet rs, String contextInfo) {
-        String identifierValue = "";
         try {
             TeksArea.append("\n[DETEKTIF QUESTIONNAIRE " + contextInfo.toUpperCase() + "] No.Resep: " + rs.getString("no_resep") + "\n");
 
@@ -8605,9 +8604,6 @@ public class frmUtama extends javax.swing.JFrame {
             String kontraindikasi = mapAdaTidakKeBoolean(rs.getString("resep_kontra_indikasi_obat"));
             String interaksi = mapAdaTidakKeBoolean(rs.getString("resep_interaksi_obat"));
 
-            // Identifier untuk Recovery
-            identifierValue = rs.getString("no_resep"); // Identifier Unik QuestionnaireResponse
-
             // 4. Konstruksi JSON
             headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -8615,10 +8611,6 @@ public class frmUtama extends javax.swing.JFrame {
 
             json = "{\n" +
                 "    \"resourceType\": \"QuestionnaireResponse\",\n" +
-                "    \"identifier\": {\n" + // Tambahkan Identifier agar bisa dicari
-                "        \"system\": \"http://sys-ids.kemkes.go.id/questionnaireresponse/" + koneksiDB.IDSATUSEHAT() + "\",\n" +
-                "        \"value\": \"" + identifierValue + "\"\n" +
-                "    },\n" +
                 "    \"questionnaire\": \"https://fhir.kemkes.go.id/Questionnaire/Q0007\",\n" +
                 "    \"status\": \"completed\",\n" +
                 "    \"subject\": {\n" +
@@ -8694,8 +8686,7 @@ public class frmUtama extends javax.swing.JFrame {
                 } 
                 // HANDLER DUPLICATE (400)
                 else if (e.getStatusCode().value() == 400 && e.getResponseBodyAsString().contains("duplicate")) {
-                    TeksArea.append("   [INFO] Data Duplikat. Mencoba Recovery ID...\n");
-                    recoverDuplicateQuestionnaire(identifierValue, rs);
+                    TeksArea.append("   [INFO] Data Duplikat. Sudah pernah terkirim sebelumnya, SKIP.\n");
                 }
                 else {
                     TeksArea.append("   !! [ERROR API " + e.getStatusCode() + "] " + e.getResponseBodyAsString() + "\n");
@@ -8725,7 +8716,7 @@ public class frmUtama extends javax.swing.JFrame {
     private void recoverDuplicateQuestionnaire(String identifierValue, ResultSet rs) {
         try {
             // Mencari ID berdasarkan Identifier (no_resep)
-            String searchUrl = link + "/QuestionnaireResponse?identifier=http://sys-ids.kemkes.go.id/questionnaireresponse/" + koneksiDB.IDSATUSEHAT() + "|" + identifierValue;
+            String searchUrl = link + "/QuestionnaireResponse?identifier=http://sys-ids.kemkes.go.id/QuestionnaireResponse/" + koneksiDB.IDSATUSEHAT() + "|" + identifierValue;
             String searchJson = konekSatuSehat(searchUrl, HttpMethod.GET, new HttpEntity(headers));
             
             JsonNode searchRoot = mapper.readTree(searchJson);
