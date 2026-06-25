@@ -918,7 +918,7 @@ public final class RMSkriningNutrisiLansia extends javax.swing.JDialog {
         FormInput.add(jLabel39);
         jLabel39.setBounds(20, 130, 460, 23);
 
-        SG1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Asupan Makan Sangat Berkurang", "Asupan Makan Agak Berkurang", "Asupan Makan Tidak Berkurang" }));
+        SG1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Asupan Makan Tidak Berkurang", "Asupan Makan Agak Berkurang", "Asupan Makan Sangat Berkurang", " " }));
         SG1.setName("SG1"); // NOI18N
         SG1.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
