@@ -499,7 +499,7 @@ public final class RMSkriningNutrisiLansia extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "07-02-2026" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-06-2026" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -513,7 +513,7 @@ public final class RMSkriningNutrisiLansia extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "07-02-2026" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-06-2026" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -634,7 +634,7 @@ public final class RMSkriningNutrisiLansia extends javax.swing.JDialog {
         TPasien.setBounds(336, 10, 285, 23);
 
         Tanggal.setForeground(new java.awt.Color(50, 70, 50));
-        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "07-02-2026" }));
+        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-06-2026" }));
         Tanggal.setDisplayFormat("dd-MM-yyyy");
         Tanggal.setName("Tanggal"); // NOI18N
         Tanggal.setOpaque(false);
@@ -925,6 +925,11 @@ public final class RMSkriningNutrisiLansia extends javax.swing.JDialog {
                 SG1ItemStateChanged(evt);
             }
         });
+        SG1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SG1ActionPerformed(evt);
+            }
+        });
         SG1.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 SG1KeyPressed(evt);
@@ -950,7 +955,7 @@ public final class RMSkriningNutrisiLansia extends javax.swing.JDialog {
         FormInput.add(jLabel43);
         jLabel43.setBounds(44, 180, 260, 23);
 
-        SG2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Penurunan Berat Badan Lebih Dari 3 Kg", "Tidak Tahu", "Penurunan Berat Badan Antara 1 Hingga 3 Kg", "Tidak Ada Penurunan Berat Badan" }));
+        SG2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Tidak Ada Penurunan Berat Badan", "Penurunan Berat Badan Antara 1 Hingga 3 Kg", "Tidak Tahu", "Penurunan Berat Badan Lebih Dari 3 Kg" }));
         SG2.setName("SG2"); // NOI18N
         SG2.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -1825,6 +1830,10 @@ public final class RMSkriningNutrisiLansia extends javax.swing.JDialog {
             });
         }
     }//GEN-LAST:event_formWindowOpened
+
+    private void SG1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SG1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_SG1ActionPerformed
 
     /**
     * @param args the command line arguments
