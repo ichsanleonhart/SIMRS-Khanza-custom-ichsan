@@ -215,6 +215,12 @@ public final class SuratPersetujuanUmum extends javax.swing.JDialog {
         NoKTP = new widget.TextBox();
         NoTelp = new widget.TextBox();
         jLabel20 = new widget.Label();
+        // Modifikasi SIMRS Khanza custom ichsan: Instansiasi juknis/pengobatan/nilai kepercayaan //edited by ichsan
+        jLabel23 = new widget.Label(); //edited by ichsan
+        PengobatanKepada = new widget.ComboBox(); //edited by ichsan
+        jLabel24 = new widget.Label(); //edited by ichsan
+        NilaiKepercayaan = new widget.TextBox(); //edited by ichsan
+        // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
         ChkInput = new widget.CekBox();
         PanelAccor = new widget.PanelBiasa();
         ChkAccor = new widget.CekBox();
@@ -483,11 +489,15 @@ public final class SuratPersetujuanUmum extends javax.swing.JDialog {
 
         PanelInput.setName("PanelInput"); // NOI18N
         PanelInput.setOpaque(false);
-        PanelInput.setPreferredSize(new java.awt.Dimension(192, 175));
+        // Modifikasi SIMRS Khanza custom ichsan: Sesuaikan ukuran PanelInput //edited by ichsan
+        PanelInput.setPreferredSize(new java.awt.Dimension(192, 205)); //edited by ichsan
+        // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
         PanelInput.setLayout(new java.awt.BorderLayout(1, 1));
 
         FormInput.setName("FormInput"); // NOI18N
-        FormInput.setPreferredSize(new java.awt.Dimension(100, 165));
+        // Modifikasi SIMRS Khanza custom ichsan: Sesuaikan ukuran FormInput //edited by ichsan
+        FormInput.setPreferredSize(new java.awt.Dimension(100, 195)); //edited by ichsan
+        // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
         FormInput.setLayout(null);
 
         jLabel4.setText("No.Rawat :");
@@ -695,6 +705,37 @@ public final class SuratPersetujuanUmum extends javax.swing.JDialog {
         FormInput.add(jLabel20);
         jLabel20.setBounds(200, 120, 96, 23);
 
+        // Modifikasi SIMRS Khanza custom ichsan: Setting PengobatanKepada dan NilaiKepercayaan //edited by ichsan
+        jLabel23.setText("Pengobatan Kepada :"); //edited by ichsan
+        jLabel23.setName("jLabel23"); // NOI18N //edited by ichsan
+        FormInput.add(jLabel23); //edited by ichsan
+        jLabel23.setBounds(0, 150, 110, 23); //edited by ichsan
+
+        PengobatanKepada.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Suami", "Istri", "Anak", "Ayah", "Ibu", "Saudara", "Keponakan", "Adik", "Kakak", "Orang Tua", "Saudara Kandung", "Teman", "Lain-lain", "Diri Sendiri", "-" })); //edited by ichsan
+        PengobatanKepada.setName("PengobatanKepada"); // NOI18N //edited by ichsan
+        PengobatanKepada.addKeyListener(new java.awt.event.KeyAdapter() { //edited by ichsan
+            public void keyPressed(java.awt.event.KeyEvent evt) { //edited by ichsan
+                PengobatanKepadaKeyPressed(evt); //edited by ichsan
+            } //edited by ichsan
+        }); //edited by ichsan
+        FormInput.add(PengobatanKepada); //edited by ichsan
+        PengobatanKepada.setBounds(114, 150, 130, 23); //edited by ichsan
+
+        jLabel24.setText("Nilai Kepercayaan :"); //edited by ichsan
+        jLabel24.setName("jLabel24"); // NOI18N //edited by ichsan
+        FormInput.add(jLabel24); //edited by ichsan
+        jLabel24.setBounds(250, 150, 110, 23); //edited by ichsan
+
+        NilaiKepercayaan.setName("NilaiKepercayaan"); // NOI18N //edited by ichsan
+        NilaiKepercayaan.addKeyListener(new java.awt.event.KeyAdapter() { //edited by ichsan
+            public void keyPressed(java.awt.event.KeyEvent evt) { //edited by ichsan
+                NilaiKepercayaanKeyPressed(evt); //edited by ichsan
+            } //edited by ichsan
+        }); //edited by ichsan
+        FormInput.add(NilaiKepercayaan); //edited by ichsan
+        NilaiKepercayaan.setBounds(364, 150, 200, 23); //edited by ichsan
+        // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
+
         PanelInput.add(FormInput, java.awt.BorderLayout.CENTER);
 
         ChkInput.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/143.png"))); // NOI18N
@@ -832,13 +873,14 @@ public final class SuratPersetujuanUmum extends javax.swing.JDialog {
         }else if(NoSurat.getText().trim().equals("")){
             Valid.textKosong(NoSurat,"No.Pernyataan");
         }else{
+            // Modifikasi SIMRS Khanza custom ichsan: Simpan pengobatan_kepada dan nilai_kepercayaan //edited by ichsan
             if(Sequel.menyimpantf("surat_persetujuan_umum","?,?,?,?,?,?,?,?,?,?,?,?","Data",12,new String[]{
-                    NoSurat.getText(),TNoRw.getText(),Valid.SetTgl(Tanggal.getSelectedItem()+""),"-","",NamaPJ.getText(),UmurPJ.getText(),NoKTP.getText(),
+                    NoSurat.getText(),TNoRw.getText(),Valid.SetTgl(Tanggal.getSelectedItem()+""),PengobatanKepada.getSelectedItem().toString(),NilaiKepercayaan.getText(),NamaPJ.getText(),UmurPJ.getText(),NoKTP.getText(), //edited by ichsan
                     JKPJ.getSelectedItem().toString().substring(0,1),BertindakAtas.getSelectedItem().toString(),NoTelp.getText(),KdPetugas.getText()
                 })==true){
                 tabMode.addRow(new Object[]{
                     NoSurat.getText(),TNoRw.getText(),TNoRM.getText(),TPasien.getText(),Umur.getText(),JK.getText(),LahirPasien.getText(),
-                    Valid.SetTgl(Tanggal.getSelectedItem()+""),"-","",NamaPJ.getText(),UmurPJ.getText(),NoKTP.getText(),JKPJ.getSelectedItem().toString().substring(0,1),
+                    Valid.SetTgl(Tanggal.getSelectedItem()+""),PengobatanKepada.getSelectedItem().toString(),NilaiKepercayaan.getText(),NamaPJ.getText(),UmurPJ.getText(),NoKTP.getText(),JKPJ.getSelectedItem().toString().substring(0,1), //edited by ichsan
                     NoTelp.getText(),BertindakAtas.getSelectedItem().toString(),KdPetugas.getText(),NmPetugas.getText()
                 });
                 LCount.setText(""+tabMode.getRowCount());
@@ -1097,8 +1139,18 @@ public final class SuratPersetujuanUmum extends javax.swing.JDialog {
     }//GEN-LAST:event_BtnPetugasActionPerformed
 
     private void BertindakAtasKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BertindakAtasKeyPressed
-        Valid.pindah(evt,NoTelp,BtnSimpan);
+        Valid.pindah(evt,NoTelp,PengobatanKepada); //edited by ichsan
     }//GEN-LAST:event_BertindakAtasKeyPressed
+
+    // Modifikasi SIMRS Khanza custom ichsan: Key event handlers //edited by ichsan
+    private void PengobatanKepadaKeyPressed(java.awt.event.KeyEvent evt) { //edited by ichsan
+        Valid.pindah(evt, BertindakAtas, NilaiKepercayaan); //edited by ichsan
+    } //edited by ichsan
+
+    private void NilaiKepercayaanKeyPressed(java.awt.event.KeyEvent evt) { //edited by ichsan
+        Valid.pindah(evt, PengobatanKepada, BtnSimpan); //edited by ichsan
+    } //edited by ichsan
+    // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
 
     private void JKPJKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_JKPJKeyPressed
         Valid.pindah(evt,NoKTP,NoTelp);
@@ -1272,12 +1324,18 @@ public final class SuratPersetujuanUmum extends javax.swing.JDialog {
     private widget.TextBox LahirPasien;
     private widget.editorpane LoadHTML2;
     private widget.TextBox NamaPJ;
+    // Modifikasi SIMRS Khanza custom ichsan: Deklarasi NilaiKepercayaan //edited by ichsan
+    private widget.TextBox NilaiKepercayaan; //edited by ichsan
+    // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
     private widget.TextBox NmPetugas;
     private widget.TextBox NoKTP;
     private widget.TextBox NoSurat;
     private widget.TextBox NoTelp;
     private widget.PanelBiasa PanelAccor;
     private javax.swing.JPanel PanelInput;
+    // Modifikasi SIMRS Khanza custom ichsan: Deklarasi PengobatanKepada //edited by ichsan
+    private widget.ComboBox PengobatanKepada; //edited by ichsan
+    // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
     private widget.ScrollPane Scroll;
     private widget.ScrollPane Scroll5;
     private widget.TextBox TCari;
@@ -1298,6 +1356,10 @@ public final class SuratPersetujuanUmum extends javax.swing.JDialog {
     private widget.Label jLabel19;
     private widget.Label jLabel20;
     private widget.Label jLabel21;
+    // Modifikasi SIMRS Khanza custom ichsan: Deklarasi label pengobatan & nilai kepercayaan //edited by ichsan
+    private widget.Label jLabel23; //edited by ichsan
+    private widget.Label jLabel24; //edited by ichsan
+    // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
     private widget.Label jLabel3;
     private widget.Label jLabel4;
     private widget.Label jLabel44;
@@ -1389,6 +1451,10 @@ public final class SuratPersetujuanUmum extends javax.swing.JDialog {
         JKPJ.setSelectedIndex(0);
         NoTelp.setText("");
         NoKTP.setText("");
+        // Modifikasi SIMRS Khanza custom ichsan: Reset pengobatan_kepada dan nilai_kepercayaan //edited by ichsan
+        PengobatanKepada.setSelectedIndex(0); //edited by ichsan
+        NilaiKepercayaan.setText(""); //edited by ichsan
+        // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
         Valid.autoNomer3("select ifnull(MAX(CONVERT(RIGHT(surat_persetujuan_umum.no_surat,3),signed)),0) from surat_persetujuan_umum where surat_persetujuan_umum.tanggal='"+Valid.SetTgl(Tanggal.getSelectedItem()+"")+"' ",
                 "PSU"+Tanggal.getSelectedItem().toString().substring(6,10)+Tanggal.getSelectedItem().toString().substring(3,5)+Tanggal.getSelectedItem().toString().substring(0,2),3,NoSurat);
         NamaPJ.requestFocus();
@@ -1411,6 +1477,10 @@ public final class SuratPersetujuanUmum extends javax.swing.JDialog {
             NoTelp.setText(tbObat.getValueAt(tbObat.getSelectedRow(),14).toString()); 
             BertindakAtas.setSelectedItem(tbObat.getValueAt(tbObat.getSelectedRow(),15).toString());  
             Valid.SetTgl(Tanggal,tbObat.getValueAt(tbObat.getSelectedRow(),7).toString());
+            // Modifikasi SIMRS Khanza custom ichsan: Set pengobatan_kepada dan nilai_kepercayaan dari tabel //edited by ichsan
+            PengobatanKepada.setSelectedItem(tbObat.getValueAt(tbObat.getSelectedRow(),8).toString()); //edited by ichsan
+            NilaiKepercayaan.setText(tbObat.getValueAt(tbObat.getSelectedRow(),9).toString()); //edited by ichsan
+            // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
         }
     }
 
@@ -1458,7 +1528,9 @@ public final class SuratPersetujuanUmum extends javax.swing.JDialog {
     private void isForm(){
         if(ChkInput.isSelected()==true){
             ChkInput.setVisible(false);
-            PanelInput.setPreferredSize(new Dimension(WIDTH,175));
+            // Modifikasi SIMRS Khanza custom ichsan: Ganti 175 ke 205 //edited by ichsan
+            PanelInput.setPreferredSize(new Dimension(WIDTH,205)); //edited by ichsan
+            // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
             FormInput.setVisible(true);      
             ChkInput.setVisible(true);
         }else if(ChkInput.isSelected()==false){           
@@ -1488,8 +1560,9 @@ public final class SuratPersetujuanUmum extends javax.swing.JDialog {
     }
   
     private void ganti() {
-        if(Sequel.mengedittf("surat_persetujuan_umum","no_surat=?","no_surat=?,no_rawat=?,tanggal=?,nama_pj=?,umur_pj=?,no_ktppj=?,jkpj=?,bertindak_atas=?,no_telp=?,nip=?",11,new String[]{
-            NoSurat.getText(),TNoRw.getText(),Valid.SetTgl(Tanggal.getSelectedItem()+""),NamaPJ.getText(),UmurPJ.getText(),NoKTP.getText(),
+        // Modifikasi SIMRS Khanza custom ichsan: Update kolom pengobatan_kepada dan nilai_kepercayaan //edited by ichsan
+        if(Sequel.mengedittf("surat_persetujuan_umum","no_surat=?","no_surat=?,no_rawat=?,tanggal=?,pengobatan_kepada=?,nilai_kepercayaan=?,nama_pj=?,umur_pj=?,no_ktppj=?,jkpj=?,bertindak_atas=?,no_telp=?,nip=?",13,new String[]{ //edited by ichsan
+            NoSurat.getText(),TNoRw.getText(),Valid.SetTgl(Tanggal.getSelectedItem()+""),PengobatanKepada.getSelectedItem().toString(),NilaiKepercayaan.getText(),NamaPJ.getText(),UmurPJ.getText(),NoKTP.getText(), //edited by ichsan
             JKPJ.getSelectedItem().toString().substring(0,1),BertindakAtas.getSelectedItem().toString(),NoTelp.getText(),KdPetugas.getText(),
             tbObat.getValueAt(tbObat.getSelectedRow(),0).toString()
         })==true){
@@ -1501,6 +1574,8 @@ public final class SuratPersetujuanUmum extends javax.swing.JDialog {
             tbObat.setValueAt(JK.getText(),tbObat.getSelectedRow(),5);
             tbObat.setValueAt(LahirPasien.getText(),tbObat.getSelectedRow(),6);
             tbObat.setValueAt(Valid.SetTgl(Tanggal.getSelectedItem()+""),tbObat.getSelectedRow(),7);
+            tbObat.setValueAt(PengobatanKepada.getSelectedItem().toString(),tbObat.getSelectedRow(),8); //edited by ichsan
+            tbObat.setValueAt(NilaiKepercayaan.getText(),tbObat.getSelectedRow(),9); //edited by ichsan
             tbObat.setValueAt(NamaPJ.getText(),tbObat.getSelectedRow(),10);
             tbObat.setValueAt(UmurPJ.getText(),tbObat.getSelectedRow(),11);
             tbObat.setValueAt(NoKTP.getText(),tbObat.getSelectedRow(),12);
@@ -1511,6 +1586,7 @@ public final class SuratPersetujuanUmum extends javax.swing.JDialog {
             tbObat.setValueAt(NmPetugas.getText(),tbObat.getSelectedRow(),17);
             emptTeks();
         }
+        // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
     }
 
     private void hapus() {

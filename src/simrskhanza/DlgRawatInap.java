@@ -203,6 +203,7 @@ public final class DlgRawatInap extends javax.swing.JDialog {
     private boolean sukses=false;  
     private double ttljmdokter=0,ttljmperawat=0,ttlkso=0,ttlpendapatan=0,ttljasasarana=0,ttlbhp=0,ttlmenejemen=0;
     private String kode_poli="",kamar="",jenisbayar="",TANGGALMUNDUR="yes";
+    private rekammedis.PanelSBAR panelSBAR; //edited by ichsan
 
     /** Creates new form DlgRawatInap
      * @param parent
@@ -4942,6 +4943,9 @@ public final class DlgRawatInap extends javax.swing.JDialog {
                         }
                     }
                 }   break;
+            case 6: //mod by ichsan - SBAR tab //edited by ichsan
+                panelSBAR.hapusDariExternal(); //edited by ichsan
+                break; //edited by ichsan
             default:
                 break;
         }
@@ -5271,6 +5275,11 @@ public final class DlgRawatInap extends javax.swing.JDialog {
             case 5:
                 runBackground(() ->tampilPemeriksaanGinekologi());
                 break;
+            case 6: //edited by ichsan
+                if(!TNoRw.getText().trim().isEmpty()){ //edited by ichsan
+                    panelSBAR.setNoRawat(TNoRw.getText().trim()); //edited by ichsan
+                } //edited by ichsan
+                break; //edited by ichsan
             default:
                 break;
         }
@@ -5737,6 +5746,9 @@ private void BtnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
                             TCari.requestFocus();
                         }
                     }   break; 
+                case 6: //mod by ichsan - SBAR tab //edited by ichsan
+                    panelSBAR.editDariExternal(); //edited by ichsan
+                    break; //edited by ichsan
                 default:
                     break;                
             }
@@ -11418,6 +11430,12 @@ private void BtnEditKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
         FormMenu.add(BtnPenilaianTambahanPerilakuKekerasan);
         FormMenu.add(BtnPenilaianTambahanMelarikanDiri);
         FormMenu.add(BtnPenilaianDerajatDehidrasi);
+        
+        // ---- Tab SBAR ---- //edited by ichsan
+        panelSBAR = new rekammedis.PanelSBAR(); //edited by ichsan
+        panelSBAR.setParentDateControls(DTPTgl, cmbJam, cmbMnt, cmbDtk); //edited by ichsan
+        panelSBAR.isCek(); //edited by ichsan
+        TabRawat.addTab("Catatan SBAR", panelSBAR); //edited by ichsan
     }
 
     private void simpan() {
@@ -11806,8 +11824,15 @@ private void BtnEditKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
                             TUkuran.setText(""); cmbNyeriTekan.setSelectedIndex(0);
                             TAdnexaKanan.setText(""); TAdnexaKiri.setText(""); TCavumDouglas.getText();
                             LCount.setText(""+tabModeGinekologi.getRowCount());
-                    }
-                } break;
+                } //edited by ichsan
+            } //edited by ichsan
+            break; //edited by ichsan
+            case 6: //edited by ichsan
+                panelSBAR.simpanDariExternal( //edited by ichsan
+                    Valid.SetTgl(DTPTgl.getSelectedItem()+""), //edited by ichsan
+                    cmbJam.getSelectedItem()+":"+cmbMnt.getSelectedItem()+":"+cmbDtk.getSelectedItem() //edited by ichsan
+                ); //edited by ichsan
+                break; //edited by ichsan
             default:
                 break;
         }
@@ -12357,6 +12382,7 @@ private void BtnEditKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
         TAdnexaKiri.setText("");
         TCavumDouglas.setText("");
         cmbKesadaran.setSelectedIndex(0);
+        if (TabRawat.getSelectedIndex() == 6) panelSBAR.batalDariExternal(); //mod by ichsan - SBAR reset //edited by ichsan
         TNoRw.requestFocus();
     }
     

@@ -216,6 +216,9 @@ public final class RMRiwayatPerawatan extends javax.swing.JDialog {
         
         ChkAccor.setSelected(false);
         isMenu();
+        
+        // Modifikasi SIMRS Khanza custom ichsan: Inisialisasi chkSBAR dipindah ke initComponents() //edited by ichsan
+        // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
     }    
 
     /** This method is called from within the constructor to
@@ -336,6 +339,9 @@ public final class RMRiwayatPerawatan extends javax.swing.JDialog {
         chkPemeriksaanGenekologiRanap = new widget.CekBox();
         chkKonsultasiMedik = new widget.CekBox();
         chkKonsultasiPerawat = new widget.CekBox();
+        // Modifikasi SIMRS Khanza custom ichsan: Inisialisasi chkSBAR //edited by ichsan
+        chkSBAR = new widget.CekBox(); //edited by ichsan
+        // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
         chkCatatanDokter = new widget.CekBox();
         chkCatatanObservasiIGD = new widget.CekBox();
         chkCatatanObservasiCHBP = new widget.CekBox();
@@ -1411,6 +1417,16 @@ public final class RMRiwayatPerawatan extends javax.swing.JDialog {
         chkKonsultasiPerawat.setOpaque(false);
         chkKonsultasiPerawat.setPreferredSize(new java.awt.Dimension(245, 22));
         FormMenu.add(chkKonsultasiPerawat);
+
+        // Modifikasi SIMRS Khanza custom ichsan: Konfigurasi chkSBAR //edited by ichsan
+        chkSBAR.setSelected(true); //edited by ichsan
+        chkSBAR.setText("Catatan SBAR"); //edited by ichsan
+        chkSBAR.setHorizontalAlignment(javax.swing.SwingConstants.LEFT); //edited by ichsan
+        chkSBAR.setName("chkSBAR"); // NOI18N //edited by ichsan
+        chkSBAR.setOpaque(false); //edited by ichsan
+        chkSBAR.setPreferredSize(new java.awt.Dimension(245, 22)); //edited by ichsan
+        FormMenu.add(chkSBAR); //edited by ichsan
+        // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
 
         chkCatatanDokter.setSelected(true);
         chkCatatanDokter.setText("Catatan Dokter");
@@ -3192,6 +3208,9 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
             chkSkriningCRUB65.setSelected(true);
             chkSkriningGiziKehamilan.setSelected(true);
             chkKonsultasiPerawat.setSelected(true);
+            // Modifikasi SIMRS Khanza custom ichsan: Set chkSBAR true //edited by ichsan
+            chkSBAR.setSelected(true); //edited by ichsan
+            // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
         }else{
             chkTriase.setSelected(false);
             chkAsuhanKeperawatanRalan.setSelected(false);
@@ -3392,6 +3411,9 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
             chkSkriningCRUB65.setSelected(false);
             chkSkriningGiziKehamilan.setSelected(false);
             chkKonsultasiPerawat.setSelected(false);
+            // Modifikasi SIMRS Khanza custom ichsan: Set chkSBAR false //edited by ichsan
+            chkSBAR.setSelected(false); //edited by ichsan
+            // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
         }
     }//GEN-LAST:event_chkSemuaItemStateChanged
 
@@ -4152,6 +4174,9 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
     private widget.CekBox chkRekonsiliasiObat;
     private widget.CekBox chkResepPulang;
     private widget.CekBox chkResume;
+    // Modifikasi SIMRS Khanza custom ichsan: Deklarasi chkSBAR //edited by ichsan
+    private widget.CekBox chkSBAR; //edited by ichsan
+    // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
     private widget.CekBox chkSEPBPJS;
     private widget.CekBox chkSemua;
     private widget.CekBox chkSignInSebelumAnestesi;
@@ -4681,6 +4706,9 @@ private void BtnPasienKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event
                     menampilkanPemeriksaanRanap(rs.getString("no_rawat"));
                     menampilkanKonsultasiMedik(rs.getString("no_rawat"));
                     menampilkanKonsultasiPerawat(rs.getString("no_rawat"));
+                    // Modifikasi SIMRS Khanza custom ichsan: Tampilkan SBAR //edited by ichsan
+                    menampilkanSBAR(rs.getString("no_rawat")); //edited by ichsan
+                    // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
                     menampilkanFollowUpDBD(rs.getString("no_rawat"));
                     menampilkanMonitoringReaksiTranfusi(rs.getString("no_rawat"));
                     menampilkanLanjutanResikoJatuhDewasa(rs.getString("no_rawat"));
@@ -37012,4 +37040,78 @@ private void tampilkanGambarTTV(String norawat, String jenisObservasi, int jumla
         }
     }
 }
+
+    // Modifikasi SIMRS Khanza custom ichsan: Method menampilkanSBAR //edited by ichsan
+    private void menampilkanSBAR(String norawat) { //edited by ichsan
+        try { //edited by ichsan
+            if(chkSBAR.isSelected()==true){ //edited by ichsan
+                try { //edited by ichsan
+                    rs2=koneksi.prepareStatement( //edited by ichsan
+                        "SELECT s.tanggal, s.jam, s.situation, s.background, s.assessment, s.recommendation, " + //edited by ichsan
+                        "COALESCE(p1.nama,'') AS nm_pemberi, " + //edited by ichsan
+                        "COALESCE(d.nm_dokter,'') AS nm_penerima, s.tbak, " + //edited by ichsan
+                        "COALESCE(s.waktu_konfirmasi,'') AS waktu_konfirmasi, " + //edited by ichsan
+                        "COALESCE(u.nama,s.nip_perekam,'') AS nm_perekam " + //edited by ichsan
+                        "FROM rekammedis_sbar s " + //edited by ichsan
+                        "LEFT JOIN petugas p1 ON s.nip_pemberi = p1.nip " + //edited by ichsan
+                        "LEFT JOIN dokter d ON s.nip_penerima = d.kd_dokter " + //edited by ichsan
+                        "LEFT JOIN petugas u ON s.nip_perekam = u.nip " + //edited by ichsan
+                        "WHERE s.no_rawat='"+norawat+"' ORDER BY s.tanggal, s.jam").executeQuery(); //edited by ichsan
+                    if(rs2.next()){ //edited by ichsan
+                        htmlContent.append("<tr class='isi'>"). //edited by ichsan
+                                        append("<td valign='top' width='2%'></td>"). //edited by ichsan
+                                        append("<td valign='top' width='18%'>Catatan SBAR</td>"). //edited by ichsan
+                                        append("<td valign='top' width='1%' align='center'>:</td>"). //edited by ichsan
+                                        append("<td valign='top' width='79%'>"). //edited by ichsan
+                                        append("<table width='100%' border='0' align='center' cellpadding='3px' cellspacing='0' class='tbl_form'>"); //edited by ichsan
+                        do{ //edited by ichsan
+                            htmlContent.append("<tr>"). //edited by ichsan
+                                            append("<td valign='top'>"). //edited by ichsan
+                                                append("<table width='100%' border='0' align='center' cellpadding='3px' cellspacing='0px' class='tbl_form'>"). //edited by ichsan
+                                                    append("<tr>"). //edited by ichsan
+                                                        append("<td width='50%'>Tanggal & Jam : ").append(rs2.getString("tanggal")).append(" ").append(rs2.getString("jam")).append("</td>"). //edited by ichsan
+                                                        append("<td width='50%'>TBAK : ").append(rs2.getString("tbak")).append("</td>"). //edited by ichsan
+                                                    append("</tr>"). //edited by ichsan
+                                                    append("<tr>"). //edited by ichsan
+                                                        append("<td width='50%'>Pemberi : ").append(rs2.getString("nm_pemberi")).append("</td>"). //edited by ichsan
+                                                        append("<td width='50%'>Penerima : ").append(rs2.getString("nm_penerima")).append("</td>"). //edited by ichsan
+                                                    append("</tr>"). //edited by ichsan
+                                                    append("<tr>"). //edited by ichsan
+                                                        append("<td width='50%'>Wkt.Konfirmasi : ").append(rs2.getString("waktu_konfirmasi")).append("</td>"). //edited by ichsan
+                                                        append("<td width='50%'>Perekam : ").append(rs2.getString("nm_perekam")).append("</td>"). //edited by ichsan
+                                                    append("</tr>"). //edited by ichsan
+                                                    append("<tr>"). //edited by ichsan
+                                                        append("<td width='100%' colspan='2'>Situation : ").append(rs2.getString("situation")).append("</td>"). //edited by ichsan
+                                                    append("</tr>"). //edited by ichsan
+                                                    append("<tr>"). //edited by ichsan
+                                                        append("<td width='100%' colspan='2'>Background : ").append(rs2.getString("background")).append("</td>"). //edited by ichsan
+                                                    append("</tr>"). //edited by ichsan
+                                                    append("<tr>"). //edited by ichsan
+                                                        append("<td width='100%' colspan='2'>Assessment : ").append(rs2.getString("assessment")).append("</td>"). //edited by ichsan
+                                                    append("</tr>"). //edited by ichsan
+                                                    append("<tr>"). //edited by ichsan
+                                                        append("<td width='100%' colspan='2'>Recommendation : ").append(rs2.getString("recommendation")).append("</td>"). //edited by ichsan
+                                                    append("</tr>"). //edited by ichsan
+                                                append("</table>"). //edited by ichsan
+                                            append("</td>"). //edited by ichsan
+                                        append("</tr>"); //edited by ichsan
+                        }while(rs2.next()); //edited by ichsan
+                        htmlContent.append("</table>"). //edited by ichsan
+                                    append("</td>"). //edited by ichsan
+                                    append("</tr>"); //edited by ichsan
+                    } //edited by ichsan
+                } catch (Exception e) { //edited by ichsan
+                    System.out.println("Notifikasi Catatan SBAR : "+e); //edited by ichsan
+                } finally{ //edited by ichsan
+                    if(rs2!=null){ //edited by ichsan
+                        rs2.close(); //edited by ichsan
+                    } //edited by ichsan
+                } //edited by ichsan
+            } //edited by ichsan
+        } catch (Exception e) { //edited by ichsan
+            System.out.println("Notif Catatan SBAR: "+e); //edited by ichsan
+        } //edited by ichsan
+    } //edited by ichsan
+    // Akhir Modifikasi SIMRS Khanza custom ichsan //edited by ichsan
 }
+

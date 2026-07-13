@@ -249,6 +249,7 @@ public final class DlgRawatJalan extends javax.swing.JDialog {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private volatile boolean ceksukses = false;
     private DlgPeresepanDokter resepobat;
+    private rekammedis.PanelSBAR panelSBAR; //edited by ichsan
 
     /** Creates new form DlgPerawatan
      * @param parent
@@ -5235,6 +5236,7 @@ public final class DlgRawatJalan extends javax.swing.JDialog {
         TCavumDouglas.setText("");
         Catatan.setText("");
         cmbKesadaran.setSelectedIndex(0);
+        if (TabRawat.getSelectedIndex() == 8) panelSBAR.batalDariExternal(); //mod by ichsan - SBAR reset //edited by ichsan
         TNoRw.requestFocus();
 }//GEN-LAST:event_BtnBatalActionPerformed
 
@@ -5803,6 +5805,9 @@ public final class DlgRawatJalan extends javax.swing.JDialog {
                     }
                     LCount.setText(""+TabModeCatatan.getRowCount());
                 }   break;
+            case 8: //mod by ichsan - SBAR tab //edited by ichsan
+                panelSBAR.hapusDariExternal(); //edited by ichsan
+                break; //edited by ichsan
             default:
                 break;
         }
@@ -6250,6 +6255,12 @@ public final class DlgRawatJalan extends javax.swing.JDialog {
                     runBackground(() ->tampilCatatan());
                 } 
                 break;
+            case 8: //edited by ichsan
+                BtnTambahTindakan.setVisible(false); //edited by ichsan
+                if(!TNoRw.getText().trim().isEmpty()){ //edited by ichsan
+                    panelSBAR.setNoRawat(TNoRw.getText().trim()); //edited by ichsan
+                } //edited by ichsan
+                break; //edited by ichsan
             default:
                 break;
         }
@@ -6747,6 +6758,9 @@ private void BtnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
                             TCari.requestFocus();
                         }
                     }   break;
+                case 8: //mod by ichsan - SBAR tab //edited by ichsan
+                    panelSBAR.editDariExternal(); //edited by ichsan
+                    break; //edited by ichsan
                 default:                
                     break;
             }
@@ -14286,6 +14300,12 @@ private void BtnEditKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
         FormMenu.add(BtnPenilaianTambahanPerilakuKekerasan);
         FormMenu.add(BtnPenilaianTambahanMelarikanDiri);
         FormMenu.add(BtnPenilaianDerajatDehidrasi);
+        
+        // ---- Tab SBAR ---- //edited by ichsan
+        panelSBAR = new rekammedis.PanelSBAR(); //edited by ichsan
+        panelSBAR.setParentDateControls(DTPTgl, cmbJam, cmbMnt, cmbDtk); //edited by ichsan
+        panelSBAR.isCek(); //edited by ichsan
+        TabRawat.addTab("Catatan SBAR", panelSBAR); //edited by ichsan
     }
 
     private void simpan() {
@@ -14498,6 +14518,12 @@ private void BtnEditKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_B
                     }
                 }
                 break;
+            case 8: //edited by ichsan
+                panelSBAR.simpanDariExternal( //edited by ichsan
+                    Valid.SetTgl(DTPTgl.getSelectedItem()+""), //edited by ichsan
+                    cmbJam.getSelectedItem()+":"+cmbMnt.getSelectedItem()+":"+cmbDtk.getSelectedItem() //edited by ichsan
+                ); //edited by ichsan
+                break; //edited by ichsan
             default:
                 break;
         } 

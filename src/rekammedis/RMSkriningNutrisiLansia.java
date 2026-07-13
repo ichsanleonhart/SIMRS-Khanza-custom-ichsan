@@ -499,7 +499,7 @@ public final class RMSkriningNutrisiLansia extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-06-2026" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "29-06-2026" })); //edited by ichsan
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -513,7 +513,7 @@ public final class RMSkriningNutrisiLansia extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-06-2026" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "29-06-2026" })); //edited by ichsan
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -634,7 +634,7 @@ public final class RMSkriningNutrisiLansia extends javax.swing.JDialog {
         TPasien.setBounds(336, 10, 285, 23);
 
         Tanggal.setForeground(new java.awt.Color(50, 70, 50));
-        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "25-06-2026" }));
+        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "29-06-2026" })); //edited by ichsan
         Tanggal.setDisplayFormat("dd-MM-yyyy");
         Tanggal.setName("Tanggal"); // NOI18N
         Tanggal.setOpaque(false);
@@ -1014,7 +1014,7 @@ public final class RMSkriningNutrisiLansia extends javax.swing.JDialog {
         FormInput.add(jLabel45);
         jLabel45.setBounds(44, 210, 80, 23);
 
-        SG3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Terbatas Dari Tempat Tidur Atau Kursi", "Mampu Bangun Dari Tempat Tidur/Kursi Tetapi Tidak Bepergian Keluar Rumah", "Dapat Bepergian Keluar Rumah" }));
+        SG3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Dapat Bepergian Keluar Rumah", "Mampu Bangun Dari Tempat Tidur/Kursi Tetapi Tidak Bepergian Keluar Rumah", "Terbatas Dari Tempat Tidur Atau Kursi" })); //edited by ichsan
         SG3.setName("SG3"); // NOI18N
         SG3.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -1053,7 +1053,7 @@ public final class RMSkriningNutrisiLansia extends javax.swing.JDialog {
         FormInput.add(Nilai4);
         Nilai4.setBounds(729, 240, 60, 23);
 
-        SG4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
+        SG4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Tidak", "Ya" })); //edited by ichsan
         SG4.setName("SG4"); // NOI18N
         SG4.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -1080,7 +1080,7 @@ public final class RMSkriningNutrisiLansia extends javax.swing.JDialog {
         FormInput.add(jLabel47);
         jLabel47.setBounds(44, 330, 130, 23);
 
-        SG6.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "IMT < 19", "19 Hingga < 21", "21 Hingga < 23", "IMT >= 23" }));
+        SG6.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "IMT >= 23", "21 Hingga < 23", "19 Hingga < 21", "IMT < 19" })); //edited by ichsan
         SG6.setName("SG6"); // NOI18N
         SG6.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -1117,7 +1117,7 @@ public final class RMSkriningNutrisiLansia extends javax.swing.JDialog {
         FormInput.add(R1);
         R1.setBounds(15, 300, 26, 23);
 
-        SG5.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Depresi Berat Atau Kepikunan Berat", "Kepikunan Ringan", "Tidak Ada Gangguan Psikologis" }));
+        SG5.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Tidak Ada Gangguan Psikologis", "Kepikunan Ringan", "Depresi Berat Atau Kepikunan Berat" })); //edited by ichsan
         SG5.setName("SG5"); // NOI18N
         SG5.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -1156,7 +1156,7 @@ public final class RMSkriningNutrisiLansia extends javax.swing.JDialog {
         FormInput.add(jLabel76);
         jLabel76.setBounds(675, 330, 50, 23);
 
-        SG7.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Lingkar Betis < 31", "Lingkar Betis >= 31" }));
+        SG7.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Lingkar Betis >= 31", "Lingkar Betis < 31" })); //edited by ichsan
         SG7.setName("SG7"); // NOI18N
         SG7.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
