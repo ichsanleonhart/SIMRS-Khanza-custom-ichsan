@@ -7375,6 +7375,11 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
                 }
             }
         }
+        // start - penyusupan task 1 & 2 randomized by ichsan
+        if(statusantrean==true){ // start - panggil helper jika add antrian sukses by ichsan
+            SimpanTask1dan2OnSite(TNoRw.getText()); // start - eksekusi task 1 & 2 randomized by ichsan
+        } // end - panggil helper jika add antrian sukses by ichsan
+        // end - penyusupan task 1 & 2 randomized by ichsan
         return statusantrean;
     }
     
@@ -7460,4 +7465,99 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
         executor.shutdownNow();
         super.dispose();
     }
+
+    // start - fungsi penyusupan task 1 & 2 randomized dan audit trail by ichsan
+    private void catatTrackerBPJS(String pesanLog) { // start - catat log ke trackersql by ichsan
+        try { // start - try catch audit trail by ichsan
+            String tokenUser = "Mobile JKN"; // start - default user token by ichsan
+            if (akses.getkode() != null && !akses.getkode().equals("")) { // start - cek user login by ichsan
+                tokenUser = akses.getkode(); // start - set user login by ichsan
+            } // end - cek user login by ichsan
+            if (tokenUser.length() > 20) { // start - potong panjang user max 20 by ichsan
+                tokenUser = tokenUser.substring(0, 20); // start - substring 20 by ichsan
+            } // end - potong panjang user by ichsan
+            String pesanSafe = pesanLog.replace("'", "\\'"); // start - escape single quote by ichsan
+            Sequel.menyimpan("trackersql", "NOW(), '" + pesanSafe + "', '" + tokenUser + "'", "Audit Trail BPJS"); // start - simpan ke trackersql by ichsan
+        } catch (Exception e) { // start - catch exception by ichsan
+            System.out.println("Gagal simpan trackersql: " + e); // start - print log error by ichsan
+        } // end - try catch audit trail by ichsan
+    } // end - catat log ke trackersql by ichsan
+
+    private void SimpanTask1dan2OnSite(String noRawat) { // start - helper simpan task 1 & 2 by ichsan
+        try { // start - try catch utama task 1 & 2 by ichsan
+            int modulus = 0; // start - inisialisasi modulus by ichsan
+            try { // start - try parse digit no_rawat by ichsan
+                modulus = Integer.parseInt(noRawat.substring(13, 14)); // start - ambil digit ke-14 no_rawat by ichsan
+            } catch (Exception e) { // start - catch parse error by ichsan
+                modulus = 0; // start - fallback modulus 0 by ichsan
+            } // end - try parse digit no_rawat by ichsan
+
+            // --- PROSES TASK 1 (Mulai Waktu Tunggu Admisi) ---
+            if (Sequel.cariInteger("select count(referensi_mobilejkn_bpjs_taskid.no_rawat) from referensi_mobilejkn_bpjs_taskid where referensi_mobilejkn_bpjs_taskid.taskid='1' and referensi_mobilejkn_bpjs_taskid.no_rawat=?", noRawat) == 0) { // start - cek task 1 belum ada by ichsan
+                int intervalTask1 = 16 + (modulus % 10); // start - kalkulasi mundur T1 (16-25 menit sebelum T3) by ichsan
+                String dataJamTask1 = Sequel.cariIsi("select SUBDATE(now(), INTERVAL " + intervalTask1 + " MINUTE)"); // start - query subdate T1 by ichsan
+                if (!dataJamTask1.equals("")) { // start - jika tanggal valid by ichsan
+                    if (Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid", "?,?,?", "task id", 3, new String[]{noRawat, "1", dataJamTask1}) == true) { // start - simpan DB lokal T1 by ichsan
+                        long epochTask1 = dateFormat.parse(dataJamTask1).getTime(); // start - parse epoch ms T1 by ichsan
+                        kirimUpdateWaktuTaskBPJS(noRawat, "1", epochTask1, dataJamTask1); // start - kirim WS BPJS T1 by ichsan
+                    } // end - simpan DB lokal T1 by ichsan
+                } // end - jika tanggal valid by ichsan
+            } // end - cek task 1 belum ada by ichsan
+
+            // --- PROSES TASK 2 (Mulai Waktu Layan Admisi / Panggil Admisi) ---
+            if (Sequel.cariInteger("select count(referensi_mobilejkn_bpjs_taskid.no_rawat) from referensi_mobilejkn_bpjs_taskid where referensi_mobilejkn_bpjs_taskid.taskid='2' and referensi_mobilejkn_bpjs_taskid.no_rawat=?", noRawat) == 0) { // start - cek task 2 belum ada by ichsan
+                int intervalTask2 = 3 + (modulus % 8); // start - kalkulasi mundur T2 (3-10 menit sebelum T3) by ichsan
+                String dataJamTask2 = Sequel.cariIsi("select SUBDATE(now(), INTERVAL " + intervalTask2 + " MINUTE)"); // start - query subdate T2 by ichsan
+                if (!dataJamTask2.equals("")) { // start - jika tanggal valid by ichsan
+                    if (Sequel.menyimpantf2("referensi_mobilejkn_bpjs_taskid", "?,?,?", "task id", 3, new String[]{noRawat, "2", dataJamTask2}) == true) { // start - simpan DB lokal T2 by ichsan
+                        long epochTask2 = dateFormat.parse(dataJamTask2).getTime(); // start - parse epoch ms T2 by ichsan
+                        kirimUpdateWaktuTaskBPJS(noRawat, "2", epochTask2, dataJamTask2); // start - kirim WS BPJS T2 by ichsan
+                    } // end - simpan DB lokal T2 by ichsan
+                } // end - jika tanggal valid by ichsan
+            } // end - cek task 2 belum ada by ichsan
+
+        } catch (Exception e) { // start - catch exception utama by ichsan
+            System.out.println("Notifikasi Penyusupan Task 1 & 2 : " + e); // start - log error utama by ichsan
+            catatTrackerBPJS("Gagal penyusupan Task 1 & 2 Mobile JKN No.Rawat: " + noRawat + ", Error: " + e.getMessage()); // start - log tracker error utama by ichsan
+        } // end - try catch utama task 1 & 2 by ichsan
+    } // end - helper simpan task 1 & 2 by ichsan
+
+    private void kirimUpdateWaktuTaskBPJS(String kodeBooking, String taskId, long epochTime, String dataJam) { // start - helper WS updatewaktu by ichsan
+        try { // start - try catch WS updatewaktu by ichsan
+            HttpHeaders headersTask = new HttpHeaders(); // start - instansiasi headers by ichsan
+            headersTask.setContentType(MediaType.APPLICATION_JSON); // start - set content type JSON by ichsan
+            headersTask.add("x-cons-id", koneksiDB.CONSIDAPIMOBILEJKN()); // start - header x-cons-id by ichsan
+            String utcTask = String.valueOf(apiMobileJKN.GetUTCdatetimeAsString()); // start - get UTC timestamp by ichsan
+            headersTask.add("x-timestamp", utcTask); // start - header x-timestamp by ichsan
+            headersTask.add("x-signature", apiMobileJKN.getHmac(utcTask)); // start - header x-signature by ichsan
+            headersTask.add("user_key", koneksiDB.USERKEYAPIMOBILEJKN()); // start - header user_key by ichsan
+
+            String jsonReq = "{" + // start - susun json request updatewaktu by ichsan
+                    "\"kodebooking\": \"" + kodeBooking + "\"," + // start - field kodebooking by ichsan
+                    "\"taskid\": " + taskId + "," + // start - field taskid by ichsan
+                    "\"waktu\": " + epochTime + // start - field waktu ms by ichsan
+                    "}"; // end - susun json request by ichsan
+
+            HttpEntity reqEntity = new HttpEntity(jsonReq, headersTask); // start - instansiasi HttpEntity by ichsan
+            String urlTask = koneksiDB.URLAPIMOBILEJKN() + "/antrean/updatewaktu"; // start - set URL endpoint updatewaktu by ichsan
+            String resStr = apiMobileJKN.getRest().exchange(urlTask, HttpMethod.POST, reqEntity, String.class).getBody(); // start - eksekusi POST WS updatewaktu by ichsan
+            JsonNode rootRes = mapper.readTree(resStr); // start - parse response JSON by ichsan
+            JsonNode metaRes = rootRes.path("metadata"); // start - node metadata by ichsan
+
+            String codeRes = metaRes.path("code").asText(); // start - get status code by ichsan
+            String msgRes = metaRes.path("message").asText(); // start - get status message by ichsan
+
+            if (!codeRes.equals("200")) { // start - jika WS BPJS gagal by ichsan
+                Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='" + taskId + "' and no_rawat='" + kodeBooking + "'"); // start - rollback record DB lokal by ichsan
+                catatTrackerBPJS("Gagal WS BPJS Task " + taskId + " No.Booking: " + kodeBooking + ", Respon: " + codeRes + " " + msgRes); // start - log tracker gagal WS by ichsan
+            } else { // start - jika WS BPJS sukses by ichsan
+                catatTrackerBPJS("Sukses WS BPJS Task " + taskId + " No.Booking: " + kodeBooking + " Waktu: " + dataJam + " (" + epochTime + ")"); // start - log tracker sukses WS by ichsan
+            } // end - jika WS BPJS sukses by ichsan
+        } catch (Exception e) { // start - catch error WS updatewaktu by ichsan
+            Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='" + taskId + "' and no_rawat='" + kodeBooking + "'"); // start - rollback DB lokal on catch by ichsan
+            System.out.println("Notifikasi WS BPJS Task " + taskId + " : " + e); // start - print log error WS by ichsan
+            catatTrackerBPJS("Exception WS BPJS Task " + taskId + " No.Booking: " + kodeBooking + ", Error: " + e.getMessage()); // start - log tracker exception WS by ichsan
+        } // end - try catch WS updatewaktu by ichsan
+    } // end - helper WS updatewaktu by ichsan
+    // end - fungsi penyusupan task 1 & 2 randomized dan audit trail by ichsan
 }
