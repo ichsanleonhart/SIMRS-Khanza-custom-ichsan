@@ -7534,8 +7534,8 @@ public final class BPJSDataSEP extends javax.swing.JDialog {
 
             String jsonReq = "{" + // start - susun json request updatewaktu by ichsan
                     "\"kodebooking\": \"" + kodeBooking + "\"," + // start - field kodebooking by ichsan
-                    "\"taskid\": " + taskId + "," + // start - field taskid by ichsan
-                    "\"waktu\": " + epochTime + // start - field waktu ms by ichsan
+                    "\"taskid\": \"" + taskId + "\"," + // start - field taskid string sesuai service by ichsan
+                    "\"waktu\": \"" + epochTime + "\"" + // start - field waktu string sesuai service by ichsan
                     "}"; // end - susun json request by ichsan
 
             HttpEntity reqEntity = new HttpEntity(jsonReq, headersTask); // start - instansiasi HttpEntity by ichsan
