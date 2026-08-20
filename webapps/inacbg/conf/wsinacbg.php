@@ -5,17 +5,17 @@
     require_once('../conf/conf.php');
 
     function getKey() {
-       $keyRS = "0d9bed920f699d89fcb5dad3e5b80eb98867494b31ea20f1f0639a0a24b4b16e";   
+       $keyRS = "b90e13592f2d8f6855af4a783c568906e4a44ee91b36d693db47357323e80084";   
        return $keyRS;
     }
 
     function getUrlWS() {
-        $UrlWS = "http://202.162.211.34:46/E-Klaim/ws.php";
+        $UrlWS = "http://192.168.100.11/E-Klaim/ws.php";
         return $UrlWS;
     }
     
     function getKelasRS() {
-        $kelasRS = "BP";
+        $kelasRS = "DS";
         return $kelasRS;
     }
 
@@ -1130,7 +1130,7 @@
                    }';
         $msg= Request($request);
         if($msg['metadata']['message']=="Ok"){
-            KirimKlaimIndividualKeDC($nomor_sep);
+            //KirimKlaimIndividualKeDC($nomor_sep);
         }else{
             echo "\n<br>Respon Final Klaim INACBG : ".$msg['metadata']['message'];
         }
@@ -1195,7 +1195,7 @@
                         }
                    }';
         $msg= Request($request);
-        echo $msg['metadata']['message']."";
+        //echo $msg['metadata']['message']."";
     }
     
     function MenarikDataKlaimPeriode($start_dt,$stop_dt,$jenis_rawat){	
