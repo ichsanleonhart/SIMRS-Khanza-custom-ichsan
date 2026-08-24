@@ -132,7 +132,7 @@ public final class SuratPenolakanAnjuranMedis extends javax.swing.JDialog {
         NoKTP.setDocument(new batasInput((byte)20).getKata(NoKTP)); 
         UmurPJ.setDocument(new batasInput((byte)3).getKata(UmurPJ));  
         NoTelp.setDocument(new batasInput((byte)30).getKata(NoTelp));  
-        AlasanPenolakan.setDocument(new batasInput((byte)60).getKata(AlasanPenolakan));
+        AlasanPenolakan.setDocument(new batasInput((int)500).getKata(AlasanPenolakan));
         RisikoPenolakan.setDocument(new batasInput((byte)100).getKata(RisikoPenolakan));  
         
         ChkInput.setSelected(false);

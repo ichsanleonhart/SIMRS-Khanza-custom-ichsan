@@ -602,17 +602,23 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
                     requestEntity = new HttpEntity(requestJson,headers);
                     URL = link+"/antrean/updatewaktu";	
                     System.out.println("URL : "+URL);        
-                    root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
+                     root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.POST, requestEntity, String.class).getBody());
                     nameNode = root.path("metadata");
                     // Fallback jika tidak sinkron
                     if(nameNode.path("code").asText().equals("201") && nameNode.path("message").asText().contains("TaskId=3 belum ada")){
                         Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='"+kodebooking+"'");
-                    } 
+                        catatTrackerBPJS("Gagal WS BPJS Task 3 (Fallback-201) No.Booking: " + kodebooking + ", Respon: " + nameNode.path("code").asText() + " " + nameNode.path("message").asText()); // start - log tracker gagal task 3 by ichsan
+                    } else if(nameNode.path("code").asText().equals("200")) { // start - log tracker sukses task 3 by ichsan
+                        catatTrackerBPJS("Sukses WS BPJS Task 3 No.Booking: " + kodebooking + " Waktu: " + datajam + " (" + parsedDate.getTime() + ")"); // start - log tracker sukses task 3 by ichsan
+                    } else { // start - log tracker respon lain task 3 by ichsan
+                        catatTrackerBPJS("Gagal WS BPJS Task 3 No.Booking: " + kodebooking + ", Respon: " + nameNode.path("code").asText() + " " + nameNode.path("message").asText()); // start - log tracker gagal respon lain task 3 by ichsan
+                    } // end - log tracker task 3 by ichsan
                     System.out.println("respon WS BPJS : "+nameNode.path("code").asText()+" "+nameNode.path("message").asText()+"\n");
                 } catch (Exception ex) {
                     System.out.println("Notifikasi Bridging Task 3 : "+ex);
                     // Hapus data lokal jika gagal kirim agar bisa dicoba lagi
-                    Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='"+kodebooking+"'"); 
+                    Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='"+kodebooking+"'");
+                    catatTrackerBPJS("Exception WS BPJS Task 3 No.Booking: " + kodebooking + ", Error: " + ex.getMessage()); // start - log tracker exception task 3 by ichsan
                 }
             }
         }
@@ -821,12 +827,18 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
                     // Fallback jika tidak sinkron
                     if(nameNode.path("code").asText().equals("201") && nameNode.path("message").asText().contains("TaskId=3 belum ada")){
                         Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='"+kodebooking+"'");
-                    } 
+                        catatTrackerBPJS("Gagal WS BPJS Task 3 (Fallback-201) No.Booking: " + kodebooking + ", Respon: " + nameNode.path("code").asText() + " " + nameNode.path("message").asText()); // start - log tracker gagal task 3 by ichsan
+                    } else if(nameNode.path("code").asText().equals("200")) { // start - log tracker sukses task 3 by ichsan
+                        catatTrackerBPJS("Sukses WS BPJS Task 3 No.Booking: " + kodebooking + " Waktu: " + datajam + " (" + parsedDate.getTime() + ")"); // start - log tracker sukses task 3 by ichsan
+                    } else { // start - log tracker respon lain task 3 by ichsan
+                        catatTrackerBPJS("Gagal WS BPJS Task 3 No.Booking: " + kodebooking + ", Respon: " + nameNode.path("code").asText() + " " + nameNode.path("message").asText()); // start - log tracker gagal respon lain task 3 by ichsan
+                    } // end - log tracker task 3 by ichsan
                     System.out.println("respon WS BPJS : "+nameNode.path("code").asText()+" "+nameNode.path("message").asText()+"\n");
                 } catch (Exception ex) {
                     System.out.println("Notifikasi Bridging Task 3 : "+ex);
                     // Hapus data lokal jika gagal kirim agar bisa dicoba lagi
-                    Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='"+kodebooking+"'"); 
+                    Sequel.queryu2("delete from referensi_mobilejkn_bpjs_taskid where taskid='3' and no_rawat='"+kodebooking+"'");
+                    catatTrackerBPJS("Exception WS BPJS Task 3 No.Booking: " + kodebooking + ", Error: " + ex.getMessage()); // start - log tracker exception task 3 by ichsan
                 }
             }
         }
@@ -1207,4 +1219,15 @@ public final class BPJSAntreanPerTanggal extends javax.swing.JDialog {
         }
     });
 }
+
+    // start - helper catat log task id ke trackersql by ichsan
+    private void catatTrackerBPJS(String pesanLog) {
+        try {
+            String pesanSafe = pesanLog.replace("'", "\\'");
+            Sequel.menyimpan("trackersql", "NOW(), '" + pesanSafe + "', 'Mobile JKN'", "Audit Trail BPJS");
+        } catch (Exception e) {
+            System.out.println("Gagal simpan trackersql: " + e);
+        }
+    }
+    // end - helper catat log task id ke trackersql by ichsan
 }
