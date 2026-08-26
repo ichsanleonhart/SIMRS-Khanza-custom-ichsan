@@ -2057,12 +2057,14 @@ public final class RMDataResumePasien extends javax.swing.JDialog {
     }//GEN-LAST:event_BtnDokter5ActionPerformed
 
     private void UploadResumeBtnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UploadResumeBtnPrintActionPerformed
+        /*
         FileName = "RESUME_" + tbObat.getValueAt(tbObat.getSelectedRow(), 1).toString().replaceAll("/", "") + "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 2).toString().trim()+ "_" + tbObat.getValueAt(tbObat.getSelectedRow(), 3).toString().replaceAll(" ", "");
         CreatePDF(FileName);
         String filePath = "tmpPDF/" + FileName;
         UploadPDF(FileName, "berkasrawat/pages/upload/");
         HapusPDF();
         ppBerkasDigitalBtnPrintActionPerformed(evt);
+        */
     }//GEN-LAST:event_UploadResumeBtnPrintActionPerformed
 
     private void CreatePDF(String FileName) {

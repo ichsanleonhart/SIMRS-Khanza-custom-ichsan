@@ -2049,6 +2049,7 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
                     LCount.setText(""+tabMode.getRowCount());
             }
             
+            /*
             ///nambahin opsi upload berkas digital perawatan setelah nekan tombol simpan - ichsan
             if (tbObat.getRowCount() > 0) {  // otomatis pilih baris terakhir di tbObat
                 int lastRow = tbObat.getRowCount() - 1;
@@ -2070,6 +2071,7 @@ public final class RMDataResumePasienRanap extends javax.swing.JDialog {
                 }
             }  
             // end dari konfirmasi upload
+            */
             
         }
 }//GEN-LAST:event_BtnSimpanActionPerformed
